@@ -107,14 +107,18 @@ export default function HomeContent() {
             {activeTab === 'illustration' && (
               <div>
                 {illustrations.map((item) => (
-                  <article key={item.id} className="py-3">
-                    <h3 className="text-base font-medium text-gray-900 mb-0.5">
+                  <Link
+                    key={item.id}
+                    href="/illustrations"
+                    className="group block py-3"
+                  >
+                    <h3 className="text-base font-medium text-gray-900 mb-0.5 group-hover:text-gray-600 transition-colors">
                       {item.title}
                     </h3>
                     <p className="text-sm text-gray-400">
                       {item.description}
                     </p>
-                  </article>
+                  </Link>
                 ))}
               </div>
             )}

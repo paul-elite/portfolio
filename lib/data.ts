@@ -116,7 +116,7 @@ export interface Illustration {
   slug: string;
   title: string;
   description: string;
-  link?: string;
+  youtubeUrl?: string;
 }
 
 export interface Interaction {
@@ -153,13 +153,43 @@ export const illustrations: Illustration[] = [
     id: "i1",
     slug: "abstract-forms",
     title: "Abstract forms",
-    description: "A collection of geometric compositions exploring shape and color relationships.",
+    description: "Geometric compositions exploring shape and color.",
+    youtubeUrl: "https://youtube.com/watch?v=example1",
   },
   {
     id: "i2",
     slug: "interface-sketches",
     title: "Interface sketches",
-    description: "Early-stage explorations and wireframes for various product concepts.",
+    description: "Early-stage explorations and wireframes.",
+    youtubeUrl: "https://youtube.com/watch?v=example2",
+  },
+  {
+    id: "i3",
+    slug: "motion-studies",
+    title: "Motion studies",
+    description: "Animation principles in practice.",
+    youtubeUrl: "https://youtube.com/watch?v=example3",
+  },
+  {
+    id: "i4",
+    slug: "color-experiments",
+    title: "Color experiments",
+    description: "Exploring palettes and gradients.",
+    youtubeUrl: "https://youtube.com/watch?v=example4",
+  },
+  {
+    id: "i5",
+    slug: "typography-play",
+    title: "Typography play",
+    description: "Letterforms and type compositions.",
+    youtubeUrl: "https://youtube.com/watch?v=example5",
+  },
+  {
+    id: "i6",
+    slug: "3d-renders",
+    title: "3D renders",
+    description: "Abstract 3D scenes and objects.",
+    youtubeUrl: "https://youtube.com/watch?v=example6",
   },
 ];
 
