@@ -1,26 +1,17 @@
 'use client';
 
-import { useEffect } from 'react';
-import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Project, siteConfig } from '@/lib/data';
-import { useTransition } from '@/components/PageTransition';
 
 interface ProjectContentProps {
   project: Project;
 }
 
 export default function ProjectContent({ project }: ProjectContentProps) {
-  const { setSelectedProject } = useTransition();
-
-  useEffect(() => {
-    setSelectedProject(null);
-  }, [setSelectedProject]);
-
   return (
     <main className="min-h-screen bg-white">
       <div className="w-full px-6">
-        {/* Back Button - Higher up */}
+        {/* Back Button */}
         <div className="pt-12 grid grid-cols-12 gap-6">
           <div className="col-span-2" />
           <div className="col-span-1" />
@@ -52,28 +43,20 @@ export default function ProjectContent({ project }: ProjectContentProps) {
 
           {/* Avatar */}
           <div className="col-span-1 flex justify-end items-start">
-            <motion.div
-              className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 mt-1"
-              layoutId="avatar"
-              transition={{ type: "spring", stiffness: 200, damping: 30 }}
-            >
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 mt-1">
               <span className="text-sm font-medium text-gray-500">
                 {siteConfig.name.charAt(0)}
               </span>
-            </motion.div>
+            </div>
           </div>
 
           {/* Content Column */}
           <div className="col-span-6">
             {/* Project Title */}
             <div className="h-14 mb-6">
-              <motion.h1
-                className="text-xl font-semibold text-gray-900"
-                layoutId="page-title"
-                transition={{ type: "spring", stiffness: 200, damping: 30 }}
-              >
+              <h1 className="text-xl font-semibold text-gray-900">
                 {project.title}
-              </motion.h1>
+              </h1>
               <div className="flex gap-4 text-sm text-gray-400">
                 {project.year && <span>{project.year}</span>}
                 {project.role && <span>{project.role}</span>}
@@ -81,12 +64,7 @@ export default function ProjectContent({ project }: ProjectContentProps) {
             </div>
 
             {/* Mobile Mockup */}
-            <motion.div
-              className="mb-16"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.15 }}
-            >
+            <div className="mb-16">
               <div className="relative w-[266px] h-[560px] bg-gray-900 rounded-[48px] p-3 shadow-xl">
                 <div className="w-full h-full bg-gray-100 rounded-[38px] overflow-hidden flex items-center justify-center">
                   <span className="text-gray-400 text-sm text-center px-6">
@@ -95,16 +73,11 @@ export default function ProjectContent({ project }: ProjectContentProps) {
                 </div>
                 <div className="absolute top-5 left-1/2 -translate-x-1/2 w-20 h-6 bg-gray-900 rounded-full" />
               </div>
-            </motion.div>
+            </div>
 
             {/* Case Study Content */}
             {project.caseStudy && (
-              <motion.div
-                className="space-y-10"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.2 }}
-              >
+              <div className="space-y-10">
                 <section>
                   <h2 className="text-xs text-gray-400 uppercase tracking-wider mb-3">
                     Overview
@@ -140,22 +113,19 @@ export default function ProjectContent({ project }: ProjectContentProps) {
                     {project.caseStudy.outcome}
                   </p>
                 </section>
-              </motion.div>
+              </div>
             )}
 
             {/* Link */}
             {project.link && (
-              <motion.a
+              <a
                 href={project.link}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm text-gray-400 hover:text-gray-900 transition-colors mt-12 inline-block"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4, delay: 0.3 }}
               >
                 View Project →
-              </motion.a>
+              </a>
             )}
           </div>
 

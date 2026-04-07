@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import Link from 'next/link';
 import {
   projects,
   writings,
@@ -10,14 +10,12 @@ import {
   siteConfig,
   Project,
 } from '@/lib/data';
-import { useTransition } from './PageTransition';
 
 type Tab = 'projects' | 'interaction' | 'illustration' | 'writings';
 
 export default function HomeContent() {
   const [activeTab, setActiveTab] = useState<Tab>('projects');
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null);
-  const { startTransition, isTransitioning, selectedProject } = useTransition();
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'projects', label: 'Projects' },
@@ -26,44 +24,28 @@ export default function HomeContent() {
     { key: 'writings', label: 'Writings' },
   ];
 
-  const handleProjectClick = (project: Project) => {
-    startTransition({ slug: project.slug, title: project.title });
-  };
-
   return (
-    <motion.div
-      className="h-screen pt-48 pb-16"
-      animate={{ opacity: isTransitioning ? 0 : 1 }}
-      transition={{ duration: 0.2 }}
-    >
+    <div className="h-screen pt-48 pb-16">
       <div className="h-full grid grid-cols-12 gap-6">
         {/* Columns 1-2: Whitespace */}
         <div className="col-span-2" />
 
         {/* Column 3: Avatar */}
         <div className="col-span-1 flex justify-end items-start">
-          <motion.div
-            className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 mt-1"
-            layoutId="avatar"
-            transition={{ type: "spring", stiffness: 200, damping: 30 }}
-          >
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 mt-1">
             <span className="text-sm font-medium text-gray-500">
               {siteConfig.name.charAt(0)}
             </span>
-          </motion.div>
+          </div>
         </div>
 
         {/* Columns 4-6: Text Content */}
         <div className="col-span-3 flex flex-col">
           {/* Name */}
           <div className="h-14 mb-6">
-            <motion.h1
-              className="text-xl font-semibold text-gray-900"
-              layoutId="page-title"
-              transition={{ type: "spring", stiffness: 200, damping: 30 }}
-            >
+            <h1 className="text-xl font-semibold text-gray-900">
               {siteConfig.name}
-            </motion.h1>
+            </h1>
             <p className="text-sm text-gray-500">{siteConfig.title}</p>
           </div>
 
@@ -89,25 +71,20 @@ export default function HomeContent() {
             {activeTab === 'projects' && (
               <div>
                 {projects.map((project) => (
-                  <motion.button
+                  <Link
                     key={project.id}
-                    onClick={() => handleProjectClick(project)}
-                    className="group block py-3 text-left w-full"
+                    href={`/project/${project.slug}`}
+                    className="group block py-3"
                     onMouseEnter={() => setHoveredProject(project)}
                     onMouseLeave={() => setHoveredProject(null)}
-                    whileHover={{ x: 4 }}
-                    transition={{ duration: 0.15 }}
                   >
-                    <motion.h2
-                      className="text-base font-medium text-gray-900 mb-0.5 group-hover:text-gray-600 transition-colors"
-                      layoutId={selectedProject?.slug === project.slug ? 'page-title' : undefined}
-                    >
+                    <h2 className="text-base font-medium text-gray-900 mb-0.5 group-hover:text-gray-600 transition-colors">
                       {project.title}
-                    </motion.h2>
+                    </h2>
                     <p className="text-sm text-gray-400">
                       {project.year} <span className="mx-1">·</span> {project.description}
                     </p>
-                  </motion.button>
+                  </Link>
                 ))}
               </div>
             )}
@@ -201,7 +178,7 @@ export default function HomeContent() {
         {/* Columns 8-10: Mobile Preview */}
         <div className="col-span-3 flex items-start">
           <div
-            className={`transition-opacity duration-300 ${
+            className={`transition-opacity duration-200 ${
               hoveredProject ? 'opacity-100' : 'opacity-0'
             }`}
           >
@@ -224,6 +201,6 @@ export default function HomeContent() {
         {/* Columns 11-12: Whitespace */}
         <div className="col-span-2" />
       </div>
-    </motion.div>
+    </div>
   );
 }
