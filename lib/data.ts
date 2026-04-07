@@ -40,10 +40,10 @@ export const projects: Project[] = [
     role: "Design & Development",
     tags: ["Interaction", "Prototyping"],
     caseStudy: {
-      overview: "A collection of experimental interaction prototypes that push the boundaries of how we interact with digital interfaces. Each prototype focuses on micro-interactions and gestural interfaces.",
-      challenge: "Traditional UI patterns often feel static and disconnected from natural human movement. The challenge was to create interactions that feel responsive, intuitive, and satisfying.",
-      approach: "I explored physics-based animations, gesture recognition, and novel input methods. Each prototype was built with Framer Motion and React, allowing for rapid iteration and real-time feedback.",
-      outcome: "The prototypes have been used as references for production features and have helped establish new interaction patterns for mobile and desktop applications.",
+      overview: "Experimental prototypes exploring fluid micro-interactions and gestural interfaces.",
+      challenge: "Making digital interactions feel responsive and natural.",
+      approach: "Physics-based animations built with Framer Motion and React.",
+      outcome: "Referenced in production features across mobile and desktop.",
     },
   },
   {
@@ -57,10 +57,10 @@ export const projects: Project[] = [
     role: "Design & Development",
     tags: ["React", "Framer Motion"],
     caseStudy: {
-      overview: "Animation Studio is a visual tool that makes creating CSS animations accessible to designers and developers alike. It provides real-time preview and generates production-ready code.",
-      challenge: "Creating CSS animations typically requires writing code and refreshing to see changes. This disconnect slows down the creative process and limits experimentation.",
-      approach: "I built a drag-and-drop interface with immediate visual feedback. Users can manipulate keyframes, adjust easing curves, and see their changes instantly reflected in the preview.",
-      outcome: "The tool has streamlined animation workflows and enabled rapid prototyping of motion design concepts.",
+      overview: "Visual tool for creating CSS animations with real-time preview.",
+      challenge: "Bridging the gap between code and visual animation design.",
+      approach: "Drag-and-drop keyframes with instant visual feedback.",
+      outcome: "Streamlined animation workflows for rapid prototyping.",
     },
   },
   {
@@ -74,10 +74,10 @@ export const projects: Project[] = [
     role: "Design & Development",
     tags: ["Next.js", "SVG"],
     caseStudy: {
-      overview: "A typing practice application that combines gamification with a realistic keyboard visualization to help users improve their typing speed and accuracy.",
-      challenge: "Most typing trainers feel utilitarian and fail to engage users. The challenge was to create an experience that is both educational and enjoyable.",
-      approach: "I designed a clean interface with an SVG keyboard that provides real-time visual feedback. Sound effects and progress tracking add satisfying feedback loops.",
-      outcome: "Users can track their progress and see measurable improvements in typing speed and accuracy over time.",
+      overview: "Typing practice with realistic keyboard visualization.",
+      challenge: "Making typing practice engaging and enjoyable.",
+      approach: "SVG keyboard with real-time feedback and sound.",
+      outcome: "Measurable improvements in speed and accuracy.",
     },
   },
   {
@@ -90,10 +90,10 @@ export const projects: Project[] = [
     role: "Visual Design",
     tags: ["Branding", "Typography"],
     caseStudy: {
-      overview: "A collection of brand identity projects spanning tech startups, creative agencies, and consumer products. Each identity is built as a comprehensive system.",
-      challenge: "Creating identities that are distinctive yet flexible enough to work across all touchpoints and scale with the business.",
-      approach: "I start with strategy and positioning, then develop visual systems including logo, typography, color, and comprehensive guidelines.",
-      outcome: "Identities that effectively communicate brand values and provide clear direction for implementation across all channels.",
+      overview: "Comprehensive brand systems for startups and agencies.",
+      challenge: "Distinctive yet flexible identities that scale.",
+      approach: "Strategy-first, then logo, typography, and guidelines.",
+      outcome: "Clear brand direction across all channels.",
     },
   },
 ];
