@@ -105,20 +105,37 @@ export default function HomeContent() {
             )}
 
             {activeTab === 'illustration' && (
-              <div>
+              <div className="grid grid-cols-2 gap-4">
                 {illustrations.map((item) => (
-                  <Link
+                  <a
                     key={item.id}
-                    href="/illustrations"
-                    className="group block py-3"
+                    href={item.youtubeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group block"
                   >
-                    <h3 className="text-base font-medium text-gray-900 mb-0.5 group-hover:text-gray-600 transition-colors">
+                    <div className="aspect-video bg-gray-100 rounded-lg mb-2 overflow-hidden relative">
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="text-gray-300 text-xs">{item.title}</span>
+                      </div>
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors">
+                        <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            className="text-gray-900 ml-0.5"
+                          >
+                            <polygon points="5 3 19 12 5 21 5 3" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    <h3 className="text-sm font-medium text-gray-900 group-hover:text-gray-600 transition-colors">
                       {item.title}
                     </h3>
-                    <p className="text-sm text-gray-400">
-                      {item.description}
-                    </p>
-                  </Link>
+                  </a>
                 ))}
               </div>
             )}
