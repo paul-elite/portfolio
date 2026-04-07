@@ -8,17 +8,25 @@ export default function Home() {
         <div className="max-w-3xl mx-auto px-6">
           {/* Hero Section */}
           <section className="py-12">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 overflow-hidden flex items-center justify-center">
-                <span className="text-2xl font-medium text-gray-500">
-                  {siteConfig.name.charAt(0)}
-                </span>
+            <div className="flex items-start justify-between gap-8 mb-6">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 overflow-hidden flex items-center justify-center">
+                  <span className="text-2xl font-medium text-gray-500">
+                    {siteConfig.name.charAt(0)}
+                  </span>
+                </div>
+                <div>
+                  <h1 className="text-2xl font-semibold text-gray-900">
+                    {siteConfig.name}
+                  </h1>
+                  <p className="text-sm text-gray-500">{siteConfig.title}</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-semibold text-gray-900">
-                  {siteConfig.name}
-                </h1>
-                <p className="text-sm text-gray-500">{siteConfig.title}</p>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-400">
+                <span>Projects</span>
+                <span>Interaction</span>
+                <span>Illustration</span>
+                <span>Writings</span>
               </div>
             </div>
             <p className="text-lg text-gray-600 leading-relaxed max-w-xl">
