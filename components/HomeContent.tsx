@@ -25,7 +25,7 @@ export default function HomeContent() {
   return (
     <>
       {/* Hero Section */}
-      <section className="pt-12 pb-16">
+      <section className="pt-12 pb-24">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 overflow-hidden flex items-center justify-center">
             <span className="text-2xl font-medium text-gray-500">
@@ -42,7 +42,7 @@ export default function HomeContent() {
       </section>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm mb-4">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm mb-2">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -59,7 +59,7 @@ export default function HomeContent() {
       </div>
 
       {/* Content Section */}
-      <section className="py-2">
+      <section>
         {activeTab === 'projects' && (
           <div>
             {workCategories.map((category, index) => (
