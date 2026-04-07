@@ -25,22 +25,25 @@ export default function HomeContent() {
   ];
 
   return (
-    <div className="h-screen flex flex-col py-16">
-      <div className="flex-1 flex gap-16">
-        {/* Left - Avatar */}
-        <div className="flex-shrink-0">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-            <span className="text-lg font-medium text-gray-500">
+    <div className="h-screen py-16">
+      <div className="h-full grid grid-cols-12 gap-6">
+        {/* Columns 1-2: Whitespace */}
+        <div className="col-span-2" />
+
+        {/* Column 3: Avatar */}
+        <div className="col-span-1 flex justify-end">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0">
+            <span className="text-sm font-medium text-gray-500">
               {siteConfig.name.charAt(0)}
             </span>
           </div>
         </div>
 
-        {/* Middle - Name, Tabs, Content */}
-        <div className="flex-1 flex flex-col min-w-0">
+        {/* Columns 4-6: Text Content */}
+        <div className="col-span-3 flex flex-col">
           {/* Name */}
           <div className="mb-6">
-            <h1 className="text-2xl font-semibold text-gray-900">
+            <h1 className="text-xl font-semibold text-gray-900">
               {siteConfig.name}
             </h1>
             <p className="text-sm text-gray-500">{siteConfig.title}</p>
@@ -133,7 +136,7 @@ export default function HomeContent() {
           </div>
 
           {/* Contact */}
-          <footer className="pt-8 mt-auto">
+          <footer className="pt-8">
             <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
               <a
                 href={siteConfig.social.twitter}
@@ -169,18 +172,34 @@ export default function HomeContent() {
           </footer>
         </div>
 
-        {/* Right - Preview */}
-        <div className="flex-shrink-0 w-72">
+        {/* Column 7: Gap */}
+        <div className="col-span-1" />
+
+        {/* Columns 8-10: Mobile Preview */}
+        <div className="col-span-3 flex items-start pt-0">
           <div
-            className={`w-full h-80 bg-gray-100 rounded-lg flex items-center justify-center transition-opacity duration-200 ${
+            className={`transition-opacity duration-300 ${
               hoveredProject ? 'opacity-100' : 'opacity-0'
             }`}
           >
-            {hoveredProject && (
-              <span className="text-gray-400 text-sm">{hoveredProject.title}</span>
-            )}
+            {/* Mobile Phone Mockup */}
+            <div className="relative w-[200px] h-[420px] bg-gray-900 rounded-[36px] p-2 shadow-xl">
+              {/* Screen */}
+              <div className="w-full h-full bg-gray-100 rounded-[28px] overflow-hidden flex items-center justify-center">
+                {hoveredProject && (
+                  <span className="text-gray-400 text-xs text-center px-4">
+                    {hoveredProject.title}
+                  </span>
+                )}
+              </div>
+              {/* Notch */}
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-16 h-5 bg-gray-900 rounded-full" />
+            </div>
           </div>
         </div>
+
+        {/* Columns 11-12: Whitespace */}
+        <div className="col-span-2" />
       </div>
     </div>
   );
