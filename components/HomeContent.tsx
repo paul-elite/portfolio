@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Illustration } from '@/lib/data';
 
 function getYouTubeId(url: string) {
@@ -39,10 +40,20 @@ export default function HomeContent() {
 
         {/* Column 3: Avatar */}
         <div className="col-span-1 flex justify-end items-start">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 mt-1">
-            <span className="text-sm font-medium text-gray-500">
-              {siteConfig.name.charAt(0)}
-            </span>
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden">
+            {siteConfig.avatar ? (
+              <Image
+                src={siteConfig.avatar}
+                alt={siteConfig.name}
+                width={40}
+                height={40}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-sm font-medium text-gray-500">
+                {siteConfig.name.charAt(0)}
+              </span>
+            )}
           </div>
         </div>
 
@@ -120,9 +131,18 @@ export default function HomeContent() {
                     className="group block text-left"
                   >
                     <div className="aspect-video bg-gray-100 rounded-lg mb-2 overflow-hidden relative">
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-gray-300 text-xs">{item.title}</span>
-                      </div>
+                      {item.thumbnail ? (
+                        <Image
+                          src={item.thumbnail}
+                          alt={item.title}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-gray-300 text-xs">{item.title}</span>
+                        </div>
+                      )}
                       <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors">
                         <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                           <svg
@@ -212,11 +232,18 @@ export default function HomeContent() {
             <div className="relative w-[266px] h-[560px] bg-gray-900 rounded-[48px] p-3 shadow-xl">
               {/* Screen */}
               <div className="w-full h-full bg-gray-100 rounded-[38px] overflow-hidden flex items-center justify-center">
-                {hoveredProject && (
+                {hoveredProject && hoveredProject.preview ? (
+                  <Image
+                    src={hoveredProject.preview}
+                    alt={hoveredProject.title}
+                    fill
+                    className="object-cover"
+                  />
+                ) : hoveredProject ? (
                   <span className="text-gray-400 text-sm text-center px-6">
                     {hoveredProject.title}
                   </span>
-                )}
+                ) : null}
               </div>
               {/* Notch */}
               <div className="absolute top-5 left-1/2 -translate-x-1/2 w-20 h-6 bg-gray-900 rounded-full" />

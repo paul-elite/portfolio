@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Project } from '@/lib/data';
 
 interface ProjectContentProps {
@@ -53,10 +54,19 @@ export default function ProjectContent({ project }: ProjectContentProps) {
             {/* Mobile Mockup */}
             <div className="mb-16">
               <div className="relative w-[266px] h-[560px] bg-gray-900 rounded-[48px] p-3 shadow-xl">
-                <div className="w-full h-full bg-gray-100 rounded-[38px] overflow-hidden flex items-center justify-center">
-                  <span className="text-gray-400 text-sm text-center px-6">
-                    {project.title}
-                  </span>
+                <div className="w-full h-full bg-gray-100 rounded-[38px] overflow-hidden flex items-center justify-center relative">
+                  {project.preview ? (
+                    <Image
+                      src={project.preview}
+                      alt={project.title}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <span className="text-gray-400 text-sm text-center px-6">
+                      {project.title}
+                    </span>
+                  )}
                 </div>
                 <div className="absolute top-5 left-1/2 -translate-x-1/2 w-20 h-6 bg-gray-900 rounded-full" />
               </div>
