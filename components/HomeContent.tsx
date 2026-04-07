@@ -25,8 +25,8 @@ export default function HomeContent() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className="flex-1">
+    <div className="flex flex-col">
+      <div>
         {/* Hero Section */}
         <section className="pt-12 pb-12">
           <div className="flex items-center">
