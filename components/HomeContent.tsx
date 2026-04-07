@@ -105,7 +105,7 @@ export default function HomeContent() {
             )}
 
             {activeTab === 'illustration' && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4" style={{ width: 'calc(166% + 1.5rem)' }}>
                 {illustrations.map((item) => (
                   <a
                     key={item.id}
