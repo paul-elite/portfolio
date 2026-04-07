@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation';
-import Header from '@/components/Header';
 import ProjectCard from '@/components/ProjectCard';
 import { getWorkCategory, workCategories } from '@/lib/data';
 import Link from 'next/link';
@@ -24,8 +23,7 @@ export default async function WorkPage({ params }: PageProps) {
 
   return (
     <>
-      <Header />
-      <main className="min-h-screen bg-white pt-24 pb-16">
+      <main className="min-h-screen bg-white pt-12 pb-16">
         <div className="max-w-3xl mx-auto px-6">
           {/* Back Link */}
           <Link

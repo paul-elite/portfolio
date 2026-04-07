@@ -1,12 +1,10 @@
-import Header from '@/components/Header';
 import WorkCard from '@/components/WorkCard';
 import { siteConfig, workCategories } from '@/lib/data';
 
 export default function Home() {
   return (
     <>
-      <Header />
-      <main className="min-h-screen bg-white pt-24 pb-16">
+      <main className="min-h-screen bg-white pt-12 pb-16">
         <div className="max-w-3xl mx-auto px-6">
           {/* Hero Section */}
           <section className="py-12">
