@@ -55,7 +55,7 @@ export default function HomeContent() {
         {/* Columns 4-6: Text Content */}
         <div className="col-span-3 flex flex-col">
           {/* Name */}
-          <div className="mb-6">
+          <div className="h-14 mb-6">
             <motion.h1
               className="text-xl font-semibold text-gray-900"
               layoutId="page-title"

@@ -65,23 +65,18 @@ export default function ProjectContent({ project }: ProjectContentProps) {
           {/* Content Column */}
           <div className="col-span-6">
             {/* Project Title */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-            >
+            <div className="h-14 mb-6">
               <motion.h1
-                className="text-xl font-semibold text-gray-900 mb-2"
+                className="text-xl font-semibold text-gray-900"
                 layoutId="page-title"
               >
                 {project.title}
               </motion.h1>
-
-              <div className="flex gap-4 text-sm text-gray-400 mb-12">
+              <div className="flex gap-4 text-sm text-gray-400">
                 {project.year && <span>{project.year}</span>}
                 {project.role && <span>{project.role}</span>}
               </div>
-            </motion.div>
+            </div>
 
             {/* Mobile Mockup */}
             <motion.div
