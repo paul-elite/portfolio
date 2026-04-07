@@ -46,7 +46,7 @@ export default async function WorkPage({ params }: PageProps) {
           </Link>
 
           {/* Header Section */}
-          <section className="pb-8 border-b border-gray-100">
+          <section className="pb-8">
             <span className="text-xs text-gray-400 uppercase tracking-wider mb-2 block">
               {category.discipline}
             </span>
