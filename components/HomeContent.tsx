@@ -25,14 +25,14 @@ export default function HomeContent() {
   ];
 
   return (
-    <div className="h-screen pt-32 pb-16">
+    <div className="h-screen pt-48 pb-16">
       <div className="h-full grid grid-cols-12 gap-6">
         {/* Columns 1-2: Whitespace */}
         <div className="col-span-2" />
 
         {/* Column 3: Avatar */}
-        <div className="col-span-1 flex justify-end">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0">
+        <div className="col-span-1 flex justify-end items-start">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 mt-1">
             <span className="text-sm font-medium text-gray-500">
               {siteConfig.name.charAt(0)}
             </span>
@@ -176,7 +176,7 @@ export default function HomeContent() {
         <div className="col-span-1" />
 
         {/* Columns 8-10: Mobile Preview */}
-        <div className="col-span-3 flex items-start pt-0">
+        <div className="col-span-3 flex items-start">
           <div
             className={`transition-opacity duration-300 ${
               hoveredProject ? 'opacity-100' : 'opacity-0'
