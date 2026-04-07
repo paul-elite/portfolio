@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { motion } from 'framer-motion';
 import {
   projects,
   writings,
@@ -10,12 +10,14 @@ import {
   siteConfig,
   Project,
 } from '@/lib/data';
+import { useTransition } from './PageTransition';
 
 type Tab = 'projects' | 'interaction' | 'illustration' | 'writings';
 
 export default function HomeContent() {
   const [activeTab, setActiveTab] = useState<Tab>('projects');
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null);
+  const { startTransition, isTransitioning, selectedProject } = useTransition();
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'projects', label: 'Projects' },
@@ -24,28 +26,42 @@ export default function HomeContent() {
     { key: 'writings', label: 'Writings' },
   ];
 
+  const handleProjectClick = (project: Project) => {
+    startTransition({ slug: project.slug, title: project.title });
+  };
+
   return (
-    <div className="h-screen pt-48 pb-16">
+    <motion.div
+      className="h-screen pt-48 pb-16"
+      animate={{ opacity: isTransitioning ? 0 : 1 }}
+      transition={{ duration: 0.2 }}
+    >
       <div className="h-full grid grid-cols-12 gap-6">
         {/* Columns 1-2: Whitespace */}
         <div className="col-span-2" />
 
         {/* Column 3: Avatar */}
         <div className="col-span-1 flex justify-end items-start">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 mt-1">
+          <motion.div
+            className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 mt-1"
+            layoutId="avatar"
+          >
             <span className="text-sm font-medium text-gray-500">
               {siteConfig.name.charAt(0)}
             </span>
-          </div>
+          </motion.div>
         </div>
 
         {/* Columns 4-6: Text Content */}
         <div className="col-span-3 flex flex-col">
           {/* Name */}
           <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
+            <motion.h1
+              className="text-xl font-semibold text-gray-900"
+              layoutId="page-title"
+            >
               {siteConfig.name}
-            </h1>
+            </motion.h1>
             <p className="text-sm text-gray-500">{siteConfig.title}</p>
           </div>
 
@@ -71,20 +87,25 @@ export default function HomeContent() {
             {activeTab === 'projects' && (
               <div>
                 {projects.map((project) => (
-                  <Link
+                  <motion.button
                     key={project.id}
-                    href={`/project/${project.slug}`}
-                    className="group block py-3"
+                    onClick={() => handleProjectClick(project)}
+                    className="group block py-3 text-left w-full"
                     onMouseEnter={() => setHoveredProject(project)}
                     onMouseLeave={() => setHoveredProject(null)}
+                    whileHover={{ x: 4 }}
+                    transition={{ duration: 0.15 }}
                   >
-                    <h2 className="text-base font-medium text-gray-900 mb-0.5 group-hover:text-gray-600 transition-colors">
+                    <motion.h2
+                      className="text-base font-medium text-gray-900 mb-0.5 group-hover:text-gray-600 transition-colors"
+                      layoutId={selectedProject?.slug === project.slug ? 'page-title' : undefined}
+                    >
                       {project.title}
-                    </h2>
+                    </motion.h2>
                     <p className="text-sm text-gray-400">
                       {project.year} <span className="mx-1">·</span> {project.description}
                     </p>
-                  </Link>
+                  </motion.button>
                 ))}
               </div>
             )}
@@ -201,6 +222,6 @@ export default function HomeContent() {
         {/* Columns 11-12: Whitespace */}
         <div className="col-span-2" />
       </div>
-    </div>
+    </motion.div>
   );
 }
