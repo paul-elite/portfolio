@@ -25,7 +25,7 @@ export default function HomeContent() {
   ];
 
   return (
-    <div className="h-screen py-16">
+    <div className="h-screen pt-32 pb-16">
       <div className="h-full grid grid-cols-12 gap-6">
         {/* Columns 1-2: Whitespace */}
         <div className="col-span-2" />
@@ -183,17 +183,17 @@ export default function HomeContent() {
             }`}
           >
             {/* Mobile Phone Mockup */}
-            <div className="relative w-[200px] h-[420px] bg-gray-900 rounded-[36px] p-2 shadow-xl">
+            <div className="relative w-[266px] h-[560px] bg-gray-900 rounded-[48px] p-3 shadow-xl">
               {/* Screen */}
-              <div className="w-full h-full bg-gray-100 rounded-[28px] overflow-hidden flex items-center justify-center">
+              <div className="w-full h-full bg-gray-100 rounded-[38px] overflow-hidden flex items-center justify-center">
                 {hoveredProject && (
-                  <span className="text-gray-400 text-xs text-center px-4">
+                  <span className="text-gray-400 text-sm text-center px-6">
                     {hoveredProject.title}
                   </span>
                 )}
               </div>
               {/* Notch */}
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-16 h-5 bg-gray-900 rounded-full" />
+              <div className="absolute top-5 left-1/2 -translate-x-1/2 w-20 h-6 bg-gray-900 rounded-full" />
             </div>
           </div>
         </div>
