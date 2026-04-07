@@ -2,6 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { Illustration } from '@/lib/data';
+
+function getYouTubeId(url: string) {
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
+  return match ? match[1] : null;
+}
 import {
   projects,
   writings,
@@ -16,6 +22,7 @@ type Tab = 'projects' | 'interaction' | 'illustration' | 'writings';
 export default function HomeContent() {
   const [activeTab, setActiveTab] = useState<Tab>('projects');
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null);
+  const [activeVideo, setActiveVideo] = useState<Illustration | null>(null);
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'projects', label: 'Projects' },
@@ -107,12 +114,10 @@ export default function HomeContent() {
             {activeTab === 'illustration' && (
               <div className="grid grid-cols-2 gap-4" style={{ width: 'calc(166% + 1.5rem)' }}>
                 {illustrations.map((item) => (
-                  <a
+                  <button
                     key={item.id}
-                    href={item.youtubeUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group block"
+                    onClick={() => setActiveVideo(item)}
+                    className="group block text-left"
                   >
                     <div className="aspect-video bg-gray-100 rounded-lg mb-2 overflow-hidden relative">
                       <div className="w-full h-full flex items-center justify-center">
@@ -135,7 +140,7 @@ export default function HomeContent() {
                     <h3 className="text-sm font-medium text-gray-900 group-hover:text-gray-600 transition-colors">
                       {item.title}
                     </h3>
-                  </a>
+                  </button>
                 ))}
               </div>
             )}
@@ -222,6 +227,32 @@ export default function HomeContent() {
         {/* Columns 11-12: Whitespace */}
         <div className="col-span-2" />
       </div>
+
+      {/* Video Modal */}
+      {activeVideo && activeVideo.youtubeUrl && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-8"
+          onClick={() => setActiveVideo(null)}
+        >
+          <div
+            className="relative w-full max-w-4xl aspect-video"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <iframe
+              src={`https://www.youtube.com/embed/${getYouTubeId(activeVideo.youtubeUrl)}?autoplay=1`}
+              className="w-full h-full rounded-lg"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+            <button
+              onClick={() => setActiveVideo(null)}
+              className="absolute -top-12 right-0 text-white/60 hover:text-white transition-colors text-sm"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
