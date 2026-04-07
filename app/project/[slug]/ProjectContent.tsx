@@ -55,6 +55,7 @@ export default function ProjectContent({ project }: ProjectContentProps) {
             <motion.div
               className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 mt-1"
               layoutId="avatar"
+              transition={{ type: "spring", stiffness: 200, damping: 30 }}
             >
               <span className="text-sm font-medium text-gray-500">
                 {siteConfig.name.charAt(0)}
@@ -69,6 +70,7 @@ export default function ProjectContent({ project }: ProjectContentProps) {
               <motion.h1
                 className="text-xl font-semibold text-gray-900"
                 layoutId="page-title"
+                transition={{ type: "spring", stiffness: 200, damping: 30 }}
               >
                 {project.title}
               </motion.h1>
