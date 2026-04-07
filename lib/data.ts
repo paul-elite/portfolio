@@ -148,3 +148,74 @@ export const workCategories: WorkCategory[] = [
 export const getWorkCategory = (slug: string): WorkCategory | undefined => {
   return workCategories.find((cat) => cat.slug === slug);
 };
+
+export interface Writing {
+  id: string;
+  title: string;
+  description: string;
+  link?: string;
+  date?: string;
+}
+
+export interface Illustration {
+  id: string;
+  title: string;
+  description: string;
+  link?: string;
+}
+
+export interface Interaction {
+  id: string;
+  title: string;
+  description: string;
+  link?: string;
+}
+
+export const writings: Writing[] = [
+  {
+    id: "w1",
+    title: "On building tools that feel alive",
+    description: "Exploring the intersection of physics and interface design, and why digital products should respond like physical objects.",
+  },
+  {
+    id: "w2",
+    title: "The case for subtle animations",
+    description: "How micro-interactions improve usability without overwhelming users.",
+  },
+  {
+    id: "w3",
+    title: "Designing for the hand",
+    description: "Rethinking mobile interfaces around natural thumb movement and one-handed use.",
+  },
+];
+
+export const illustrations: Illustration[] = [
+  {
+    id: "i1",
+    title: "Abstract forms",
+    description: "A collection of geometric compositions exploring shape and color relationships.",
+  },
+  {
+    id: "i2",
+    title: "Interface sketches",
+    description: "Early-stage explorations and wireframes for various product concepts.",
+  },
+];
+
+export const interactions: Interaction[] = [
+  {
+    id: "int1",
+    title: "Spring physics playground",
+    description: "An interactive demo exploring spring-based animations and their parameters.",
+  },
+  {
+    id: "int2",
+    title: "Gesture recognition",
+    description: "Experiments with touch gesture detection and visual feedback systems.",
+  },
+  {
+    id: "int3",
+    title: "Cursor trails",
+    description: "Playful cursor effects and pointer-following animations.",
+  },
+];
