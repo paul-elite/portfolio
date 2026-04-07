@@ -25,8 +25,8 @@ export default function HomeContent() {
   return (
     <>
       {/* Hero Section */}
-      <section className="py-12">
-        <div className="flex items-center gap-4 mb-4">
+      <section className="pt-12 pb-16">
+        <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 overflow-hidden flex items-center justify-center">
             <span className="text-2xl font-medium text-gray-500">
               {siteConfig.name.charAt(0)}
@@ -39,27 +39,27 @@ export default function HomeContent() {
             <p className="text-sm text-gray-500">{siteConfig.title}</p>
           </div>
         </div>
-
-        {/* Tabs */}
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`transition-colors ${
-                activeTab === tab.key
-                  ? 'text-gray-900'
-                  : 'text-gray-400 hover:text-gray-600'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
       </section>
 
+      {/* Tabs */}
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm mb-4">
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`transition-colors ${
+              activeTab === tab.key
+                ? 'text-gray-900'
+                : 'text-gray-400 hover:text-gray-600'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {/* Content Section */}
-      <section className="py-8">
+      <section className="py-2">
         {activeTab === 'projects' && (
           <div>
             {workCategories.map((category, index) => (
