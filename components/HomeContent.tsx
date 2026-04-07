@@ -89,8 +89,8 @@ export default function HomeContent() {
                   <h2 className="text-base font-medium text-gray-900 mb-1 group-hover:text-gray-600 transition-colors">
                     {project.title}
                   </h2>
-                  <p className="text-sm text-gray-500 leading-relaxed max-w-xl">
-                    {project.description}
+                  <p className="text-sm text-gray-500">
+                    {project.year} <span className="mx-1">·</span> {project.description}
                   </p>
                 </Link>
               ))}
