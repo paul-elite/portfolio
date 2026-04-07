@@ -26,8 +26,8 @@ export default function HomeContent() {
     <>
       {/* Hero Section */}
       <section className="pt-12 pb-24">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 overflow-hidden flex items-center justify-center">
+        <div className="flex items-center">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 overflow-hidden flex items-center justify-center -ml-20 mr-4">
             <span className="text-2xl font-medium text-gray-500">
               {siteConfig.name.charAt(0)}
             </span>
