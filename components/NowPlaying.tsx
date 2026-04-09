@@ -64,6 +64,9 @@ function formatTime(ms: number): string {
 export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [avgColor, setAvgColor] = useState<string>('rgba(0,0,0,0.3)');
+  const containerRef = useRef<HTMLDivElement>(null);
   const lastFetchTime = useRef<number>(Date.now());
 
   useEffect(() => {
@@ -87,15 +90,82 @@ export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
     return () => clearInterval(interval);
   }, [data?.isPlaying, data?.progressMs, data?.durationMs, remainingMs]);
 
+  // Extract average color from album art
+  useEffect(() => {
+    if (!data?.albumImageUrl) return;
+
+    const img = document.createElement('img');
+    img.crossOrigin = 'anonymous';
+    img.src = data.albumImageUrl;
+
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+
+      // Sample from bottom third of image
+      const startY = Math.floor(img.height * 0.7);
+      const imageData = ctx.getImageData(0, startY, img.width, img.height - startY);
+      const pixels = imageData.data;
+
+      let r = 0, g = 0, b = 0, count = 0;
+      for (let i = 0; i < pixels.length; i += 4) {
+        r += pixels[i];
+        g += pixels[i + 1];
+        b += pixels[i + 2];
+        count++;
+      }
+
+      r = Math.floor(r / count);
+      g = Math.floor(g / count);
+      b = Math.floor(b / count);
+
+      setAvgColor(`rgba(${r}, ${g}, ${b}, 0.8)`);
+    };
+  }, [data?.albumImageUrl]);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    // Calculate offset from center, scaled down for subtle movement
+    const offsetX = (e.clientX - centerX) * 0.15;
+    const offsetY = (e.clientY - centerY) * 0.15;
+
+    setMousePos({ x: offsetX, y: offsetY });
+  };
+
   return (
     <div
+      ref={containerRef}
       className="relative"
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setMousePos({ x: 0, y: 0 });
+      }}
+      onMouseMove={handleMouseMove}
     >
       {/* Cover art on hover */}
       {isHovered && data?.isPlaying && data.albumImageUrl && (
-        <div className="absolute bottom-full mb-3 w-32 h-32 rounded-lg overflow-hidden shadow-lg z-10" style={{ left: '-64px' }}>
+        <div
+          className="absolute bottom-full mb-3 w-32 h-32 rounded-lg overflow-hidden shadow-2xl z-10 transition-transform duration-75 ease-out"
+          style={{
+            left: '-64px',
+            transform: `translate(${mousePos.x}px, ${mousePos.y}px)`,
+            boxShadow: `0 8px 32px ${avgColor}, 0 4px 16px rgba(0,0,0,0.2)`,
+          }}
+        >
+          <div
+            className="absolute inset-0 -z-10 blur-xl scale-110"
+            style={{ backgroundColor: avgColor }}
+          />
           <Image
             src={data.albumImageUrl}
             alt={data.album || 'Cover art'}
