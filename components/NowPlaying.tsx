@@ -65,7 +65,8 @@ export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [avgColor, setAvgColor] = useState<string>('rgba(0,0,0,0.3)');
+  const [avgColor, setAvgColor] = useState<string>('rgba(0,0,0,0.15)');
+  const [imageReady, setImageReady] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const lastFetchTime = useRef<number>(Date.now());
 
@@ -92,8 +93,12 @@ export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
 
   // Extract average color from album art
   useEffect(() => {
-    if (!data?.albumImageUrl) return;
+    if (!data?.albumImageUrl) {
+      setImageReady(false);
+      return;
+    }
 
+    setImageReady(false);
     const img = document.createElement('img');
     img.crossOrigin = 'anonymous';
     img.src = data.albumImageUrl;
@@ -101,7 +106,10 @@ export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
     img.onload = () => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+      if (!ctx) {
+        setImageReady(true);
+        return;
+      }
 
       canvas.width = img.width;
       canvas.height = img.height;
@@ -124,7 +132,12 @@ export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
       g = Math.floor(g / count);
       b = Math.floor(b / count);
 
-      setAvgColor(`rgba(${r}, ${g}, ${b}, 0.8)`);
+      setAvgColor(`rgba(${r}, ${g}, ${b}, 0.4)`);
+      setImageReady(true);
+    };
+
+    img.onerror = () => {
+      setImageReady(true);
     };
   }, [data?.albumImageUrl]);
 
@@ -153,19 +166,15 @@ export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
       onMouseMove={handleMouseMove}
     >
       {/* Cover art on hover */}
-      {isHovered && data?.isPlaying && data.albumImageUrl && (
+      {isHovered && data?.isPlaying && data.albumImageUrl && imageReady && (
         <div
-          className="absolute bottom-full mb-3 w-32 h-32 rounded-lg overflow-hidden shadow-2xl z-10 transition-transform duration-75 ease-out"
+          className="absolute bottom-full mb-3 w-32 h-32 rounded-lg overflow-hidden z-10 transition-transform duration-75 ease-out"
           style={{
             left: '-64px',
             transform: `translate(${mousePos.x}px, ${mousePos.y}px)`,
-            boxShadow: `0 8px 32px ${avgColor}, 0 4px 16px rgba(0,0,0,0.2)`,
+            boxShadow: `0 4px 16px ${avgColor}, 0 2px 8px rgba(0,0,0,0.1)`,
           }}
         >
-          <div
-            className="absolute inset-0 -z-10 blur-xl scale-110"
-            style={{ backgroundColor: avgColor }}
-          />
           <Image
             src={data.albumImageUrl}
             alt={data.album || 'Cover art'}
