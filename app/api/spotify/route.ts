@@ -7,6 +7,7 @@ const REFRESH_TOKEN = process.env.SPOTIFY_REFRESH_TOKEN;
 const basic = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString('base64');
 const TOKEN_ENDPOINT = 'https://accounts.spotify.com/api/token';
 const NOW_PLAYING_ENDPOINT = 'https://api.spotify.com/v1/me/player/currently-playing';
+const RECENTLY_PLAYED_ENDPOINT = 'https://api.spotify.com/v1/me/player/recently-played?limit=1';
 
 async function getAccessToken() {
   const response = await fetch(TOKEN_ENDPOINT, {
@@ -26,14 +27,14 @@ async function getAccessToken() {
 
 export async function GET() {
   if (!CLIENT_ID || !CLIENT_SECRET || !REFRESH_TOKEN) {
-    return NextResponse.json({ isPlaying: false, error: 'missing_env' });
+    return NextResponse.json({ isPlaying: false });
   }
 
   try {
     const tokenResponse = await getAccessToken();
 
     if (!tokenResponse.access_token) {
-      return NextResponse.json({ isPlaying: false, error: 'token_failed', details: tokenResponse });
+      return NextResponse.json({ isPlaying: false });
     }
 
     const response = await fetch(NOW_PLAYING_ENDPOINT, {
@@ -42,18 +43,35 @@ export async function GET() {
       },
     });
 
-    if (response.status === 204) {
-      return NextResponse.json({ isPlaying: false, error: 'not_playing' });
-    }
+    if (response.status === 204 || response.status > 400) {
+      // Fetch recently played
+      const recentResponse = await fetch(RECENTLY_PLAYED_ENDPOINT, {
+        headers: {
+          Authorization: `Bearer ${tokenResponse.access_token}`,
+        },
+      });
 
-    if (response.status > 400) {
-      return NextResponse.json({ isPlaying: false, error: 'api_error', status: response.status });
+      if (recentResponse.ok) {
+        const recentData = await recentResponse.json();
+        if (recentData.items && recentData.items.length > 0) {
+          const track = recentData.items[0].track;
+          return NextResponse.json({
+            isPlaying: false,
+            lastPlayed: {
+              title: track.name,
+              artist: track.artists.map((a: { name: string }) => a.name).join(', '),
+            },
+          });
+        }
+      }
+
+      return NextResponse.json({ isPlaying: false });
     }
 
     const song = await response.json();
 
     if (!song.item) {
-      return NextResponse.json({ isPlaying: false, error: 'no_item' });
+      return NextResponse.json({ isPlaying: false });
     }
 
     const isPlaying = song.is_playing;
@@ -71,7 +89,7 @@ export async function GET() {
       albumImageUrl,
       songUrl,
     });
-  } catch (e) {
-    return NextResponse.json({ isPlaying: false, error: 'exception', message: String(e) });
+  } catch {
+    return NextResponse.json({ isPlaying: false });
   }
 }
