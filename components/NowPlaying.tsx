@@ -31,7 +31,7 @@ export function useNowPlaying() {
     }
 
     fetchNowPlaying();
-    const interval = setInterval(fetchNowPlaying, 30000);
+    const interval = setInterval(fetchNowPlaying, 5000);
     return () => clearInterval(interval);
   }, []);
 

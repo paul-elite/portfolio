@@ -184,8 +184,8 @@ export default function HomeContent() {
           </div>
 
           {/* Now Playing - aligned with avatar */}
-          <div className="flex items-center py-4" style={{ marginLeft: 'calc(-33.333% - 1.5rem)' }}>
-            <div className="flex justify-end pr-3" style={{ width: 'calc(33.333% + 1.5rem)' }}>
+          <div className="flex items-center py-4" style={{ marginLeft: 'calc(-33.333% - 24px)', width: 'calc(133.333% + 24px)' }}>
+            <div className="flex justify-end" style={{ width: 'calc(25% - 6px)', paddingRight: '24px' }}>
               <NowPlayingImage data={nowPlayingData} />
             </div>
             <div className="min-w-0 flex-1">
