@@ -39,6 +39,7 @@ interface Writing {
   slug: string;
   title: string;
   description: string;
+  blocks?: Block[];
 }
 
 interface Settings {
@@ -71,6 +72,7 @@ export default function AdminPage() {
   // Form states
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [projectBlocks, setProjectBlocks] = useState<Block[]>([]);
+  const [writingBlocks, setWritingBlocks] = useState<Block[]>([]);
   const [settings, setSettings] = useState<Settings>({
     name: '',
     title: '',
@@ -176,6 +178,13 @@ export default function AdminPage() {
         }
       }
 
+      // Handle blocks for writings
+      if (activeTab === 'writings') {
+        if (writingBlocks.length > 0) {
+          data.blocks = writingBlocks;
+        }
+      }
+
       const res = await fetch('/api/admin/content', {
         method: 'POST',
         headers: {
@@ -190,6 +199,7 @@ export default function AdminPage() {
         setFormData({});
         setPreviewImages({});
         setProjectBlocks([]);
+        setWritingBlocks([]);
         fetchContent();
       } else {
         setMessage('Failed to create');
@@ -344,6 +354,7 @@ export default function AdminPage() {
                 setFormData({});
                 setPreviewImages({});
                 setProjectBlocks([]);
+                setWritingBlocks([]);
               }}
               className={`text-sm transition-colors ${
                 activeTab === tab.key
@@ -654,6 +665,21 @@ export default function AdminPage() {
                       className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
                     />
                   </>
+                )}
+
+                {activeTab === 'writings' && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <h3 className="text-sm font-medium text-gray-900 mb-4">Article Content</h3>
+                    <p className="text-xs text-gray-400 mb-4">
+                      Build your article with blocks. Add text, images, code snippets, quotes, and more.
+                    </p>
+                    <BlockEditor
+                      blocks={writingBlocks}
+                      onChange={setWritingBlocks}
+                      onUpload={handleFileUpload}
+                      uploading={uploading}
+                    />
+                  </div>
                 )}
 
                 <button
