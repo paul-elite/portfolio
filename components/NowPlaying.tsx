@@ -95,12 +95,13 @@ export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
     >
       {/* Cover art on hover */}
       {isHovered && data?.isPlaying && data.albumImageUrl && (
-        <div className="absolute bottom-full left-0 mb-3 w-32 h-32 rounded-lg overflow-hidden shadow-lg">
+        <div className="absolute bottom-full mb-3 w-32 h-32 rounded-lg overflow-hidden shadow-lg z-10" style={{ left: '-64px' }}>
           <Image
             src={data.albumImageUrl}
             alt={data.album || 'Cover art'}
             fill
             className="object-cover"
+            unoptimized
           />
         </div>
       )}
