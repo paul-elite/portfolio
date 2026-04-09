@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import BlockEditor, { Block } from '@/components/BlockEditor';
 
 type ContentType = 'projects' | 'illustrations' | 'writings' | 'interactions';
 type TabType = ContentType | 'profile' | 'contact';
@@ -15,6 +16,7 @@ interface Project {
   role: string;
   preview?: string;
   link?: string;
+  blocks?: Block[];
   caseStudy?: {
     overview: string;
     challenge: string;
@@ -68,6 +70,7 @@ export default function AdminPage() {
 
   // Form states
   const [formData, setFormData] = useState<Record<string, string>>({});
+  const [projectBlocks, setProjectBlocks] = useState<Block[]>([]);
   const [settings, setSettings] = useState<Settings>({
     name: '',
     title: '',
@@ -152,20 +155,25 @@ export default function AdminPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const data = { ...formData };
+      const data: Record<string, unknown> = { ...formData };
 
-      // Handle case study for projects
-      if (activeTab === 'projects' && (formData.overview || formData.challenge || formData.approach || formData.outcome)) {
-        (data as Record<string, unknown>).caseStudy = {
-          overview: formData.overview || '',
-          challenge: formData.challenge || '',
-          approach: formData.approach || '',
-          outcome: formData.outcome || '',
-        };
-        delete data.overview;
-        delete data.challenge;
-        delete data.approach;
-        delete data.outcome;
+      // Handle blocks and case study for projects
+      if (activeTab === 'projects') {
+        if (projectBlocks.length > 0) {
+          data.blocks = projectBlocks;
+        }
+        if (formData.overview || formData.challenge || formData.approach || formData.outcome) {
+          data.caseStudy = {
+            overview: formData.overview || '',
+            challenge: formData.challenge || '',
+            approach: formData.approach || '',
+            outcome: formData.outcome || '',
+          };
+          delete data.overview;
+          delete data.challenge;
+          delete data.approach;
+          delete data.outcome;
+        }
       }
 
       const res = await fetch('/api/admin/content', {
@@ -181,6 +189,7 @@ export default function AdminPage() {
         setMessage('Created successfully!');
         setFormData({});
         setPreviewImages({});
+        setProjectBlocks([]);
         fetchContent();
       } else {
         setMessage('Failed to create');
@@ -334,6 +343,7 @@ export default function AdminPage() {
                 setActiveTab(tab.key);
                 setFormData({});
                 setPreviewImages({});
+                setProjectBlocks([]);
               }}
               className={`text-sm transition-colors ${
                 activeTab === tab.key
@@ -582,31 +592,20 @@ export default function AdminPage() {
                       onChange={(e) => setFormData({ ...formData, link: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
                     />
-                    <p className="text-xs text-gray-400 mt-4 mb-2">Case Study (optional)</p>
-                    <textarea
-                      placeholder="Overview"
-                      value={formData.overview || ''}
-                      onChange={(e) => setFormData({ ...formData, overview: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 h-20"
-                    />
-                    <textarea
-                      placeholder="Challenge"
-                      value={formData.challenge || ''}
-                      onChange={(e) => setFormData({ ...formData, challenge: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 h-20"
-                    />
-                    <textarea
-                      placeholder="Approach"
-                      value={formData.approach || ''}
-                      onChange={(e) => setFormData({ ...formData, approach: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 h-20"
-                    />
-                    <textarea
-                      placeholder="Outcome"
-                      value={formData.outcome || ''}
-                      onChange={(e) => setFormData({ ...formData, outcome: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 h-20"
-                    />
+
+                    {/* Block Editor for Project Content */}
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <h3 className="text-sm font-medium text-gray-900 mb-4">Project Content</h3>
+                      <p className="text-xs text-gray-400 mb-4">
+                        Build your project page with blocks. Add text, images, SVGs, code snippets, and more.
+                      </p>
+                      <BlockEditor
+                        blocks={projectBlocks}
+                        onChange={setProjectBlocks}
+                        onUpload={handleFileUpload}
+                        uploading={uploading}
+                      />
+                    </div>
                   </>
                 )}
 
