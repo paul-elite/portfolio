@@ -26,26 +26,34 @@ async function getAccessToken() {
 
 export async function GET() {
   if (!CLIENT_ID || !CLIENT_SECRET || !REFRESH_TOKEN) {
-    return NextResponse.json({ isPlaying: false });
+    return NextResponse.json({ isPlaying: false, error: 'missing_env' });
   }
 
   try {
-    const { access_token } = await getAccessToken();
+    const tokenResponse = await getAccessToken();
+
+    if (!tokenResponse.access_token) {
+      return NextResponse.json({ isPlaying: false, error: 'token_failed', details: tokenResponse });
+    }
 
     const response = await fetch(NOW_PLAYING_ENDPOINT, {
       headers: {
-        Authorization: `Bearer ${access_token}`,
+        Authorization: `Bearer ${tokenResponse.access_token}`,
       },
     });
 
-    if (response.status === 204 || response.status > 400) {
-      return NextResponse.json({ isPlaying: false });
+    if (response.status === 204) {
+      return NextResponse.json({ isPlaying: false, error: 'not_playing' });
+    }
+
+    if (response.status > 400) {
+      return NextResponse.json({ isPlaying: false, error: 'api_error', status: response.status });
     }
 
     const song = await response.json();
 
     if (!song.item) {
-      return NextResponse.json({ isPlaying: false });
+      return NextResponse.json({ isPlaying: false, error: 'no_item' });
     }
 
     const isPlaying = song.is_playing;
@@ -63,7 +71,7 @@ export async function GET() {
       albumImageUrl,
       songUrl,
     });
-  } catch {
-    return NextResponse.json({ isPlaying: false });
+  } catch (e) {
+    return NextResponse.json({ isPlaying: false, error: 'exception', message: String(e) });
   }
 }
