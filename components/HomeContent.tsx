@@ -17,7 +17,7 @@ import {
   siteConfig,
   Project,
 } from '@/lib/data';
-import NowPlaying from './NowPlaying';
+import { useNowPlaying, NowPlayingImage, NowPlayingText } from './NowPlaying';
 
 type Tab = 'projects' | 'interaction' | 'illustration' | 'writings';
 
@@ -25,6 +25,7 @@ export default function HomeContent() {
   const [activeTab, setActiveTab] = useState<Tab>('projects');
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null);
   const [activeVideo, setActiveVideo] = useState<Illustration | null>(null);
+  const nowPlayingData = useNowPlaying();
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'projects', label: 'Projects' },
@@ -182,8 +183,15 @@ export default function HomeContent() {
             )}
           </div>
 
-          {/* Now Playing */}
-          <NowPlaying />
+          {/* Now Playing - aligned with avatar */}
+          <div className="flex items-center gap-3 py-4" style={{ marginLeft: 'calc(-33.333% - 0.75rem)' }}>
+            <div className="flex justify-end" style={{ width: 'calc(33.333% - 0.75rem)' }}>
+              <NowPlayingImage data={nowPlayingData} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <NowPlayingText data={nowPlayingData} />
+            </div>
+          </div>
 
           {/* Contact */}
           <footer className="pt-4">
