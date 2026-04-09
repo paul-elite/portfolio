@@ -110,13 +110,13 @@ export function NowPlayingText({ data }: { data: SpotifyData | null }) {
 
   return (
     <>
-      <p className="text-sm text-gray-900">Nothing playing</p>
+      <p className="text-sm text-gray-900">Elite isn't listening to anything right now</p>
       {data?.lastPlayed ? (
         <p className="text-sm text-gray-400 truncate">
-          {data.lastPlayed.title} · {data.lastPlayed.artist}
+          last listened to {data.lastPlayed.title}
         </p>
       ) : (
-        <p className="text-sm text-gray-400">No recent tracks</p>
+        <p className="text-sm text-gray-400">check again shortly</p>
       )}
     </>
   );
