@@ -17,7 +17,7 @@ import {
   siteConfig,
   Project,
 } from '@/lib/data';
-import { useNowPlaying, NowPlayingImage, NowPlayingText } from './NowPlaying';
+import { useNowPlaying, NowPlayingContent } from './NowPlaying';
 
 type Tab = 'projects' | 'interaction' | 'illustration' | 'writings';
 
@@ -184,14 +184,7 @@ export default function HomeContent() {
           </div>
 
           {/* Now Playing */}
-          <div className="flex items-center py-4">
-            <div className="flex-shrink-0" style={{ marginLeft: '-64px', marginRight: '24px' }}>
-              <NowPlayingImage data={nowPlayingData} />
-            </div>
-            <div className="min-w-0">
-              <NowPlayingText data={nowPlayingData} />
-            </div>
-          </div>
+          <NowPlayingContent data={nowPlayingData} />
 
           {/* Contact */}
           <footer className="pt-4">

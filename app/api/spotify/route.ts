@@ -75,13 +75,37 @@ export async function GET() {
     }
 
     const isPlaying = song.is_playing;
+    const progressMs = song.progress_ms;
+    const durationMs = song.item.duration_ms;
+
+    // Handle both tracks and podcast episodes
+    if (song.currently_playing_type === 'episode') {
+      // Podcast episode
+      const title = song.item.name;
+      const artist = song.item.show?.name || 'Podcast';
+      const album = song.item.show?.name || '';
+      const albumImageUrl = song.item.images?.[0]?.url || song.item.show?.images?.[0]?.url;
+      const songUrl = song.item.external_urls?.spotify;
+
+      return NextResponse.json({
+        isPlaying,
+        title,
+        artist,
+        album,
+        albumImageUrl,
+        songUrl,
+        progressMs,
+        durationMs,
+        type: 'episode',
+      });
+    }
+
+    // Regular track
     const title = song.item.name;
     const artist = song.item.artists.map((a: { name: string }) => a.name).join(', ');
     const album = song.item.album.name;
     const albumImageUrl = song.item.album.images[0]?.url;
     const songUrl = song.item.external_urls.spotify;
-    const progressMs = song.progress_ms;
-    const durationMs = song.item.duration_ms;
 
     return NextResponse.json({
       isPlaying,
@@ -92,6 +116,7 @@ export async function GET() {
       songUrl,
       progressMs,
       durationMs,
+      type: 'track',
     });
   } catch {
     return NextResponse.json({ isPlaying: false });
