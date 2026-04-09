@@ -41,21 +41,12 @@ export function useNowPlaying() {
 export function NowPlayingImage({ data }: { data: SpotifyData | null }) {
   return (
     <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 relative">
-      {data?.isPlaying && data.albumImageUrl ? (
-        <Image
-          src={data.albumImageUrl}
-          alt={data.album || 'Album art'}
-          fill
-          className="object-cover animate-spin-slow"
-        />
-      ) : (
-        <Image
-          src="/music-icon.svg"
-          alt="Music"
-          fill
-          className="object-cover"
-        />
-      )}
+      <Image
+        src="/music-icon.svg"
+        alt="Music"
+        fill
+        className={`object-cover ${data?.isPlaying ? 'animate-spin-slow' : ''}`}
+      />
     </div>
   );
 }
