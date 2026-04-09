@@ -1,0 +1,404 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+
+type ContentType = 'projects' | 'illustrations' | 'writings' | 'interactions';
+
+interface Project {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  year: string;
+  role: string;
+  preview?: string;
+  link?: string;
+  caseStudy?: {
+    overview: string;
+    challenge: string;
+    approach: string;
+    outcome: string;
+  };
+}
+
+interface Illustration {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  thumbnail?: string;
+  youtubeUrl?: string;
+}
+
+interface Writing {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+}
+
+interface ContentStore {
+  projects: Project[];
+  illustrations: Illustration[];
+  writings: Writing[];
+  interactions: Writing[];
+}
+
+export default function AdminPage() {
+  const [password, setPassword] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [activeTab, setActiveTab] = useState<ContentType>('projects');
+  const [content, setContent] = useState<ContentStore | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+
+  // Form states
+  const [formData, setFormData] = useState<Record<string, string>>({});
+
+  const fetchContent = async () => {
+    try {
+      const res = await fetch('/api/admin/content', {
+        headers: { Authorization: `Bearer ${password}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setContent(data);
+      }
+    } catch {
+      console.error('Failed to fetch content');
+    }
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await fetch('/api/admin/content', {
+        headers: { Authorization: `Bearer ${password}` },
+      });
+      if (res.ok) {
+        setIsAuthenticated(true);
+        const data = await res.json();
+        setContent(data);
+        localStorage.setItem('admin_password', password);
+      } else {
+        setMessage('Invalid password');
+      }
+    } catch {
+      setMessage('Error logging in');
+    }
+    setLoading(false);
+  };
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const data = { ...formData };
+
+      // Handle case study for projects
+      if (activeTab === 'projects' && (formData.overview || formData.challenge || formData.approach || formData.outcome)) {
+        (data as Record<string, unknown>).caseStudy = {
+          overview: formData.overview || '',
+          challenge: formData.challenge || '',
+          approach: formData.approach || '',
+          outcome: formData.outcome || '',
+        };
+        delete data.overview;
+        delete data.challenge;
+        delete data.approach;
+        delete data.outcome;
+      }
+
+      const res = await fetch('/api/admin/content', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${password}`,
+        },
+        body: JSON.stringify({ type: activeTab, data }),
+      });
+
+      if (res.ok) {
+        setMessage('Created successfully!');
+        setFormData({});
+        fetchContent();
+      } else {
+        setMessage('Failed to create');
+      }
+    } catch {
+      setMessage('Error creating');
+    }
+    setLoading(false);
+  };
+
+  const handleDelete = async (type: ContentType, id: string) => {
+    if (!confirm('Are you sure?')) return;
+
+    try {
+      const res = await fetch('/api/admin/content', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${password}`,
+        },
+        body: JSON.stringify({ type, id }),
+      });
+
+      if (res.ok) {
+        setMessage('Deleted successfully!');
+        fetchContent();
+      }
+    } catch {
+      setMessage('Error deleting');
+    }
+  };
+
+  useEffect(() => {
+    const saved = localStorage.getItem('admin_password');
+    if (saved) {
+      setPassword(saved);
+      fetch('/api/admin/content', {
+        headers: { Authorization: `Bearer ${saved}` },
+      }).then((res) => {
+        if (res.ok) {
+          setIsAuthenticated(true);
+          res.json().then(setContent);
+        }
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => setMessage(''), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
+  if (!isAuthenticated) {
+    return (
+      <main className="min-h-screen bg-white flex items-center justify-center p-8">
+        <form onSubmit={handleLogin} className="w-full max-w-sm">
+          <h1 className="text-2xl font-semibold text-gray-900 mb-8">Admin</h1>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            className="w-full px-4 py-3 border border-gray-200 rounded-lg mb-4 focus:outline-none focus:border-gray-400"
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+          >
+            {loading ? 'Loading...' : 'Login'}
+          </button>
+          {message && <p className="text-red-500 text-sm mt-4">{message}</p>}
+        </form>
+      </main>
+    );
+  }
+
+  const tabs: { key: ContentType; label: string }[] = [
+    { key: 'projects', label: 'Projects' },
+    { key: 'illustrations', label: 'Illustrations' },
+    { key: 'writings', label: 'Writings' },
+    { key: 'interactions', label: 'Interactions' },
+  ];
+
+  return (
+    <main className="min-h-screen bg-white p-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-2xl font-semibold text-gray-900">Admin Panel</h1>
+          <button
+            onClick={() => {
+              localStorage.removeItem('admin_password');
+              setIsAuthenticated(false);
+              setPassword('');
+            }}
+            className="text-sm text-gray-400 hover:text-gray-900 transition-colors"
+          >
+            Logout
+          </button>
+        </div>
+
+        {message && (
+          <div className="mb-6 p-4 bg-green-50 text-green-700 rounded-lg text-sm">
+            {message}
+          </div>
+        )}
+
+        {/* Tabs */}
+        <div className="flex gap-4 mb-8 border-b border-gray-100 pb-4">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => {
+                setActiveTab(tab.key);
+                setFormData({});
+              }}
+              className={`text-sm transition-colors ${
+                activeTab === tab.key
+                  ? 'text-gray-900 font-medium'
+                  : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Add Form */}
+        <div className="mb-12 p-6 bg-gray-50 rounded-lg">
+          <h2 className="text-sm font-medium text-gray-900 mb-4">
+            Add {activeTab.slice(0, -1)}
+          </h2>
+          <form onSubmit={handleCreate} className="space-y-4">
+            <input
+              type="text"
+              placeholder="Title"
+              value={formData.title || ''}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Description"
+              value={formData.description || ''}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
+              required
+            />
+
+            {activeTab === 'projects' && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <input
+                    type="text"
+                    placeholder="Year (e.g., 2024)"
+                    value={formData.year || ''}
+                    onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                    className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Role"
+                    value={formData.role || ''}
+                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                    className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
+                  />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Preview image path (e.g., /previews/project.png)"
+                  value={formData.preview || ''}
+                  onChange={(e) => setFormData({ ...formData, preview: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
+                />
+                <input
+                  type="text"
+                  placeholder="Live link (optional)"
+                  value={formData.link || ''}
+                  onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
+                />
+                <p className="text-xs text-gray-400 mt-4 mb-2">Case Study (optional)</p>
+                <textarea
+                  placeholder="Overview"
+                  value={formData.overview || ''}
+                  onChange={(e) => setFormData({ ...formData, overview: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 h-20"
+                />
+                <textarea
+                  placeholder="Challenge"
+                  value={formData.challenge || ''}
+                  onChange={(e) => setFormData({ ...formData, challenge: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 h-20"
+                />
+                <textarea
+                  placeholder="Approach"
+                  value={formData.approach || ''}
+                  onChange={(e) => setFormData({ ...formData, approach: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 h-20"
+                />
+                <textarea
+                  placeholder="Outcome"
+                  value={formData.outcome || ''}
+                  onChange={(e) => setFormData({ ...formData, outcome: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 h-20"
+                />
+              </>
+            )}
+
+            {activeTab === 'illustrations' && (
+              <>
+                <input
+                  type="text"
+                  placeholder="Thumbnail path (e.g., /illustrations/thumb.jpg)"
+                  value={formData.thumbnail || ''}
+                  onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
+                />
+                <input
+                  type="text"
+                  placeholder="YouTube URL"
+                  value={formData.youtubeUrl || ''}
+                  onChange={(e) => setFormData({ ...formData, youtubeUrl: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
+                />
+              </>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+            >
+              {loading ? 'Adding...' : 'Add'}
+            </button>
+          </form>
+        </div>
+
+        {/* Content List */}
+        <div>
+          <h2 className="text-sm font-medium text-gray-900 mb-4">
+            Existing {activeTab}
+          </h2>
+          <div className="space-y-2">
+            {content && content[activeTab]?.length === 0 && (
+              <p className="text-sm text-gray-400">No items yet</p>
+            )}
+            {content &&
+              content[activeTab]?.map((item: { id: string; title: string; description: string }) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{item.title}</p>
+                    <p className="text-xs text-gray-400">{item.description}</p>
+                  </div>
+                  <button
+                    onClick={() => handleDelete(activeTab, item.id)}
+                    className="text-xs text-red-400 hover:text-red-600 transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))}
+          </div>
+        </div>
+
+        {/* Note */}
+        <p className="text-xs text-gray-300 mt-12">
+          Content is stored in memory and resets on deploy. Connect a database for persistence.
+        </p>
+      </div>
+    </main>
+  );
+}
