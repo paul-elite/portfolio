@@ -1,9 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { readFile, writeFile, mkdir } from 'fs/promises';
+import path from 'path';
 
 // Simple password check - change this in production
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 
-// In-memory store - replace with database later (Vercel KV, Postgres, etc.)
+const DATA_DIR = path.join(process.cwd(), 'data');
+const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
+
+interface Settings {
+  name: string;
+  title: string;
+  avatar: string;
+  twitter: string;
+  github: string;
+  linkedin: string;
+  email: string;
+}
+
+const defaultSettings: Settings = {
+  name: '',
+  title: '',
+  avatar: '',
+  twitter: '',
+  github: '',
+  linkedin: '',
+  email: '',
+};
+
+async function loadSettings(): Promise<Settings> {
+  try {
+    const data = await readFile(SETTINGS_FILE, 'utf-8');
+    return { ...defaultSettings, ...JSON.parse(data) };
+  } catch {
+    return defaultSettings;
+  }
+}
+
+async function saveSettings(settings: Settings): Promise<void> {
+  await mkdir(DATA_DIR, { recursive: true });
+  await writeFile(SETTINGS_FILE, JSON.stringify(settings, null, 2));
+}
+
+// In-memory store for content (projects, etc.) - replace with database later
 declare global {
   var contentStore: {
     projects: Array<{
@@ -42,15 +81,6 @@ declare global {
       title: string;
       description: string;
     }>;
-    settings: {
-      name: string;
-      title: string;
-      avatar: string;
-      twitter: string;
-      github: string;
-      linkedin: string;
-      email: string;
-    };
   };
 }
 
@@ -60,15 +90,6 @@ if (!global.contentStore) {
     illustrations: [],
     writings: [],
     interactions: [],
-    settings: {
-      name: '',
-      title: '',
-      avatar: '',
-      twitter: '',
-      github: '',
-      linkedin: '',
-      email: '',
-    },
   };
 }
 
@@ -84,7 +105,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  return NextResponse.json(global.contentStore);
+  const settings = await loadSettings();
+  return NextResponse.json({ ...global.contentStore, settings });
 }
 
 export async function POST(request: NextRequest) {
@@ -121,10 +143,12 @@ export async function PUT(request: NextRequest) {
   try {
     const { type, id, data } = await request.json();
 
-    // Handle settings update
+    // Handle settings update - persist to file
     if (type === 'settings') {
-      global.contentStore.settings = { ...global.contentStore.settings, ...data };
-      return NextResponse.json({ success: true, settings: global.contentStore.settings });
+      const currentSettings = await loadSettings();
+      const newSettings = { ...currentSettings, ...data };
+      await saveSettings(newSettings);
+      return NextResponse.json({ success: true, settings: newSettings });
     }
 
     if (!['projects', 'illustrations', 'writings', 'interactions'].includes(type)) {
