@@ -9,6 +9,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-archivo);
+  --font-gochi: var(--font-gochi-hand);
 }
 
 body {

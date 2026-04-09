@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
-import { Archivo } from "next/font/google";
+import { Archivo, Gochi_Hand } from "next/font/google";
 import Analytics from "@/components/Analytics";
 import "./globals.css";
 
 const archivo = Archivo({
   variable: "--font-archivo",
+  subsets: ["latin"],
+});
+
+const gochiHand = Gochi_Hand({
+  variable: "--font-gochi-hand",
+  weight: "400",
   subsets: ["latin"],
 });
 
@@ -19,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${archivo.variable} h-full antialiased`}>
+    <html lang="en" className={`${archivo.variable} ${gochiHand.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans">
         {children}
         <Analytics />

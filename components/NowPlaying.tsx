@@ -66,6 +66,7 @@ export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
   const [isHovered, setIsHovered] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [avgColor, setAvgColor] = useState<string>('rgba(0,0,0,0.15)');
+  const [saturatedColor, setSaturatedColor] = useState<string>('#666666');
   const [imageReady, setImageReady] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const lastFetchTime = useRef<number>(Date.now());
@@ -91,7 +92,7 @@ export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
     return () => clearInterval(interval);
   }, [data?.isPlaying, data?.progressMs, data?.durationMs, remainingMs]);
 
-  // Extract average color from album art
+  // Extract average color and most saturated color from album art
   useEffect(() => {
     if (!data?.albumImageUrl) {
       setImageReady(false);
@@ -115,7 +116,7 @@ export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
       canvas.height = img.height;
       ctx.drawImage(img, 0, 0);
 
-      // Sample from bottom third of image
+      // Sample from bottom third of image for average color
       const startY = Math.floor(img.height * 0.7);
       const imageData = ctx.getImageData(0, startY, img.width, img.height - startY);
       const pixels = imageData.data;
@@ -133,6 +134,45 @@ export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
       b = Math.floor(b / count);
 
       setAvgColor(`rgba(${r}, ${g}, ${b}, 0.4)`);
+
+      // Find most saturated color from entire image
+      const fullImageData = ctx.getImageData(0, 0, img.width, img.height);
+      const fullPixels = fullImageData.data;
+
+      let maxSaturation = 0;
+      let mostSaturatedR = 128, mostSaturatedG = 128, mostSaturatedB = 128;
+
+      // Sample every 10th pixel for performance
+      for (let i = 0; i < fullPixels.length; i += 40) {
+        const pr = fullPixels[i];
+        const pg = fullPixels[i + 1];
+        const pb = fullPixels[i + 2];
+
+        // Calculate saturation (HSL)
+        const max = Math.max(pr, pg, pb);
+        const min = Math.min(pr, pg, pb);
+        const l = (max + min) / 2;
+
+        let s = 0;
+        if (max !== min) {
+          s = l > 127
+            ? (max - min) / (510 - max - min)
+            : (max - min) / (max + min);
+        }
+
+        // Prefer colors that are saturated and not too dark or too light
+        const lightnessBonus = 1 - Math.abs(l - 127) / 127;
+        const effectiveSaturation = s * lightnessBonus;
+
+        if (effectiveSaturation > maxSaturation) {
+          maxSaturation = effectiveSaturation;
+          mostSaturatedR = pr;
+          mostSaturatedG = pg;
+          mostSaturatedB = pb;
+        }
+      }
+
+      setSaturatedColor(`rgb(${mostSaturatedR}, ${mostSaturatedG}, ${mostSaturatedB})`);
       setImageReady(true);
     };
 
@@ -165,23 +205,41 @@ export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
       }}
       onMouseMove={handleMouseMove}
     >
-      {/* Cover art on hover */}
+      {/* Cover art and album name on hover */}
       {isHovered && data?.isPlaying && data.albumImageUrl && imageReady && (
         <div
-          className="absolute bottom-full mb-3 w-32 h-32 rounded-lg overflow-hidden z-10 transition-transform duration-75 ease-out"
+          className="absolute bottom-full mb-3 flex items-center gap-4 z-10 transition-transform duration-75 ease-out"
           style={{
             left: '-64px',
             transform: `translate(${mousePos.x}px, ${mousePos.y}px)`,
-            boxShadow: `0 4px 16px ${avgColor}, 0 2px 8px rgba(0,0,0,0.1)`,
           }}
         >
-          <Image
-            src={data.albumImageUrl}
-            alt={data.album || 'Cover art'}
-            fill
-            className="object-cover"
-            unoptimized
-          />
+          {/* Album art */}
+          <div
+            className="w-32 h-32 rounded-lg overflow-hidden flex-shrink-0"
+            style={{
+              boxShadow: `0 4px 16px ${avgColor}, 0 2px 8px rgba(0,0,0,0.1)`,
+            }}
+          >
+            <Image
+              src={data.albumImageUrl}
+              alt={data.album || 'Cover art'}
+              fill
+              className="object-cover"
+              unoptimized
+            />
+          </div>
+
+          {/* Album name */}
+          <div className="flex flex-col gap-1">
+            <span className="text-sm text-gray-400">Album</span>
+            <span
+              className="font-gochi text-[32px] leading-tight max-w-[200px]"
+              style={{ color: saturatedColor }}
+            >
+              {data.album}
+            </span>
+          </div>
         </div>
       )}
 

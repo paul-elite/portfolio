@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Illustration } from '@/lib/data';
@@ -14,10 +14,44 @@ import {
   writings,
   illustrations,
   interactions,
-  siteConfig,
+  siteConfig as staticConfig,
   Project,
 } from '@/lib/data';
 import { useNowPlaying, NowPlayingContent } from './NowPlaying';
+
+interface SiteConfig {
+  name: string;
+  title: string;
+  avatar: string;
+  bio: string;
+  social: {
+    twitter: string;
+    github: string;
+    linkedin: string;
+    email: string;
+  };
+}
+
+function useSiteConfig() {
+  const [config, setConfig] = useState<SiteConfig>(staticConfig);
+
+  useEffect(() => {
+    async function fetchConfig() {
+      try {
+        const res = await fetch('/api/config', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          setConfig(data);
+        }
+      } catch {
+        // Fall back to static config
+      }
+    }
+    fetchConfig();
+  }, []);
+
+  return config;
+}
 
 type Tab = 'projects' | 'interaction' | 'illustration' | 'writings';
 
@@ -26,6 +60,7 @@ export default function HomeContent() {
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null);
   const [activeVideo, setActiveVideo] = useState<Illustration | null>(null);
   const nowPlayingData = useNowPlaying();
+  const siteConfig = useSiteConfig();
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'projects', label: 'Projects' },
