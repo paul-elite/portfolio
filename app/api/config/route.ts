@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
-import { readFile } from 'fs/promises';
-import path from 'path';
+import { kv } from '@vercel/kv';
 import { siteConfig as staticConfig } from '@/lib/data';
-
-const SETTINGS_FILE = path.join(process.cwd(), 'data', 'settings.json');
 
 interface Settings {
   name: string;
@@ -17,15 +14,14 @@ interface Settings {
 
 async function loadSettings(): Promise<Settings | null> {
   try {
-    const data = await readFile(SETTINGS_FILE, 'utf-8');
-    return JSON.parse(data);
+    return await kv.get<Settings>('portfolio:settings');
   } catch {
     return null;
   }
 }
 
 export async function GET() {
-  // Load settings from file
+  // Load settings from Vercel KV
   const dynamicSettings = await loadSettings();
 
   const config = {

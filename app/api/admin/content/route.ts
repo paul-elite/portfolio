@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readFile, writeFile, mkdir } from 'fs/promises';
-import path from 'path';
+import { kv } from '@vercel/kv';
 
-// Simple password check - change this in production
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
-
-const DATA_DIR = path.join(process.cwd(), 'data');
-const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
 
 interface Settings {
   name: string;
@@ -30,16 +25,15 @@ const defaultSettings: Settings = {
 
 async function loadSettings(): Promise<Settings> {
   try {
-    const data = await readFile(SETTINGS_FILE, 'utf-8');
-    return { ...defaultSettings, ...JSON.parse(data) };
+    const settings = await kv.get<Settings>('portfolio:settings');
+    return settings ? { ...defaultSettings, ...settings } : defaultSettings;
   } catch {
     return defaultSettings;
   }
 }
 
 async function saveSettings(settings: Settings): Promise<void> {
-  await mkdir(DATA_DIR, { recursive: true });
-  await writeFile(SETTINGS_FILE, JSON.stringify(settings, null, 2));
+  await kv.set('portfolio:settings', settings);
 }
 
 // In-memory store for content (projects, etc.) - replace with database later
@@ -143,7 +137,7 @@ export async function PUT(request: NextRequest) {
   try {
     const { type, id, data } = await request.json();
 
-    // Handle settings update - persist to file
+    // Handle settings update - persist to Vercel KV
     if (type === 'settings') {
       const currentSettings = await loadSettings();
       const newSettings = { ...currentSettings, ...data };
