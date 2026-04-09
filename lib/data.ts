@@ -17,9 +17,9 @@ export interface Project {
 }
 
 export const siteConfig = {
-  name: "Your Name",
+  name: "Elite",
   title: "Designer & Developer",
-  avatar: "/avatar.jpg",
+  avatar: "",
   bio: "I design and build digital products with a focus on interaction design, prototyping, and front-end development.",
   social: {
     twitter: "https://twitter.com",
