@@ -77,6 +77,8 @@ export default function AdminPage() {
     linkedin: '',
     email: '',
   });
+  const [avatarPreview, setAvatarPreview] = useState<string>('');
+  const [previewImages, setPreviewImages] = useState<Record<string, string>>({});
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -178,6 +180,7 @@ export default function AdminPage() {
       if (res.ok) {
         setMessage('Created successfully!');
         setFormData({});
+        setPreviewImages({});
         fetchContent();
       } else {
         setMessage('Failed to create');
@@ -330,6 +333,7 @@ export default function AdminPage() {
               onClick={() => {
                 setActiveTab(tab.key);
                 setFormData({});
+                setPreviewImages({});
               }}
               className={`text-sm transition-colors ${
                 activeTab === tab.key
@@ -349,14 +353,15 @@ export default function AdminPage() {
               <h2 className="text-sm font-medium text-gray-900 mb-4">Profile Photo</h2>
 
               <div className="flex items-center gap-6">
-                {settings.avatar ? (
+                {(avatarPreview || settings.avatar) ? (
                   <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-200">
                     <Image
-                      src={settings.avatar}
+                      src={avatarPreview || settings.avatar}
                       alt="Avatar"
                       width={80}
                       height={80}
                       className="w-full h-full object-cover"
+                      unoptimized={!!avatarPreview}
                     />
                   </div>
                 ) : (
@@ -374,6 +379,11 @@ export default function AdminPage() {
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (file) {
+                        // Show instant preview
+                        const previewUrl = URL.createObjectURL(file);
+                        setAvatarPreview(previewUrl);
+
+                        // Upload file
                         const path = await handleFileUpload(file, '');
                         if (path) {
                           setSettings({ ...settings, avatar: path });
@@ -533,12 +543,27 @@ export default function AdminPage() {
                     <div>
                       <label className="text-xs text-gray-500 mb-2 block">Preview Image</label>
                       <div className="flex items-center gap-4">
+                        {(previewImages.preview || formData.preview) && (
+                          <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
+                            <Image
+                              src={previewImages.preview || formData.preview}
+                              alt="Preview"
+                              width={64}
+                              height={64}
+                              className="w-full h-full object-cover"
+                              unoptimized={!!previewImages.preview}
+                            />
+                          </div>
+                        )}
                         <input
                           type="file"
                           accept="image/*"
                           onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (file) {
+                              const previewUrl = URL.createObjectURL(file);
+                              setPreviewImages({ ...previewImages, preview: previewUrl });
+
                               const path = await handleFileUpload(file, 'previews');
                               if (path) {
                                 setFormData({ ...formData, preview: path });
@@ -547,9 +572,6 @@ export default function AdminPage() {
                           }}
                           className="text-sm"
                         />
-                        {formData.preview && (
-                          <span className="text-xs text-green-600">✓ {formData.preview}</span>
-                        )}
                       </div>
                     </div>
 
@@ -594,12 +616,27 @@ export default function AdminPage() {
                     <div>
                       <label className="text-xs text-gray-500 mb-2 block">Thumbnail Image</label>
                       <div className="flex items-center gap-4">
+                        {(previewImages.thumbnail || formData.thumbnail) && (
+                          <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
+                            <Image
+                              src={previewImages.thumbnail || formData.thumbnail}
+                              alt="Thumbnail"
+                              width={64}
+                              height={64}
+                              className="w-full h-full object-cover"
+                              unoptimized={!!previewImages.thumbnail}
+                            />
+                          </div>
+                        )}
                         <input
                           type="file"
                           accept="image/*"
                           onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (file) {
+                              const previewUrl = URL.createObjectURL(file);
+                              setPreviewImages({ ...previewImages, thumbnail: previewUrl });
+
                               const path = await handleFileUpload(file, 'illustrations');
                               if (path) {
                                 setFormData({ ...formData, thumbnail: path });
@@ -608,9 +645,6 @@ export default function AdminPage() {
                           }}
                           className="text-sm"
                         />
-                        {formData.thumbnail && (
-                          <span className="text-xs text-green-600">✓ {formData.thumbnail}</span>
-                        )}
                       </div>
                     </div>
                     <input
