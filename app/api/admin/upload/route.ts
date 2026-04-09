@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { put } from '@vercel/blob';
+import { supabase } from '@/lib/supabase';
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 
@@ -28,12 +28,25 @@ export async function POST(request: NextRequest) {
     const ext = file.name.split('.').pop() || 'jpg';
     const filename = `${folder}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
 
-    // Upload to Vercel Blob
-    const blob = await put(filename, file, {
-      access: 'public',
-    });
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('uploads')
+      .upload(filename, file, {
+        cacheControl: '3600',
+        upsert: false,
+      });
 
-    return NextResponse.json({ success: true, path: blob.url });
+    if (error) {
+      console.error('Upload error:', error);
+      return NextResponse.json({ error: 'Failed to upload' }, { status: 500 });
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('uploads')
+      .getPublicUrl(data.path);
+
+    return NextResponse.json({ success: true, path: urlData.publicUrl });
   } catch (error) {
     console.error('Upload error:', error);
     return NextResponse.json({ error: 'Failed to upload' }, { status: 500 });

@@ -1,42 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { kv } from '@vercel/kv';
+import { supabase, Settings, defaultSettings } from '@/lib/supabase';
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 
-interface Settings {
-  name: string;
-  title: string;
-  avatar: string;
-  twitter: string;
-  github: string;
-  linkedin: string;
-  email: string;
-}
-
-const defaultSettings: Settings = {
-  name: '',
-  title: '',
-  avatar: '',
-  twitter: '',
-  github: '',
-  linkedin: '',
-  email: '',
-};
-
 async function loadSettings(): Promise<Settings> {
   try {
-    const settings = await kv.get<Settings>('portfolio:settings');
-    return settings ? { ...defaultSettings, ...settings } : defaultSettings;
+    const { data, error } = await supabase
+      .from('settings')
+      .select('*')
+      .single();
+
+    if (error || !data) {
+      return defaultSettings;
+    }
+    return { ...defaultSettings, ...data };
   } catch {
     return defaultSettings;
   }
 }
 
 async function saveSettings(settings: Settings): Promise<void> {
-  await kv.set('portfolio:settings', settings);
+  const { data: existing } = await supabase
+    .from('settings')
+    .select('id')
+    .single();
+
+  if (existing) {
+    await supabase
+      .from('settings')
+      .update({ ...settings, updated_at: new Date().toISOString() })
+      .eq('id', existing.id);
+  } else {
+    await supabase
+      .from('settings')
+      .insert({ ...settings, updated_at: new Date().toISOString() });
+  }
 }
 
-// In-memory store for content (projects, etc.) - replace with database later
+// In-memory store for content (projects, etc.) - can migrate to Supabase later
 declare global {
   var contentStore: {
     projects: Array<{
@@ -137,7 +138,7 @@ export async function PUT(request: NextRequest) {
   try {
     const { type, id, data } = await request.json();
 
-    // Handle settings update - persist to Vercel KV
+    // Handle settings update - persist to Supabase
     if (type === 'settings') {
       const currentSettings = await loadSettings();
       const newSettings = { ...currentSettings, ...data };

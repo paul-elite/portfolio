@@ -1,27 +1,25 @@
 import { NextResponse } from 'next/server';
-import { kv } from '@vercel/kv';
+import { supabase, Settings, defaultSettings } from '@/lib/supabase';
 import { siteConfig as staticConfig } from '@/lib/data';
-
-interface Settings {
-  name: string;
-  title: string;
-  avatar: string;
-  twitter: string;
-  github: string;
-  linkedin: string;
-  email: string;
-}
 
 async function loadSettings(): Promise<Settings | null> {
   try {
-    return await kv.get<Settings>('portfolio:settings');
+    const { data, error } = await supabase
+      .from('settings')
+      .select('*')
+      .single();
+
+    if (error || !data) {
+      return null;
+    }
+    return data;
   } catch {
     return null;
   }
 }
 
 export async function GET() {
-  // Load settings from Vercel KV
+  // Load settings from Supabase
   const dynamicSettings = await loadSettings();
 
   const config = {
