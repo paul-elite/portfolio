@@ -17,6 +17,7 @@ import {
   siteConfig,
   Project,
 } from '@/lib/data';
+import NowPlaying from './NowPlaying';
 
 type Tab = 'projects' | 'interaction' | 'illustration' | 'writings';
 
@@ -181,8 +182,11 @@ export default function HomeContent() {
             )}
           </div>
 
+          {/* Now Playing */}
+          <NowPlaying />
+
           {/* Contact */}
-          <footer className="pt-8">
+          <footer className="pt-4">
             <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
               <a
                 href={siteConfig.social.twitter}
