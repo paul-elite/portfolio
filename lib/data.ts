@@ -116,6 +116,7 @@ export interface Illustration {
   slug: string;
   title: string;
   description: string;
+  thumbnail?: string;
   youtubeUrl?: string;
 }
 
