@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 
 interface SpotifyData {
@@ -10,6 +10,8 @@ interface SpotifyData {
   album?: string;
   albumImageUrl?: string;
   songUrl?: string;
+  progressMs?: number;
+  durationMs?: number;
   lastPlayed?: {
     title: string;
     artist: string;
@@ -51,18 +53,56 @@ export function NowPlayingImage({ data }: { data: SpotifyData | null }) {
   );
 }
 
+function formatTime(ms: number): string {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
 export function NowPlayingText({ data }: { data: SpotifyData | null }) {
+  const [remainingMs, setRemainingMs] = useState<number | null>(null);
+  const lastFetchTime = useRef<number>(Date.now());
+
+  useEffect(() => {
+    if (data?.isPlaying && data.progressMs !== undefined && data.durationMs !== undefined) {
+      lastFetchTime.current = Date.now();
+      setRemainingMs(data.durationMs - data.progressMs);
+    } else {
+      setRemainingMs(null);
+    }
+  }, [data?.progressMs, data?.durationMs, data?.isPlaying]);
+
+  useEffect(() => {
+    if (!data?.isPlaying || remainingMs === null) return;
+
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - lastFetchTime.current;
+      const newRemaining = (data.durationMs || 0) - (data.progressMs || 0) - elapsed;
+      setRemainingMs(Math.max(0, newRemaining));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [data?.isPlaying, data?.progressMs, data?.durationMs, remainingMs]);
+
   if (data?.isPlaying) {
     return (
       <>
-        <a
-          href={data.songUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block text-base font-medium text-gray-900 hover:text-gray-600 transition-colors truncate"
-        >
-          {data.title}
-        </a>
+        <div className="flex items-center gap-2">
+          <a
+            href={data.songUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-gray-900 hover:text-gray-600 transition-colors truncate"
+          >
+            {data.title}
+          </a>
+          {remainingMs !== null && (
+            <span className="text-sm text-gray-400 flex-shrink-0">
+              {formatTime(remainingMs)}
+            </span>
+          )}
+        </div>
         <p className="text-sm text-gray-400 truncate">{data.artist}</p>
       </>
     );
@@ -70,7 +110,7 @@ export function NowPlayingText({ data }: { data: SpotifyData | null }) {
 
   return (
     <>
-      <p className="text-base font-medium text-gray-900">Nothing playing</p>
+      <p className="text-sm text-gray-900">Nothing playing</p>
       {data?.lastPlayed ? (
         <p className="text-sm text-gray-400 truncate">
           {data.lastPlayed.title} · {data.lastPlayed.artist}

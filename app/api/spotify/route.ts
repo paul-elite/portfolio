@@ -80,6 +80,8 @@ export async function GET() {
     const album = song.item.album.name;
     const albumImageUrl = song.item.album.images[0]?.url;
     const songUrl = song.item.external_urls.spotify;
+    const progressMs = song.progress_ms;
+    const durationMs = song.item.duration_ms;
 
     return NextResponse.json({
       isPlaying,
@@ -88,6 +90,8 @@ export async function GET() {
       album,
       albumImageUrl,
       songUrl,
+      progressMs,
+      durationMs,
     });
   } catch {
     return NextResponse.json({ isPlaying: false });
