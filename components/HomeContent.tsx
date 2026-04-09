@@ -183,12 +183,12 @@ export default function HomeContent() {
             )}
           </div>
 
-          {/* Now Playing - aligned with avatar */}
-          <div className="flex items-center py-4" style={{ marginLeft: 'calc(-33.333% - 24px)', width: 'calc(133.333% + 24px)' }}>
-            <div className="flex justify-end" style={{ width: 'calc(25% - 6px)', paddingRight: '24px' }}>
+          {/* Now Playing */}
+          <div className="flex items-center py-4">
+            <div className="flex-shrink-0" style={{ marginLeft: '-64px', marginRight: '24px' }}>
               <NowPlayingImage data={nowPlayingData} />
             </div>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0">
               <NowPlayingText data={nowPlayingData} />
             </div>
           </div>
