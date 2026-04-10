@@ -216,7 +216,7 @@ export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
         >
           {/* Album art */}
           <div
-            className="w-32 h-32 rounded-lg overflow-hidden flex-shrink-0"
+            className="w-32 h-32 rounded-lg overflow-hidden flex-shrink-0 relative"
             style={{
               boxShadow: `0 4px 16px ${avgColor}, 0 2px 8px rgba(0,0,0,0.1)`,
             }}
