@@ -4,8 +4,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Project, ContentBlock } from '@/lib/data';
 
+interface ProjectNav {
+  slug: string;
+  title: string;
+}
+
 interface ProjectContentProps {
   project: Project;
+  prevProject?: ProjectNav | null;
+  nextProject?: ProjectNav | null;
 }
 
 function renderBlock(block: ContentBlock, index: number) {
@@ -54,7 +61,7 @@ function renderBlock(block: ContentBlock, index: number) {
   }
 }
 
-export default function ProjectContent({ project }: ProjectContentProps) {
+export default function ProjectContent({ project, prevProject, nextProject }: ProjectContentProps) {
   const hasBlocks = project.blocks && project.blocks.length > 0;
 
   return (
@@ -185,6 +192,38 @@ export default function ProjectContent({ project }: ProjectContentProps) {
               >
                 View Project →
               </a>
+            )}
+
+            {/* Project Navigation */}
+            {(prevProject || nextProject) && (
+              <div className="flex justify-between items-center mt-16 pt-8 border-t border-gray-100">
+                {prevProject ? (
+                  <Link
+                    href={`/project/${prevProject.slug}`}
+                    className="group flex flex-col items-start"
+                  >
+                    <span className="text-xs text-gray-400 mb-1">Previous Project</span>
+                    <span className="text-sm font-medium text-gray-900 group-hover:text-gray-600 transition-colors">
+                      ← {prevProject.title}
+                    </span>
+                  </Link>
+                ) : (
+                  <div />
+                )}
+                {nextProject ? (
+                  <Link
+                    href={`/project/${nextProject.slug}`}
+                    className="group flex flex-col items-end"
+                  >
+                    <span className="text-xs text-gray-400 mb-1">Next Project</span>
+                    <span className="text-sm font-medium text-gray-900 group-hover:text-gray-600 transition-colors">
+                      {nextProject.title} →
+                    </span>
+                  </Link>
+                ) : (
+                  <div />
+                )}
+              </div>
             )}
           </div>
 
