@@ -95,7 +95,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         {/* Text Content */}
         <div className="flex-1 md:col-span-3 flex flex-col min-w-0">
           {/* Name */}
-          <div className="h-auto md:h-14 mb-6 md:mb-6">
+          <div className="h-auto md:h-14 mb-10 md:mb-6">
             <h1 className="text-base font-semibold text-gray-900">
               {siteConfig.name}
             </h1>
