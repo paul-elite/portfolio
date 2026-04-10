@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Archivo, Gochi_Hand } from "next/font/google";
 import Analytics from "@/components/Analytics";
 import "./globals.css";
@@ -19,6 +19,13 @@ export const metadata: Metadata = {
   description: "Personal portfolio",
 };
 
+export const viewport: Viewport = {
+  themeColor: "#e1ebfa",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -26,7 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${archivo.variable} ${gochiHand.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans">
+      <body className="min-h-full flex flex-col font-sans bg-background">
         {children}
         <Analytics />
       </body>

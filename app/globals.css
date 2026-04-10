@@ -20,9 +20,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Smooth scrolling */
+/* Smooth scrolling and background */
 html {
   scroll-behavior: smooth;
+  background: var(--background);
 }
 
 /* Selection styling */
