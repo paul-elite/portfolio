@@ -204,11 +204,12 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Now Playing */}
-          <NowPlayingContent data={nowPlayingData} />
+          <div style={activeTab === 'illustration' ? { width: 'calc(166% + 1.5rem)' } : undefined}>
+            <NowPlayingContent data={nowPlayingData} />
 
-          {/* Contact */}
-          <footer className="pt-4">
-            <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+            {/* Contact */}
+            <footer className="pt-4">
+              <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
               <a
                 href={siteConfig.social.twitter}
                 target="_blank"
@@ -240,7 +241,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                 Email
               </a>
             </div>
-          </footer>
+            </footer>
+          </div>
         </div>
 
         {/* Column 7: Gap */}
