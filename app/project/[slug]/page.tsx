@@ -50,12 +50,12 @@ async function getProjectFromDatabase(slug: string): Promise<Project | null> {
 export default async function ProjectPage({ params }: PageProps) {
   const { slug } = await params;
 
-  // First try static project
-  let project = getProject(slug);
+  // First try database (has latest data with blocks)
+  let project = await getProjectFromDatabase(slug);
 
-  // If not found, try database
+  // Fall back to static project if not in database
   if (!project) {
-    project = await getProjectFromDatabase(slug) || undefined;
+    project = getProject(slug) || null;
   }
 
   if (!project) {
