@@ -774,26 +774,26 @@ export default function AdminPage() {
                   <p className="text-sm text-gray-400">No items yet</p>
                 )}
                 {content &&
-                  content[activeTab as ContentType]?.map((item: Record<string, unknown>) => (
+                  (content[activeTab as ContentType] as unknown as Array<{ id: string; title: string; description: string } & Record<string, unknown>>)?.map((item) => (
                     <div
-                      key={item.id as string}
+                      key={item.id}
                       className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
                         editingId === item.id ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'
                       }`}
                     >
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{item.title as string}</p>
-                        <p className="text-xs text-gray-400">{item.description as string}</p>
+                        <p className="text-sm font-medium text-gray-900">{item.title}</p>
+                        <p className="text-xs text-gray-400">{item.description}</p>
                       </div>
                       <div className="flex gap-3">
                         <button
-                          onClick={() => handleEdit(item)}
+                          onClick={() => handleEdit(item as Record<string, unknown>)}
                           className="text-xs text-blue-500 hover:text-blue-700 transition-colors"
                         >
                           Edit
                         </button>
                         <button
-                          onClick={() => handleDelete(activeTab as ContentType, item.id as string)}
+                          onClick={() => handleDelete(activeTab as ContentType, item.id)}
                           className="text-xs text-red-400 hover:text-red-600 transition-colors"
                         >
                           Delete
