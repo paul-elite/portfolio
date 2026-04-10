@@ -2,13 +2,61 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Project } from '@/lib/data';
+import { Project, ContentBlock } from '@/lib/data';
 
 interface ProjectContentProps {
   project: Project;
 }
 
+function renderBlock(block: ContentBlock, index: number) {
+  switch (block.type) {
+    case 'heading':
+      return (
+        <h2 key={index} className="text-lg font-semibold text-gray-900 mt-8 mb-4">
+          {block.content}
+        </h2>
+      );
+    case 'text':
+      return (
+        <p key={index} className="text-base text-gray-600 leading-relaxed mb-4">
+          {block.content}
+        </p>
+      );
+    case 'image':
+      return (
+        <div key={index} className="my-6 relative aspect-video rounded-lg overflow-hidden">
+          <Image
+            src={block.content}
+            alt=""
+            fill
+            className="object-cover"
+          />
+        </div>
+      );
+    case 'quote':
+      return (
+        <blockquote key={index} className="border-l-2 border-gray-200 pl-4 my-6 text-gray-500 italic">
+          {block.content}
+        </blockquote>
+      );
+    case 'code':
+      return (
+        <pre key={index} className="bg-gray-50 rounded-lg p-4 my-6 overflow-x-auto text-sm">
+          <code>{block.content}</code>
+        </pre>
+      );
+    case 'svg':
+      return (
+        <div key={index} className="my-6" dangerouslySetInnerHTML={{ __html: block.content }} />
+      );
+    default:
+      return null;
+  }
+}
+
 export default function ProjectContent({ project }: ProjectContentProps) {
+  const hasBlocks = project.blocks && project.blocks.length > 0;
+
   return (
     <main className="min-h-screen bg-white">
       <div className="w-full px-6">
@@ -51,29 +99,32 @@ export default function ProjectContent({ project }: ProjectContentProps) {
               </div>
             </div>
 
-            {/* Mobile Mockup */}
-            <div className="mb-16">
-              <div className="relative w-[266px] h-[560px] bg-gray-900 rounded-[48px] p-3 shadow-xl">
-                <div className="w-full h-full bg-gray-100 rounded-[38px] overflow-hidden flex items-center justify-center relative">
-                  {project.preview ? (
+            {/* Mobile Mockup - only show if preview exists */}
+            {project.preview && (
+              <div className="mb-16">
+                <div className="relative w-[266px] h-[560px] bg-gray-900 rounded-[48px] p-3 shadow-xl">
+                  <div className="w-full h-full bg-gray-100 rounded-[38px] overflow-hidden flex items-center justify-center relative">
                     <Image
                       src={project.preview}
                       alt={project.title}
                       fill
                       className="object-cover"
                     />
-                  ) : (
-                    <span className="text-gray-400 text-sm text-center px-6">
-                      {project.title}
-                    </span>
-                  )}
+                  </div>
+                  <div className="absolute top-5 left-1/2 -translate-x-1/2 w-20 h-6 bg-gray-900 rounded-full" />
                 </div>
-                <div className="absolute top-5 left-1/2 -translate-x-1/2 w-20 h-6 bg-gray-900 rounded-full" />
               </div>
-            </div>
+            )}
 
-            {/* Case Study Content */}
-            {project.caseStudy && (
+            {/* Block Content - for projects with blocks */}
+            {hasBlocks && (
+              <div className="prose prose-gray max-w-none">
+                {project.blocks!.map((block, index) => renderBlock(block, index))}
+              </div>
+            )}
+
+            {/* Case Study Content - for projects with caseStudy */}
+            {!hasBlocks && project.caseStudy && (
               <div className="space-y-10">
                 <section>
                   <h2 className="text-xs text-gray-400 uppercase tracking-wider mb-3">
@@ -111,6 +162,13 @@ export default function ProjectContent({ project }: ProjectContentProps) {
                   </p>
                 </section>
               </div>
+            )}
+
+            {/* Description fallback if no blocks or caseStudy */}
+            {!hasBlocks && !project.caseStudy && project.description && (
+              <p className="text-base text-gray-600 leading-relaxed">
+                {project.description}
+              </p>
             )}
 
             {/* Link */}

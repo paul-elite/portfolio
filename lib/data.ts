@@ -1,3 +1,8 @@
+export interface ContentBlock {
+  type: 'text' | 'heading' | 'image' | 'svg' | 'code' | 'quote';
+  content: string;
+}
+
 export interface Project {
   id: string;
   slug: string;
@@ -14,6 +19,7 @@ export interface Project {
     approach: string;
     outcome: string;
   };
+  blocks?: ContentBlock[];
 }
 
 export const siteConfig = {
