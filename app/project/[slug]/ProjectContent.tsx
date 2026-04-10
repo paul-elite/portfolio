@@ -66,9 +66,9 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
 
   return (
     <main className="min-h-screen bg-white">
-      <div className="w-full px-3 md:px-6">
+      <div className="w-full pl-2 pr-3 md:px-6">
         {/* Main Content */}
-        <div className="pt-24 md:pt-48 pb-16 flex md:grid md:grid-cols-12 gap-[10px] md:gap-6">
+        <div className="pt-24 md:pt-48 pb-16 flex md:grid md:grid-cols-12 gap-4 md:gap-6">
           <div className="hidden md:block md:col-span-2" />
 
           {/* Back Button */}

@@ -67,9 +67,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   ];
 
   return (
-    <div className="min-h-screen flex flex-col pt-24 pb-4 md:pt-48 md:pb-16 px-3 md:px-0">
+    <div className="min-h-screen flex flex-col pt-24 pb-4 md:pt-48 md:pb-16 pl-2 pr-3 md:px-0">
       {/* Main content area */}
-      <div className="flex-1 flex md:grid md:grid-cols-12 gap-[10px] md:gap-6">
+      <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6">
         {/* Columns 1-2: Whitespace (desktop only) */}
         <div className="hidden md:block md:col-span-2" />
 
@@ -96,7 +96,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         <div className="flex-1 md:col-span-3 flex flex-col min-w-0">
           {/* Name */}
           <div className="h-auto md:h-14 mb-4 md:mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="text-base font-semibold text-gray-900">
               {siteConfig.name}
             </h1>
             <p className="text-base font-normal text-gray-500">{siteConfig.title}</p>
@@ -465,7 +465,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
       {/* Mobile Bottom Section - Now Playing & Contacts */}
       <div className="md:hidden mt-auto pt-6">
-        <div className="flex gap-[10px]">
+        <div className="flex gap-4">
           {/* Music Icon */}
           <div className="flex-shrink-0">
             <NowPlayingImage data={nowPlayingData} />
