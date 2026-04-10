@@ -26,6 +26,8 @@ export const siteConfig = {
     github: "https://github.com",
     linkedin: "https://linkedin.com",
     email: "hello@example.com",
+    behance: "https://behance.net",
+    instagram: "https://instagram.com",
   },
 };
 

@@ -21,6 +21,8 @@ interface SiteConfig {
     github: string;
     linkedin: string;
     email: string;
+    behance: string;
+    instagram: string;
   };
 }
 
@@ -280,6 +282,22 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                 className="text-gray-400 hover:text-gray-900 transition-colors"
               >
                 LinkedIn
+              </a>
+              <a
+                href={siteConfig.social.behance}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-gray-900 transition-colors"
+              >
+                Behance
+              </a>
+              <a
+                href={siteConfig.social.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-gray-900 transition-colors"
+              >
+                Instagram
               </a>
               <a
                 href={`mailto:${siteConfig.social.email}`}

@@ -29,6 +29,8 @@ async function getConfig() {
         github: data.github || staticConfig.social.github,
         linkedin: data.linkedin || staticConfig.social.linkedin,
         email: data.email || staticConfig.social.email,
+        behance: data.behance || staticConfig.social.behance,
+        instagram: data.instagram || staticConfig.social.instagram,
       },
     };
   } catch {
