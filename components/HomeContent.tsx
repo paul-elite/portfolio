@@ -67,8 +67,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   ];
 
   return (
-    <div className="min-h-screen pt-24 pb-16 md:pt-48 px-3 md:px-0">
-      <div className="h-full grid grid-cols-5 md:grid-cols-12 gap-3 md:gap-6">
+    <div className="min-h-screen flex flex-col md:block pt-24 pb-4 md:pt-48 md:pb-16 px-3 md:px-0">
+      <div className="flex-1 grid grid-cols-5 md:grid-cols-12 gap-3 md:gap-6 content-start">
         {/* Columns 1-2: Whitespace (desktop only) */}
         <div className="hidden md:block md:col-span-2" />
 
@@ -338,9 +338,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             <NowPlayingContent data={nowPlayingData} />
           </div>
 
-          {/* Contact */}
-          <footer className="pt-4">
-            <div className="flex flex-wrap gap-x-4 md:gap-x-6 gap-y-2 text-sm">
+          {/* Contact - Desktop only (mobile shows in bottom section) */}
+          <footer className="hidden md:block pt-4">
+            <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
               <a
                 href={siteConfig.social.twitter}
                 target="_blank"
@@ -425,41 +425,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </footer>
         </div>
 
-        {/* Now Playing - Mobile only (uses grid) */}
-        <div className="md:hidden col-span-1 flex items-start pt-4">
-          <NowPlayingImage data={nowPlayingData} />
-        </div>
-        <div className="md:hidden col-span-4 pt-4">
-          <div className="min-w-0">
-            {nowPlayingData?.isPlaying ? (
-              <>
-                <div className="flex items-center gap-2">
-                  <a
-                    href={nowPlayingData.songUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-gray-900 hover:text-gray-600 transition-colors truncate"
-                  >
-                    {nowPlayingData.title}
-                  </a>
-                </div>
-                <p className="text-sm text-gray-400 truncate">{nowPlayingData.artist}</p>
-              </>
-            ) : (
-              <>
-                <p className="text-sm text-gray-900">Not listening right now</p>
-                {nowPlayingData?.lastPlayed ? (
-                  <p className="text-sm text-gray-400 truncate">
-                    last: {nowPlayingData.lastPlayed.title}
-                  </p>
-                ) : (
-                  <p className="text-sm text-gray-400">check again shortly</p>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-
         {/* Column 7: Gap (desktop only) */}
         <div className="hidden md:block md:col-span-1" />
 
@@ -495,6 +460,54 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
         {/* Columns 11-12: Whitespace (desktop only) */}
         <div className="hidden md:block md:col-span-2" />
+      </div>
+
+      {/* Mobile Bottom Section - Now Playing & Contacts */}
+      <div className="md:hidden mt-auto pt-6">
+        <div className="grid grid-cols-5 gap-3">
+          {/* Music Icon - Column 1 */}
+          <div className="col-span-1 flex items-start">
+            <NowPlayingImage data={nowPlayingData} />
+          </div>
+          {/* Now Playing Text - Columns 2-5 */}
+          <div className="col-span-4">
+            <div className="min-w-0">
+              {nowPlayingData?.isPlaying ? (
+                <>
+                  <a
+                    href={nowPlayingData.songUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-gray-900 hover:text-gray-600 transition-colors truncate block"
+                  >
+                    {nowPlayingData.title}
+                  </a>
+                  <p className="text-sm text-gray-400 truncate">{nowPlayingData.artist}</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-gray-900">Not listening right now</p>
+                  {nowPlayingData?.lastPlayed ? (
+                    <p className="text-sm text-gray-400 truncate">
+                      last: {nowPlayingData.lastPlayed.title}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-400">check again shortly</p>
+                  )}
+                </>
+              )}
+            </div>
+            {/* Contact Links */}
+            <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm mt-4">
+              <a href={siteConfig.social.twitter} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">Twitter</a>
+              <a href={siteConfig.social.github} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">GitHub</a>
+              <a href={siteConfig.social.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">LinkedIn</a>
+              <a href={siteConfig.social.behance} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">Behance</a>
+              <a href={siteConfig.social.instagram} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">Instagram</a>
+              <a href={`mailto:${siteConfig.social.email}`} className="text-gray-400 hover:text-gray-900 transition-colors">Email</a>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Video Modal */}
