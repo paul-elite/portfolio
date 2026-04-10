@@ -244,40 +244,60 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               );
             })()}
 
-            {activeTab === 'writings' && (
-              <div className="grid grid-cols-2 gap-4" style={{ width: 'calc(166% + 1.5rem)' }}>
-                {content.writings.map((item) => (
-                  <article key={item.id} className="group block">
-                    <div className="aspect-video bg-gray-100 rounded-lg mb-2 overflow-hidden relative">
-                      {item.cover ? (
-                        <Image
-                          src={item.cover}
-                          alt={item.title}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <span className="text-gray-300 text-xs">{item.title}</span>
+            {activeTab === 'writings' && (() => {
+              // Group writings by year
+              const writingsByYear = content.writings.reduce((acc, item) => {
+                const year = item.date ? new Date(item.date).getFullYear().toString() : 'Unknown';
+                if (!acc[year]) acc[year] = [];
+                acc[year].push(item);
+                return acc;
+              }, {} as Record<string, typeof content.writings>);
+
+              // Sort years descending
+              const sortedYears = Object.keys(writingsByYear).sort((a, b) => Number(b) - Number(a));
+
+              // Check if item is less than 30 days old
+              const isNew = (date?: string) => {
+                if (!date) return false;
+                const itemDate = new Date(date);
+                const now = new Date();
+                const diffDays = (now.getTime() - itemDate.getTime()) / (1000 * 60 * 60 * 24);
+                return diffDays <= 30;
+              };
+
+              return (
+                <div className="space-y-2">
+                  {sortedYears.map((year) => (
+                    <div key={year}>
+                      {writingsByYear[year].map((item, index) => (
+                        <div key={item.id} className="flex items-baseline py-3 border-b border-gray-100 last:border-0">
+                          <span className="w-16 text-sm text-gray-300 flex-shrink-0">
+                            {index === 0 ? year : ''}
+                          </span>
+                          <div className="flex-1 flex items-center gap-2">
+                            <h3 className="text-base font-medium text-gray-900">
+                              {item.title}
+                            </h3>
+                            {isNew(item.date) && (
+                              <span className="text-xs text-pink-500 border border-pink-300 rounded-full px-2 py-0.5">
+                                New
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-sm text-gray-300 flex-shrink-0">
+                            {item.date ? new Date(item.date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }).replace('/', '/') : ''}
+                          </span>
                         </div>
-                      )}
+                      ))}
                     </div>
-                    <h3 className="text-sm font-medium text-gray-900 group-hover:text-gray-600 transition-colors">
-                      {item.title}
-                    </h3>
-                    {item.date && (
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        {new Date(item.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                      </p>
-                    )}
-                  </article>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Now Playing */}
-          <div style={activeTab === 'illustration' || activeTab === 'writings' ? { width: 'calc(166% + 1.5rem)' } : undefined}>
+          <div style={activeTab === 'illustration' ? { width: 'calc(166% + 1.5rem)' } : undefined}>
             <NowPlayingContent data={nowPlayingData} />
 
             {/* Contact */}
