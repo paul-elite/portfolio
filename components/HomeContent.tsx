@@ -210,12 +210,15 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
                   {/* Vertical Pagination */}
                   {totalPages > 1 && (
-                    <div className="flex flex-col justify-center gap-1">
+                    <div className="flex flex-col justify-center gap-3">
                       {Array.from({ length: totalPages }, (_, i) => (
                         <button
                           key={i}
-                          onClick={() => setIllustrationPage(i)}
-                          className="p-2 -m-2 flex items-center justify-center"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIllustrationPage(i);
+                          }}
+                          className="w-4 h-8 flex items-center justify-center cursor-pointer"
                           aria-label={`Page ${i + 1}`}
                         >
                           <span
