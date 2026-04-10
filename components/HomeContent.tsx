@@ -151,8 +151,21 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               const startIndex = illustrationPage * itemsPerPage;
               const currentItems = content.illustrations.slice(startIndex, startIndex + itemsPerPage);
 
+              const handleWheel = (e: React.WheelEvent) => {
+                e.preventDefault();
+                if (e.deltaY > 0 && illustrationPage < totalPages - 1) {
+                  setIllustrationPage(illustrationPage + 1);
+                } else if (e.deltaY < 0 && illustrationPage > 0) {
+                  setIllustrationPage(illustrationPage - 1);
+                }
+              };
+
               return (
-                <div className="flex gap-6" style={{ width: 'calc(166% + 1.5rem)' }}>
+                <div
+                  className="flex gap-6"
+                  style={{ width: 'calc(166% + 1.5rem)' }}
+                  onWheel={handleWheel}
+                >
                   {/* 2x2 Grid */}
                   <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-4">
                     {currentItems.map((item) => (
