@@ -3,21 +3,21 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Illustration } from '@/lib/data';
+import {
+  siteConfig as staticConfig,
+  projects as staticProjects,
+  writings as staticWritings,
+  illustrations as staticIllustrations,
+  interactions as staticInteractions,
+  Project,
+  Illustration,
+} from '@/lib/data';
+import { useNowPlaying, NowPlayingContent } from './NowPlaying';
 
 function getYouTubeId(url: string) {
   const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
   return match ? match[1] : null;
 }
-import {
-  projects,
-  writings,
-  illustrations,
-  interactions,
-  siteConfig as staticConfig,
-  Project,
-} from '@/lib/data';
-import { useNowPlaying, NowPlayingContent } from './NowPlaying';
 
 interface SiteConfig {
   name: string;
@@ -30,6 +30,13 @@ interface SiteConfig {
     linkedin: string;
     email: string;
   };
+}
+
+interface ContentData {
+  projects: Project[];
+  writings: { id: string; slug: string; title: string; description: string }[];
+  illustrations: Illustration[];
+  interactions: { id: string; slug: string; title: string; description: string }[];
 }
 
 function useSiteConfig() {
@@ -53,6 +60,37 @@ function useSiteConfig() {
   return config;
 }
 
+function useContent() {
+  const [content, setContent] = useState<ContentData>({
+    projects: staticProjects,
+    writings: staticWritings,
+    illustrations: staticIllustrations,
+    interactions: staticInteractions,
+  });
+
+  useEffect(() => {
+    async function fetchContent() {
+      try {
+        const res = await fetch('/api/content', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          setContent({
+            projects: data.projects?.length > 0 ? data.projects : staticProjects,
+            writings: data.writings?.length > 0 ? data.writings : staticWritings,
+            illustrations: data.illustrations?.length > 0 ? data.illustrations : staticIllustrations,
+            interactions: data.interactions?.length > 0 ? data.interactions : staticInteractions,
+          });
+        }
+      } catch {
+        // Fall back to static content
+      }
+    }
+    fetchContent();
+  }, []);
+
+  return content;
+}
+
 type Tab = 'projects' | 'interaction' | 'illustration' | 'writings';
 
 export default function HomeContent() {
@@ -61,6 +99,7 @@ export default function HomeContent() {
   const [activeVideo, setActiveVideo] = useState<Illustration | null>(null);
   const nowPlayingData = useNowPlaying();
   const siteConfig = useSiteConfig();
+  const content = useContent();
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'projects', label: 'Projects' },
@@ -125,7 +164,7 @@ export default function HomeContent() {
           <div className="flex-1">
             {activeTab === 'projects' && (
               <div>
-                {projects.map((project) => (
+                {content.projects.map((project) => (
                   <Link
                     key={project.id}
                     href={`/project/${project.slug}`}
@@ -146,7 +185,7 @@ export default function HomeContent() {
 
             {activeTab === 'interaction' && (
               <div>
-                {interactions.map((item) => (
+                {content.interactions.map((item) => (
                   <article key={item.id} className="py-3">
                     <h3 className="text-base font-medium text-gray-900 mb-0.5">
                       {item.title}
@@ -161,7 +200,7 @@ export default function HomeContent() {
 
             {activeTab === 'illustration' && (
               <div className="grid grid-cols-2 gap-4" style={{ width: 'calc(166% + 1.5rem)' }}>
-                {illustrations.map((item) => (
+                {content.illustrations.map((item) => (
                   <button
                     key={item.id}
                     onClick={() => setActiveVideo(item)}
@@ -204,7 +243,7 @@ export default function HomeContent() {
 
             {activeTab === 'writings' && (
               <div>
-                {writings.map((item) => (
+                {content.writings.map((item) => (
                   <article key={item.id} className="py-3">
                     <h3 className="text-base font-medium text-gray-900 mb-0.5">
                       {item.title}

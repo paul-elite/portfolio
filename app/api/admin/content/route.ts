@@ -37,57 +37,6 @@ async function saveSettings(settings: Settings): Promise<void> {
   }
 }
 
-// In-memory store for content (projects, etc.) - can migrate to Supabase later
-declare global {
-  var contentStore: {
-    projects: Array<{
-      id: string;
-      slug: string;
-      title: string;
-      description: string;
-      year: string;
-      role: string;
-      preview?: string;
-      link?: string;
-      caseStudy?: {
-        overview: string;
-        challenge: string;
-        approach: string;
-        outcome: string;
-      };
-    }>;
-    illustrations: Array<{
-      id: string;
-      slug: string;
-      title: string;
-      description: string;
-      thumbnail?: string;
-      youtubeUrl?: string;
-    }>;
-    writings: Array<{
-      id: string;
-      slug: string;
-      title: string;
-      description: string;
-    }>;
-    interactions: Array<{
-      id: string;
-      slug: string;
-      title: string;
-      description: string;
-    }>;
-  };
-}
-
-if (!global.contentStore) {
-  global.contentStore = {
-    projects: [],
-    illustrations: [],
-    writings: [],
-    interactions: [],
-  };
-}
-
 function checkAuth(request: NextRequest): boolean {
   const authHeader = request.headers.get('authorization');
   if (!authHeader) return false;
@@ -100,8 +49,26 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const settings = await loadSettings();
-  return NextResponse.json({ ...global.contentStore, settings });
+  try {
+    const [settings, projectsRes, writingsRes, illustrationsRes, interactionsRes] = await Promise.all([
+      loadSettings(),
+      supabase.from('projects').select('*').order('created_at', { ascending: false }),
+      supabase.from('writings').select('*').order('created_at', { ascending: false }),
+      supabase.from('illustrations').select('*').order('created_at', { ascending: false }),
+      supabase.from('interactions').select('*').order('created_at', { ascending: false }),
+    ]);
+
+    return NextResponse.json({
+      settings,
+      projects: projectsRes.data || [],
+      writings: writingsRes.data || [],
+      illustrations: illustrationsRes.data || [],
+      interactions: interactionsRes.data || [],
+    });
+  } catch (error) {
+    console.error('Error loading content:', error);
+    return NextResponse.json({ error: 'Failed to load content' }, { status: 500 });
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -119,13 +86,56 @@ export async function POST(request: NextRequest) {
     const id = crypto.randomUUID();
     const slug = data.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
-    const newItem = { ...data, id, slug };
+    let insertData: Record<string, unknown> = {
+      id,
+      slug,
+      title: data.title,
+      description: data.description || '',
+    };
 
-    const store = global.contentStore[type as 'projects' | 'illustrations' | 'writings' | 'interactions'];
-    store.push(newItem);
+    // Handle type-specific fields
+    if (type === 'projects') {
+      insertData = {
+        ...insertData,
+        year: data.year || '',
+        role: data.role || '',
+        preview: data.preview || '',
+        link: data.link || '',
+        blocks: data.blocks || [],
+        case_study: data.caseStudy || null,
+      };
+    } else if (type === 'writings') {
+      insertData = {
+        ...insertData,
+        blocks: data.blocks || [],
+      };
+    } else if (type === 'illustrations') {
+      insertData = {
+        ...insertData,
+        thumbnail: data.thumbnail || '',
+        youtube_url: data.youtubeUrl || '',
+      };
+    } else if (type === 'interactions') {
+      insertData = {
+        ...insertData,
+        link: data.link || '',
+      };
+    }
+
+    const { data: newItem, error } = await supabase
+      .from(type)
+      .insert(insertData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Insert error:', error);
+      return NextResponse.json({ error: 'Failed to create' }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, item: newItem });
-  } catch {
+  } catch (error) {
+    console.error('POST error:', error);
     return NextResponse.json({ error: 'Failed to create' }, { status: 500 });
   }
 }
@@ -138,7 +148,7 @@ export async function PUT(request: NextRequest) {
   try {
     const { type, id, data } = await request.json();
 
-    // Handle settings update - persist to Supabase
+    // Handle settings update
     if (type === 'settings') {
       const currentSettings = await loadSettings();
       const newSettings = { ...currentSettings, ...data };
@@ -150,20 +160,21 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
     }
 
-    const store = global.contentStore[type as keyof typeof global.contentStore];
-    if (Array.isArray(store)) {
-      const index = store.findIndex((item: { id: string }) => item.id === id);
+    const { data: updatedItem, error } = await supabase
+      .from(type)
+      .update(data)
+      .eq('id', id)
+      .select()
+      .single();
 
-      if (index === -1) {
-        return NextResponse.json({ error: 'Not found' }, { status: 404 });
-      }
-
-      store[index] = { ...store[index], ...data };
-      return NextResponse.json({ success: true, item: store[index] });
+    if (error) {
+      console.error('Update error:', error);
+      return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
     }
 
-    return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
-  } catch {
+    return NextResponse.json({ success: true, item: updatedItem });
+  } catch (error) {
+    console.error('PUT error:', error);
     return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
   }
 }
@@ -180,17 +191,19 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
     }
 
-    const store = global.contentStore[type as keyof typeof global.contentStore] as Array<{ id: string }>;
-    const index = store.findIndex((item) => item.id === id);
+    const { error } = await supabase
+      .from(type)
+      .delete()
+      .eq('id', id);
 
-    if (index === -1) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    if (error) {
+      console.error('Delete error:', error);
+      return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
     }
 
-    store.splice(index, 1);
-
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error('DELETE error:', error);
     return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
   }
 }
