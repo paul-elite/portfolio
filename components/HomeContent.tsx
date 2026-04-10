@@ -53,17 +53,21 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const [illustrationPage, setIllustrationPage] = useState(0);
   const [githubHovered, setGithubHovered] = useState(false);
   const [githubMousePos, setGithubMousePos] = useState({ x: 0, y: 0 });
+  const [showMoreTabs, setShowMoreTabs] = useState(false);
   const githubRef = useRef<HTMLAnchorElement>(null);
   const nowPlayingData = useNowPlaying();
 
   const siteConfig = initialConfig;
   const content = initialContent;
 
-  const tabs: { key: Tab; label: string }[] = [
+  const mainTabs: { key: Tab; label: string }[] = [
     { key: 'projects', label: 'Projects' },
-    { key: 'interaction', label: 'Interaction' },
     { key: 'illustration', label: 'Illustration' },
     { key: 'writings', label: 'Writings' },
+  ];
+
+  const moreTabs: { key: Tab; label: string }[] = [
+    { key: 'interaction', label: 'Interaction' },
   ];
 
   return (
@@ -103,8 +107,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Tabs */}
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-base mb-6">
-            {tabs.map((tab) => (
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-base mb-6">
+            {mainTabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
@@ -117,6 +121,42 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                 {tab.label}
               </button>
             ))}
+            {showMoreTabs && moreTabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`transition-colors font-normal ${
+                  activeTab === tab.key
+                    ? 'text-gray-900'
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+            <button
+              onClick={() => setShowMoreTabs(!showMoreTabs)}
+              className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:border-gray-400 transition-colors"
+            >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              >
+                {showMoreTabs ? (
+                  <line x1="2" y1="6" x2="10" y2="6" />
+                ) : (
+                  <>
+                    <line x1="6" y1="2" x2="6" y2="10" />
+                    <line x1="2" y1="6" x2="10" y2="6" />
+                  </>
+                )}
+              </svg>
+            </button>
           </div>
 
           {/* Content */}
