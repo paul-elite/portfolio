@@ -1,17 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import {
-  siteConfig as staticConfig,
-  projects as staticProjects,
-  writings as staticWritings,
-  illustrations as staticIllustrations,
-  interactions as staticInteractions,
-  Project,
-  Illustration,
-} from '@/lib/data';
+import { Project, Illustration } from '@/lib/data';
 import { useNowPlaying, NowPlayingContent } from './NowPlaying';
 
 function getYouTubeId(url: string) {
@@ -39,67 +31,21 @@ interface ContentData {
   interactions: { id: string; slug: string; title: string; description: string }[];
 }
 
-function useSiteConfig() {
-  const [config, setConfig] = useState<SiteConfig>(staticConfig);
-
-  useEffect(() => {
-    async function fetchConfig() {
-      try {
-        const res = await fetch('/api/config', { cache: 'no-store' });
-        if (res.ok) {
-          const data = await res.json();
-          setConfig(data);
-        }
-      } catch {
-        // Fall back to static config
-      }
-    }
-    fetchConfig();
-  }, []);
-
-  return config;
-}
-
-function useContent() {
-  const [content, setContent] = useState<ContentData>({
-    projects: staticProjects,
-    writings: staticWritings,
-    illustrations: staticIllustrations,
-    interactions: staticInteractions,
-  });
-
-  useEffect(() => {
-    async function fetchContent() {
-      try {
-        const res = await fetch('/api/content', { cache: 'no-store' });
-        if (res.ok) {
-          const data = await res.json();
-          setContent({
-            projects: data.projects?.length > 0 ? data.projects : staticProjects,
-            writings: data.writings?.length > 0 ? data.writings : staticWritings,
-            illustrations: data.illustrations?.length > 0 ? data.illustrations : staticIllustrations,
-            interactions: data.interactions?.length > 0 ? data.interactions : staticInteractions,
-          });
-        }
-      } catch {
-        // Fall back to static content
-      }
-    }
-    fetchContent();
-  }, []);
-
-  return content;
+interface HomeContentProps {
+  initialConfig: SiteConfig;
+  initialContent: ContentData;
 }
 
 type Tab = 'projects' | 'interaction' | 'illustration' | 'writings';
 
-export default function HomeContent() {
+export default function HomeContent({ initialConfig, initialContent }: HomeContentProps) {
   const [activeTab, setActiveTab] = useState<Tab>('projects');
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null);
   const [activeVideo, setActiveVideo] = useState<Illustration | null>(null);
   const nowPlayingData = useNowPlaying();
-  const siteConfig = useSiteConfig();
-  const content = useContent();
+
+  const siteConfig = initialConfig;
+  const content = initialContent;
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'projects', label: 'Projects' },
