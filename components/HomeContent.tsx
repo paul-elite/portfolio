@@ -103,12 +103,12 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Tabs */}
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm mb-6">
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-base mb-6">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`transition-colors ${
+                className={`transition-colors font-normal ${
                   activeTab === tab.key
                     ? 'text-gray-900'
                     : 'text-gray-400 hover:text-gray-600'
