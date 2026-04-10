@@ -99,7 +99,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             <h1 className="text-xl font-semibold text-gray-900">
               {siteConfig.name}
             </h1>
-            <p className="text-sm text-gray-500">{siteConfig.title}</p>
+            <p className="text-base font-normal text-gray-500">{siteConfig.title}</p>
           </div>
 
           {/* Tabs */}
