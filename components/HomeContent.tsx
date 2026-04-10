@@ -162,12 +162,12 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
               return (
                 <div
-                  className="flex gap-6"
+                  className="flex gap-6 h-full min-h-[300px]"
                   style={{ width: 'calc(166% + 1.5rem)' }}
                   onWheel={handleWheel}
                 >
                   {/* 2x2 Grid */}
-                  <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-4">
+                  <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-4 content-start">
                     {currentItems.map((item) => (
                       <button
                         key={item.id}
@@ -210,16 +210,20 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
                   {/* Vertical Pagination */}
                   {totalPages > 1 && (
-                    <div className="flex flex-col justify-center gap-2">
+                    <div className="flex flex-col justify-center gap-1">
                       {Array.from({ length: totalPages }, (_, i) => (
                         <button
                           key={i}
                           onClick={() => setIllustrationPage(i)}
-                          className={`w-1 h-6 rounded-full transition-colors ${
-                            illustrationPage === i ? 'bg-gray-900' : 'bg-gray-300 hover:bg-gray-400'
-                          }`}
+                          className="p-2 -m-2 flex items-center justify-center"
                           aria-label={`Page ${i + 1}`}
-                        />
+                        >
+                          <span
+                            className={`w-1 h-6 rounded-full transition-colors ${
+                              illustrationPage === i ? 'bg-gray-900' : 'bg-gray-300 hover:bg-gray-400'
+                            }`}
+                          />
+                        </button>
                       ))}
                     </div>
                   )}
