@@ -66,13 +66,13 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
 
   return (
     <main className="min-h-screen bg-white">
-      <div className="w-full px-6">
+      <div className="w-full px-3 md:px-6">
         {/* Main Content */}
-        <div className="pt-24 md:pt-48 pb-16 grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6">
+        <div className="pt-24 md:pt-48 pb-16 grid grid-cols-5 md:grid-cols-12 gap-3 md:gap-6">
           <div className="hidden md:block md:col-span-2" />
 
-          {/* Back Button + Title (mobile layout) */}
-          <div className="flex items-start gap-4 md:col-span-1 md:justify-end">
+          {/* Back Button - Column 1 on mobile */}
+          <div className="col-span-1 flex flex-col items-start md:justify-end md:items-end">
             <Link
               href="/"
               className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-1 transition-all hover:opacity-80"
@@ -95,22 +95,12 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
                 <polyline points="15 18 9 12 15 6" />
               </svg>
             </Link>
-            {/* Mobile: Title next to back button */}
-            <div className="md:hidden">
-              <h1 className="text-xl font-semibold text-gray-900">
-                {project.title}
-              </h1>
-              <div className="flex gap-4 text-sm text-gray-400">
-                {project.year && <span>{project.year}</span>}
-                {project.role && <span>{project.role}</span>}
-              </div>
-            </div>
           </div>
 
-          {/* Content Column */}
-          <div className="md:col-span-6">
-            {/* Project Title (desktop only - mobile shows next to back button) */}
-            <div className="hidden md:block h-14 mb-6">
+          {/* Content Column - Columns 2-5 on mobile */}
+          <div className="col-span-4 md:col-span-6">
+            {/* Project Title */}
+            <div className="h-auto md:h-14 mb-4 md:mb-6">
               <h1 className="text-xl font-semibold text-gray-900">
                 {project.title}
               </h1>

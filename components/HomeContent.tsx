@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Project, Illustration } from '@/lib/data';
-import { useNowPlaying, NowPlayingContent } from './NowPlaying';
+import { useNowPlaying, NowPlayingContent, NowPlayingImage } from './NowPlaying';
 
 function getGitHubUsername(url: string): string | null {
   const match = url.match(/github\.com\/([^\/]+)/);
@@ -67,13 +67,13 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   ];
 
   return (
-    <div className="min-h-screen pt-24 pb-16 md:pt-48 px-6 md:px-0">
-      <div className="h-full grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6">
+    <div className="min-h-screen pt-24 pb-16 md:pt-48 px-3 md:px-0">
+      <div className="h-full grid grid-cols-5 md:grid-cols-12 gap-3 md:gap-6">
         {/* Columns 1-2: Whitespace (desktop only) */}
         <div className="hidden md:block md:col-span-2" />
 
-        {/* Column 3: Avatar */}
-        <div className="flex items-start gap-4 md:col-span-1 md:justify-end">
+        {/* Column 1 (mobile) / Column 3 (desktop): Avatar */}
+        <div className="col-span-1 flex flex-col items-start md:justify-end md:items-end">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden">
             {siteConfig.avatar ? (
               <Image
@@ -89,19 +89,12 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               </span>
             )}
           </div>
-          {/* Mobile: Name next to avatar */}
-          <div className="md:hidden">
-            <h1 className="text-xl font-semibold text-gray-900">
-              {siteConfig.name}
-            </h1>
-            <p className="text-sm text-gray-500">{siteConfig.title}</p>
-          </div>
         </div>
 
-        {/* Columns 4-6: Text Content */}
-        <div className="md:col-span-3 flex flex-col">
-          {/* Name (desktop only - mobile shows next to avatar) */}
-          <div className="hidden md:block h-14 mb-6">
+        {/* Columns 2-5 (mobile) / Columns 4-6 (desktop): Text Content */}
+        <div className="col-span-4 md:col-span-3 flex flex-col">
+          {/* Name */}
+          <div className="h-auto md:h-14 mb-4 md:mb-6">
             <h1 className="text-xl font-semibold text-gray-900">
               {siteConfig.name}
             </h1>
@@ -109,7 +102,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Tabs */}
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm mb-6 mt-4 md:mt-0">
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm mb-6">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
@@ -340,13 +333,14 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             })()}
           </div>
 
-          {/* Now Playing */}
-          <div className={activeTab === 'illustration' ? 'w-full md:w-[calc(166%+1.5rem)]' : ''}>
+          {/* Now Playing - Desktop only (uses negative margin) */}
+          <div className={`hidden md:block ${activeTab === 'illustration' ? 'w-full md:w-[calc(166%+1.5rem)]' : ''}`}>
             <NowPlayingContent data={nowPlayingData} />
+          </div>
 
-            {/* Contact */}
-            <footer className="pt-4">
-              <div className="flex flex-wrap gap-x-4 md:gap-x-6 gap-y-2 text-sm">
+          {/* Contact */}
+          <footer className="pt-4">
+            <div className="flex flex-wrap gap-x-4 md:gap-x-6 gap-y-2 text-sm">
               <a
                 href={siteConfig.social.twitter}
                 target="_blank"
@@ -428,7 +422,41 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                 Email
               </a>
             </div>
-            </footer>
+          </footer>
+        </div>
+
+        {/* Now Playing - Mobile only (uses grid) */}
+        <div className="md:hidden col-span-1 flex items-start pt-4">
+          <NowPlayingImage data={nowPlayingData} />
+        </div>
+        <div className="md:hidden col-span-4 pt-4">
+          <div className="min-w-0">
+            {nowPlayingData?.isPlaying ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={nowPlayingData.songUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-gray-900 hover:text-gray-600 transition-colors truncate"
+                  >
+                    {nowPlayingData.title}
+                  </a>
+                </div>
+                <p className="text-sm text-gray-400 truncate">{nowPlayingData.artist}</p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-gray-900">Not listening right now</p>
+                {nowPlayingData?.lastPlayed ? (
+                  <p className="text-sm text-gray-400 truncate">
+                    last: {nowPlayingData.lastPlayed.title}
+                  </p>
+                ) : (
+                  <p className="text-sm text-gray-400">check again shortly</p>
+                )}
+              </>
+            )}
           </div>
         </div>
 
