@@ -68,11 +68,11 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
     <main className="min-h-screen bg-white">
       <div className="w-full px-3 md:px-6">
         {/* Main Content */}
-        <div className="pt-24 md:pt-48 pb-16 grid grid-cols-5 md:grid-cols-12 gap-3 md:gap-6">
+        <div className="pt-24 md:pt-48 pb-16 flex md:grid md:grid-cols-12 gap-[10px] md:gap-6">
           <div className="hidden md:block md:col-span-2" />
 
-          {/* Back Button - Column 1 on mobile */}
-          <div className="col-span-1 flex flex-col items-start md:justify-end md:items-end">
+          {/* Back Button */}
+          <div className="flex-shrink-0 md:col-span-1 md:flex md:justify-end md:items-start">
             <Link
               href="/"
               className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-1 transition-all hover:opacity-80"
@@ -97,8 +97,8 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
             </Link>
           </div>
 
-          {/* Content Column - Columns 2-5 on mobile */}
-          <div className="col-span-4 md:col-span-6">
+          {/* Content Column */}
+          <div className="flex-1 min-w-0 md:col-span-6">
             {/* Project Title */}
             <div className="h-auto md:h-14 mb-4 md:mb-6">
               <h1 className="text-xl font-semibold text-gray-900">

@@ -67,13 +67,14 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   ];
 
   return (
-    <div className="min-h-screen flex flex-col md:block pt-24 pb-4 md:pt-48 md:pb-16 px-3 md:px-0">
-      <div className="flex-1 grid grid-cols-5 md:grid-cols-12 gap-3 md:gap-6 content-start">
+    <div className="min-h-screen flex flex-col pt-24 pb-4 md:pt-48 md:pb-16 px-3 md:px-0">
+      {/* Main content area */}
+      <div className="flex-1 flex md:grid md:grid-cols-12 gap-[10px] md:gap-6">
         {/* Columns 1-2: Whitespace (desktop only) */}
         <div className="hidden md:block md:col-span-2" />
 
-        {/* Column 1 (mobile) / Column 3 (desktop): Avatar */}
-        <div className="col-span-1 flex flex-col items-start md:justify-end md:items-end">
+        {/* Avatar - 12px from edge on mobile */}
+        <div className="flex-shrink-0 md:col-span-1 md:flex md:justify-end md:items-start">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden">
             {siteConfig.avatar ? (
               <Image
@@ -91,8 +92,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
         </div>
 
-        {/* Columns 2-5 (mobile) / Columns 4-6 (desktop): Text Content */}
-        <div className="col-span-4 md:col-span-3 flex flex-col">
+        {/* Text Content */}
+        <div className="flex-1 md:col-span-3 flex flex-col min-w-0">
           {/* Name */}
           <div className="h-auto md:h-14 mb-4 md:mb-6">
             <h1 className="text-xl font-semibold text-gray-900">
@@ -464,39 +465,37 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
       {/* Mobile Bottom Section - Now Playing & Contacts */}
       <div className="md:hidden mt-auto pt-6">
-        <div className="grid grid-cols-5 gap-3">
-          {/* Music Icon - Column 1 */}
-          <div className="col-span-1 flex items-start">
+        <div className="flex gap-[10px]">
+          {/* Music Icon */}
+          <div className="flex-shrink-0">
             <NowPlayingImage data={nowPlayingData} />
           </div>
-          {/* Now Playing Text - Columns 2-5 */}
-          <div className="col-span-4">
-            <div className="min-w-0">
-              {nowPlayingData?.isPlaying ? (
-                <>
-                  <a
-                    href={nowPlayingData.songUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-gray-900 hover:text-gray-600 transition-colors truncate block"
-                  >
-                    {nowPlayingData.title}
-                  </a>
-                  <p className="text-sm text-gray-400 truncate">{nowPlayingData.artist}</p>
-                </>
-              ) : (
-                <>
-                  <p className="text-sm text-gray-900">Not listening right now</p>
-                  {nowPlayingData?.lastPlayed ? (
-                    <p className="text-sm text-gray-400 truncate">
-                      last: {nowPlayingData.lastPlayed.title}
-                    </p>
-                  ) : (
-                    <p className="text-sm text-gray-400">check again shortly</p>
-                  )}
-                </>
-              )}
-            </div>
+          {/* Now Playing Text & Contacts */}
+          <div className="flex-1 min-w-0">
+            {nowPlayingData?.isPlaying ? (
+              <>
+                <a
+                  href={nowPlayingData.songUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-gray-900 hover:text-gray-600 transition-colors truncate block"
+                >
+                  {nowPlayingData.title}
+                </a>
+                <p className="text-sm text-gray-400 truncate">{nowPlayingData.artist}</p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-gray-900">Not listening right now</p>
+                {nowPlayingData?.lastPlayed ? (
+                  <p className="text-sm text-gray-400 truncate">
+                    last: {nowPlayingData.lastPlayed.title}
+                  </p>
+                ) : (
+                  <p className="text-sm text-gray-400">check again shortly</p>
+                )}
+              </>
+            )}
             {/* Contact Links */}
             <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm mt-4">
               <a href={siteConfig.social.twitter} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">Twitter</a>
