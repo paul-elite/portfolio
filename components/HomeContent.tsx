@@ -42,6 +42,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const [activeTab, setActiveTab] = useState<Tab>('projects');
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null);
   const [activeVideo, setActiveVideo] = useState<Illustration | null>(null);
+  const [illustrationPage, setIllustrationPage] = useState(0);
   const nowPlayingData = useNowPlaying();
 
   const siteConfig = initialConfig;
@@ -80,7 +81,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         </div>
 
         {/* Columns 4-6: Text Content */}
-        <div className={`col-span-3 flex flex-col overflow-hidden ${activeTab === 'illustration' ? 'relative' : ''}`}>
+        <div className="col-span-3 flex flex-col">
           {/* Name */}
           <div className="h-14 mb-6">
             <h1 className="text-xl font-semibold text-gray-900">
@@ -107,7 +108,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Content */}
-          <div className={`flex-1 ${activeTab === 'illustration' ? 'overflow-y-auto pb-32' : ''}`}>
+          <div className="flex-1">
             {activeTab === 'projects' && (
               <div>
                 {content.projects.map((project) => (
@@ -144,48 +145,74 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               </div>
             )}
 
-            {activeTab === 'illustration' && (
-              <div className="grid grid-cols-2 gap-4" style={{ width: 'calc(166% + 1.5rem)' }}>
-                {content.illustrations.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveVideo(item)}
-                    className="group block text-left"
-                  >
-                    <div className="aspect-video bg-gray-100 rounded-lg mb-2 overflow-hidden relative">
-                      {item.thumbnail ? (
-                        <Image
-                          src={item.thumbnail}
-                          alt={item.title}
-                          fill
-                          className="object-cover"
+            {activeTab === 'illustration' && (() => {
+              const itemsPerPage = 4;
+              const totalPages = Math.ceil(content.illustrations.length / itemsPerPage);
+              const startIndex = illustrationPage * itemsPerPage;
+              const currentItems = content.illustrations.slice(startIndex, startIndex + itemsPerPage);
+
+              return (
+                <div className="flex gap-6" style={{ width: 'calc(166% + 1.5rem)' }}>
+                  {/* 2x2 Grid */}
+                  <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-4">
+                    {currentItems.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setActiveVideo(item)}
+                        className="group block text-left"
+                      >
+                        <div className="aspect-video bg-gray-100 rounded-lg mb-2 overflow-hidden relative">
+                          {item.thumbnail ? (
+                            <Image
+                              src={item.thumbnail}
+                              alt={item.title}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <span className="text-gray-300 text-xs">{item.title}</span>
+                            </div>
+                          )}
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors">
+                            <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <svg
+                                width="12"
+                                height="12"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                className="text-gray-900 ml-0.5"
+                              >
+                                <polygon points="5 3 19 12 5 21 5 3" />
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <h3 className="text-sm font-medium text-gray-900 group-hover:text-gray-600 transition-colors">
+                          {item.title}
+                        </h3>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Vertical Pagination */}
+                  {totalPages > 1 && (
+                    <div className="flex flex-col justify-center gap-2">
+                      {Array.from({ length: totalPages }, (_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setIllustrationPage(i)}
+                          className={`w-1 h-6 rounded-full transition-colors ${
+                            illustrationPage === i ? 'bg-gray-900' : 'bg-gray-300 hover:bg-gray-400'
+                          }`}
+                          aria-label={`Page ${i + 1}`}
                         />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <span className="text-gray-300 text-xs">{item.title}</span>
-                        </div>
-                      )}
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors">
-                        <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <svg
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            className="text-gray-900 ml-0.5"
-                          >
-                            <polygon points="5 3 19 12 5 21 5 3" />
-                          </svg>
-                        </div>
-                      </div>
+                      ))}
                     </div>
-                    <h3 className="text-sm font-medium text-gray-900 group-hover:text-gray-600 transition-colors">
-                      {item.title}
-                    </h3>
-                  </button>
-                ))}
-              </div>
-            )}
+                  )}
+                </div>
+              );
+            })()}
 
             {activeTab === 'writings' && (
               <div>
@@ -204,10 +231,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Now Playing */}
-          <div
-            className={activeTab === 'illustration' ? 'absolute bottom-0 left-0 bg-white pt-4' : ''}
-            style={activeTab === 'illustration' ? { width: 'calc(166% + 1.5rem)' } : undefined}
-          >
+          <div style={activeTab === 'illustration' ? { width: 'calc(166% + 1.5rem)' } : undefined}>
             <NowPlayingContent data={nowPlayingData} />
 
             {/* Contact */}
