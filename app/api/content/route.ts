@@ -34,14 +34,14 @@ export async function GET() {
     }));
 
     return NextResponse.json({
-      projects: dbProjects.length > 0 ? dbProjects : staticProjects,
-      writings: dbWritings.length > 0 ? dbWritings : staticWritings,
-      illustrations: dbIllustrations.length > 0 ? dbIllustrations : staticIllustrations,
-      interactions: dbInteractions.length > 0 ? dbInteractions : staticInteractions,
+      projects: dbProjects,
+      writings: dbWritings,
+      illustrations: dbIllustrations,
+      interactions: dbInteractions,
     });
   } catch (error) {
     console.error('Error fetching content:', error);
-    // Fall back to static content on error
+    // Only fall back to static content on error (e.g., database connection issue)
     return NextResponse.json({
       projects: staticProjects,
       writings: staticWritings,

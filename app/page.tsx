@@ -57,12 +57,13 @@ async function getContent() {
     const interactions = interactionsRes.data || [];
 
     return {
-      projects: projects.length > 0 ? projects : staticProjects,
-      writings: writings.length > 0 ? writings : staticWritings,
-      illustrations: illustrations.length > 0 ? illustrations : staticIllustrations,
-      interactions: interactions.length > 0 ? interactions : staticInteractions,
+      projects,
+      writings,
+      illustrations,
+      interactions,
     };
   } catch {
+    // Only fall back to static content on error (e.g., database connection issue)
     return {
       projects: staticProjects,
       writings: staticWritings,
