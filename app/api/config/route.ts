@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase, Settings, defaultSettings } from '@/lib/supabase';
+import { supabase, Settings } from '@/lib/supabase';
 import { siteConfig as staticConfig } from '@/lib/data';
 
 async function loadSettings(): Promise<Settings | null> {
@@ -20,20 +20,30 @@ async function loadSettings(): Promise<Settings | null> {
 
 export async function GET() {
   // Load settings from Supabase
-  const dynamicSettings = await loadSettings();
+  const dbSettings = await loadSettings();
 
-  const config = {
-    name: dynamicSettings?.name || staticConfig.name,
-    title: dynamicSettings?.title || staticConfig.title,
-    avatar: dynamicSettings?.avatar || staticConfig.avatar,
+  // If we have database settings, use them (with static fallbacks only for missing fields)
+  if (dbSettings) {
+    return NextResponse.json({
+      name: dbSettings.name || staticConfig.name,
+      title: dbSettings.title || staticConfig.title,
+      avatar: dbSettings.avatar || '',
+      bio: staticConfig.bio,
+      social: {
+        twitter: dbSettings.twitter || staticConfig.social.twitter,
+        github: dbSettings.github || staticConfig.social.github,
+        linkedin: dbSettings.linkedin || staticConfig.social.linkedin,
+        email: dbSettings.email || staticConfig.social.email,
+      },
+    });
+  }
+
+  // No database settings, use static config
+  return NextResponse.json({
+    name: staticConfig.name,
+    title: staticConfig.title,
+    avatar: staticConfig.avatar,
     bio: staticConfig.bio,
-    social: {
-      twitter: dynamicSettings?.twitter || staticConfig.social.twitter,
-      github: dynamicSettings?.github || staticConfig.social.github,
-      linkedin: dynamicSettings?.linkedin || staticConfig.social.linkedin,
-      email: dynamicSettings?.email || staticConfig.social.email,
-    },
-  };
-
-  return NextResponse.json(config);
+    social: staticConfig.social,
+  });
 }
