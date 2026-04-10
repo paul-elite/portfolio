@@ -33,7 +33,7 @@ interface SiteConfig {
 
 interface ContentData {
   projects: Project[];
-  writings: { id: string; slug: string; title: string; description: string }[];
+  writings: { id: string; slug: string; title: string; description: string; cover?: string; date?: string }[];
   illustrations: Illustration[];
   interactions: { id: string; slug: string; title: string; description: string }[];
 }
@@ -245,15 +245,31 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             })()}
 
             {activeTab === 'writings' && (
-              <div>
+              <div className="grid grid-cols-2 gap-4" style={{ width: 'calc(166% + 1.5rem)' }}>
                 {content.writings.map((item) => (
-                  <article key={item.id} className="py-3">
-                    <h3 className="text-base font-medium text-gray-900 mb-0.5">
+                  <article key={item.id} className="group block">
+                    <div className="aspect-video bg-gray-100 rounded-lg mb-2 overflow-hidden relative">
+                      {item.cover ? (
+                        <Image
+                          src={item.cover}
+                          alt={item.title}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-gray-300 text-xs">{item.title}</span>
+                        </div>
+                      )}
+                    </div>
+                    <h3 className="text-sm font-medium text-gray-900 group-hover:text-gray-600 transition-colors">
                       {item.title}
                     </h3>
-                    <p className="text-sm text-gray-400">
-                      {item.description}
-                    </p>
+                    {item.date && (
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        {new Date(item.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                      </p>
+                    )}
                   </article>
                 ))}
               </div>
@@ -261,7 +277,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Now Playing */}
-          <div style={activeTab === 'illustration' ? { width: 'calc(166% + 1.5rem)' } : undefined}>
+          <div style={activeTab === 'illustration' || activeTab === 'writings' ? { width: 'calc(166% + 1.5rem)' } : undefined}>
             <NowPlayingContent data={nowPlayingData} />
 
             {/* Contact */}

@@ -108,6 +108,8 @@ export async function POST(request: NextRequest) {
       insertData = {
         ...insertData,
         blocks: data.blocks || [],
+        cover: data.cover || '',
+        date: data.date || new Date().toISOString(),
       };
     } else if (type === 'illustrations') {
       insertData = {

@@ -111,6 +111,7 @@ export interface Writing {
   description: string;
   link?: string;
   date?: string;
+  cover?: string;
 }
 
 export interface Illustration {
@@ -136,18 +137,24 @@ export const writings: Writing[] = [
     slug: "tools-that-feel-alive",
     title: "On building tools that feel alive",
     description: "Exploring the intersection of physics and interface design, and why digital products should respond like physical objects.",
+    date: "2024-01-15",
+    cover: "",
   },
   {
     id: "w2",
     slug: "subtle-animations",
     title: "The case for subtle animations",
     description: "How micro-interactions improve usability without overwhelming users.",
+    date: "2024-02-20",
+    cover: "",
   },
   {
     id: "w3",
     slug: "designing-for-the-hand",
     title: "Designing for the hand",
     description: "Rethinking mobile interfaces around natural thumb movement and one-handed use.",
+    date: "2024-03-10",
+    cover: "",
   },
 ];
 
