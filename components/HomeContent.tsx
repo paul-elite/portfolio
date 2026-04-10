@@ -1,10 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Project, Illustration } from '@/lib/data';
 import { useNowPlaying, NowPlayingContent } from './NowPlaying';
+
+function getGitHubUsername(url: string): string | null {
+  const match = url.match(/github\.com\/([^\/]+)/);
+  return match ? match[1] : null;
+}
 
 function getYouTubeId(url: string) {
   const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
@@ -45,6 +50,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null);
   const [activeVideo, setActiveVideo] = useState<Illustration | null>(null);
   const [illustrationPage, setIllustrationPage] = useState(0);
+  const [githubHovered, setGithubHovered] = useState(false);
+  const [githubMousePos, setGithubMousePos] = useState({ x: 0, y: 0 });
+  const githubRef = useRef<HTMLAnchorElement>(null);
   const nowPlayingData = useNowPlaying();
 
   const siteConfig = initialConfig;
@@ -267,14 +275,48 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               >
                 Twitter
               </a>
-              <a
-                href={siteConfig.social.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-gray-900 transition-colors"
-              >
-                GitHub
-              </a>
+              <div className="relative inline-block">
+                <a
+                  ref={githubRef}
+                  href={siteConfig.social.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-gray-900 transition-colors"
+                  onMouseEnter={() => setGithubHovered(true)}
+                  onMouseLeave={() => {
+                    setGithubHovered(false);
+                    setGithubMousePos({ x: 0, y: 0 });
+                  }}
+                  onMouseMove={(e) => {
+                    if (!githubRef.current) return;
+                    const rect = githubRef.current.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    const offsetX = (e.clientX - centerX) * 0.1;
+                    const offsetY = (e.clientY - centerY) * 0.1;
+                    setGithubMousePos({ x: offsetX, y: offsetY });
+                  }}
+                >
+                  GitHub
+                </a>
+                {githubHovered && getGitHubUsername(siteConfig.social.github) && (
+                  <div
+                    className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out"
+                    style={{
+                      transform: `translateX(-50%) translate(${githubMousePos.x}px, ${githubMousePos.y}px)`,
+                    }}
+                  >
+                    <div className="bg-white rounded-lg shadow-lg p-3 border border-gray-100">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={`https://ghchart.rshah.org/${getGitHubUsername(siteConfig.social.github)}`}
+                        alt="GitHub Contributions"
+                        className="w-64 h-auto"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
               <a
                 href={siteConfig.social.linkedin}
                 target="_blank"
