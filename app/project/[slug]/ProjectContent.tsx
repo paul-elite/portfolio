@@ -68,11 +68,11 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
     <main className="min-h-screen bg-white">
       <div className="w-full px-6">
         {/* Main Content */}
-        <div className="pt-48 pb-16 grid grid-cols-12 gap-6">
-          <div className="col-span-2" />
+        <div className="pt-24 md:pt-48 pb-16 grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6">
+          <div className="hidden md:block md:col-span-2" />
 
-          {/* Back Button (replaces avatar) */}
-          <div className="col-span-1 flex justify-end items-start">
+          {/* Back Button + Title (mobile layout) */}
+          <div className="flex items-start gap-4 md:col-span-1 md:justify-end">
             <Link
               href="/"
               className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-1 transition-all hover:opacity-80"
@@ -95,12 +95,22 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
                 <polyline points="15 18 9 12 15 6" />
               </svg>
             </Link>
+            {/* Mobile: Title next to back button */}
+            <div className="md:hidden">
+              <h1 className="text-xl font-semibold text-gray-900">
+                {project.title}
+              </h1>
+              <div className="flex gap-4 text-sm text-gray-400">
+                {project.year && <span>{project.year}</span>}
+                {project.role && <span>{project.role}</span>}
+              </div>
+            </div>
           </div>
 
           {/* Content Column */}
-          <div className="col-span-6">
-            {/* Project Title */}
-            <div className="h-14 mb-6">
+          <div className="md:col-span-6">
+            {/* Project Title (desktop only - mobile shows next to back button) */}
+            <div className="hidden md:block h-14 mb-6">
               <h1 className="text-xl font-semibold text-gray-900">
                 {project.title}
               </h1>
@@ -112,8 +122,8 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
 
             {/* Mobile Mockup - only show if preview exists */}
             {project.preview && (
-              <div className="mb-16">
-                <div className="relative w-[266px] h-[560px] bg-gray-900 rounded-[48px] p-3 shadow-xl">
+              <div className="mb-8 md:mb-16 mt-6 md:mt-0">
+                <div className="relative w-full max-w-[266px] mx-auto md:mx-0 aspect-[266/560] bg-gray-900 rounded-[48px] p-3 shadow-xl">
                   <div className="w-full h-full bg-gray-100 rounded-[38px] overflow-hidden flex items-center justify-center relative">
                     <Image
                       src={project.preview}
@@ -227,7 +237,7 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
             )}
           </div>
 
-          <div className="col-span-2" />
+          <div className="hidden md:block md:col-span-2" />
         </div>
       </div>
     </main>

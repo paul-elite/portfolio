@@ -67,13 +67,13 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   ];
 
   return (
-    <div className="h-screen pt-48 pb-16">
-      <div className="h-full grid grid-cols-12 gap-6">
-        {/* Columns 1-2: Whitespace */}
-        <div className="col-span-2" />
+    <div className="min-h-screen pt-24 pb-16 md:pt-48 px-6 md:px-0">
+      <div className="h-full grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6">
+        {/* Columns 1-2: Whitespace (desktop only) */}
+        <div className="hidden md:block md:col-span-2" />
 
         {/* Column 3: Avatar */}
-        <div className="col-span-1 flex justify-end items-start">
+        <div className="flex items-start gap-4 md:col-span-1 md:justify-end">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden">
             {siteConfig.avatar ? (
               <Image
@@ -89,12 +89,19 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               </span>
             )}
           </div>
+          {/* Mobile: Name next to avatar */}
+          <div className="md:hidden">
+            <h1 className="text-xl font-semibold text-gray-900">
+              {siteConfig.name}
+            </h1>
+            <p className="text-sm text-gray-500">{siteConfig.title}</p>
+          </div>
         </div>
 
         {/* Columns 4-6: Text Content */}
-        <div className="col-span-3 flex flex-col">
-          {/* Name */}
-          <div className="h-14 mb-6">
+        <div className="md:col-span-3 flex flex-col">
+          {/* Name (desktop only - mobile shows next to avatar) */}
+          <div className="hidden md:block h-14 mb-6">
             <h1 className="text-xl font-semibold text-gray-900">
               {siteConfig.name}
             </h1>
@@ -102,7 +109,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Tabs */}
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm mb-6">
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm mb-6 mt-4 md:mt-0">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
@@ -173,12 +180,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
               return (
                 <div
-                  className="flex gap-6 h-full min-h-[300px]"
-                  style={{ width: 'calc(166% + 1.5rem)' }}
+                  className="flex gap-6 h-full min-h-[300px] w-full md:w-[calc(166%+1.5rem)]"
                   onWheel={handleWheel}
                 >
-                  {/* 2x2 Grid */}
-                  <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-4 content-start">
+                  {/* 2x2 Grid (1 col on mobile, 2 on desktop) */}
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-2 gap-4 content-start">
                     {currentItems.map((item) => {
                       const isPlayingInline = playingInlineId === item.id;
                       const youtubeId = item.youtubeUrl ? getYouTubeId(item.youtubeUrl) : null;
@@ -308,8 +314,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   {sortedYears.map((year) => (
                     <div key={year}>
                       {writingsByYear[year].map((item, index) => (
-                        <div key={item.id} className="flex items-baseline py-3 border-b border-gray-100 last:border-0">
-                          <span className="w-16 text-sm text-gray-300 flex-shrink-0">
+                        <div key={item.id} className="flex flex-col sm:flex-row sm:items-baseline py-3 border-b border-gray-100 last:border-0 gap-1 sm:gap-0">
+                          <span className="w-16 text-sm text-gray-300 flex-shrink-0 hidden sm:block">
                             {index === 0 ? year : ''}
                           </span>
                           <div className="flex-1 flex items-center gap-2">
@@ -335,12 +341,12 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Now Playing */}
-          <div style={activeTab === 'illustration' ? { width: 'calc(166% + 1.5rem)' } : undefined}>
+          <div className={activeTab === 'illustration' ? 'w-full md:w-[calc(166%+1.5rem)]' : ''}>
             <NowPlayingContent data={nowPlayingData} />
 
             {/* Contact */}
             <footer className="pt-4">
-              <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+              <div className="flex flex-wrap gap-x-4 md:gap-x-6 gap-y-2 text-sm">
               <a
                 href={siteConfig.social.twitter}
                 target="_blank"
@@ -426,11 +432,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
         </div>
 
-        {/* Column 7: Gap */}
-        <div className="col-span-1" />
+        {/* Column 7: Gap (desktop only) */}
+        <div className="hidden md:block md:col-span-1" />
 
-        {/* Columns 8-10: Mobile Preview */}
-        <div className="col-span-3 flex items-start">
+        {/* Columns 8-10: Mobile Preview (desktop only) */}
+        <div className="hidden md:flex md:col-span-3 items-start">
           <div
             className={`transition-opacity duration-200 ${
               hoveredProject ? 'opacity-100' : 'opacity-0'
@@ -459,8 +465,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
         </div>
 
-        {/* Columns 11-12: Whitespace */}
-        <div className="col-span-2" />
+        {/* Columns 11-12: Whitespace (desktop only) */}
+        <div className="hidden md:block md:col-span-2" />
       </div>
 
       {/* Video Modal */}
