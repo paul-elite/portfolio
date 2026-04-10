@@ -49,6 +49,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const [activeTab, setActiveTab] = useState<Tab>('projects');
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null);
   const [activeVideo, setActiveVideo] = useState<Illustration | null>(null);
+  const [playingInlineId, setPlayingInlineId] = useState<string | null>(null);
   const [illustrationPage, setIllustrationPage] = useState(0);
   const [githubHovered, setGithubHovered] = useState(false);
   const [githubMousePos, setGithubMousePos] = useState({ x: 0, y: 0 });
@@ -178,44 +179,81 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                 >
                   {/* 2x2 Grid */}
                   <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-4 content-start">
-                    {currentItems.map((item) => (
-                      <button
-                        key={item.id}
-                        onClick={() => setActiveVideo(item)}
-                        className="group block text-left"
-                      >
-                        <div className="aspect-video bg-gray-100 rounded-lg mb-2 overflow-hidden relative">
-                          {item.thumbnail ? (
-                            <Image
-                              src={item.thumbnail}
-                              alt={item.title}
-                              fill
-                              className="object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <span className="text-gray-300 text-xs">{item.title}</span>
-                            </div>
-                          )}
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors">
-                            <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <svg
-                                width="12"
-                                height="12"
-                                viewBox="0 0 24 24"
-                                fill="currentColor"
-                                className="text-gray-900 ml-0.5"
+                    {currentItems.map((item) => {
+                      const isPlayingInline = playingInlineId === item.id;
+                      const youtubeId = item.youtubeUrl ? getYouTubeId(item.youtubeUrl) : null;
+
+                      return (
+                        <div key={item.id} className="group block text-left">
+                          <div className="aspect-video bg-gray-100 rounded-lg mb-2 overflow-hidden relative">
+                            {isPlayingInline && youtubeId ? (
+                              // Inline video player
+                              <iframe
+                                src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1`}
+                                className="w-full h-full"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                              />
+                            ) : (
+                              // Thumbnail with play button
+                              <button
+                                onClick={() => {
+                                  if (youtubeId) {
+                                    setPlayingInlineId(item.id);
+                                  }
+                                }}
+                                className="w-full h-full relative cursor-pointer"
                               >
-                                <polygon points="5 3 19 12 5 21 5 3" />
-                              </svg>
-                            </div>
+                                {item.thumbnail ? (
+                                  <Image
+                                    src={item.thumbnail}
+                                    alt={item.title}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <span className="text-gray-300 text-xs">{item.title}</span>
+                                  </div>
+                                )}
+                                {youtubeId && (
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors">
+                                    <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <svg
+                                        width="12"
+                                        height="12"
+                                        viewBox="0 0 24 24"
+                                        fill="currentColor"
+                                        className="text-gray-900 ml-0.5"
+                                      >
+                                        <polygon points="5 3 19 12 5 21 5 3" />
+                                      </svg>
+                                    </div>
+                                  </div>
+                                )}
+                              </button>
+                            )}
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-sm text-gray-900 group-hover:text-gray-600 transition-colors">
+                              {item.title}
+                            </h3>
+                            {isPlayingInline && (
+                              <button
+                                onClick={() => {
+                                  setActiveVideo(item);
+                                  setPlayingInlineId(null);
+                                }}
+                                className="text-xs transition-colors hover:opacity-80"
+                                style={{ color: '#0066f5' }}
+                              >
+                                Expand
+                              </button>
+                            )}
                           </div>
                         </div>
-                        <h3 className="text-sm font-medium text-gray-900 group-hover:text-gray-600 transition-colors">
-                          {item.title}
-                        </h3>
-                      </button>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   {/* Vertical Pagination */}

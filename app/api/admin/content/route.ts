@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { supabase, Settings, defaultSettings } from '@/lib/supabase';
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
@@ -54,15 +55,30 @@ export async function GET(request: NextRequest) {
       loadSettings(),
       supabase.from('projects').select('*').order('created_at', { ascending: false }),
       supabase.from('writings').select('*').order('created_at', { ascending: false }),
-      supabase.from('illustrations').select('*').order('created_at', { ascending: false }),
+      supabase.from('illustrations').select('*'),
       supabase.from('interactions').select('*').order('created_at', { ascending: false }),
     ]);
+
+    // Log errors for debugging
+    if (illustrationsRes.error) {
+      console.error('Illustrations fetch error:', illustrationsRes.error);
+    }
+
+    // Transform illustrations to camelCase for frontend
+    const illustrations = (illustrationsRes.data || []).map((item: Record<string, unknown>) => ({
+      id: item.id,
+      slug: item.slug,
+      title: item.title,
+      description: item.description,
+      thumbnail: item.thumbnail,
+      youtubeUrl: item.youtube_url,
+    }));
 
     return NextResponse.json({
       settings,
       projects: projectsRes.data || [],
       writings: writingsRes.data || [],
-      illustrations: illustrationsRes.data || [],
+      illustrations,
       interactions: interactionsRes.data || [],
     });
   } catch (error) {
@@ -135,6 +151,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create' }, { status: 500 });
     }
 
+    // Revalidate frontend cache
+    revalidatePath('/');
+    if (type === 'projects') {
+      revalidatePath('/project/[slug]', 'page');
+    }
+
     return NextResponse.json({ success: true, item: newItem });
   } catch (error) {
     console.error('POST error:', error);
@@ -155,6 +177,7 @@ export async function PUT(request: NextRequest) {
       const currentSettings = await loadSettings();
       const newSettings = { ...currentSettings, ...data };
       await saveSettings(newSettings);
+      revalidatePath('/');
       return NextResponse.json({ success: true, settings: newSettings });
     }
 
@@ -172,6 +195,12 @@ export async function PUT(request: NextRequest) {
     if (error) {
       console.error('Update error:', error);
       return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
+    }
+
+    // Revalidate frontend cache
+    revalidatePath('/');
+    if (type === 'projects') {
+      revalidatePath('/project/[slug]', 'page');
     }
 
     return NextResponse.json({ success: true, item: updatedItem });
@@ -201,6 +230,12 @@ export async function DELETE(request: NextRequest) {
     if (error) {
       console.error('Delete error:', error);
       return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
+    }
+
+    // Revalidate frontend cache
+    revalidatePath('/');
+    if (type === 'projects') {
+      revalidatePath('/project/[slug]', 'page');
     }
 
     return NextResponse.json({ success: true });

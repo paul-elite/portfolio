@@ -84,6 +84,7 @@ export default function AdminPage() {
   });
   const [avatarPreview, setAvatarPreview] = useState<string>('');
   const [previewImages, setPreviewImages] = useState<Record<string, string>>({});
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -153,7 +154,54 @@ export default function AdminPage() {
     return null;
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleEdit = (item: Record<string, unknown>) => {
+    setEditingId(item.id as string);
+
+    // Load basic fields
+    const data: Record<string, string> = {
+      title: (item.title as string) || '',
+      description: (item.description as string) || '',
+    };
+
+    // Load type-specific fields
+    if (activeTab === 'projects') {
+      data.year = (item.year as string) || '';
+      data.role = (item.role as string) || '';
+      data.preview = (item.preview as string) || '';
+      data.link = (item.link as string) || '';
+      if (item.caseStudy) {
+        const cs = item.caseStudy as Record<string, string>;
+        data.overview = cs.overview || '';
+        data.challenge = cs.challenge || '';
+        data.approach = cs.approach || '';
+        data.outcome = cs.outcome || '';
+      }
+      setProjectBlocks((item.blocks as Block[]) || []);
+    } else if (activeTab === 'illustrations') {
+      data.thumbnail = (item.thumbnail as string) || '';
+      data.youtubeUrl = (item.youtubeUrl as string) || '';
+    } else if (activeTab === 'writings') {
+      data.cover = (item.cover as string) || '';
+      data.date = (item.date as string) || '';
+      setWritingBlocks((item.blocks as Block[]) || []);
+    } else if (activeTab === 'interactions') {
+      data.link = (item.link as string) || '';
+    }
+
+    setFormData(data);
+    if (data.preview) setPreviewImages({ preview: data.preview });
+    if (data.thumbnail) setPreviewImages({ thumbnail: data.thumbnail });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setFormData({});
+    setPreviewImages({});
+    setProjectBlocks([]);
+    setWritingBlocks([]);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
@@ -185,27 +233,39 @@ export default function AdminPage() {
         }
       }
 
+      // Handle illustrations - convert youtubeUrl to youtube_url for database
+      if (activeTab === 'illustrations') {
+        data.youtube_url = data.youtubeUrl;
+        delete data.youtubeUrl;
+      }
+
+      const isEditing = !!editingId;
       const res = await fetch('/api/admin/content', {
-        method: 'POST',
+        method: isEditing ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${password}`,
         },
-        body: JSON.stringify({ type: activeTab, data }),
+        body: JSON.stringify({
+          type: activeTab,
+          id: editingId,
+          data
+        }),
       });
 
       if (res.ok) {
-        setMessage('Created successfully!');
+        setMessage(isEditing ? 'Updated successfully!' : 'Created successfully!');
         setFormData({});
         setPreviewImages({});
         setProjectBlocks([]);
         setWritingBlocks([]);
+        setEditingId(null);
         fetchContent();
       } else {
-        setMessage('Failed to create');
+        setMessage(isEditing ? 'Failed to update' : 'Failed to create');
       }
     } catch {
-      setMessage('Error creating');
+      setMessage('Error saving');
     }
     setLoading(false);
   };
@@ -355,6 +415,7 @@ export default function AdminPage() {
                 setPreviewImages({});
                 setProjectBlocks([]);
                 setWritingBlocks([]);
+                setEditingId(null);
               }}
               className={`text-sm transition-colors ${
                 activeTab === tab.key
@@ -518,12 +579,23 @@ export default function AdminPage() {
         {/* Content Tabs */}
         {isContentTab && (
           <>
-            {/* Add Form */}
+            {/* Add/Edit Form */}
             <div className="mb-12 p-6 bg-gray-50 rounded-lg">
-              <h2 className="text-sm font-medium text-gray-900 mb-4">
-                Add {activeTab.slice(0, -1)}
-              </h2>
-              <form onSubmit={handleCreate} className="space-y-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-medium text-gray-900">
+                  {editingId ? `Edit ${activeTab.slice(0, -1)}` : `Add ${activeTab.slice(0, -1)}`}
+                </h2>
+                {editingId && (
+                  <button
+                    type="button"
+                    onClick={handleCancelEdit}
+                    className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <input
                   type="text"
                   placeholder="Title"
@@ -687,7 +759,7 @@ export default function AdminPage() {
                   disabled={loading || uploading}
                   className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
                 >
-                  {loading ? 'Adding...' : 'Add'}
+                  {loading ? 'Saving...' : editingId ? 'Update' : 'Add'}
                 </button>
               </form>
             </div>
@@ -702,21 +774,31 @@ export default function AdminPage() {
                   <p className="text-sm text-gray-400">No items yet</p>
                 )}
                 {content &&
-                  content[activeTab as ContentType]?.map((item: { id: string; title: string; description: string }) => (
+                  content[activeTab as ContentType]?.map((item: Record<string, unknown>) => (
                     <div
-                      key={item.id}
-                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                      key={item.id as string}
+                      className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
+                        editingId === item.id ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'
+                      }`}
                     >
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{item.title}</p>
-                        <p className="text-xs text-gray-400">{item.description}</p>
+                        <p className="text-sm font-medium text-gray-900">{item.title as string}</p>
+                        <p className="text-xs text-gray-400">{item.description as string}</p>
                       </div>
-                      <button
-                        onClick={() => handleDelete(activeTab as ContentType, item.id)}
-                        className="text-xs text-red-400 hover:text-red-600 transition-colors"
-                      >
-                        Delete
-                      </button>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => handleEdit(item)}
+                          className="text-xs text-blue-500 hover:text-blue-700 transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(activeTab as ContentType, item.id as string)}
+                          className="text-xs text-red-400 hover:text-red-600 transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   ))}
               </div>
@@ -726,7 +808,7 @@ export default function AdminPage() {
 
         {/* Note */}
         <p className="text-xs text-gray-300 mt-12">
-          Content is stored in memory and resets on deploy. Connect a database for persistence.
+          Content is stored in Supabase and synced to the frontend with a 60-second cache.
         </p>
       </div>
     </main>
