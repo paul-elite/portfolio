@@ -10,6 +10,7 @@ export interface Settings {
   name: string;
   title: string;
   avatar: string;
+  metaImage: string;
   twitter: string;
   github: string;
   linkedin: string;
@@ -21,6 +22,7 @@ export const defaultSettings: Settings = {
   name: '',
   title: '',
   avatar: '',
+  metaImage: '',
   twitter: '',
   github: '',
   linkedin: '',

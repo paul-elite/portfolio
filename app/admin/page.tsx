@@ -46,6 +46,7 @@ interface Settings {
   name: string;
   title: string;
   avatar: string;
+  metaImage: string;
   twitter: string;
   github: string;
   linkedin: string;
@@ -77,16 +78,19 @@ export default function AdminPage() {
     name: '',
     title: '',
     avatar: '',
+    metaImage: '',
     twitter: '',
     github: '',
     linkedin: '',
     email: '',
   });
   const [avatarPreview, setAvatarPreview] = useState<string>('');
+  const [metaImagePreview, setMetaImagePreview] = useState<string>('');
   const [previewImages, setPreviewImages] = useState<Record<string, string>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const metaImageInputRef = useRef<HTMLInputElement>(null);
 
   const fetchContent = async () => {
     try {
@@ -482,6 +486,60 @@ export default function AdminPage() {
                     {uploading ? 'Uploading...' : 'Upload Photo'}
                   </button>
                   <p className="text-xs text-gray-400 mt-2">JPG, PNG. Max 5MB.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 bg-gray-50 rounded-lg">
+              <h2 className="text-sm font-medium text-gray-900 mb-4">Social Share Image (Meta Image)</h2>
+              <p className="text-xs text-gray-400 mb-4">This image appears when your site is shared on social media.</p>
+
+              <div className="flex items-start gap-6">
+                {(metaImagePreview || settings.metaImage) ? (
+                  <div className="w-48 h-24 rounded-lg overflow-hidden bg-gray-200">
+                    <Image
+                      src={metaImagePreview || settings.metaImage}
+                      alt="Meta Image"
+                      width={192}
+                      height={96}
+                      className="w-full h-full object-cover"
+                      unoptimized={!!metaImagePreview}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-48 h-24 rounded-lg bg-gray-200 flex items-center justify-center">
+                    <span className="text-gray-400 text-sm">No image</span>
+                  </div>
+                )}
+
+                <div>
+                  <input
+                    type="file"
+                    ref={metaImageInputRef}
+                    accept="image/png,image/svg+xml,image/jpeg"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const previewUrl = URL.createObjectURL(file);
+                        setMetaImagePreview(previewUrl);
+
+                        const path = await handleFileUpload(file, 'meta');
+                        if (path) {
+                          setSettings({ ...settings, metaImage: path });
+                        }
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => metaImageInputRef.current?.click()}
+                    disabled={uploading}
+                    className="px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+                  >
+                    {uploading ? 'Uploading...' : 'Upload Image'}
+                  </button>
+                  <p className="text-xs text-gray-400 mt-2">PNG, SVG, or JPG. Recommended: 1200x630px</p>
                 </div>
               </div>
             </div>

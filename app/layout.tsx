@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, Gochi_Hand } from "next/font/google";
+import { supabase, defaultSettings } from "@/lib/supabase";
 import Analytics from "@/components/Analytics";
 import "./globals.css";
 
@@ -14,10 +15,42 @@ const gochiHand = Gochi_Hand({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Portfolio",
-  description: "Personal portfolio",
-};
+async function getSettings() {
+  try {
+    const { data, error } = await supabase
+      .from('settings')
+      .select('*')
+      .single();
+
+    if (error || !data) {
+      return defaultSettings;
+    }
+    return { ...defaultSettings, ...data };
+  } catch {
+    return defaultSettings;
+  }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSettings();
+
+  const metadata: Metadata = {
+    title: settings.name ? `${settings.name} - Portfolio` : "Portfolio",
+    description: settings.title || "Personal portfolio",
+  };
+
+  if (settings.metaImage) {
+    metadata.openGraph = {
+      images: [settings.metaImage],
+    };
+    metadata.twitter = {
+      card: "summary_large_image",
+      images: [settings.metaImage],
+    };
+  }
+
+  return metadata;
+}
 
 export const viewport: Viewport = {
   themeColor: "#e1ebfa",
