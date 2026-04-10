@@ -80,7 +80,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         </div>
 
         {/* Columns 4-6: Text Content */}
-        <div className="col-span-3 flex flex-col">
+        <div className={`col-span-3 flex flex-col overflow-hidden ${activeTab === 'illustration' ? 'relative' : ''}`}>
           {/* Name */}
           <div className="h-14 mb-6">
             <h1 className="text-xl font-semibold text-gray-900">
@@ -107,7 +107,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Content */}
-          <div className="flex-1">
+          <div className={`flex-1 ${activeTab === 'illustration' ? 'overflow-y-auto pb-32' : ''}`}>
             {activeTab === 'projects' && (
               <div>
                 {content.projects.map((project) => (
@@ -204,7 +204,10 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Now Playing */}
-          <div style={activeTab === 'illustration' ? { width: 'calc(166% + 1.5rem)' } : undefined}>
+          <div
+            className={activeTab === 'illustration' ? 'absolute bottom-0 left-0 bg-white pt-4' : ''}
+            style={activeTab === 'illustration' ? { width: 'calc(166% + 1.5rem)' } : undefined}
+          >
             <NowPlayingContent data={nowPlayingData} />
 
             {/* Contact */}
