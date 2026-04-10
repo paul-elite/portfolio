@@ -68,7 +68,11 @@ export default function ProjectContent({ project }: ProjectContentProps) {
           <div className="col-span-1 flex justify-end items-start">
             <Link
               href="/"
-              className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 mt-1 hover:from-gray-300 hover:to-gray-400 transition-all"
+              className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-1 transition-all hover:opacity-80"
+              style={{
+                background: 'linear-gradient(to bottom, #fefeff, #ffffff)',
+                boxShadow: 'inset 0 1px 0.5px rgba(255, 255, 255, 1), 0 0 0 0.5px rgba(0, 0, 0, 0.05)',
+              }}
             >
               <svg
                 width="16"
@@ -79,7 +83,7 @@ export default function ProjectContent({ project }: ProjectContentProps) {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-gray-500"
+                className="text-gray-400"
               >
                 <polyline points="15 18 9 12 15 6" />
               </svg>
