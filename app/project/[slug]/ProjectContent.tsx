@@ -69,7 +69,7 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
       <div className="w-full pl-2 pr-3 md:px-6">
         {/* Main Content */}
         <div className="pt-24 md:pt-48 pb-16 flex md:grid md:grid-cols-12 gap-4 md:gap-6">
-          <div className="hidden md:block md:col-span-2" />
+          <div className="hidden md:block md:col-span-3" />
 
           {/* Back Button */}
           <div className="flex-shrink-0 md:col-span-1 md:flex md:justify-end md:items-start">
@@ -98,7 +98,7 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
           </div>
 
           {/* Content Column */}
-          <div className="flex-1 min-w-0 md:col-span-6">
+          <div className="flex-1 min-w-0 md:col-span-4">
             {/* Project Title */}
             <div className="h-auto md:h-14 mb-4 md:mb-6">
               <h1 className="text-xl font-semibold text-gray-900">
@@ -227,7 +227,7 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
             )}
           </div>
 
-          <div className="hidden md:block md:col-span-2" />
+          <div className="hidden md:block md:col-span-3" />
         </div>
       </div>
     </main>
