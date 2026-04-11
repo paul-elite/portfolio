@@ -19,7 +19,7 @@ function renderBlock(block: ContentBlock, index: number) {
   switch (block.type) {
     case 'heading':
       return (
-        <h2 key={index} className="text-lg font-semibold text-gray-900 mt-8 mb-4">
+        <h2 key={index} className="text-base font-semibold text-gray-900 mt-8 mb-4">
           {block.content}
         </h2>
       );

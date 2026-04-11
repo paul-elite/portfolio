@@ -171,7 +171,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                     onMouseEnter={() => setHoveredProject(project)}
                     onMouseLeave={() => setHoveredProject(null)}
                   >
-                    <h2 className="text-base font-medium text-gray-900 mb-0.5 group-hover:text-gray-600 transition-colors">
+                    <h2 className="text-base font-normal text-gray-900 mb-0.5 group-hover:text-gray-600 transition-colors">
                       {project.title}
                     </h2>
                     <p className="text-sm text-gray-400">

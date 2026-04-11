@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, Gochi_Hand } from "next/font/google";
+import { Archivo, Gochi_Hand, Inter } from "next/font/google";
 import { supabase, defaultSettings } from "@/lib/supabase";
 import Analytics from "@/components/Analytics";
 import "./globals.css";
@@ -12,6 +12,11 @@ const archivo = Archivo({
 const gochiHand = Gochi_Hand({
   variable: "--font-gochi-hand",
   weight: "400",
+  subsets: ["latin"],
+});
+
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -65,7 +70,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${archivo.variable} ${gochiHand.variable} h-full antialiased`}>
+    <html lang="en" className={`${archivo.variable} ${gochiHand.variable} ${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans bg-background">
         {children}
         <Analytics />
