@@ -5,7 +5,24 @@ import Image from 'next/image';
 import BlockEditor, { Block } from '@/components/BlockEditor';
 
 type ContentType = 'projects' | 'illustrations' | 'writings' | 'interactions';
-type TabType = ContentType | 'profile' | 'contact';
+type TabType = ContentType | 'profile' | 'contact' | 'dashboard';
+
+interface AnalyticsData {
+  totalVisits: number;
+  uniqueVisitors: number;
+  repeatVisitors: number;
+  countries: [string, number][];
+  pages: [string, number][];
+  recentVisits: Array<{
+    id: string;
+    timestamp: string;
+    path: string;
+    country: string;
+    city: string;
+    isRepeat: boolean;
+  }>;
+  last7Days: Record<string, number>;
+}
 
 interface Project {
   id: string;
@@ -832,16 +849,29 @@ export default function AdminPage() {
                   <p className="text-sm text-gray-400">No items yet</p>
                 )}
                 {content &&
-                  (content[activeTab as ContentType] as unknown as Array<{ id: string; title: string; description: string } & Record<string, unknown>>)?.map((item) => (
+                  (content[activeTab as ContentType] as unknown as Array<{ id: string; title: string; description: string; thumbnail?: string } & Record<string, unknown>>)?.map((item) => (
                     <div
                       key={item.id}
                       className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
                         editingId === item.id ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'
                       }`}
                     >
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{item.title}</p>
-                        <p className="text-xs text-gray-400">{item.description}</p>
+                      <div className="flex items-center gap-4">
+                        {activeTab === 'illustrations' && item.thumbnail && (
+                          <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
+                            <Image
+                              src={item.thumbnail}
+                              alt={item.title}
+                              width={48}
+                              height={48}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{item.title}</p>
+                          <p className="text-xs text-gray-400">{item.description}</p>
+                        </div>
                       </div>
                       <div className="flex gap-3">
                         <button
