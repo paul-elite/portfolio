@@ -225,18 +225,31 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                       const youtubeId = item.youtubeUrl ? getYouTubeId(item.youtubeUrl) : null;
 
                       return (
-                        <div key={item.id} className="group block text-left">
-                          <div className="aspect-video bg-gray-100 rounded-lg mb-2 overflow-hidden relative">
+                        <div key={item.id} className="group block">
+                          <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden relative">
                             {isPlayingInline && youtubeId ? (
                               // Inline video player
-                              <iframe
-                                src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1`}
-                                className="w-full h-full"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                              />
+                              <>
+                                <iframe
+                                  src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1`}
+                                  className="w-full h-full"
+                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                  allowFullScreen
+                                />
+                                {/* Expand button overlay when playing */}
+                                <button
+                                  onClick={() => {
+                                    setActiveVideo(item);
+                                    setPlayingInlineId(null);
+                                  }}
+                                  className="absolute bottom-2 right-2 text-xs px-2 py-1 bg-white/90 rounded transition-colors hover:bg-white"
+                                  style={{ color: '#0066f5' }}
+                                >
+                                  Expand
+                                </button>
+                              </>
                             ) : (
-                              // Thumbnail with play button
+                              // Thumbnail with hover overlay
                               <button
                                 onClick={() => {
                                   if (youtubeId) {
@@ -258,9 +271,13 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                                     <span className="text-gray-300 text-xs">{item.title}</span>
                                   </div>
                                 )}
-                                {youtubeId && (
-                                  <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors">
-                                    <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                {/* Hover overlay with title and play button */}
+                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors">
+                                  <h3 className="text-sm text-white font-medium opacity-0 group-hover:opacity-100 transition-opacity text-center px-4">
+                                    {item.title}
+                                  </h3>
+                                  {youtubeId && (
+                                    <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity mt-2">
                                       <svg
                                         width="12"
                                         height="12"
@@ -271,25 +288,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                                         <polygon points="5 3 19 12 5 21 5 3" />
                                       </svg>
                                     </div>
-                                  </div>
-                                )}
-                              </button>
-                            )}
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <h3 className="text-sm text-gray-900 group-hover:text-gray-600 transition-colors">
-                              {item.title}
-                            </h3>
-                            {isPlayingInline && (
-                              <button
-                                onClick={() => {
-                                  setActiveVideo(item);
-                                  setPlayingInlineId(null);
-                                }}
-                                className="text-xs transition-colors hover:opacity-80"
-                                style={{ color: '#0066f5' }}
-                              >
-                                Expand
+                                  )}
+                                </div>
                               </button>
                             )}
                           </div>
