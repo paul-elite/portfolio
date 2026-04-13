@@ -3,26 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import BlockEditor, { Block } from '@/components/BlockEditor';
+import { ToastContainer, toast } from '@/components/Toast';
 
 type ContentType = 'projects' | 'illustrations' | 'writings' | 'interactions';
-type TabType = ContentType | 'profile' | 'contact' | 'dashboard';
-
-interface AnalyticsData {
-  totalVisits: number;
-  uniqueVisitors: number;
-  repeatVisitors: number;
-  countries: [string, number][];
-  pages: [string, number][];
-  recentVisits: Array<{
-    id: string;
-    timestamp: string;
-    path: string;
-    country: string;
-    city: string;
-    isRepeat: boolean;
-  }>;
-  last7Days: Record<string, number>;
-}
+type TabType = ContentType | 'profile' | 'contact';
 
 interface Project {
   id: string;
@@ -78,6 +62,248 @@ interface ContentStore {
   settings: Settings;
 }
 
+// Reusable Input Component
+function Input({
+  label,
+  placeholder,
+  value,
+  onChange,
+  type = 'text',
+  required = false,
+  icon,
+  helpText,
+}: {
+  label: string;
+  placeholder?: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+  required?: boolean;
+  icon?: React.ReactNode;
+  helpText?: string;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className="block text-sm font-medium text-gray-700">
+        {label}
+        {required && <span className="text-red-400 ml-1">*</span>}
+      </label>
+      <div className="relative">
+        {icon && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            {icon}
+          </div>
+        )}
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          required={required}
+          className={`w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all ${
+            icon ? 'pl-10' : ''
+          }`}
+        />
+      </div>
+      {helpText && <p className="text-xs text-gray-400">{helpText}</p>}
+    </div>
+  );
+}
+
+// Reusable Textarea Component
+function Textarea({
+  label,
+  placeholder,
+  value,
+  onChange,
+  required = false,
+  rows = 3,
+  helpText,
+}: {
+  label: string;
+  placeholder?: string;
+  value: string;
+  onChange: (value: string) => void;
+  required?: boolean;
+  rows?: number;
+  helpText?: string;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className="block text-sm font-medium text-gray-700">
+        {label}
+        {required && <span className="text-red-400 ml-1">*</span>}
+      </label>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        required={required}
+        rows={rows}
+        className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none"
+      />
+      {helpText && <p className="text-xs text-gray-400">{helpText}</p>}
+    </div>
+  );
+}
+
+// File Upload Component
+function FileUpload({
+  label,
+  accept,
+  preview,
+  onUpload,
+  uploading,
+  aspectRatio = 'square',
+  helpText,
+}: {
+  label: string;
+  accept: string;
+  preview?: string;
+  onUpload: (file: File) => void;
+  uploading: boolean;
+  aspectRatio?: 'square' | 'video' | 'wide';
+  helpText?: string;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [dragOver, setDragOver] = useState(false);
+
+  const aspectClasses = {
+    square: 'aspect-square w-24',
+    video: 'aspect-video w-48',
+    wide: 'aspect-[2/1] w-48',
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file) onUpload(file);
+  };
+
+  return (
+    <div className="space-y-1.5">
+      <label className="block text-sm font-medium text-gray-700">{label}</label>
+      <div className="flex items-start gap-4">
+        {/* Preview */}
+        <div
+          className={`${aspectClasses[aspectRatio]} rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center border-2 border-dashed transition-colors ${
+            dragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+          }`}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOver(true);
+          }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={handleDrop}
+        >
+          {uploading ? (
+            <div className="flex flex-col items-center gap-2">
+              <svg className="w-6 h-6 text-blue-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              <span className="text-xs text-gray-400">Uploading...</span>
+            </div>
+          ) : preview ? (
+            <Image
+              src={preview}
+              alt="Preview"
+              width={192}
+              height={192}
+              className="w-full h-full object-cover"
+              unoptimized
+            />
+          ) : (
+            <div className="flex flex-col items-center gap-1 p-2">
+              <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+              </svg>
+              <span className="text-xs text-gray-400 text-center">Drop or click</span>
+            </div>
+          )}
+        </div>
+
+        {/* Upload Button */}
+        <div className="flex flex-col gap-2">
+          <input
+            type="file"
+            ref={inputRef}
+            accept={accept}
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) onUpload(file);
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            disabled={uploading}
+            className="px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {preview ? 'Change' : 'Upload'}
+          </button>
+          {helpText && <p className="text-xs text-gray-400 max-w-[150px]">{helpText}</p>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Section Card Component
+function Section({ title, children, className = '' }: { title?: string; children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`bg-white border border-gray-100 rounded-2xl p-6 shadow-sm ${className}`}>
+      {title && <h2 className="text-base font-semibold text-gray-900 mb-5">{title}</h2>}
+      {children}
+    </div>
+  );
+}
+
+// Button Component
+function Button({
+  children,
+  type = 'button',
+  variant = 'primary',
+  loading = false,
+  disabled = false,
+  onClick,
+  className = '',
+}: {
+  children: React.ReactNode;
+  type?: 'button' | 'submit';
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+  loading?: boolean;
+  disabled?: boolean;
+  onClick?: () => void;
+  className?: string;
+}) {
+  const variants = {
+    primary: 'bg-gray-900 text-white hover:bg-gray-800',
+    secondary: 'bg-gray-100 text-gray-700 hover:bg-gray-200',
+    danger: 'bg-red-500 text-white hover:bg-red-600',
+    ghost: 'bg-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50',
+  };
+
+  return (
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled || loading}
+      className={`px-5 py-2.5 rounded-xl font-medium text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${variants[variant]} ${className}`}
+    >
+      {loading && (
+        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+        </svg>
+      )}
+      {children}
+    </button>
+  );
+}
+
 export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -85,7 +311,6 @@ export default function AdminPage() {
   const [content, setContent] = useState<ContentStore | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [message, setMessage] = useState('');
 
   // Form states
   const [formData, setFormData] = useState<Record<string, string>>({});
@@ -106,9 +331,6 @@ export default function AdminPage() {
   const [previewImages, setPreviewImages] = useState<Record<string, string>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const metaImageInputRef = useRef<HTMLInputElement>(null);
-
   const fetchContent = async () => {
     try {
       const res = await fetch('/api/admin/content', {
@@ -122,13 +344,15 @@ export default function AdminPage() {
         }
       }
     } catch {
-      console.error('Failed to fetch content');
+      toast.error('Failed to fetch content');
     }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const loadingToast = toast.loading('Signing in...');
+
     try {
       const res = await fetch('/api/admin/content', {
         headers: { Authorization: `Bearer ${password}` },
@@ -141,17 +365,20 @@ export default function AdminPage() {
           setSettings(data.settings);
         }
         localStorage.setItem('admin_password', password);
+        toast.update(loadingToast, 'Welcome back!', 'success');
       } else {
-        setMessage('Invalid password');
+        toast.update(loadingToast, 'Invalid password', 'error');
       }
     } catch {
-      setMessage('Error logging in');
+      toast.update(loadingToast, 'Connection error', 'error');
     }
     setLoading(false);
   };
 
   const handleFileUpload = async (file: File, folder: string): Promise<string | null> => {
     setUploading(true);
+    const loadingToast = toast.loading(`Uploading ${file.name}...`);
+
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -165,10 +392,13 @@ export default function AdminPage() {
 
       if (res.ok) {
         const data = await res.json();
+        toast.update(loadingToast, 'Upload complete!', 'success');
         return data.path;
+      } else {
+        toast.update(loadingToast, 'Upload failed', 'error');
       }
     } catch {
-      setMessage('Failed to upload file');
+      toast.update(loadingToast, 'Upload failed', 'error');
     } finally {
       setUploading(false);
     }
@@ -177,14 +407,13 @@ export default function AdminPage() {
 
   const handleEdit = (item: Record<string, unknown>) => {
     setEditingId(item.id as string);
+    toast.info(`Editing "${item.title}"`);
 
-    // Load basic fields
     const data: Record<string, string> = {
       title: (item.title as string) || '',
       description: (item.description as string) || '',
     };
 
-    // Load type-specific fields
     if (activeTab === 'projects') {
       data.year = (item.year as string) || '';
       data.role = (item.role as string) || '';
@@ -212,6 +441,9 @@ export default function AdminPage() {
     setFormData(data);
     if (data.preview) setPreviewImages({ preview: data.preview });
     if (data.thumbnail) setPreviewImages({ thumbnail: data.thumbnail });
+
+    // Scroll to form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCancelEdit = () => {
@@ -220,15 +452,18 @@ export default function AdminPage() {
     setPreviewImages({});
     setProjectBlocks([]);
     setWritingBlocks([]);
+    toast.info('Cancelled editing');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const isEditing = !!editingId;
+    const loadingToast = toast.loading(isEditing ? 'Updating...' : 'Creating...');
+
     try {
       const data: Record<string, unknown> = { ...formData };
 
-      // Handle blocks and case study for projects
       if (activeTab === 'projects') {
         if (projectBlocks.length > 0) {
           data.blocks = projectBlocks;
@@ -247,20 +482,17 @@ export default function AdminPage() {
         }
       }
 
-      // Handle blocks for writings
       if (activeTab === 'writings') {
         if (writingBlocks.length > 0) {
           data.blocks = writingBlocks;
         }
       }
 
-      // Handle illustrations - convert youtubeUrl to youtube_url for database
       if (activeTab === 'illustrations') {
         data.youtube_url = data.youtubeUrl;
         delete data.youtubeUrl;
       }
 
-      const isEditing = !!editingId;
       const res = await fetch('/api/admin/content', {
         method: isEditing ? 'PUT' : 'POST',
         headers: {
@@ -275,7 +507,7 @@ export default function AdminPage() {
       });
 
       if (res.ok) {
-        setMessage(isEditing ? 'Updated successfully!' : 'Created successfully!');
+        toast.update(loadingToast, isEditing ? 'Updated successfully!' : 'Created successfully!', 'success');
         setFormData({});
         setPreviewImages({});
         setProjectBlocks([]);
@@ -283,10 +515,10 @@ export default function AdminPage() {
         setEditingId(null);
         fetchContent();
       } else {
-        setMessage(isEditing ? 'Failed to update' : 'Failed to create');
+        toast.update(loadingToast, isEditing ? 'Failed to update' : 'Failed to create', 'error');
       }
     } catch {
-      setMessage('Error saving');
+      toast.update(loadingToast, 'Something went wrong', 'error');
     }
     setLoading(false);
   };
@@ -294,6 +526,8 @@ export default function AdminPage() {
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const loadingToast = toast.loading('Saving settings...');
+
     try {
       const res = await fetch('/api/admin/content', {
         method: 'PUT',
@@ -305,19 +539,21 @@ export default function AdminPage() {
       });
 
       if (res.ok) {
-        setMessage('Settings saved!');
+        toast.update(loadingToast, 'Settings saved!', 'success');
         fetchContent();
       } else {
-        setMessage('Failed to save settings');
+        toast.update(loadingToast, 'Failed to save settings', 'error');
       }
     } catch {
-      setMessage('Error saving settings');
+      toast.update(loadingToast, 'Something went wrong', 'error');
     }
     setLoading(false);
   };
 
-  const handleDelete = async (type: ContentType, id: string) => {
-    if (!confirm('Are you sure?')) return;
+  const handleDelete = async (type: ContentType, id: string, title: string) => {
+    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+
+    const loadingToast = toast.loading('Deleting...');
 
     try {
       const res = await fetch('/api/admin/content', {
@@ -330,11 +566,13 @@ export default function AdminPage() {
       });
 
       if (res.ok) {
-        setMessage('Deleted successfully!');
+        toast.update(loadingToast, 'Deleted successfully', 'success');
         fetchContent();
+      } else {
+        toast.update(loadingToast, 'Failed to delete', 'error');
       }
     } catch {
-      setMessage('Error deleting');
+      toast.update(loadingToast, 'Something went wrong', 'error');
     }
   };
 
@@ -358,547 +596,505 @@ export default function AdminPage() {
     }
   }, []);
 
-  useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => setMessage(''), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [message]);
-
   if (!isAuthenticated) {
     return (
-      <main className="min-h-screen bg-white flex items-center justify-center p-8">
-        <form onSubmit={handleLogin} className="w-full max-w-sm">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-8">Admin</h1>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg mb-4 focus:outline-none focus:border-gray-400"
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
-          >
-            {loading ? 'Loading...' : 'Login'}
-          </button>
-          {message && <p className="text-red-500 text-sm mt-4">{message}</p>}
-        </form>
-      </main>
+      <>
+        <ToastContainer />
+        <main className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
+          <div className="w-full max-w-sm">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+              <div className="text-center mb-8">
+                <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <h1 className="text-xl font-semibold text-gray-900">Admin Panel</h1>
+                <p className="text-sm text-gray-400 mt-1">Enter your password to continue</p>
+              </div>
+
+              <form onSubmit={handleLogin} className="space-y-4">
+                <Input
+                  label="Password"
+                  type="password"
+                  value={password}
+                  onChange={setPassword}
+                  placeholder="Enter password"
+                  required
+                  icon={
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                    </svg>
+                  }
+                />
+                <Button type="submit" loading={loading} className="w-full">
+                  Sign In
+                </Button>
+              </form>
+            </div>
+          </div>
+        </main>
+      </>
     );
   }
 
-  const tabs: { key: TabType; label: string }[] = [
-    { key: 'profile', label: 'Profile' },
-    { key: 'contact', label: 'Contact' },
-    { key: 'projects', label: 'Projects' },
-    { key: 'illustrations', label: 'Illustrations' },
-    { key: 'writings', label: 'Writings' },
-    { key: 'interactions', label: 'Interactions' },
+  const tabs: { key: TabType; label: string; icon: React.ReactNode }[] = [
+    {
+      key: 'profile',
+      label: 'Profile',
+      icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+    },
+    {
+      key: 'contact',
+      label: 'Contact',
+      icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
+    },
+    {
+      key: 'projects',
+      label: 'Projects',
+      icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>
+    },
+    {
+      key: 'illustrations',
+      label: 'Illustrations',
+      icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+    },
+    {
+      key: 'writings',
+      label: 'Writings',
+      icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+    },
+    {
+      key: 'interactions',
+      label: 'Interactions',
+      icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" /></svg>
+    },
   ];
 
   const isContentTab = ['projects', 'illustrations', 'writings', 'interactions'].includes(activeTab);
 
   return (
-    <main className="min-h-screen bg-white p-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900">Admin Panel</h1>
-          <button
-            onClick={() => {
-              localStorage.removeItem('admin_password');
-              setIsAuthenticated(false);
-              setPassword('');
-            }}
-            className="text-sm text-gray-400 hover:text-gray-900 transition-colors"
-          >
-            Logout
-          </button>
-        </div>
-
-        {message && (
-          <div className="mb-6 p-4 bg-green-50 text-green-700 rounded-lg text-sm">
-            {message}
-          </div>
-        )}
-
-        {/* Tabs */}
-        <div className="flex gap-4 mb-8 border-b border-gray-100 pb-4 flex-wrap">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
+    <>
+      <ToastContainer />
+      <main className="min-h-screen bg-gray-50">
+        <div className="max-w-5xl mx-auto px-6 py-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-2xl font-semibold text-gray-900">Admin Panel</h1>
+              <p className="text-sm text-gray-400 mt-1">Manage your portfolio content</p>
+            </div>
+            <Button
+              variant="ghost"
               onClick={() => {
-                setActiveTab(tab.key);
-                setFormData({});
-                setPreviewImages({});
-                setProjectBlocks([]);
-                setWritingBlocks([]);
-                setEditingId(null);
+                localStorage.removeItem('admin_password');
+                setIsAuthenticated(false);
+                setPassword('');
+                toast.info('Logged out');
               }}
-              className={`text-sm transition-colors ${
-                activeTab === tab.key
-                  ? 'text-gray-900 font-medium'
-                  : 'text-gray-400 hover:text-gray-600'
-              }`}
             >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+              </svg>
+              Logout
+            </Button>
+          </div>
 
-        {/* Profile Tab */}
-        {activeTab === 'profile' && (
-          <form onSubmit={handleSaveSettings} className="space-y-6">
-            <div className="p-6 bg-gray-50 rounded-lg">
-              <h2 className="text-sm font-medium text-gray-900 mb-4">Profile Photo</h2>
+          {/* Tabs */}
+          <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => {
+                  setActiveTab(tab.key);
+                  setFormData({});
+                  setPreviewImages({});
+                  setProjectBlocks([]);
+                  setWritingBlocks([]);
+                  setEditingId(null);
+                }}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
+                  activeTab === tab.key
+                    ? 'bg-gray-900 text-white'
+                    : 'bg-white text-gray-500 hover:bg-gray-100 border border-gray-100'
+                }`}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-              <div className="flex items-center gap-6">
-                {(avatarPreview || settings.avatar) ? (
-                  <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-200">
-                    <Image
-                      src={avatarPreview || settings.avatar}
-                      alt="Avatar"
-                      width={80}
-                      height={80}
-                      className="w-full h-full object-cover"
-                      unoptimized={!!avatarPreview}
-                    />
-                  </div>
-                ) : (
-                  <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
-                    <span className="text-gray-400 text-sm">No photo</span>
-                  </div>
-                )}
+          {/* Profile Tab */}
+          {activeTab === 'profile' && (
+            <form onSubmit={handleSaveSettings} className="space-y-6">
+              <Section title="Profile Photo">
+                <FileUpload
+                  label=""
+                  accept="image/*"
+                  preview={avatarPreview || settings.avatar}
+                  uploading={uploading}
+                  aspectRatio="square"
+                  helpText="JPG or PNG. Max 5MB."
+                  onUpload={async (file) => {
+                    const previewUrl = URL.createObjectURL(file);
+                    setAvatarPreview(previewUrl);
+                    const path = await handleFileUpload(file, '');
+                    if (path) {
+                      setSettings({ ...settings, avatar: path });
+                    }
+                  }}
+                />
+              </Section>
 
-                <div>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    accept="image/*"
-                    className="hidden"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        // Show instant preview
-                        const previewUrl = URL.createObjectURL(file);
-                        setAvatarPreview(previewUrl);
+              <Section title="Social Share Image">
+                <p className="text-sm text-gray-500 mb-4">This image appears when your site is shared on social media.</p>
+                <FileUpload
+                  label=""
+                  accept="image/png,image/svg+xml,image/jpeg"
+                  preview={metaImagePreview || settings.metaImage}
+                  uploading={uploading}
+                  aspectRatio="wide"
+                  helpText="Recommended: 1200x630px"
+                  onUpload={async (file) => {
+                    const previewUrl = URL.createObjectURL(file);
+                    setMetaImagePreview(previewUrl);
+                    const path = await handleFileUpload(file, 'meta');
+                    if (path) {
+                      setSettings({ ...settings, metaImage: path });
+                    }
+                  }}
+                />
+              </Section>
 
-                        // Upload file
-                        const path = await handleFileUpload(file, '');
-                        if (path) {
-                          setSettings({ ...settings, avatar: path });
-                        }
-                      }
-                    }}
+              <Section title="Profile Info">
+                <div className="space-y-4">
+                  <Input
+                    label="Display Name"
+                    placeholder="Your name"
+                    value={settings.name}
+                    onChange={(value) => setSettings({ ...settings, name: value })}
+                    icon={
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                      </svg>
+                    }
                   />
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploading}
-                    className="px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
-                  >
-                    {uploading ? 'Uploading...' : 'Upload Photo'}
-                  </button>
-                  <p className="text-xs text-gray-400 mt-2">JPG, PNG. Max 5MB.</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 bg-gray-50 rounded-lg">
-              <h2 className="text-sm font-medium text-gray-900 mb-4">Social Share Image (Meta Image)</h2>
-              <p className="text-xs text-gray-400 mb-4">This image appears when your site is shared on social media.</p>
-
-              <div className="flex items-start gap-6">
-                {(metaImagePreview || settings.metaImage) ? (
-                  <div className="w-48 h-24 rounded-lg overflow-hidden bg-gray-200">
-                    <Image
-                      src={metaImagePreview || settings.metaImage}
-                      alt="Meta Image"
-                      width={192}
-                      height={96}
-                      className="w-full h-full object-cover"
-                      unoptimized={!!metaImagePreview}
-                    />
-                  </div>
-                ) : (
-                  <div className="w-48 h-24 rounded-lg bg-gray-200 flex items-center justify-center">
-                    <span className="text-gray-400 text-sm">No image</span>
-                  </div>
-                )}
-
-                <div>
-                  <input
-                    type="file"
-                    ref={metaImageInputRef}
-                    accept="image/png,image/svg+xml,image/jpeg"
-                    className="hidden"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const previewUrl = URL.createObjectURL(file);
-                        setMetaImagePreview(previewUrl);
-
-                        const path = await handleFileUpload(file, 'meta');
-                        if (path) {
-                          setSettings({ ...settings, metaImage: path });
-                        }
-                      }
-                    }}
+                  <Input
+                    label="Title / Role"
+                    placeholder="Designer & Developer"
+                    value={settings.title}
+                    onChange={(value) => setSettings({ ...settings, title: value })}
+                    icon={
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0M12 12.75h.008v.008H12v-.008z" />
+                      </svg>
+                    }
                   />
-                  <button
-                    type="button"
-                    onClick={() => metaImageInputRef.current?.click()}
-                    disabled={uploading}
-                    className="px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
-                  >
-                    {uploading ? 'Uploading...' : 'Upload Image'}
-                  </button>
-                  <p className="text-xs text-gray-400 mt-2">PNG, SVG, or JPG. Recommended: 1200x630px</p>
                 </div>
-              </div>
-            </div>
+              </Section>
 
-            <div className="p-6 bg-gray-50 rounded-lg space-y-4">
-              <h2 className="text-sm font-medium text-gray-900 mb-4">Profile Info</h2>
+              <Button type="submit" loading={loading}>
+                Save Profile
+              </Button>
+            </form>
+          )}
 
-              <input
-                type="text"
-                placeholder="Your Name"
-                value={settings.name}
-                onChange={(e) => setSettings({ ...settings, name: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
-              />
-              <input
-                type="text"
-                placeholder="Your Title (e.g., Designer & Developer)"
-                value={settings.title}
-                onChange={(e) => setSettings({ ...settings, title: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
-              />
-            </div>
+          {/* Contact Tab */}
+          {activeTab === 'contact' && (
+            <form onSubmit={handleSaveSettings} className="space-y-6">
+              <Section title="Social Links">
+                <div className="space-y-4">
+                  <Input
+                    label="Twitter"
+                    placeholder="https://twitter.com/username"
+                    value={settings.twitter}
+                    onChange={(value) => setSettings({ ...settings, twitter: value })}
+                    type="url"
+                    icon={
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                      </svg>
+                    }
+                  />
+                  <Input
+                    label="GitHub"
+                    placeholder="https://github.com/username"
+                    value={settings.github}
+                    onChange={(value) => setSettings({ ...settings, github: value })}
+                    type="url"
+                    icon={
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                      </svg>
+                    }
+                  />
+                  <Input
+                    label="LinkedIn"
+                    placeholder="https://linkedin.com/in/username"
+                    value={settings.linkedin}
+                    onChange={(value) => setSettings({ ...settings, linkedin: value })}
+                    type="url"
+                    icon={
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                      </svg>
+                    }
+                  />
+                  <Input
+                    label="Email"
+                    placeholder="you@example.com"
+                    value={settings.email}
+                    onChange={(value) => setSettings({ ...settings, email: value })}
+                    type="email"
+                    icon={
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                      </svg>
+                    }
+                  />
+                </div>
+              </Section>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
-            >
-              {loading ? 'Saving...' : 'Save Profile'}
-            </button>
-          </form>
-        )}
+              <Button type="submit" loading={loading}>
+                Save Contact Info
+              </Button>
+            </form>
+          )}
 
-        {/* Contact Tab */}
-        {activeTab === 'contact' && (
-          <form onSubmit={handleSaveSettings} className="space-y-6">
-            <div className="p-6 bg-gray-50 rounded-lg space-y-4">
-              <h2 className="text-sm font-medium text-gray-900 mb-4">Social Links</h2>
-
-              <div>
-                <label className="text-xs text-gray-500 mb-1 block">Twitter URL</label>
-                <input
-                  type="url"
-                  placeholder="https://twitter.com/username"
-                  value={settings.twitter}
-                  onChange={(e) => setSettings({ ...settings, twitter: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs text-gray-500 mb-1 block">GitHub URL</label>
-                <input
-                  type="url"
-                  placeholder="https://github.com/username"
-                  value={settings.github}
-                  onChange={(e) => setSettings({ ...settings, github: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs text-gray-500 mb-1 block">LinkedIn URL</label>
-                <input
-                  type="url"
-                  placeholder="https://linkedin.com/in/username"
-                  value={settings.linkedin}
-                  onChange={(e) => setSettings({ ...settings, linkedin: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs text-gray-500 mb-1 block">Email</label>
-                <input
-                  type="email"
-                  placeholder="you@example.com"
-                  value={settings.email}
-                  onChange={(e) => setSettings({ ...settings, email: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
-            >
-              {loading ? 'Saving...' : 'Save Contact Info'}
-            </button>
-          </form>
-        )}
-
-        {/* Content Tabs */}
-        {isContentTab && (
-          <>
-            {/* Add/Edit Form */}
-            <div className="mb-12 p-6 bg-gray-50 rounded-lg">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-medium text-gray-900">
-                  {editingId ? `Edit ${activeTab.slice(0, -1)}` : `Add ${activeTab.slice(0, -1)}`}
-                </h2>
+          {/* Content Tabs */}
+          {isContentTab && (
+            <div className="space-y-8">
+              {/* Add/Edit Form */}
+              <Section title={editingId ? `Edit ${activeTab.slice(0, -1)}` : `Add new ${activeTab.slice(0, -1)}`}>
                 {editingId && (
-                  <button
-                    type="button"
-                    onClick={handleCancelEdit}
-                    className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    Cancel
-                  </button>
+                  <div className="flex items-center gap-2 mb-4 p-3 bg-blue-50 rounded-lg">
+                    <svg className="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    <span className="text-sm text-blue-700">Editing mode</span>
+                    <button
+                      type="button"
+                      onClick={handleCancelEdit}
+                      className="ml-auto text-sm text-blue-500 hover:text-blue-700"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 )}
-              </div>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Title"
-                  value={formData.title || ''}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Description"
-                  value={formData.description || ''}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
-                  required
-                />
 
-                {activeTab === 'projects' && (
-                  <>
-                    <div className="grid grid-cols-2 gap-4">
-                      <input
-                        type="text"
-                        placeholder="Year (e.g., 2024)"
-                        value={formData.year || ''}
-                        onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                        className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Role"
-                        value={formData.role || ''}
-                        onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                        className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
-                      />
-                    </div>
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <Input
+                    label="Title"
+                    placeholder="Enter a title"
+                    value={formData.title || ''}
+                    onChange={(value) => setFormData({ ...formData, title: value })}
+                    required
+                  />
+                  <Textarea
+                    label="Description"
+                    placeholder="Brief description"
+                    value={formData.description || ''}
+                    onChange={(value) => setFormData({ ...formData, description: value })}
+                    required
+                  />
 
-                    {/* Preview Image Upload */}
-                    <div>
-                      <label className="text-xs text-gray-500 mb-2 block">Preview Image</label>
-                      <div className="flex items-center gap-4">
-                        {(previewImages.preview || formData.preview) && (
-                          <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
-                            <Image
-                              src={previewImages.preview || formData.preview}
-                              alt="Preview"
-                              width={64}
-                              height={64}
-                              className="w-full h-full object-cover"
-                              unoptimized={!!previewImages.preview}
-                            />
-                          </div>
-                        )}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={async (e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              const previewUrl = URL.createObjectURL(file);
-                              setPreviewImages({ ...previewImages, preview: previewUrl });
-
-                              const path = await handleFileUpload(file, 'previews');
-                              if (path) {
-                                setFormData({ ...formData, preview: path });
-                              }
-                            }
-                          }}
-                          className="text-sm"
+                  {activeTab === 'projects' && (
+                    <>
+                      <div className="grid grid-cols-2 gap-4">
+                        <Input
+                          label="Year"
+                          placeholder="2024"
+                          value={formData.year || ''}
+                          onChange={(value) => setFormData({ ...formData, year: value })}
+                        />
+                        <Input
+                          label="Role"
+                          placeholder="Lead Designer"
+                          value={formData.role || ''}
+                          onChange={(value) => setFormData({ ...formData, role: value })}
                         />
                       </div>
-                    </div>
 
-                    <input
-                      type="text"
-                      placeholder="Live link (optional)"
-                      value={formData.link || ''}
-                      onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
-                    />
+                      <FileUpload
+                        label="Preview Image"
+                        accept="image/*"
+                        preview={previewImages.preview || formData.preview}
+                        uploading={uploading}
+                        aspectRatio="video"
+                        helpText="Shown in project list"
+                        onUpload={async (file) => {
+                          const previewUrl = URL.createObjectURL(file);
+                          setPreviewImages({ ...previewImages, preview: previewUrl });
+                          const path = await handleFileUpload(file, 'previews');
+                          if (path) {
+                            setFormData({ ...formData, preview: path });
+                          }
+                        }}
+                      />
 
-                    {/* Block Editor for Project Content */}
-                    <div className="mt-6 pt-6 border-t border-gray-200">
-                      <h3 className="text-sm font-medium text-gray-900 mb-4">Project Content</h3>
+                      <Input
+                        label="Live Link"
+                        placeholder="https://example.com"
+                        value={formData.link || ''}
+                        onChange={(value) => setFormData({ ...formData, link: value })}
+                        type="url"
+                        helpText="Optional external link"
+                      />
+
+                      <div className="pt-4 border-t border-gray-100">
+                        <h3 className="text-sm font-medium text-gray-900 mb-1">Project Content</h3>
+                        <p className="text-xs text-gray-400 mb-4">
+                          Add text, images, code snippets, and more.
+                        </p>
+                        <BlockEditor
+                          blocks={projectBlocks}
+                          onChange={setProjectBlocks}
+                          onUpload={handleFileUpload}
+                          uploading={uploading}
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {activeTab === 'illustrations' && (
+                    <>
+                      <FileUpload
+                        label="Thumbnail"
+                        accept="image/*"
+                        preview={previewImages.thumbnail || formData.thumbnail}
+                        uploading={uploading}
+                        aspectRatio="video"
+                        helpText="Cover image for the illustration"
+                        onUpload={async (file) => {
+                          const previewUrl = URL.createObjectURL(file);
+                          setPreviewImages({ ...previewImages, thumbnail: previewUrl });
+                          const path = await handleFileUpload(file, 'illustrations');
+                          if (path) {
+                            setFormData({ ...formData, thumbnail: path });
+                          }
+                        }}
+                      />
+                      <Input
+                        label="YouTube URL"
+                        placeholder="https://youtube.com/watch?v=..."
+                        value={formData.youtubeUrl || ''}
+                        onChange={(value) => setFormData({ ...formData, youtubeUrl: value })}
+                        type="url"
+                        icon={
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                          </svg>
+                        }
+                      />
+                    </>
+                  )}
+
+                  {activeTab === 'writings' && (
+                    <div className="pt-4 border-t border-gray-100">
+                      <h3 className="text-sm font-medium text-gray-900 mb-1">Article Content</h3>
                       <p className="text-xs text-gray-400 mb-4">
-                        Build your project page with blocks. Add text, images, SVGs, code snippets, and more.
+                        Build your article with blocks.
                       </p>
                       <BlockEditor
-                        blocks={projectBlocks}
-                        onChange={setProjectBlocks}
+                        blocks={writingBlocks}
+                        onChange={setWritingBlocks}
                         onUpload={handleFileUpload}
                         uploading={uploading}
                       />
                     </div>
-                  </>
-                )}
+                  )}
 
-                {activeTab === 'illustrations' && (
-                  <>
-                    {/* Thumbnail Upload */}
-                    <div>
-                      <label className="text-xs text-gray-500 mb-2 block">Thumbnail Image</label>
-                      <div className="flex items-center gap-4">
-                        {(previewImages.thumbnail || formData.thumbnail) && (
-                          <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
-                            <Image
-                              src={previewImages.thumbnail || formData.thumbnail}
-                              alt="Thumbnail"
-                              width={64}
-                              height={64}
-                              className="w-full h-full object-cover"
-                              unoptimized={!!previewImages.thumbnail}
-                            />
-                          </div>
-                        )}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={async (e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              const previewUrl = URL.createObjectURL(file);
-                              setPreviewImages({ ...previewImages, thumbnail: previewUrl });
+                  <div className="flex gap-3 pt-2">
+                    <Button type="submit" loading={loading}>
+                      {editingId ? 'Update' : 'Create'}
+                    </Button>
+                    {editingId && (
+                      <Button type="button" variant="secondary" onClick={handleCancelEdit}>
+                        Cancel
+                      </Button>
+                    )}
+                  </div>
+                </form>
+              </Section>
 
-                              const path = await handleFileUpload(file, 'illustrations');
-                              if (path) {
-                                setFormData({ ...formData, thumbnail: path });
-                              }
-                            }
-                          }}
-                          className="text-sm"
-                        />
-                      </div>
+              {/* Content List */}
+              <Section title={`All ${activeTab}`}>
+                {content && content[activeTab as ContentType]?.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                      <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                      </svg>
                     </div>
-                    <input
-                      type="text"
-                      placeholder="YouTube URL"
-                      value={formData.youtubeUrl || ''}
-                      onChange={(e) => setFormData({ ...formData, youtubeUrl: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
-                    />
-                  </>
-                )}
-
-                {activeTab === 'writings' && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <h3 className="text-sm font-medium text-gray-900 mb-4">Article Content</h3>
-                    <p className="text-xs text-gray-400 mb-4">
-                      Build your article with blocks. Add text, images, code snippets, quotes, and more.
-                    </p>
-                    <BlockEditor
-                      blocks={writingBlocks}
-                      onChange={setWritingBlocks}
-                      onUpload={handleFileUpload}
-                      uploading={uploading}
-                    />
+                    <p className="text-sm text-gray-400">No {activeTab} yet</p>
+                    <p className="text-xs text-gray-300 mt-1">Create your first one above</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {content &&
+                      (content[activeTab as ContentType] as unknown as Array<{ id: string; title: string; description: string; thumbnail?: string } & Record<string, unknown>>)?.map((item) => (
+                        <div
+                          key={item.id}
+                          className={`flex items-center justify-between p-4 rounded-xl transition-all ${
+                            editingId === item.id
+                              ? 'bg-blue-50 border-2 border-blue-200'
+                              : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+                          }`}
+                        >
+                          <div className="flex items-center gap-4 min-w-0">
+                            {activeTab === 'illustrations' && item.thumbnail && (
+                              <div className="w-14 h-14 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
+                                <Image
+                                  src={item.thumbnail}
+                                  alt={item.title}
+                                  width={56}
+                                  height={56}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-gray-900 truncate">{item.title}</p>
+                              <p className="text-xs text-gray-400 truncate">{item.description}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+                            <Button
+                              variant="ghost"
+                              onClick={() => handleEdit(item as Record<string, unknown>)}
+                              className="!px-3 !py-1.5"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                              </svg>
+                              Edit
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              onClick={() => handleDelete(activeTab as ContentType, item.id, item.title)}
+                              className="!px-3 !py-1.5 !text-red-500 hover:!text-red-600 hover:!bg-red-50"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                              </svg>
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
                   </div>
                 )}
-
-                <button
-                  type="submit"
-                  disabled={loading || uploading}
-                  className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
-                >
-                  {loading ? 'Saving...' : editingId ? 'Update' : 'Add'}
-                </button>
-              </form>
+              </Section>
             </div>
+          )}
 
-            {/* Content List */}
-            <div>
-              <h2 className="text-sm font-medium text-gray-900 mb-4">
-                Existing {activeTab}
-              </h2>
-              <div className="space-y-2">
-                {content && content[activeTab as ContentType]?.length === 0 && (
-                  <p className="text-sm text-gray-400">No items yet</p>
-                )}
-                {content &&
-                  (content[activeTab as ContentType] as unknown as Array<{ id: string; title: string; description: string; thumbnail?: string } & Record<string, unknown>>)?.map((item) => (
-                    <div
-                      key={item.id}
-                      className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
-                        editingId === item.id ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-4">
-                        {activeTab === 'illustrations' && item.thumbnail && (
-                          <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
-                            <Image
-                              src={item.thumbnail}
-                              alt={item.title}
-                              width={48}
-                              height={48}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        )}
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{item.title}</p>
-                          <p className="text-xs text-gray-400">{item.description}</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => handleEdit(item as Record<string, unknown>)}
-                          className="text-xs text-blue-500 hover:text-blue-700 transition-colors"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(activeTab as ContentType, item.id)}
-                          className="text-xs text-red-400 hover:text-red-600 transition-colors"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Note */}
-        <p className="text-xs text-gray-300 mt-12">
-          Content is stored in Supabase and synced to the frontend with a 60-second cache.
-        </p>
-      </div>
-    </main>
+          {/* Footer */}
+          <p className="text-xs text-gray-300 mt-12 text-center">
+            Content synced to Supabase with 60-second cache
+          </p>
+        </div>
+      </main>
+    </>
   );
 }
