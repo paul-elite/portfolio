@@ -600,7 +600,7 @@ export default function AdminPage() {
     return (
       <>
         <ToastContainer />
-        <main className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
+        <main className="min-h-screen bg-gray-50 flex items-center justify-center p-8 tracking-tight">
           <div className="w-full max-w-sm">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
               <div className="text-center mb-8">
@@ -676,7 +676,7 @@ export default function AdminPage() {
   return (
     <>
       <ToastContainer />
-      <main className="min-h-screen bg-gray-50">
+      <main className="min-h-screen bg-gray-50 tracking-tight">
         <div className="max-w-5xl mx-auto px-6 py-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
