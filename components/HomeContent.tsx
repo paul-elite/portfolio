@@ -215,11 +215,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
               return (
                 <div
-                  className="flex gap-6 h-full min-h-[300px] w-full md:w-[calc(166%+1.5rem)]"
+                  className="flex gap-6 h-full items-center w-full md:w-[calc(166%+1.5rem)]"
                   onWheel={handleWheel}
                 >
                   {/* 2x2 Grid (1 col on mobile, 2 on desktop) */}
-                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-2 gap-4 content-start">
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-2 gap-4 content-center">
                     {currentItems.map((item) => {
                       const isPlayingInline = playingInlineId === item.id;
                       const youtubeId = item.youtubeUrl ? getYouTubeId(item.youtubeUrl) : null;
