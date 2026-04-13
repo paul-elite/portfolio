@@ -310,7 +310,7 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<TabType>('profile');
   const [content, setContent] = useState<ContentStore | null>(null);
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [uploadingField, setUploadingField] = useState<string | null>(null);
 
   // Form states
   const [formData, setFormData] = useState<Record<string, string>>({});
@@ -375,8 +375,8 @@ export default function AdminPage() {
     setLoading(false);
   };
 
-  const handleFileUpload = async (file: File, folder: string): Promise<string | null> => {
-    setUploading(true);
+  const handleFileUpload = async (file: File, folder: string, fieldId?: string): Promise<string | null> => {
+    if (fieldId) setUploadingField(fieldId);
     const loadingToast = toast.loading(`Uploading ${file.name}...`);
 
     try {
@@ -400,7 +400,7 @@ export default function AdminPage() {
     } catch {
       toast.update(loadingToast, 'Upload failed', 'error');
     } finally {
-      setUploading(false);
+      setUploadingField(null);
     }
     return null;
   };
@@ -733,15 +733,15 @@ export default function AdminPage() {
                   label=""
                   accept="image/*"
                   preview={avatarPreview || settings.avatar}
-                  uploading={uploading}
+                  uploading={uploadingField === 'avatar'}
                   aspectRatio="square"
                   helpText="JPG or PNG. Max 5MB."
                   onUpload={async (file) => {
                     const previewUrl = URL.createObjectURL(file);
                     setAvatarPreview(previewUrl);
-                    const path = await handleFileUpload(file, '');
+                    const path = await handleFileUpload(file, '', 'avatar');
                     if (path) {
-                      setSettings({ ...settings, avatar: path });
+                      setSettings((prev) => ({ ...prev, avatar: path }));
                     }
                   }}
                 />
@@ -753,15 +753,15 @@ export default function AdminPage() {
                   label=""
                   accept="image/png,image/svg+xml,image/jpeg"
                   preview={metaImagePreview || settings.metaImage}
-                  uploading={uploading}
+                  uploading={uploadingField === 'metaImage'}
                   aspectRatio="wide"
                   helpText="Recommended: 1200x630px"
                   onUpload={async (file) => {
                     const previewUrl = URL.createObjectURL(file);
                     setMetaImagePreview(previewUrl);
-                    const path = await handleFileUpload(file, 'meta');
+                    const path = await handleFileUpload(file, 'meta', 'metaImage');
                     if (path) {
-                      setSettings({ ...settings, metaImage: path });
+                      setSettings((prev) => ({ ...prev, metaImage: path }));
                     }
                   }}
                 />
@@ -920,15 +920,15 @@ export default function AdminPage() {
                         label="Preview Image"
                         accept="image/*"
                         preview={previewImages.preview || formData.preview}
-                        uploading={uploading}
+                        uploading={uploadingField === 'preview'}
                         aspectRatio="video"
                         helpText="Shown in project list"
                         onUpload={async (file) => {
                           const previewUrl = URL.createObjectURL(file);
-                          setPreviewImages({ ...previewImages, preview: previewUrl });
-                          const path = await handleFileUpload(file, 'previews');
+                          setPreviewImages((prev) => ({ ...prev, preview: previewUrl }));
+                          const path = await handleFileUpload(file, 'previews', 'preview');
                           if (path) {
-                            setFormData({ ...formData, preview: path });
+                            setFormData((prev) => ({ ...prev, preview: path }));
                           }
                         }}
                       />
@@ -950,8 +950,8 @@ export default function AdminPage() {
                         <BlockEditor
                           blocks={projectBlocks}
                           onChange={setProjectBlocks}
-                          onUpload={handleFileUpload}
-                          uploading={uploading}
+                          onUpload={(file, folder) => handleFileUpload(file, folder, 'projectBlock')}
+                          uploading={uploadingField === 'projectBlock'}
                         />
                       </div>
                     </>
@@ -963,15 +963,15 @@ export default function AdminPage() {
                         label="Thumbnail"
                         accept="image/*"
                         preview={previewImages.thumbnail || formData.thumbnail}
-                        uploading={uploading}
+                        uploading={uploadingField === 'thumbnail'}
                         aspectRatio="video"
                         helpText="Cover image for the illustration"
                         onUpload={async (file) => {
                           const previewUrl = URL.createObjectURL(file);
-                          setPreviewImages({ ...previewImages, thumbnail: previewUrl });
-                          const path = await handleFileUpload(file, 'illustrations');
+                          setPreviewImages((prev) => ({ ...prev, thumbnail: previewUrl }));
+                          const path = await handleFileUpload(file, 'illustrations', 'thumbnail');
                           if (path) {
-                            setFormData({ ...formData, thumbnail: path });
+                            setFormData((prev) => ({ ...prev, thumbnail: path }));
                           }
                         }}
                       />
@@ -999,8 +999,8 @@ export default function AdminPage() {
                       <BlockEditor
                         blocks={writingBlocks}
                         onChange={setWritingBlocks}
-                        onUpload={handleFileUpload}
-                        uploading={uploading}
+                        onUpload={(file, folder) => handleFileUpload(file, folder, 'writingBlock')}
+                        uploading={uploadingField === 'writingBlock'}
                       />
                     </div>
                   )}
