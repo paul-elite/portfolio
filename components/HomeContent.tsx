@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import OptimizedImage from './OptimizedImage';
 import { Project, Illustration } from '@/lib/data';
 import { useNowPlaying, NowPlayingContent, NowPlayingImage } from './NowPlaying';
 
@@ -245,11 +246,12 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                                 className="w-full h-full relative cursor-pointer"
                               >
                                 {item.thumbnail ? (
-                                  <Image
+                                  <OptimizedImage
                                     src={item.thumbnail}
                                     alt={item.title}
                                     fill
                                     className="object-cover"
+                                    sizes="(max-width: 640px) 100vw, 50vw"
                                   />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center">
@@ -481,11 +483,12 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               {/* Screen */}
               <div className="w-full h-full bg-gray-100 rounded-[38px] overflow-hidden flex items-center justify-center">
                 {hoveredProject && hoveredProject.preview ? (
-                  <Image
+                  <OptimizedImage
                     src={hoveredProject.preview}
                     alt={hoveredProject.title}
                     fill
                     className="object-cover"
+                    sizes="266px"
                   />
                 ) : hoveredProject ? (
                   <span className="text-gray-400 text-sm text-center px-6">

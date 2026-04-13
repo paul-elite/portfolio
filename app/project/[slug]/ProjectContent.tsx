@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import OptimizedImage from '@/components/OptimizedImage';
 import { Project, ContentBlock } from '@/lib/data';
 
 interface ProjectNav {
@@ -32,11 +33,12 @@ function renderBlock(block: ContentBlock, index: number) {
     case 'image':
       return (
         <div key={index} className="my-6 relative aspect-video rounded-lg overflow-hidden">
-          <Image
+          <OptimizedImage
             src={block.content}
             alt=""
             fill
             className="object-cover"
+            sizes="(max-width: 768px) 100vw, 50vw"
           />
         </div>
       );
@@ -115,11 +117,12 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
               <div className="mb-8 md:mb-16 mt-6 md:mt-0">
                 <div className="relative w-full max-w-[266px] mx-auto md:mx-0 aspect-[266/560] bg-gray-900 rounded-[48px] p-3 shadow-xl">
                   <div className="w-full h-full bg-gray-100 rounded-[38px] overflow-hidden flex items-center justify-center relative">
-                    <Image
+                    <OptimizedImage
                       src={project.preview}
                       alt={project.title}
                       fill
                       className="object-cover"
+                      sizes="266px"
                     />
                   </div>
                   <div className="absolute top-5 left-1/2 -translate-x-1/2 w-20 h-6 bg-gray-900 rounded-full" />
