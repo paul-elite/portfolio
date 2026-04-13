@@ -72,7 +72,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   ];
 
   return (
-    <div className="min-h-screen flex flex-col pt-24 pb-4 md:pt-48 md:pb-16 pl-2 pr-3 md:px-0">
+    <div className="min-h-screen flex flex-col pt-16 pb-4 md:pt-32 md:pb-16 pl-2 pr-3 md:px-0">
       {/* Main content area */}
       <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6">
         {/* Columns 1-2: Whitespace (desktop only) */}
@@ -100,7 +100,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         {/* Text Content */}
         <div className="flex-1 md:col-span-3 flex flex-col min-w-0">
           {/* Name */}
-          <div className="h-auto md:h-14 mb-10 md:mb-6">
+          <div className="h-auto md:h-14 mb-6 md:mb-4">
             <h1 className="text-base font-semibold text-gray-900">
               {siteConfig.name}
             </h1>
