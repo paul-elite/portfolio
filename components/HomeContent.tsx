@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import OptimizedImage from './OptimizedImage';
@@ -55,11 +55,34 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const [githubHovered, setGithubHovered] = useState(false);
   const [githubMousePos, setGithubMousePos] = useState({ x: 0, y: 0 });
   const [showMoreTabs, setShowMoreTabs] = useState(false);
+  const [previewImageIndex, setPreviewImageIndex] = useState(0);
   const githubRef = useRef<HTMLAnchorElement>(null);
   const nowPlayingData = useNowPlaying();
 
   const siteConfig = initialConfig;
   const content = initialContent;
+
+  // Get all images from the hovered project's blocks
+  const projectImages = useMemo(() => {
+    if (!hoveredProject?.blocks) return [];
+    return hoveredProject.blocks
+      .filter((block) => block.type === 'image')
+      .map((block) => block.content);
+  }, [hoveredProject]);
+
+  // Cycle through project images
+  useEffect(() => {
+    if (!hoveredProject || projectImages.length <= 1) {
+      setPreviewImageIndex(0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setPreviewImageIndex((prev) => (prev + 1) % projectImages.length);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [hoveredProject, projectImages.length]);
 
   const mainTabs: { key: Tab; label: string }[] = [
     { key: 'projects', label: 'Projects' },
@@ -481,8 +504,19 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             {/* Mobile Phone Mockup */}
             <div className="relative w-[266px] h-[560px] bg-gray-900 rounded-[48px] p-3 shadow-xl">
               {/* Screen */}
-              <div className="w-full h-full bg-gray-100 rounded-[38px] overflow-hidden flex items-center justify-center">
-                {hoveredProject && hoveredProject.preview ? (
+              <div className="w-full h-full bg-gray-100 rounded-[38px] overflow-hidden flex items-center justify-center relative">
+                {hoveredProject && projectImages.length > 0 ? (
+                  // Show cycling images from project blocks
+                  <Image
+                    key={projectImages[previewImageIndex]}
+                    src={projectImages[previewImageIndex]}
+                    alt={hoveredProject.title}
+                    fill
+                    className="object-contain transition-opacity duration-500"
+                    sizes="266px"
+                  />
+                ) : hoveredProject && hoveredProject.preview ? (
+                  // Fall back to preview image
                   <OptimizedImage
                     src={hoveredProject.preview}
                     alt={hoveredProject.title}
