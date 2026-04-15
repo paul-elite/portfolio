@@ -88,7 +88,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
     const interval = setInterval(() => {
       setPreviewImageIndex((prev) => (prev + 1) % projectImages.length);
-    }, 2000);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [hoveredProject, projectImages.length]);
