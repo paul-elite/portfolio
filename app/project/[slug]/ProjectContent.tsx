@@ -32,12 +32,13 @@ function renderBlock(block: ContentBlock, index: number) {
       );
     case 'image':
       return (
-        <div key={index} className="my-6 relative aspect-video rounded-lg overflow-hidden">
+        <div key={index} className="my-6 rounded-lg overflow-hidden">
           <OptimizedImage
             src={block.content}
             alt=""
-            fill
-            className="object-cover"
+            width={800}
+            height={600}
+            className="w-full h-auto"
             sizes="(max-width: 768px) 100vw, 50vw"
           />
         </div>
