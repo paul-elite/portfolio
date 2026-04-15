@@ -494,45 +494,25 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         {/* Column 7: Gap (desktop only) */}
         <div className="hidden md:block md:col-span-1" />
 
-        {/* Columns 8-10: Mobile Preview (desktop only) */}
+        {/* Columns 8-10: Project Images Preview (desktop only) */}
         <div className="hidden md:flex md:col-span-3 items-start">
           <div
-            className={`transition-opacity duration-200 ${
-              hoveredProject ? 'opacity-100' : 'opacity-0'
+            className={`transition-opacity duration-300 w-full ${
+              hoveredProject && projectImages.length > 0 ? 'opacity-100' : 'opacity-0'
             }`}
           >
-            {/* Mobile Phone Mockup */}
-            <div className="relative w-[266px] h-[560px] bg-gray-900 rounded-[48px] p-3 shadow-xl">
-              {/* Screen */}
-              <div className="w-full h-full bg-gray-100 rounded-[38px] overflow-hidden flex items-center justify-center relative">
-                {hoveredProject && projectImages.length > 0 ? (
-                  // Show cycling images from project blocks
-                  <Image
-                    key={projectImages[previewImageIndex]}
-                    src={projectImages[previewImageIndex]}
-                    alt={hoveredProject.title}
-                    fill
-                    className="object-contain transition-opacity duration-500"
-                    sizes="266px"
-                  />
-                ) : hoveredProject && hoveredProject.preview ? (
-                  // Fall back to preview image
-                  <OptimizedImage
-                    src={hoveredProject.preview}
-                    alt={hoveredProject.title}
-                    fill
-                    className="object-cover"
-                    sizes="266px"
-                  />
-                ) : hoveredProject ? (
-                  <span className="text-gray-400 text-sm text-center px-6">
-                    {hoveredProject.title}
-                  </span>
-                ) : null}
+            {hoveredProject && projectImages.length > 0 && (
+              <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden">
+                <Image
+                  key={projectImages[previewImageIndex]}
+                  src={projectImages[previewImageIndex]}
+                  alt={hoveredProject.title}
+                  fill
+                  className="object-contain"
+                  sizes="(max-width: 768px) 100vw, 25vw"
+                />
               </div>
-              {/* Notch */}
-              <div className="absolute top-5 left-1/2 -translate-x-1/2 w-20 h-6 bg-gray-900 rounded-full" />
-            </div>
+            )}
           </div>
         </div>
 
