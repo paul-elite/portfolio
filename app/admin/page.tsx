@@ -16,6 +16,7 @@ interface Project {
   year: string;
   role: string;
   preview?: string;
+  previewImages?: string[];
   link?: string;
   blocks?: Block[];
   caseStudy?: {
@@ -329,6 +330,7 @@ export default function AdminPage() {
   const [avatarPreview, setAvatarPreview] = useState<string>('');
   const [metaImagePreview, setMetaImagePreview] = useState<string>('');
   const [previewImages, setPreviewImages] = useState<Record<string, string>>({});
+  const [homepageImages, setHomepageImages] = useState<string[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const fetchContent = async () => {
@@ -427,6 +429,7 @@ export default function AdminPage() {
         data.outcome = cs.outcome || '';
       }
       setProjectBlocks((item.blocks as Block[]) || []);
+      setHomepageImages((item.previewImages as string[]) || []);
     } else if (activeTab === 'illustrations') {
       data.thumbnail = (item.thumbnail as string) || '';
       data.youtubeUrl = (item.youtubeUrl as string) || '';
@@ -452,6 +455,7 @@ export default function AdminPage() {
     setPreviewImages({});
     setProjectBlocks([]);
     setWritingBlocks([]);
+    setHomepageImages([]);
     toast.info('Cancelled editing');
   };
 
@@ -467,6 +471,9 @@ export default function AdminPage() {
       if (activeTab === 'projects') {
         if (projectBlocks.length > 0) {
           data.blocks = projectBlocks;
+        }
+        if (homepageImages.length > 0) {
+          data.previewImages = homepageImages;
         }
         if (formData.overview || formData.challenge || formData.approach || formData.outcome) {
           data.caseStudy = {
@@ -512,6 +519,7 @@ export default function AdminPage() {
         setPreviewImages({});
         setProjectBlocks([]);
         setWritingBlocks([]);
+        setHomepageImages([]);
         setEditingId(null);
         fetchContent();
       } else {
@@ -711,6 +719,7 @@ export default function AdminPage() {
                   setPreviewImages({});
                   setProjectBlocks([]);
                   setWritingBlocks([]);
+                  setHomepageImages([]);
                   setEditingId(null);
                 }}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
@@ -941,6 +950,90 @@ export default function AdminPage() {
                         type="url"
                         helpText="Optional external link"
                       />
+
+                      {/* Homepage Preview Images */}
+                      <div className="pt-4 border-t border-gray-100">
+                        <h3 className="text-sm font-medium text-gray-900 mb-1">Homepage Preview Images</h3>
+                        <p className="text-xs text-gray-400 mb-4">
+                          Images that cycle when hovering on the homepage. Upload multiple images.
+                        </p>
+
+                        {/* Current images */}
+                        {homepageImages.length > 0 && (
+                          <div className="grid grid-cols-4 gap-3 mb-4">
+                            {homepageImages.map((img, index) => (
+                              <div key={index} className="relative group aspect-video rounded-lg overflow-hidden bg-gray-100">
+                                <Image
+                                  src={img}
+                                  alt={`Preview ${index + 1}`}
+                                  fill
+                                  className="object-cover"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setHomepageImages((prev) => prev.filter((_, i) => i !== index));
+                                  }}
+                                  className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                                >
+                                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                                <span className="absolute bottom-1 left-1 text-xs text-white bg-black/50 px-1.5 py-0.5 rounded">
+                                  {index + 1}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Add new image button */}
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            id="homepage-image-upload"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const path = await handleFileUpload(file, 'previews', 'homepageImage');
+                                if (path) {
+                                  setHomepageImages((prev) => [...prev, path]);
+                                }
+                              }
+                              e.target.value = '';
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => document.getElementById('homepage-image-upload')?.click()}
+                            disabled={uploadingField === 'homepageImage'}
+                            className="px-4 py-2 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                          >
+                            {uploadingField === 'homepageImage' ? (
+                              <>
+                                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                </svg>
+                                Uploading...
+                              </>
+                            ) : (
+                              <>
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                                Add Image
+                              </>
+                            )}
+                          </button>
+                          {homepageImages.length > 0 && (
+                            <span className="text-xs text-gray-400">{homepageImages.length} image{homepageImages.length !== 1 ? 's' : ''}</span>
+                          )}
+                        </div>
+                      </div>
 
                       <div className="pt-4 border-t border-gray-100">
                         <h3 className="text-sm font-medium text-gray-900 mb-1">Project Content</h3>

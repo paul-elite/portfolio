@@ -62,12 +62,21 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const siteConfig = initialConfig;
   const content = initialContent;
 
-  // Get all images from the hovered project's blocks
+  // Get preview images from the hovered project
+  // Use previewImages if available, otherwise fall back to extracting from blocks
   const projectImages = useMemo(() => {
-    if (!hoveredProject?.blocks) return [];
-    return hoveredProject.blocks
-      .filter((block) => block.type === 'image')
-      .map((block) => block.content);
+    if (!hoveredProject) return [];
+    // Use dedicated previewImages array if available
+    if (hoveredProject.previewImages && hoveredProject.previewImages.length > 0) {
+      return hoveredProject.previewImages;
+    }
+    // Fallback: extract images from blocks
+    if (hoveredProject.blocks) {
+      return hoveredProject.blocks
+        .filter((block) => block.type === 'image')
+        .map((block) => block.content);
+    }
+    return [];
   }, [hoveredProject]);
 
   // Cycle through project images

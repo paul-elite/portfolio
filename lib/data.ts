@@ -9,6 +9,7 @@ export interface Project {
   title: string;
   description: string;
   preview?: string;
+  previewImages?: string[];
   link?: string;
   tags?: string[];
   year?: string;
