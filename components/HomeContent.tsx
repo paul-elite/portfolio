@@ -495,14 +495,14 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         <div className="hidden md:block md:col-span-1" />
 
         {/* Columns 8-10: Project Images Preview (desktop only) */}
-        <div className="hidden md:flex md:col-span-3 items-start">
+        <div className="hidden md:flex md:col-span-3 items-stretch">
           <div
-            className={`transition-opacity duration-300 w-full ${
+            className={`transition-opacity duration-300 w-full h-full ${
               hoveredProject && projectImages.length > 0 ? 'opacity-100' : 'opacity-0'
             }`}
           >
             {hoveredProject && projectImages.length > 0 && (
-              <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden">
+              <div className="relative w-full h-full rounded-lg overflow-hidden">
                 <Image
                   key={projectImages[previewImageIndex]}
                   src={projectImages[previewImageIndex]}
