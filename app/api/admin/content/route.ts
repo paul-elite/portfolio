@@ -74,9 +74,16 @@ export async function GET(request: NextRequest) {
       youtubeUrl: item.youtube_url,
     }));
 
+    // Transform projects to camelCase for frontend
+    const projects = (projectsRes.data || []).map((item: Record<string, unknown>) => ({
+      ...item,
+      caseStudy: item.case_study,
+      previewImages: item.preview_images,
+    }));
+
     return NextResponse.json({
       settings,
-      projects: projectsRes.data || [],
+      projects,
       writings: writingsRes.data || [],
       illustrations,
       interactions: interactionsRes.data || [],
@@ -116,6 +123,7 @@ export async function POST(request: NextRequest) {
         year: data.year || '',
         role: data.role || '',
         preview: data.preview || '',
+        preview_images: data.previewImages || [],
         link: data.link || '',
         blocks: data.blocks || [],
         case_study: data.caseStudy || null,
@@ -185,9 +193,22 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
     }
 
+    // Transform camelCase to snake_case for database
+    let updateData = { ...data };
+    if (type === 'projects') {
+      if ('caseStudy' in updateData) {
+        updateData.case_study = updateData.caseStudy;
+        delete updateData.caseStudy;
+      }
+      if ('previewImages' in updateData) {
+        updateData.preview_images = updateData.previewImages;
+        delete updateData.previewImages;
+      }
+    }
+
     const { data: updatedItem, error } = await supabase
       .from(type)
-      .update(data)
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();

@@ -50,6 +50,7 @@ async function getContent() {
     const projects = (projectsRes.data || []).map(p => ({
       ...p,
       caseStudy: p.case_study,
+      previewImages: p.preview_images,
     }));
     const writings = writingsRes.data || [];
     const illustrations = (illustrationsRes.data || []).map(i => ({
