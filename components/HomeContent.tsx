@@ -107,8 +107,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     <div className="min-h-screen flex flex-col pt-16 pb-4 md:pt-32 md:pb-16 pl-2 pr-3 md:px-0">
       {/* Main content area */}
       <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6">
-        {/* Columns 1-2: Whitespace (desktop only) */}
-        <div className="hidden md:block md:col-span-2" />
+        {/* Column 1: Whitespace (desktop only) */}
+        <div className="hidden md:block md:col-span-1" />
 
         {/* Avatar - 12px from edge on mobile */}
         <div className="flex-shrink-0 md:col-span-1 md:flex md:justify-end md:items-start">
@@ -503,8 +503,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         {/* Column 7: Gap (desktop only) */}
         <div className="hidden md:block md:col-span-1" />
 
-        {/* Columns 8-10: Project Images Preview (desktop only) */}
-        <div className="hidden md:flex md:col-span-3 items-stretch">
+        {/* Columns 7-11: Project Images Preview (desktop only) */}
+        <div className="hidden md:flex md:col-span-5 items-stretch">
           <div
             className={`transition-opacity duration-300 w-full h-full ${
               hoveredProject && projectImages.length > 0 ? 'opacity-100' : 'opacity-0'
@@ -525,8 +525,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
         </div>
 
-        {/* Columns 11-12: Whitespace (desktop only) */}
-        <div className="hidden md:block md:col-span-2" />
+        {/* Column 12: Whitespace (desktop only) */}
+        <div className="hidden md:block md:col-span-1" />
       </div>
 
       {/* Mobile Bottom Section - Now Playing & Contacts */}
