@@ -215,18 +215,18 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
               return (
                 <div
-                  className="flex gap-6 h-full items-center w-full md:w-[calc(166%+1.5rem)]"
+                  className="flex gap-6 h-full items-center w-full"
                   onWheel={handleWheel}
                 >
                   {/* 2x2 Grid (1 col on mobile, 2 on desktop) */}
-                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-2 gap-4 content-center">
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 content-center">
                     {currentItems.map((item) => {
                       const isPlayingInline = playingInlineId === item.id;
                       const youtubeId = item.youtubeUrl ? getYouTubeId(item.youtubeUrl) : null;
 
                       return (
                         <div key={item.id} className="group block">
-                          <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden relative">
+                          <div className="bg-gray-100 rounded-lg overflow-hidden relative">
                             {isPlayingInline && youtubeId ? (
                               // Inline video player
                               <>
@@ -256,18 +256,19 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                                     setPlayingInlineId(item.id);
                                   }
                                 }}
-                                className="w-full h-full relative cursor-pointer"
+                                className="w-full relative cursor-pointer block"
                               >
                                 {item.thumbnail ? (
                                   <OptimizedImage
                                     src={item.thumbnail}
                                     alt={item.title}
-                                    fill
-                                    className="object-cover"
+                                    width={400}
+                                    height={300}
+                                    className="w-full h-auto object-contain"
                                     sizes="(max-width: 640px) 100vw, 50vw"
                                   />
                                 ) : (
-                                  <div className="w-full h-full flex items-center justify-center">
+                                  <div className="w-full aspect-video flex items-center justify-center">
                                     <span className="text-gray-300 text-xs">{item.title}</span>
                                   </div>
                                 )}
@@ -376,8 +377,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             })()}
           </div>
 
-          {/* Now Playing - Desktop only (uses negative margin) */}
-          <div className={`hidden md:block ${activeTab === 'illustration' ? 'w-full md:w-[calc(166%+1.5rem)]' : ''}`}>
+          {/* Now Playing - Desktop only */}
+          <div className="hidden md:block">
             <NowPlayingContent data={nowPlayingData} />
           </div>
 
