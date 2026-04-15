@@ -215,7 +215,8 @@ export async function PUT(request: NextRequest) {
 
     if (error) {
       console.error('Update error:', error);
-      return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
+      console.error('Update data was:', JSON.stringify(updateData, null, 2));
+      return NextResponse.json({ error: 'Failed to update', details: error.message }, { status: 500 });
     }
 
     // Revalidate frontend cache

@@ -523,7 +523,10 @@ export default function AdminPage() {
         setEditingId(null);
         fetchContent();
       } else {
-        toast.update(loadingToast, isEditing ? 'Failed to update' : 'Failed to create', 'error');
+        const errorData = await res.json().catch(() => ({}));
+        const errorMsg = errorData.details || (isEditing ? 'Failed to update' : 'Failed to create');
+        toast.update(loadingToast, errorMsg, 'error');
+        console.error('Submit error:', errorData);
       }
     } catch {
       toast.update(loadingToast, 'Something went wrong', 'error');
