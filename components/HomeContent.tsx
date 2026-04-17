@@ -177,42 +177,23 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     <div className="min-h-screen flex flex-col pt-16 pb-4 md:pt-32 md:pb-16 pl-2 pr-3 md:px-6">
       {/* Main content area */}
       <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6">
-        {/* Avatar */}
-        <div className="flex-shrink-0 md:col-span-1 md:flex md:justify-end md:items-start">
+        {/* Avatar Column */}
+        <div className="flex-shrink-0 md:col-span-1 md:flex md:flex-col md:items-end md:gap-6">
+          {/* Main User Avatar */}
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden">
-            {(() => {
-              // Determine which avatar to show
-              const hasActiveContent = selectedProject || selectedCategory;
-              const projectAvatar = selectedProject?.avatar;
-              const focusedAvatar = siteConfig.avatarFocused;
-              const defaultAvatar = siteConfig.avatar;
-
-              const currentAvatar = hasActiveContent
-                ? (projectAvatar || focusedAvatar || defaultAvatar)
-                : defaultAvatar;
-
-              return currentAvatar ? (
-                <Image
-                  key={currentAvatar}
-                  src={currentAvatar}
-                  alt={selectedProject?.title || siteConfig.name}
-                  width={40}
-                  height={40}
-                  className="w-full h-full object-cover transition-all duration-300"
-                />
-              ) : (
-                <span className="text-sm font-medium text-gray-500">
-                  {siteConfig.name.charAt(0)}
-                </span>
-              );
-            })()}
-          </div>
-          {/* DEBUG: Remove after testing */}
-          <div className="hidden md:block fixed top-2 left-2 text-[10px] bg-black/90 text-white p-2 rounded z-50 font-mono">
-            <div>default: {siteConfig.avatar ? 'YES' : 'NO'}</div>
-            <div>focused: {siteConfig.avatarFocused ? 'YES' : 'NO'}</div>
-            <div>projAvatar: {selectedProject?.avatar ? 'YES' : 'NO'}</div>
-            <div>hasSelection: {selectedProject ? 'YES' : 'NO'}</div>
+            {siteConfig.avatar ? (
+              <Image
+                src={siteConfig.avatar}
+                alt={siteConfig.name}
+                width={40}
+                height={40}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-sm font-medium text-gray-500">
+                {siteConfig.name.charAt(0)}
+              </span>
+            )}
           </div>
         </div>
 
@@ -499,11 +480,32 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           {selectedProject ? (
             // Show full project content when selected
             <div className="w-full pr-4">
-              {/* Project Title */}
-              <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedProject.title}</h2>
-              <div className="flex gap-4 text-sm text-gray-400 mb-6">
-                {selectedProject.year && <span>{selectedProject.year}</span>}
-                {selectedProject.role && <span>{selectedProject.role}</span>}
+              {/* Project Header with Avatar */}
+              <div className="flex items-start gap-3 mb-6">
+                {/* Project Avatar */}
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  {selectedProject.avatar ? (
+                    <Image
+                      src={selectedProject.avatar}
+                      alt={selectedProject.title}
+                      width={40}
+                      height={40}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-sm font-medium text-gray-500">
+                      {selectedProject.title.charAt(0)}
+                    </span>
+                  )}
+                </div>
+                {/* Project Title & Meta */}
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedProject.title}</h2>
+                  <div className="flex gap-4 text-sm text-gray-400">
+                    {selectedProject.year && <span>{selectedProject.year}</span>}
+                    {selectedProject.role && <span>{selectedProject.role}</span>}
+                  </div>
+                </div>
               </div>
 
               {/* Project Content */}
@@ -549,9 +551,19 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           ) : selectedCategory ? (
             // Show illustrations grid when category is selected
             <div className="w-full pr-4">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">
-                {ILLUSTRATION_CATEGORIES.find(c => c.key === selectedCategory)?.label}
-              </h2>
+              {/* Category Header with Icon */}
+              <div className="flex items-start gap-3 mb-6">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0">
+                  <span className="text-sm font-medium text-gray-500">
+                    {selectedCategory === 'app-icons' ? '📱' : selectedCategory === 'characters' ? '🎨' : '🖼️'}
+                  </span>
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    {ILLUSTRATION_CATEGORIES.find(c => c.key === selectedCategory)?.label}
+                  </h2>
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 {content.illustrations
                   .filter(item => (item.category || 'assets') === selectedCategory)
