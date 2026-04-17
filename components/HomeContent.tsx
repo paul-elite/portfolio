@@ -175,9 +175,16 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden">
             {(() => {
               // Determine which avatar to show
+              const projectAvatar = selectedProject?.avatar;
+              const focusedAvatar = siteConfig.avatarFocused;
+              const defaultAvatar = siteConfig.avatar;
+
               const currentAvatar = selectedProject
-                ? (selectedProject.avatar || siteConfig.avatarFocused || siteConfig.avatar)
-                : siteConfig.avatar;
+                ? (projectAvatar || focusedAvatar || defaultAvatar)
+                : defaultAvatar;
+
+              // Debug: remove after testing
+              console.log('Avatar debug:', { projectAvatar, focusedAvatar, defaultAvatar, currentAvatar, hasSelectedProject: !!selectedProject });
 
               return currentAvatar ? (
                 <Image
