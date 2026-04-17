@@ -382,12 +382,16 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   {sortedYears.map((year) => (
                     <div key={year}>
                       {writingsByYear[year].map((item, index) => (
-                        <div key={item.id} className="flex flex-col sm:flex-row sm:items-baseline py-3 border-b border-gray-100 last:border-0 gap-1 sm:gap-0">
+                        <Link
+                          key={item.id}
+                          href={`/writing/${item.slug}`}
+                          className="group flex flex-col sm:flex-row sm:items-baseline py-3 border-b border-gray-100 last:border-0 gap-1 sm:gap-0"
+                        >
                           <span className="w-16 text-sm text-gray-300 flex-shrink-0 hidden sm:block">
                             {index === 0 ? year : ''}
                           </span>
                           <div className="flex-1 flex items-center gap-2">
-                            <h3 className="text-base font-medium text-gray-900">
+                            <h3 className="text-base font-medium text-gray-900 group-hover:text-gray-600 transition-colors">
                               {item.title}
                             </h3>
                             {isNew(item.date) && (
@@ -396,10 +400,10 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                               </span>
                             )}
                           </div>
-                          <span className="text-sm text-gray-300 flex-shrink-0">
+                          <span className="text-sm text-gray-300 flex-shrink-0 sm:ml-8">
                             {item.date ? new Date(item.date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }).replace('/', '/') : ''}
                           </span>
-                        </div>
+                        </Link>
                       ))}
                     </div>
                   ))}
