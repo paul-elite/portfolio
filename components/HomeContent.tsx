@@ -198,7 +198,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
           {/* Project/Category Avatar - shows when content is selected */}
           {(selectedProject || selectedCategory) && (
-            <div className="hidden md:flex w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 items-center justify-center flex-shrink-0 mt-[88px] overflow-hidden">
+            <div className="hidden md:flex w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 items-center justify-center flex-shrink-0 mt-[180px] overflow-hidden">
               {selectedProject ? (
                 selectedProject.avatar ? (
                   <Image
