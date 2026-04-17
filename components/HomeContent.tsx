@@ -259,9 +259,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                 {content.projects.map((project) => {
                   const isSelected = selectedProject?.id === project.id;
                   return (
-                    <div key={project.id} className="flex items-start gap-3">
-                      {/* Project Avatar - only visible when selected */}
-                      <div className={`w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex-shrink-0 flex items-center justify-center overflow-hidden mt-3 transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`}>
+                    <div key={project.id} className="relative">
+                      {/* Project Avatar - positioned in avatar column */}
+                      <div className={`absolute right-full mr-6 top-3 w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center overflow-hidden transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`}>
                         {project.avatar ? (
                           <Image
                             src={project.avatar}
@@ -278,7 +278,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                       </div>
                       <button
                         onClick={() => setSelectedProject(isSelected ? null : project)}
-                        className={`group block py-3 flex-1 text-left ${isSelected ? 'opacity-100' : ''}`}
+                        className={`group block py-3 w-full text-left ${isSelected ? 'opacity-100' : ''}`}
                         onMouseEnter={() => !selectedProject && setHoveredProject(project)}
                         onMouseLeave={() => !selectedProject && setHoveredProject(null)}
                       >
@@ -320,16 +320,16 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   const count = content.illustrations.filter(i => (i.category || 'assets') === cat.key).length;
                   const isSelected = selectedCategory === cat.key;
                   return (
-                    <div key={cat.key} className="flex items-start gap-3">
-                      {/* Category Icon - only visible when selected */}
-                      <div className={`w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex-shrink-0 flex items-center justify-center mt-3 transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`}>
+                    <div key={cat.key} className="relative">
+                      {/* Category Icon - positioned in avatar column */}
+                      <div className={`absolute right-full mr-6 top-3 w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`}>
                         <span className="text-base">
                           {cat.key === 'app-icons' ? '📱' : cat.key === 'characters' ? '🎨' : '🖼️'}
                         </span>
                       </div>
                       <button
                         onClick={() => setSelectedCategory(isSelected ? null : cat.key)}
-                        className={`group block py-3 flex-1 text-left ${isSelected ? 'opacity-100' : ''}`}
+                        className={`group block py-3 w-full text-left ${isSelected ? 'opacity-100' : ''}`}
                       >
                         <h2 className={`text-base font-normal mb-0.5 transition-colors ${
                           isSelected
