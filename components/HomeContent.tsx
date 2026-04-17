@@ -166,12 +166,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   ];
 
   return (
-    <div className="min-h-screen flex flex-col pt-16 pb-4 md:pt-32 md:pb-16 pl-2 pr-3 md:px-0">
+    <div className="min-h-screen flex flex-col pt-16 pb-4 md:pt-32 md:pb-16 pl-2 pr-3 md:px-6">
       {/* Main content area */}
       <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6">
-        {/* Column 1: Whitespace (desktop only) */}
-        <div className="hidden md:block md:col-span-1" />
-
         {/* Avatar */}
         <div className="flex-shrink-0 md:col-span-1 md:flex md:justify-end md:items-start">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden">
@@ -528,9 +525,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </footer>
         </div>
 
-        {/* Gap Column */}
-        <div className="hidden md:block md:col-span-1" />
-
         {/* Right Column - Project Content or Preview Images */}
         <div className="hidden md:flex md:col-span-5 items-start overflow-y-auto max-h-[calc(100vh-8rem)]">
           {selectedProject ? (
@@ -613,8 +607,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           )}
         </div>
 
-        {/* Column 12: Whitespace */}
-        <div className="hidden md:block md:col-span-1" />
+        {/* Right Whitespace */}
+        <div className="hidden md:block md:col-span-3" />
       </div>
 
       {/* Mobile Bottom Section */}
