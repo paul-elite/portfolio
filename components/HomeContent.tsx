@@ -178,9 +178,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       {/* Main content area */}
       <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6 min-h-0">
         {/* Avatar Column */}
-        <div className="hidden md:block md:col-span-1">
-          <div className="flex flex-col items-end h-full">
-            {/* Main User Avatar */}
+        <div className="hidden md:flex md:col-span-1 flex-col items-end h-full">
+          {/* User Avatar - matches Name section height */}
+          <div className="h-14 mb-4 flex items-start">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden">
               {siteConfig.avatar ? (
                 <Image
@@ -196,6 +196,64 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                 </span>
               )}
             </div>
+          </div>
+
+          {/* Tabs spacer */}
+          <div className="mb-6 h-6" />
+
+          {/* Project Avatars - synced with content list */}
+          <div className="flex-1 overflow-y-auto min-h-0">
+            {activeTab === 'projects' && content.projects.map((project, index) => {
+              const isSelected = selectedProject?.id === project.id;
+              const colors = [
+                'from-blue-400 to-cyan-400',
+                'from-purple-400 to-pink-400',
+                'from-orange-400 to-red-400',
+                'from-green-400 to-teal-400',
+                'from-indigo-400 to-purple-400',
+                'from-pink-400 to-rose-400',
+              ];
+              const colorClass = colors[index % colors.length];
+
+              return (
+                <div key={project.id} className="py-3 flex items-start justify-end">
+                  <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center overflow-hidden transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`}>
+                    {project.avatar ? (
+                      <Image
+                        src={project.avatar}
+                        alt={project.title}
+                        width={40}
+                        height={40}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-sm font-medium text-white">
+                        {project.title.charAt(0)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            {activeTab === 'illustration' && ILLUSTRATION_CATEGORIES.map((cat, index) => {
+              const isSelected = selectedCategory === cat.key;
+              const colors = [
+                'from-yellow-400 to-orange-400',
+                'from-pink-400 to-purple-400',
+                'from-cyan-400 to-blue-400',
+              ];
+              const colorClass = colors[index % colors.length];
+
+              return (
+                <div key={cat.key} className="py-3 flex items-start justify-end">
+                  <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`}>
+                    <span className="text-base">
+                      {cat.key === 'app-icons' ? '📱' : cat.key === 'characters' ? '🎨' : '🖼️'}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -258,57 +316,27 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           <div className="flex-1 overflow-y-auto min-h-0">
             {activeTab === 'projects' && (
               <div>
-                {content.projects.map((project, index) => {
+                {content.projects.map((project) => {
                   const isSelected = selectedProject?.id === project.id;
-                  const colors = [
-                    'from-blue-400 to-cyan-400',
-                    'from-purple-400 to-pink-400',
-                    'from-orange-400 to-red-400',
-                    'from-green-400 to-teal-400',
-                    'from-indigo-400 to-purple-400',
-                    'from-pink-400 to-rose-400',
-                  ];
-                  const colorClass = colors[index % colors.length];
-
                   return (
-                    <div key={project.id} className="relative">
-                      {/* Project Avatar - positioned in avatar column via negative margin */}
-                      <div
-                        className={`absolute top-3 w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center overflow-hidden transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`}
-                        style={{ left: 'calc(-40px - 1.5rem)' }}
-                      >
-                        {project.avatar ? (
-                          <Image
-                            src={project.avatar}
-                            alt={project.title}
-                            width={40}
-                            height={40}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-sm font-medium text-white">
-                            {project.title.charAt(0)}
-                          </span>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => setSelectedProject(isSelected ? null : project)}
-                        className={`group block py-3 w-full text-left ${isSelected ? 'opacity-100' : ''}`}
-                        onMouseEnter={() => !selectedProject && setHoveredProject(project)}
-                        onMouseLeave={() => !selectedProject && setHoveredProject(null)}
-                      >
-                        <h2 className={`text-base font-normal mb-0.5 transition-colors ${
-                          isSelected
-                            ? 'text-gray-900'
-                            : 'text-gray-900 group-hover:text-gray-600'
-                        }`}>
-                          {project.title}
-                        </h2>
-                        <p className="text-sm text-gray-400">
-                          {project.year} <span className="mx-1">·</span> {project.description}
-                        </p>
-                      </button>
-                    </div>
+                    <button
+                      key={project.id}
+                      onClick={() => setSelectedProject(isSelected ? null : project)}
+                      className={`group block py-3 w-full text-left`}
+                      onMouseEnter={() => !selectedProject && setHoveredProject(project)}
+                      onMouseLeave={() => !selectedProject && setHoveredProject(null)}
+                    >
+                      <h2 className={`text-base font-normal mb-0.5 transition-colors ${
+                        isSelected
+                          ? 'text-gray-900'
+                          : 'text-gray-900 group-hover:text-gray-600'
+                      }`}>
+                        {project.title}
+                      </h2>
+                      <p className="text-sm text-gray-400">
+                        {project.year} <span className="mx-1">·</span> {project.description}
+                      </p>
+                    </button>
                   );
                 })}
               </div>
@@ -331,43 +359,26 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
             {activeTab === 'illustration' && (
               <div>
-                {ILLUSTRATION_CATEGORIES.map((cat, index) => {
+                {ILLUSTRATION_CATEGORIES.map((cat) => {
                   const count = content.illustrations.filter(i => (i.category || 'assets') === cat.key).length;
                   const isSelected = selectedCategory === cat.key;
-                  const colors = [
-                    'from-yellow-400 to-orange-400',
-                    'from-pink-400 to-purple-400',
-                    'from-cyan-400 to-blue-400',
-                  ];
-                  const colorClass = colors[index % colors.length];
-
                   return (
-                    <div key={cat.key} className="relative">
-                      {/* Category Icon - positioned in avatar column */}
-                      <div
-                        className={`absolute top-3 w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`}
-                        style={{ left: 'calc(-40px - 1.5rem)' }}
-                      >
-                        <span className="text-base">
-                          {cat.key === 'app-icons' ? '📱' : cat.key === 'characters' ? '🎨' : '🖼️'}
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => setSelectedCategory(isSelected ? null : cat.key)}
-                        className={`group block py-3 w-full text-left ${isSelected ? 'opacity-100' : ''}`}
-                      >
-                        <h2 className={`text-base font-normal mb-0.5 transition-colors ${
-                          isSelected
-                            ? 'text-gray-900'
-                            : 'text-gray-900 group-hover:text-gray-600'
-                        }`}>
-                          {cat.label}
-                        </h2>
-                        <p className="text-sm text-gray-400">
-                          {count} {count === 1 ? 'item' : 'items'}
-                        </p>
-                      </button>
-                    </div>
+                    <button
+                      key={cat.key}
+                      onClick={() => setSelectedCategory(isSelected ? null : cat.key)}
+                      className={`group block py-3 w-full text-left`}
+                    >
+                      <h2 className={`text-base font-normal mb-0.5 transition-colors ${
+                        isSelected
+                          ? 'text-gray-900'
+                          : 'text-gray-900 group-hover:text-gray-600'
+                      }`}>
+                        {cat.label}
+                      </h2>
+                      <p className="text-sm text-gray-400">
+                        {count} {count === 1 ? 'item' : 'items'}
+                      </p>
+                    </button>
                   );
                 })}
               </div>
