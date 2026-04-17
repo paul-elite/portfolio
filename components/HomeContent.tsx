@@ -539,17 +539,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           {selectedProject ? (
             // Show full project content when selected
             <div className="w-full pr-4">
-              {/* Close button */}
-              <button
-                onClick={() => setSelectedProject(null)}
-                className="mb-4 text-sm text-gray-400 hover:text-gray-600 transition-colors flex items-center gap-1"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="15 18 9 12 15 6" />
-                </svg>
-                Back
-              </button>
-
               {/* Project Title */}
               <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedProject.title}</h2>
               <div className="flex gap-4 text-sm text-gray-400 mb-6">
