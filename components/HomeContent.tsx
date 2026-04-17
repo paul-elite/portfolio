@@ -274,7 +274,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Tabs */}
-          <div className={`flex flex-wrap items-center gap-x-4 gap-y-1 text-base mb-6 transition-opacity ${hasSelection ? 'opacity-30' : ''}`}
+          <div className={`flex flex-wrap items-center gap-x-4 gap-y-1 text-base mb-6 transition-opacity ${hasSelection ? 'opacity-30' : ''}`}>
             {mainTabs.map((tab) => (
               <button
                 key={tab.key}
