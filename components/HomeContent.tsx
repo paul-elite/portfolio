@@ -21,6 +21,7 @@ interface SiteConfig {
   name: string;
   title: string;
   avatar: string;
+  avatarFocused?: string;
   bio: string;
   social: {
     twitter: string;
@@ -41,7 +42,7 @@ interface SiteConfig {
 
 interface ContentData {
   projects: Project[];
-  writings: { id: string; slug: string; title: string; description: string; cover?: string; date?: string }[];
+  writings: { id: string; slug: string; title: string; description: string; cover?: string; date?: string; avatar?: string }[];
   illustrations: Illustration[];
   interactions: { id: string; slug: string; title: string; description: string }[];
 }
@@ -172,19 +173,26 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         {/* Avatar */}
         <div className="flex-shrink-0 md:col-span-1 md:flex md:justify-end md:items-start">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden">
-            {siteConfig.avatar ? (
-              <Image
-                src={siteConfig.avatar}
-                alt={siteConfig.name}
-                width={40}
-                height={40}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span className="text-sm font-medium text-gray-500">
-                {siteConfig.name.charAt(0)}
-              </span>
-            )}
+            {(() => {
+              // Determine which avatar to show
+              const currentAvatar = selectedProject
+                ? (selectedProject.avatar || siteConfig.avatarFocused || siteConfig.avatar)
+                : siteConfig.avatar;
+
+              return currentAvatar ? (
+                <Image
+                  src={currentAvatar}
+                  alt={selectedProject?.title || siteConfig.name}
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-cover transition-all duration-300"
+                />
+              ) : (
+                <span className="text-sm font-medium text-gray-500">
+                  {siteConfig.name.charAt(0)}
+                </span>
+              );
+            })()}
           </div>
         </div>
 

@@ -23,6 +23,7 @@ async function getConfig() {
       name: data.name || staticConfig.name,
       title: data.title || staticConfig.title,
       avatar: data.avatar || '',
+      avatarFocused: data.avatar_focused || '',
       bio: staticConfig.bio,
       social: {
         twitter: data.twitter || staticConfig.social.twitter,

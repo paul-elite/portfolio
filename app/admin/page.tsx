@@ -19,6 +19,7 @@ interface Project {
   previewImages?: string[];
   link?: string;
   blocks?: Block[];
+  avatar?: string;
   caseStudy?: {
     overview: string;
     challenge: string;
@@ -42,12 +43,14 @@ interface Writing {
   title: string;
   description: string;
   blocks?: Block[];
+  avatar?: string;
 }
 
 interface Settings {
   name: string;
   title: string;
   avatar: string;
+  avatarFocused: string;
   metaImage: string;
   twitter: string;
   github: string;
@@ -326,6 +329,7 @@ export default function AdminPage() {
     name: '',
     title: '',
     avatar: '',
+    avatarFocused: '',
     metaImage: '',
     twitter: '',
     github: '',
@@ -338,6 +342,7 @@ export default function AdminPage() {
     emailImage: '',
   });
   const [avatarPreview, setAvatarPreview] = useState<string>('');
+  const [avatarFocusedPreview, setAvatarFocusedPreview] = useState<string>('');
   const [metaImagePreview, setMetaImagePreview] = useState<string>('');
   const [previewImages, setPreviewImages] = useState<Record<string, string>>({});
   const [homepageImages, setHomepageImages] = useState<string[]>([]);
@@ -429,6 +434,7 @@ export default function AdminPage() {
     if (activeTab === 'projects') {
       data.year = (item.year as string) || '';
       data.role = (item.role as string) || '';
+      data.avatar = (item.avatar as string) || '';
       data.preview = (item.preview as string) || '';
       data.link = (item.link as string) || '';
       if (item.caseStudy) {
@@ -444,6 +450,7 @@ export default function AdminPage() {
       data.thumbnail = (item.thumbnail as string) || '';
       data.youtubeUrl = (item.youtubeUrl as string) || '';
     } else if (activeTab === 'writings') {
+      data.avatar = (item.avatar as string) || '';
       data.cover = (item.cover as string) || '';
       data.date = (item.date as string) || '';
       setWritingBlocks((item.blocks as Block[]) || []);
@@ -452,8 +459,9 @@ export default function AdminPage() {
     }
 
     setFormData(data);
-    if (data.preview) setPreviewImages({ preview: data.preview });
-    if (data.thumbnail) setPreviewImages({ thumbnail: data.thumbnail });
+    if (data.avatar) setPreviewImages((prev) => ({ ...prev, avatar: data.avatar }));
+    if (data.preview) setPreviewImages((prev) => ({ ...prev, preview: data.preview }));
+    if (data.thumbnail) setPreviewImages((prev) => ({ ...prev, thumbnail: data.thumbnail }));
 
     // Scroll to form
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -750,23 +758,48 @@ export default function AdminPage() {
           {/* Profile Tab */}
           {activeTab === 'profile' && (
             <form onSubmit={handleSaveSettings} className="space-y-6">
-              <Section title="Profile Photo">
-                <FileUpload
-                  label=""
-                  accept="image/*"
-                  preview={avatarPreview || settings.avatar}
-                  uploading={uploadingField === 'avatar'}
-                  aspectRatio="square"
-                  helpText="JPG or PNG. Max 5MB."
-                  onUpload={async (file) => {
-                    const previewUrl = URL.createObjectURL(file);
-                    setAvatarPreview(previewUrl);
-                    const path = await handleFileUpload(file, '', 'avatar');
-                    if (path) {
-                      setSettings((prev) => ({ ...prev, avatar: path }));
-                    }
-                  }}
-                />
+              <Section title="Profile Photos">
+                <p className="text-sm text-gray-500 mb-4">Default avatar shows on home. Focused avatar shows when viewing content.</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">Default Avatar</label>
+                    <FileUpload
+                      label=""
+                      accept="image/*"
+                      preview={avatarPreview || settings.avatar}
+                      uploading={uploadingField === 'avatar'}
+                      aspectRatio="square"
+                      helpText="Shows on home"
+                      onUpload={async (file) => {
+                        const previewUrl = URL.createObjectURL(file);
+                        setAvatarPreview(previewUrl);
+                        const path = await handleFileUpload(file, '', 'avatar');
+                        if (path) {
+                          setSettings((prev) => ({ ...prev, avatar: path }));
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">Focused Avatar</label>
+                    <FileUpload
+                      label=""
+                      accept="image/*"
+                      preview={avatarFocusedPreview || settings.avatarFocused}
+                      uploading={uploadingField === 'avatarFocused'}
+                      aspectRatio="square"
+                      helpText="Shows when viewing content"
+                      onUpload={async (file) => {
+                        const previewUrl = URL.createObjectURL(file);
+                        setAvatarFocusedPreview(previewUrl);
+                        const path = await handleFileUpload(file, '', 'avatarFocused');
+                        if (path) {
+                          setSettings((prev) => ({ ...prev, avatarFocused: path }));
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
               </Section>
 
               <Section title="Social Share Image">
@@ -1013,6 +1046,23 @@ export default function AdminPage() {
                       </div>
 
                       <FileUpload
+                        label="Project Avatar"
+                        accept="image/*"
+                        preview={previewImages.avatar || formData.avatar}
+                        uploading={uploadingField === 'projectAvatar'}
+                        aspectRatio="square"
+                        helpText="Shows when this project is selected"
+                        onUpload={async (file) => {
+                          const previewUrl = URL.createObjectURL(file);
+                          setPreviewImages((prev) => ({ ...prev, avatar: previewUrl }));
+                          const path = await handleFileUpload(file, 'avatars', 'projectAvatar');
+                          if (path) {
+                            setFormData((prev) => ({ ...prev, avatar: path }));
+                          }
+                        }}
+                      />
+
+                      <FileUpload
                         label="Preview Image"
                         accept="image/*"
                         preview={previewImages.preview || formData.preview}
@@ -1171,18 +1221,36 @@ export default function AdminPage() {
                   )}
 
                   {activeTab === 'writings' && (
-                    <div className="pt-4 border-t border-gray-100">
-                      <h3 className="text-sm font-medium text-gray-900 mb-1">Article Content</h3>
-                      <p className="text-xs text-gray-400 mb-4">
-                        Build your article with blocks.
-                      </p>
-                      <BlockEditor
-                        blocks={writingBlocks}
-                        onChange={setWritingBlocks}
-                        onUpload={(file, folder) => handleFileUpload(file, folder, 'writingBlock')}
-                        uploading={uploadingField === 'writingBlock'}
+                    <>
+                      <FileUpload
+                        label="Writing Avatar"
+                        accept="image/*"
+                        preview={previewImages.avatar || formData.avatar}
+                        uploading={uploadingField === 'writingAvatar'}
+                        aspectRatio="square"
+                        helpText="Shows when this writing is selected"
+                        onUpload={async (file) => {
+                          const previewUrl = URL.createObjectURL(file);
+                          setPreviewImages((prev) => ({ ...prev, avatar: previewUrl }));
+                          const path = await handleFileUpload(file, 'avatars', 'writingAvatar');
+                          if (path) {
+                            setFormData((prev) => ({ ...prev, avatar: path }));
+                          }
+                        }}
                       />
-                    </div>
+                      <div className="pt-4 border-t border-gray-100">
+                        <h3 className="text-sm font-medium text-gray-900 mb-1">Article Content</h3>
+                        <p className="text-xs text-gray-400 mb-4">
+                          Build your article with blocks.
+                        </p>
+                        <BlockEditor
+                          blocks={writingBlocks}
+                          onChange={setWritingBlocks}
+                          onUpload={(file, folder) => handleFileUpload(file, folder, 'writingBlock')}
+                          uploading={uploadingField === 'writingBlock'}
+                        />
+                      </div>
+                    </>
                   )}
 
                   <div className="flex gap-3 pt-2">

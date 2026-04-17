@@ -8,6 +8,7 @@ export interface Project {
   slug: string;
   title: string;
   description: string;
+  avatar?: string;
   preview?: string;
   previewImages?: string[];
   link?: string;
@@ -116,6 +117,7 @@ export interface Writing {
   slug: string;
   title: string;
   description: string;
+  avatar?: string;
   link?: string;
   date?: string;
   cover?: string;

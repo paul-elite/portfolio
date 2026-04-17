@@ -18,6 +18,7 @@ async function loadSettings(): Promise<Settings> {
     return {
       ...defaultSettings,
       ...data,
+      avatarFocused: data.avatar_focused || '',
       metaImage: data.meta_image || data.metaImage || '',
       twitterImage: data.twitter_image || '',
       linkedinImage: data.linkedin_image || '',
@@ -36,6 +37,7 @@ async function saveSettings(settings: Settings): Promise<void> {
     name: settings.name,
     title: settings.title,
     avatar: settings.avatar,
+    avatar_focused: settings.avatarFocused || '',
     meta_image: settings.metaImage,
     twitter: settings.twitter,
     github: settings.github,
@@ -155,6 +157,7 @@ export async function POST(request: NextRequest) {
         link: data.link || '',
         blocks: data.blocks || [],
         case_study: data.caseStudy || null,
+        avatar: data.avatar || '',
       };
     } else if (type === 'writings') {
       insertData = {
@@ -162,6 +165,7 @@ export async function POST(request: NextRequest) {
         blocks: data.blocks || [],
         cover: data.cover || '',
         date: data.date || new Date().toISOString(),
+        avatar: data.avatar || '',
       };
     } else if (type === 'illustrations') {
       insertData = {
