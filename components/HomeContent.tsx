@@ -181,6 +181,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
               return currentAvatar ? (
                 <Image
+                  key={currentAvatar}
                   src={currentAvatar}
                   alt={selectedProject?.title || siteConfig.name}
                   width={40}
