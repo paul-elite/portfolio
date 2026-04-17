@@ -195,31 +195,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               </span>
             )}
           </div>
-
-          {/* Project/Category Avatar - shows when content is selected */}
-          {(selectedProject || selectedCategory) && (
-            <div className="hidden md:flex w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 items-center justify-center flex-shrink-0 mt-[180px] overflow-hidden">
-              {selectedProject ? (
-                selectedProject.avatar ? (
-                  <Image
-                    src={selectedProject.avatar}
-                    alt={selectedProject.title}
-                    width={40}
-                    height={40}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-sm font-medium text-gray-500">
-                    {selectedProject.title.charAt(0)}
-                  </span>
-                )
-              ) : (
-                <span className="text-base">
-                  {selectedCategory === 'app-icons' ? '📱' : selectedCategory === 'characters' ? '🎨' : '🖼️'}
-                </span>
-              )}
-            </div>
-          )}
         </div>
 
         {/* Left Column - Name, Tabs, Content List, Now Playing, Contacts */}
@@ -281,26 +256,46 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           <div className="flex-1">
             {activeTab === 'projects' && (
               <div>
-                {content.projects.map((project) => (
-                  <button
-                    key={project.id}
-                    onClick={() => setSelectedProject(selectedProject?.id === project.id ? null : project)}
-                    className={`group block py-3 w-full text-left ${selectedProject?.id === project.id ? 'opacity-100' : ''}`}
-                    onMouseEnter={() => !selectedProject && setHoveredProject(project)}
-                    onMouseLeave={() => !selectedProject && setHoveredProject(null)}
-                  >
-                    <h2 className={`text-base font-normal mb-0.5 transition-colors ${
-                      selectedProject?.id === project.id
-                        ? 'text-gray-900'
-                        : 'text-gray-900 group-hover:text-gray-600'
-                    }`}>
-                      {project.title}
-                    </h2>
-                    <p className="text-sm text-gray-400">
-                      {project.year} <span className="mx-1">·</span> {project.description}
-                    </p>
-                  </button>
-                ))}
+                {content.projects.map((project) => {
+                  const isSelected = selectedProject?.id === project.id;
+                  return (
+                    <div key={project.id} className="flex items-start gap-3">
+                      {/* Project Avatar - only visible when selected */}
+                      <div className={`w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex-shrink-0 flex items-center justify-center overflow-hidden mt-3 transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`}>
+                        {project.avatar ? (
+                          <Image
+                            src={project.avatar}
+                            alt={project.title}
+                            width={40}
+                            height={40}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-sm font-medium text-gray-500">
+                            {project.title.charAt(0)}
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => setSelectedProject(isSelected ? null : project)}
+                        className={`group block py-3 flex-1 text-left ${isSelected ? 'opacity-100' : ''}`}
+                        onMouseEnter={() => !selectedProject && setHoveredProject(project)}
+                        onMouseLeave={() => !selectedProject && setHoveredProject(null)}
+                      >
+                        <h2 className={`text-base font-normal mb-0.5 transition-colors ${
+                          isSelected
+                            ? 'text-gray-900'
+                            : 'text-gray-900 group-hover:text-gray-600'
+                        }`}>
+                          {project.title}
+                        </h2>
+                        <p className="text-sm text-gray-400">
+                          {project.year} <span className="mx-1">·</span> {project.description}
+                        </p>
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             )}
 
@@ -323,23 +318,31 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               <div>
                 {ILLUSTRATION_CATEGORIES.map((cat) => {
                   const count = content.illustrations.filter(i => (i.category || 'assets') === cat.key).length;
+                  const isSelected = selectedCategory === cat.key;
                   return (
-                    <button
-                      key={cat.key}
-                      onClick={() => setSelectedCategory(selectedCategory === cat.key ? null : cat.key)}
-                      className={`group block py-3 w-full text-left ${selectedCategory === cat.key ? 'opacity-100' : ''}`}
-                    >
-                      <h2 className={`text-base font-normal mb-0.5 transition-colors ${
-                        selectedCategory === cat.key
-                          ? 'text-gray-900'
-                          : 'text-gray-900 group-hover:text-gray-600'
-                      }`}>
-                        {cat.label}
-                      </h2>
-                      <p className="text-sm text-gray-400">
-                        {count} {count === 1 ? 'item' : 'items'}
-                      </p>
-                    </button>
+                    <div key={cat.key} className="flex items-start gap-3">
+                      {/* Category Icon - only visible when selected */}
+                      <div className={`w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex-shrink-0 flex items-center justify-center mt-3 transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`}>
+                        <span className="text-base">
+                          {cat.key === 'app-icons' ? '📱' : cat.key === 'characters' ? '🎨' : '🖼️'}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => setSelectedCategory(isSelected ? null : cat.key)}
+                        className={`group block py-3 flex-1 text-left ${isSelected ? 'opacity-100' : ''}`}
+                      >
+                        <h2 className={`text-base font-normal mb-0.5 transition-colors ${
+                          isSelected
+                            ? 'text-gray-900'
+                            : 'text-gray-900 group-hover:text-gray-600'
+                        }`}>
+                          {cat.label}
+                        </h2>
+                        <p className="text-sm text-gray-400">
+                          {count} {count === 1 ? 'item' : 'items'}
+                        </p>
+                      </button>
+                    </div>
                   );
                 })}
               </div>
