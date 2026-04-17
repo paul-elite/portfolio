@@ -253,9 +253,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Content List */}
-          <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="flex-1 overflow-y-auto overflow-x-visible min-h-0">
             {activeTab === 'projects' && (
-              <div>
+              <div className="overflow-visible">
                 {content.projects.map((project) => {
                   const isSelected = selectedProject?.id === project.id;
                   return (
