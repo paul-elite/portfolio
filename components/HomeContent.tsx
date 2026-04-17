@@ -169,6 +169,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     { key: 'writings', label: 'Writings' },
   ];
 
+  // Track if anything is selected to fade other elements
+  const hasSelection = selectedProject !== null || selectedCategory !== null;
+
   const moreTabs: { key: Tab; label: string }[] = [
     { key: 'interaction', label: 'Interaction' },
   ];
@@ -183,7 +186,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           <div className="h-14 mb-4 flex items-start">
             <button
               onClick={() => { setSelectedProject(null); setSelectedCategory(null); }}
-              className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden cursor-pointer hover:ring-2 hover:ring-purple-300 transition-all"
+              className={`w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden cursor-pointer hover:ring-2 hover:ring-purple-300 transition-all ${hasSelection ? 'opacity-30' : ''}`}
             >
               {siteConfig.avatar ? (
                 <Image
@@ -263,7 +266,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         {/* Left Content Column */}
         <div className="flex-1 md:col-span-3 flex flex-col min-w-0 h-full">
           {/* Name */}
-          <div className="h-auto md:h-14 mb-6 md:mb-4">
+          <div className={`h-auto md:h-14 mb-6 md:mb-4 transition-opacity ${hasSelection ? 'opacity-30' : ''}`}>
             <h1 className="text-base font-semibold text-gray-900">
               {siteConfig.name}
             </h1>
@@ -271,7 +274,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Tabs */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-base mb-6">
+          <div className={`flex flex-wrap items-center gap-x-4 gap-y-1 text-base mb-6 transition-opacity ${hasSelection ? 'opacity-30' : ''}`}
             {mainTabs.map((tab) => (
               <button
                 key={tab.key}
@@ -325,7 +328,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                     <button
                       key={project.id}
                       onClick={() => setSelectedProject(isSelected ? null : project)}
-                      className={`group block py-3 w-full text-left`}
+                      className={`group block py-3 w-full text-left transition-opacity ${hasSelection && !isSelected ? 'opacity-30' : ''}`}
                       onMouseEnter={() => !selectedProject && setHoveredProject(project)}
                       onMouseLeave={() => !selectedProject && setHoveredProject(null)}
                     >
@@ -346,7 +349,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             )}
 
             {activeTab === 'interaction' && (
-              <div>
+              <div className={`transition-opacity ${hasSelection ? 'opacity-30' : ''}`}>
                 {content.interactions.map((item) => (
                   <article key={item.id} className="py-3">
                     <h3 className="text-base font-medium text-gray-900 mb-0.5">
@@ -369,7 +372,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                     <button
                       key={cat.key}
                       onClick={() => setSelectedCategory(isSelected ? null : cat.key)}
-                      className={`group block py-3 w-full text-left`}
+                      className={`group block py-3 w-full text-left transition-opacity ${hasSelection && !isSelected ? 'opacity-30' : ''}`}
                     >
                       <h2 className={`text-base font-normal mb-0.5 transition-colors ${
                         isSelected
@@ -406,7 +409,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               };
 
               return (
-                <div className="space-y-2">
+                <div className={`space-y-2 transition-opacity ${hasSelection ? 'opacity-30' : ''}`}>
                   {sortedYears.map((year) => (
                     <div key={year}>
                       {writingsByYear[year].map((item, index) => (
@@ -435,7 +438,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Now Playing & Contact - Desktop only, pinned to bottom */}
-          <div className="hidden md:block flex-shrink-0 mt-auto pt-4">
+          <div className={`hidden md:block flex-shrink-0 mt-auto pt-4 transition-opacity ${hasSelection ? 'opacity-30' : ''}`}>
             <div className={`${activeTab === 'illustration' ? 'w-full md:w-[calc(166%+1.5rem)]' : ''}`}>
               <NowPlayingContent data={nowPlayingData} />
             </div>

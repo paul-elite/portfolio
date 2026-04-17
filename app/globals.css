@@ -91,7 +91,7 @@ html {
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: hsl(210, 100%, 48%);
   border-radius: 3px;
-  min-height: 27px;
+  min-height: 9px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
