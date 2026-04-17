@@ -32,6 +32,13 @@ async function getConfig() {
         behance: data.behance || staticConfig.social.behance,
         instagram: data.instagram || staticConfig.social.instagram,
       },
+      socialImages: {
+        twitter: data.twitter_image || '',
+        linkedin: data.linkedin_image || '',
+        behance: data.behance_image || '',
+        instagram: data.instagram_image || '',
+        email: data.email_image || '',
+      },
     };
   } catch {
     return staticConfig;

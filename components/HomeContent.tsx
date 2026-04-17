@@ -30,6 +30,13 @@ interface SiteConfig {
     behance: string;
     instagram: string;
   };
+  socialImages?: {
+    twitter?: string;
+    linkedin?: string;
+    behance?: string;
+    instagram?: string;
+    email?: string;
+  };
 }
 
 interface ContentData {
@@ -56,7 +63,10 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const [githubMousePos, setGithubMousePos] = useState({ x: 0, y: 0 });
   const [showMoreTabs, setShowMoreTabs] = useState(false);
   const [previewImageIndex, setPreviewImageIndex] = useState(0);
+  const [hoveredSocial, setHoveredSocial] = useState<string | null>(null);
+  const [socialMousePos, setSocialMousePos] = useState({ x: 0, y: 0 });
   const githubRef = useRef<HTMLAnchorElement>(null);
+  const socialRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
   const nowPlayingData = useNowPlaying();
 
   const siteConfig = initialConfig;
@@ -420,14 +430,43 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           {/* Contact - Desktop only (mobile shows in bottom section) */}
           <footer className="hidden md:block pt-4">
             <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-              <a
-                href={siteConfig.social.twitter}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-gray-900 transition-colors"
-              >
-                Twitter
-              </a>
+              {/* Twitter */}
+              <div className="relative inline-block">
+                <a
+                  ref={(el) => { socialRefs.current.twitter = el; }}
+                  href={siteConfig.social.twitter}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-gray-900 transition-colors"
+                  onMouseEnter={() => setHoveredSocial('twitter')}
+                  onMouseLeave={() => {
+                    setHoveredSocial(null);
+                    setSocialMousePos({ x: 0, y: 0 });
+                  }}
+                  onMouseMove={(e) => {
+                    const ref = socialRefs.current.twitter;
+                    if (!ref) return;
+                    const rect = ref.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    setSocialMousePos({ x: (e.clientX - centerX) * 0.1, y: (e.clientY - centerY) * 0.1 });
+                  }}
+                >
+                  Twitter
+                </a>
+                {hoveredSocial === 'twitter' && siteConfig.socialImages?.twitter && (
+                  <div
+                    className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none"
+                    style={{ transform: `translateX(-50%) translate(${socialMousePos.x}px, ${socialMousePos.y}px)` }}
+                  >
+                    <div className="bg-white rounded-lg shadow-lg p-2 border border-gray-100">
+                      <Image src={siteConfig.socialImages.twitter} alt="Twitter preview" width={200} height={150} className="w-48 h-auto rounded" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* GitHub */}
               <div className="relative inline-block">
                 <a
                   ref={githubRef}
@@ -454,52 +493,158 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                 </a>
                 {githubHovered && getGitHubUsername(siteConfig.social.github) && (
                   <div
-                    className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out"
-                    style={{
-                      transform: `translateX(-50%) translate(${githubMousePos.x}px, ${githubMousePos.y}px)`,
-                    }}
+                    className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none"
+                    style={{ transform: `translateX(-50%) translate(${githubMousePos.x}px, ${githubMousePos.y}px)` }}
                   >
                     <div className="bg-white rounded-lg shadow-lg p-3 border border-gray-100">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={`https://ghchart.rshah.org/${getGitHubUsername(siteConfig.social.github)}`}
-                        alt="GitHub Contributions"
-                        className="w-64 h-auto"
-                      />
+                      <img src={`https://ghchart.rshah.org/${getGitHubUsername(siteConfig.social.github)}`} alt="GitHub Contributions" className="w-64 h-auto" />
                     </div>
                   </div>
                 )}
               </div>
-              <a
-                href={siteConfig.social.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-gray-900 transition-colors"
-              >
-                LinkedIn
-              </a>
-              <a
-                href={siteConfig.social.behance}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-gray-900 transition-colors"
-              >
-                Behance
-              </a>
-              <a
-                href={siteConfig.social.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-gray-900 transition-colors"
-              >
-                Instagram
-              </a>
-              <a
-                href={`mailto:${siteConfig.social.email}`}
-                className="text-gray-400 hover:text-gray-900 transition-colors"
-              >
-                Email
-              </a>
+
+              {/* LinkedIn */}
+              <div className="relative inline-block">
+                <a
+                  ref={(el) => { socialRefs.current.linkedin = el; }}
+                  href={siteConfig.social.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-gray-900 transition-colors"
+                  onMouseEnter={() => setHoveredSocial('linkedin')}
+                  onMouseLeave={() => {
+                    setHoveredSocial(null);
+                    setSocialMousePos({ x: 0, y: 0 });
+                  }}
+                  onMouseMove={(e) => {
+                    const ref = socialRefs.current.linkedin;
+                    if (!ref) return;
+                    const rect = ref.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    setSocialMousePos({ x: (e.clientX - centerX) * 0.1, y: (e.clientY - centerY) * 0.1 });
+                  }}
+                >
+                  LinkedIn
+                </a>
+                {hoveredSocial === 'linkedin' && siteConfig.socialImages?.linkedin && (
+                  <div
+                    className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none"
+                    style={{ transform: `translateX(-50%) translate(${socialMousePos.x}px, ${socialMousePos.y}px)` }}
+                  >
+                    <div className="bg-white rounded-lg shadow-lg p-2 border border-gray-100">
+                      <Image src={siteConfig.socialImages.linkedin} alt="LinkedIn preview" width={200} height={150} className="w-48 h-auto rounded" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Behance */}
+              <div className="relative inline-block">
+                <a
+                  ref={(el) => { socialRefs.current.behance = el; }}
+                  href={siteConfig.social.behance}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-gray-900 transition-colors"
+                  onMouseEnter={() => setHoveredSocial('behance')}
+                  onMouseLeave={() => {
+                    setHoveredSocial(null);
+                    setSocialMousePos({ x: 0, y: 0 });
+                  }}
+                  onMouseMove={(e) => {
+                    const ref = socialRefs.current.behance;
+                    if (!ref) return;
+                    const rect = ref.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    setSocialMousePos({ x: (e.clientX - centerX) * 0.1, y: (e.clientY - centerY) * 0.1 });
+                  }}
+                >
+                  Behance
+                </a>
+                {hoveredSocial === 'behance' && siteConfig.socialImages?.behance && (
+                  <div
+                    className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none"
+                    style={{ transform: `translateX(-50%) translate(${socialMousePos.x}px, ${socialMousePos.y}px)` }}
+                  >
+                    <div className="bg-white rounded-lg shadow-lg p-2 border border-gray-100">
+                      <Image src={siteConfig.socialImages.behance} alt="Behance preview" width={200} height={150} className="w-48 h-auto rounded" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Instagram */}
+              <div className="relative inline-block">
+                <a
+                  ref={(el) => { socialRefs.current.instagram = el; }}
+                  href={siteConfig.social.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-gray-900 transition-colors"
+                  onMouseEnter={() => setHoveredSocial('instagram')}
+                  onMouseLeave={() => {
+                    setHoveredSocial(null);
+                    setSocialMousePos({ x: 0, y: 0 });
+                  }}
+                  onMouseMove={(e) => {
+                    const ref = socialRefs.current.instagram;
+                    if (!ref) return;
+                    const rect = ref.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    setSocialMousePos({ x: (e.clientX - centerX) * 0.1, y: (e.clientY - centerY) * 0.1 });
+                  }}
+                >
+                  Instagram
+                </a>
+                {hoveredSocial === 'instagram' && siteConfig.socialImages?.instagram && (
+                  <div
+                    className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none"
+                    style={{ transform: `translateX(-50%) translate(${socialMousePos.x}px, ${socialMousePos.y}px)` }}
+                  >
+                    <div className="bg-white rounded-lg shadow-lg p-2 border border-gray-100">
+                      <Image src={siteConfig.socialImages.instagram} alt="Instagram preview" width={200} height={150} className="w-48 h-auto rounded" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Email */}
+              <div className="relative inline-block">
+                <a
+                  ref={(el) => { socialRefs.current.email = el; }}
+                  href={`mailto:${siteConfig.social.email}`}
+                  className="text-gray-400 hover:text-gray-900 transition-colors"
+                  onMouseEnter={() => setHoveredSocial('email')}
+                  onMouseLeave={() => {
+                    setHoveredSocial(null);
+                    setSocialMousePos({ x: 0, y: 0 });
+                  }}
+                  onMouseMove={(e) => {
+                    const ref = socialRefs.current.email;
+                    if (!ref) return;
+                    const rect = ref.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    setSocialMousePos({ x: (e.clientX - centerX) * 0.1, y: (e.clientY - centerY) * 0.1 });
+                  }}
+                >
+                  Email
+                </a>
+                {hoveredSocial === 'email' && siteConfig.socialImages?.email && (
+                  <div
+                    className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none"
+                    style={{ transform: `translateX(-50%) translate(${socialMousePos.x}px, ${socialMousePos.y}px)` }}
+                  >
+                    <div className="bg-white rounded-lg shadow-lg p-2 border border-gray-100">
+                      <Image src={siteConfig.socialImages.email} alt="Email preview" width={200} height={150} className="w-48 h-auto rounded" />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </footer>
         </div>

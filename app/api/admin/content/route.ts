@@ -14,13 +14,41 @@ async function loadSettings(): Promise<Settings> {
     if (error || !data) {
       return defaultSettings;
     }
-    return { ...defaultSettings, ...data };
+    // Convert snake_case from database to camelCase for frontend
+    return {
+      ...defaultSettings,
+      ...data,
+      metaImage: data.meta_image || data.metaImage || '',
+      twitterImage: data.twitter_image || '',
+      linkedinImage: data.linkedin_image || '',
+      behanceImage: data.behance_image || '',
+      instagramImage: data.instagram_image || '',
+      emailImage: data.email_image || '',
+    };
   } catch {
     return defaultSettings;
   }
 }
 
 async function saveSettings(settings: Settings): Promise<void> {
+  // Convert camelCase to snake_case for database
+  const dbSettings: Record<string, unknown> = {
+    name: settings.name,
+    title: settings.title,
+    avatar: settings.avatar,
+    meta_image: settings.metaImage,
+    twitter: settings.twitter,
+    github: settings.github,
+    linkedin: settings.linkedin,
+    email: settings.email,
+    twitter_image: settings.twitterImage || '',
+    linkedin_image: settings.linkedinImage || '',
+    behance_image: settings.behanceImage || '',
+    instagram_image: settings.instagramImage || '',
+    email_image: settings.emailImage || '',
+    updated_at: new Date().toISOString(),
+  };
+
   const { data: existing } = await supabase
     .from('settings')
     .select('id')
@@ -29,12 +57,12 @@ async function saveSettings(settings: Settings): Promise<void> {
   if (existing) {
     await supabase
       .from('settings')
-      .update({ ...settings, updated_at: new Date().toISOString() })
+      .update(dbSettings)
       .eq('id', existing.id);
   } else {
     await supabase
       .from('settings')
-      .insert({ ...settings, updated_at: new Date().toISOString() });
+      .insert(dbSettings);
   }
 }
 

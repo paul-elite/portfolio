@@ -15,6 +15,11 @@ export interface Settings {
   github: string;
   linkedin: string;
   email: string;
+  twitterImage?: string;
+  linkedinImage?: string;
+  behanceImage?: string;
+  instagramImage?: string;
+  emailImage?: string;
   updated_at?: string;
 }
 
@@ -27,4 +32,9 @@ export const defaultSettings: Settings = {
   github: '',
   linkedin: '',
   email: '',
+  twitterImage: '',
+  linkedinImage: '',
+  behanceImage: '',
+  instagramImage: '',
+  emailImage: '',
 };

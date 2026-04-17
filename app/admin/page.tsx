@@ -53,6 +53,11 @@ interface Settings {
   github: string;
   linkedin: string;
   email: string;
+  twitterImage: string;
+  linkedinImage: string;
+  behanceImage: string;
+  instagramImage: string;
+  emailImage: string;
 }
 
 interface ContentStore {
@@ -326,6 +331,11 @@ export default function AdminPage() {
     github: '',
     linkedin: '',
     email: '',
+    twitterImage: '',
+    linkedinImage: '',
+    behanceImage: '',
+    instagramImage: '',
+    emailImage: '',
   });
   const [avatarPreview, setAvatarPreview] = useState<string>('');
   const [metaImagePreview, setMetaImagePreview] = useState<string>('');
@@ -853,6 +863,92 @@ export default function AdminPage() {
                       </svg>
                     }
                   />
+                </div>
+              </Section>
+
+              <Section title="Hover Preview Images">
+                <p className="text-sm text-gray-500 mb-4">These images appear when hovering over contact links on the homepage.</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">Twitter</label>
+                    <FileUpload
+                      label=""
+                      accept="image/*"
+                      preview={settings.twitterImage}
+                      uploading={uploadingField === 'twitterImage'}
+                      aspectRatio="video"
+                      onUpload={async (file) => {
+                        const path = await handleFileUpload(file, 'social', 'twitterImage');
+                        if (path) {
+                          setSettings((prev) => ({ ...prev, twitterImage: path }));
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">LinkedIn</label>
+                    <FileUpload
+                      label=""
+                      accept="image/*"
+                      preview={settings.linkedinImage}
+                      uploading={uploadingField === 'linkedinImage'}
+                      aspectRatio="video"
+                      onUpload={async (file) => {
+                        const path = await handleFileUpload(file, 'social', 'linkedinImage');
+                        if (path) {
+                          setSettings((prev) => ({ ...prev, linkedinImage: path }));
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">Behance</label>
+                    <FileUpload
+                      label=""
+                      accept="image/*"
+                      preview={settings.behanceImage}
+                      uploading={uploadingField === 'behanceImage'}
+                      aspectRatio="video"
+                      onUpload={async (file) => {
+                        const path = await handleFileUpload(file, 'social', 'behanceImage');
+                        if (path) {
+                          setSettings((prev) => ({ ...prev, behanceImage: path }));
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">Instagram</label>
+                    <FileUpload
+                      label=""
+                      accept="image/*"
+                      preview={settings.instagramImage}
+                      uploading={uploadingField === 'instagramImage'}
+                      aspectRatio="video"
+                      onUpload={async (file) => {
+                        const path = await handleFileUpload(file, 'social', 'instagramImage');
+                        if (path) {
+                          setSettings((prev) => ({ ...prev, instagramImage: path }));
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">Email</label>
+                    <FileUpload
+                      label=""
+                      accept="image/*"
+                      preview={settings.emailImage}
+                      uploading={uploadingField === 'emailImage'}
+                      aspectRatio="video"
+                      onUpload={async (file) => {
+                        const path = await handleFileUpload(file, 'social', 'emailImage');
+                        if (path) {
+                          setSettings((prev) => ({ ...prev, emailImage: path }));
+                        }
+                      }}
+                    />
+                  </div>
                 </div>
               </Section>
 
