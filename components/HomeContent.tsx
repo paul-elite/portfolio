@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import OptimizedImage from './OptimizedImage';
-import { Project, Illustration } from '@/lib/data';
+import { Project, Illustration, ContentBlock } from '@/lib/data';
 import { useNowPlaying, NowPlayingContent, NowPlayingImage } from './NowPlaying';
 
 function getGitHubUsername(url: string): string | null {
@@ -53,9 +53,59 @@ interface HomeContentProps {
 
 type Tab = 'projects' | 'interaction' | 'illustration' | 'writings';
 
+// Render content blocks for project details
+function renderBlock(block: ContentBlock, index: number) {
+  switch (block.type) {
+    case 'heading':
+      return (
+        <h2 key={index} className="text-base font-semibold text-gray-900 mt-8 mb-4">
+          {block.content}
+        </h2>
+      );
+    case 'text':
+      return (
+        <p key={index} className="text-base text-gray-600 leading-relaxed mb-4">
+          {block.content}
+        </p>
+      );
+    case 'image':
+      return (
+        <div key={index} className="my-6 rounded-lg overflow-hidden">
+          <OptimizedImage
+            src={block.content}
+            alt=""
+            width={800}
+            height={600}
+            className="w-full h-auto"
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
+        </div>
+      );
+    case 'quote':
+      return (
+        <blockquote key={index} className="border-l-2 border-gray-200 pl-4 my-6 text-gray-500 italic">
+          {block.content}
+        </blockquote>
+      );
+    case 'code':
+      return (
+        <pre key={index} className="bg-gray-50 rounded-lg p-4 my-6 overflow-x-auto text-sm">
+          <code>{block.content}</code>
+        </pre>
+      );
+    case 'svg':
+      return (
+        <div key={index} className="my-6" dangerouslySetInnerHTML={{ __html: block.content }} />
+      );
+    default:
+      return null;
+  }
+}
+
 export default function HomeContent({ initialConfig, initialContent }: HomeContentProps) {
   const [activeTab, setActiveTab] = useState<Tab>('projects');
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [activeVideo, setActiveVideo] = useState<Illustration | null>(null);
   const [playingInlineId, setPlayingInlineId] = useState<string | null>(null);
   const [illustrationPage, setIllustrationPage] = useState(0);
@@ -73,14 +123,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const content = initialContent;
 
   // Get preview images from the hovered project
-  // Use previewImages if available, otherwise fall back to extracting from blocks
   const projectImages = useMemo(() => {
     if (!hoveredProject) return [];
-    // Use dedicated previewImages array if available
     if (hoveredProject.previewImages && hoveredProject.previewImages.length > 0) {
       return hoveredProject.previewImages;
     }
-    // Fallback: extract images from blocks
     if (hoveredProject.blocks) {
       return hoveredProject.blocks
         .filter((block) => block.type === 'image')
@@ -89,9 +136,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     return [];
   }, [hoveredProject]);
 
-  // Cycle through project images
+  // Cycle through project images when hovering (not when selected)
   useEffect(() => {
-    if (!hoveredProject || projectImages.length <= 1) {
+    if (selectedProject || !hoveredProject || projectImages.length <= 1) {
       setPreviewImageIndex(0);
       return;
     }
@@ -101,7 +148,12 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [hoveredProject, projectImages.length]);
+  }, [hoveredProject, projectImages.length, selectedProject]);
+
+  // Clear selected project when switching tabs
+  useEffect(() => {
+    setSelectedProject(null);
+  }, [activeTab]);
 
   const mainTabs: { key: Tab; label: string }[] = [
     { key: 'projects', label: 'Projects' },
@@ -120,7 +172,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         {/* Column 1: Whitespace (desktop only) */}
         <div className="hidden md:block md:col-span-1" />
 
-        {/* Avatar - 12px from edge on mobile */}
+        {/* Avatar */}
         <div className="flex-shrink-0 md:col-span-1 md:flex md:justify-end md:items-start">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden">
             {siteConfig.avatar ? (
@@ -139,7 +191,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
         </div>
 
-        {/* Text Content */}
+        {/* Left Column - Name, Tabs, Content List, Now Playing, Contacts */}
         <div className="flex-1 md:col-span-3 flex flex-col min-w-0">
           {/* Name */}
           <div className="h-auto md:h-14 mb-6 md:mb-4">
@@ -181,15 +233,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               onClick={() => setShowMoreTabs(!showMoreTabs)}
               className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:border-gray-400 transition-colors"
             >
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 12 12"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                 {showMoreTabs ? (
                   <line x1="2" y1="6" x2="10" y2="6" />
                 ) : (
@@ -202,25 +246,29 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             </button>
           </div>
 
-          {/* Content */}
+          {/* Content List */}
           <div className="flex-1">
             {activeTab === 'projects' && (
               <div>
                 {content.projects.map((project) => (
-                  <Link
+                  <button
                     key={project.id}
-                    href={`/project/${project.slug}`}
-                    className="group block py-3"
-                    onMouseEnter={() => setHoveredProject(project)}
-                    onMouseLeave={() => setHoveredProject(null)}
+                    onClick={() => setSelectedProject(selectedProject?.id === project.id ? null : project)}
+                    className={`group block py-3 w-full text-left ${selectedProject?.id === project.id ? 'opacity-100' : ''}`}
+                    onMouseEnter={() => !selectedProject && setHoveredProject(project)}
+                    onMouseLeave={() => !selectedProject && setHoveredProject(null)}
                   >
-                    <h2 className="text-base font-normal text-gray-900 mb-0.5 group-hover:text-gray-600 transition-colors">
+                    <h2 className={`text-base font-normal mb-0.5 transition-colors ${
+                      selectedProject?.id === project.id
+                        ? 'text-gray-900'
+                        : 'text-gray-900 group-hover:text-gray-600'
+                    }`}>
                       {project.title}
                     </h2>
                     <p className="text-sm text-gray-400">
                       {project.year} <span className="mx-1">·</span> {project.description}
                     </p>
-                  </Link>
+                  </button>
                 ))}
               </div>
             )}
@@ -256,11 +304,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               };
 
               return (
-                <div
-                  className="flex gap-6 h-full items-center w-full md:w-[calc(166%+1.5rem)]"
-                  onWheel={handleWheel}
-                >
-                  {/* 2x2 Grid (1 col on mobile, 2 on desktop) */}
+                <div className="flex gap-6 h-full items-center w-full md:w-[calc(166%+1.5rem)]" onWheel={handleWheel}>
                   <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-2 gap-4 content-center">
                     {currentItems.map((item) => {
                       const isPlayingInline = playingInlineId === item.id;
@@ -270,7 +314,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                         <div key={item.id} className="group block">
                           <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden relative">
                             {isPlayingInline && youtubeId ? (
-                              // Inline video player
                               <>
                                 <iframe
                                   src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1`}
@@ -278,12 +321,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                   allowFullScreen
                                 />
-                                {/* Expand button overlay when playing */}
                                 <button
-                                  onClick={() => {
-                                    setActiveVideo(item);
-                                    setPlayingInlineId(null);
-                                  }}
+                                  onClick={() => { setActiveVideo(item); setPlayingInlineId(null); }}
                                   className="absolute bottom-2 right-2 text-xs px-2 py-1 bg-white/90 rounded transition-colors hover:bg-white"
                                   style={{ color: '#0066f5' }}
                                 >
@@ -291,42 +330,24 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                                 </button>
                               </>
                             ) : (
-                              // Thumbnail with hover overlay
                               <button
-                                onClick={() => {
-                                  if (youtubeId) {
-                                    setPlayingInlineId(item.id);
-                                  }
-                                }}
+                                onClick={() => { if (youtubeId) setPlayingInlineId(item.id); }}
                                 className="w-full h-full relative cursor-pointer"
                               >
                                 {item.thumbnail ? (
-                                  <OptimizedImage
-                                    src={item.thumbnail}
-                                    alt={item.title}
-                                    fill
-                                    className="object-cover"
-                                    sizes="(max-width: 640px) 100vw, 50vw"
-                                  />
+                                  <OptimizedImage src={item.thumbnail} alt={item.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 50vw" />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center">
                                     <span className="text-gray-300 text-xs">{item.title}</span>
                                   </div>
                                 )}
-                                {/* Hover overlay with title and play button */}
                                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors">
                                   <h3 className="text-sm text-white font-medium opacity-0 group-hover:opacity-100 transition-opacity text-center px-4">
                                     {item.title}
                                   </h3>
                                   {youtubeId && (
                                     <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity mt-2">
-                                      <svg
-                                        width="12"
-                                        height="12"
-                                        viewBox="0 0 24 24"
-                                        fill="currentColor"
-                                        className="text-gray-900 ml-0.5"
-                                      >
+                                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="text-gray-900 ml-0.5">
                                         <polygon points="5 3 19 12 5 21 5 3" />
                                       </svg>
                                     </div>
@@ -339,25 +360,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                       );
                     })}
                   </div>
-
-                  {/* Vertical Pagination */}
                   {totalPages > 1 && (
                     <div className="flex flex-col justify-center gap-3">
                       {Array.from({ length: totalPages }, (_, i) => (
-                        <button
-                          key={i}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIllustrationPage(i);
-                          }}
-                          className="w-4 h-8 flex items-center justify-center cursor-pointer"
-                          aria-label={`Page ${i + 1}`}
-                        >
-                          <span
-                            className={`w-1 h-6 rounded-full transition-colors ${
-                              illustrationPage === i ? 'bg-gray-900' : 'bg-gray-300 hover:bg-gray-400'
-                            }`}
-                          />
+                        <button key={i} onClick={(e) => { e.stopPropagation(); setIllustrationPage(i); }} className="w-4 h-8 flex items-center justify-center cursor-pointer" aria-label={`Page ${i + 1}`}>
+                          <span className={`w-1 h-6 rounded-full transition-colors ${illustrationPage === i ? 'bg-gray-900' : 'bg-gray-300 hover:bg-gray-400'}`} />
                         </button>
                       ))}
                     </div>
@@ -367,7 +374,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             })()}
 
             {activeTab === 'writings' && (() => {
-              // Group writings by year
               const writingsByYear = content.writings.reduce((acc, item) => {
                 const year = item.date ? new Date(item.date).getFullYear().toString() : 'Unknown';
                 if (!acc[year]) acc[year] = [];
@@ -375,10 +381,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                 return acc;
               }, {} as Record<string, typeof content.writings>);
 
-              // Sort years descending
               const sortedYears = Object.keys(writingsByYear).sort((a, b) => Number(b) - Number(a));
 
-              // Check if item is less than 30 days old
               const isNew = (date?: string) => {
                 if (!date) return false;
                 const itemDate = new Date(date);
@@ -392,11 +396,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   {sortedYears.map((year) => (
                     <div key={year}>
                       {writingsByYear[year].map((item, index) => (
-                        <Link
-                          key={item.id}
-                          href={`/writing/${item.slug}`}
-                          className="group flex flex-col sm:flex-row sm:items-baseline py-3 border-b border-gray-100 last:border-0 gap-1 sm:gap-0"
-                        >
+                        <Link key={item.id} href={`/writing/${item.slug}`} className="group flex flex-col sm:flex-row sm:items-baseline py-3 border-b border-gray-100 last:border-0 gap-1 sm:gap-0">
                           <span className="w-16 text-sm text-gray-300 flex-shrink-0 hidden sm:block">
                             {index === 0 ? year : ''}
                           </span>
@@ -405,9 +405,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                               {item.title}
                             </h3>
                             {isNew(item.date) && (
-                              <span className="text-xs text-pink-500 border border-pink-300 rounded-full px-2 py-0.5">
-                                New
-                              </span>
+                              <span className="text-xs text-pink-500 border border-pink-300 rounded-full px-2 py-0.5">New</span>
                             )}
                           </div>
                           <span className="text-sm text-gray-300 flex-shrink-0 sm:ml-8">
@@ -422,43 +420,23 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             })()}
           </div>
 
-          {/* Now Playing - Desktop only (uses negative margin) */}
+          {/* Now Playing - Desktop only */}
           <div className={`hidden md:block ${activeTab === 'illustration' ? 'w-full md:w-[calc(166%+1.5rem)]' : ''}`}>
             <NowPlayingContent data={nowPlayingData} />
           </div>
 
-          {/* Contact - Desktop only (mobile shows in bottom section) */}
+          {/* Contact - Desktop only */}
           <footer className="hidden md:block pt-4">
             <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
               {/* Twitter */}
               <div className="relative inline-block">
-                <a
-                  ref={(el) => { socialRefs.current.twitter = el; }}
-                  href={siteConfig.social.twitter}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-gray-900 transition-colors"
+                <a ref={(el) => { socialRefs.current.twitter = el; }} href={siteConfig.social.twitter} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors"
                   onMouseEnter={() => setHoveredSocial('twitter')}
-                  onMouseLeave={() => {
-                    setHoveredSocial(null);
-                    setSocialMousePos({ x: 0, y: 0 });
-                  }}
-                  onMouseMove={(e) => {
-                    const ref = socialRefs.current.twitter;
-                    if (!ref) return;
-                    const rect = ref.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
-                    setSocialMousePos({ x: (e.clientX - centerX) * 0.1, y: (e.clientY - centerY) * 0.1 });
-                  }}
-                >
-                  Twitter
-                </a>
+                  onMouseLeave={() => { setHoveredSocial(null); setSocialMousePos({ x: 0, y: 0 }); }}
+                  onMouseMove={(e) => { const ref = socialRefs.current.twitter; if (!ref) return; const rect = ref.getBoundingClientRect(); setSocialMousePos({ x: (e.clientX - rect.left - rect.width / 2) * 0.1, y: (e.clientY - rect.top - rect.height / 2) * 0.1 }); }}
+                >Twitter</a>
                 {hoveredSocial === 'twitter' && siteConfig.socialImages?.twitter && (
-                  <div
-                    className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none"
-                    style={{ transform: `translateX(-50%) translate(${socialMousePos.x}px, ${socialMousePos.y}px)` }}
-                  >
+                  <div className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none" style={{ transform: `translateX(-50%) translate(${socialMousePos.x}px, ${socialMousePos.y}px)` }}>
                     <div className="bg-white rounded-lg shadow-lg p-2 border border-gray-100">
                       <Image src={siteConfig.socialImages.twitter} alt="Twitter preview" width={200} height={150} className="w-48 h-auto rounded" />
                     </div>
@@ -468,34 +446,13 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
               {/* GitHub */}
               <div className="relative inline-block">
-                <a
-                  ref={githubRef}
-                  href={siteConfig.social.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-gray-900 transition-colors"
+                <a ref={githubRef} href={siteConfig.social.github} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors"
                   onMouseEnter={() => setGithubHovered(true)}
-                  onMouseLeave={() => {
-                    setGithubHovered(false);
-                    setGithubMousePos({ x: 0, y: 0 });
-                  }}
-                  onMouseMove={(e) => {
-                    if (!githubRef.current) return;
-                    const rect = githubRef.current.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
-                    const offsetX = (e.clientX - centerX) * 0.1;
-                    const offsetY = (e.clientY - centerY) * 0.1;
-                    setGithubMousePos({ x: offsetX, y: offsetY });
-                  }}
-                >
-                  GitHub
-                </a>
+                  onMouseLeave={() => { setGithubHovered(false); setGithubMousePos({ x: 0, y: 0 }); }}
+                  onMouseMove={(e) => { if (!githubRef.current) return; const rect = githubRef.current.getBoundingClientRect(); setGithubMousePos({ x: (e.clientX - rect.left - rect.width / 2) * 0.1, y: (e.clientY - rect.top - rect.height / 2) * 0.1 }); }}
+                >GitHub</a>
                 {githubHovered && getGitHubUsername(siteConfig.social.github) && (
-                  <div
-                    className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none"
-                    style={{ transform: `translateX(-50%) translate(${githubMousePos.x}px, ${githubMousePos.y}px)` }}
-                  >
+                  <div className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none" style={{ transform: `translateX(-50%) translate(${githubMousePos.x}px, ${githubMousePos.y}px)` }}>
                     <div className="bg-white rounded-lg shadow-lg p-3 border border-gray-100">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={`https://ghchart.rshah.org/${getGitHubUsername(siteConfig.social.github)}`} alt="GitHub Contributions" className="w-64 h-auto" />
@@ -506,33 +463,13 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
               {/* LinkedIn */}
               <div className="relative inline-block">
-                <a
-                  ref={(el) => { socialRefs.current.linkedin = el; }}
-                  href={siteConfig.social.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-gray-900 transition-colors"
+                <a ref={(el) => { socialRefs.current.linkedin = el; }} href={siteConfig.social.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors"
                   onMouseEnter={() => setHoveredSocial('linkedin')}
-                  onMouseLeave={() => {
-                    setHoveredSocial(null);
-                    setSocialMousePos({ x: 0, y: 0 });
-                  }}
-                  onMouseMove={(e) => {
-                    const ref = socialRefs.current.linkedin;
-                    if (!ref) return;
-                    const rect = ref.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
-                    setSocialMousePos({ x: (e.clientX - centerX) * 0.1, y: (e.clientY - centerY) * 0.1 });
-                  }}
-                >
-                  LinkedIn
-                </a>
+                  onMouseLeave={() => { setHoveredSocial(null); setSocialMousePos({ x: 0, y: 0 }); }}
+                  onMouseMove={(e) => { const ref = socialRefs.current.linkedin; if (!ref) return; const rect = ref.getBoundingClientRect(); setSocialMousePos({ x: (e.clientX - rect.left - rect.width / 2) * 0.1, y: (e.clientY - rect.top - rect.height / 2) * 0.1 }); }}
+                >LinkedIn</a>
                 {hoveredSocial === 'linkedin' && siteConfig.socialImages?.linkedin && (
-                  <div
-                    className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none"
-                    style={{ transform: `translateX(-50%) translate(${socialMousePos.x}px, ${socialMousePos.y}px)` }}
-                  >
+                  <div className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none" style={{ transform: `translateX(-50%) translate(${socialMousePos.x}px, ${socialMousePos.y}px)` }}>
                     <div className="bg-white rounded-lg shadow-lg p-2 border border-gray-100">
                       <Image src={siteConfig.socialImages.linkedin} alt="LinkedIn preview" width={200} height={150} className="w-48 h-auto rounded" />
                     </div>
@@ -542,33 +479,13 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
               {/* Behance */}
               <div className="relative inline-block">
-                <a
-                  ref={(el) => { socialRefs.current.behance = el; }}
-                  href={siteConfig.social.behance}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-gray-900 transition-colors"
+                <a ref={(el) => { socialRefs.current.behance = el; }} href={siteConfig.social.behance} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors"
                   onMouseEnter={() => setHoveredSocial('behance')}
-                  onMouseLeave={() => {
-                    setHoveredSocial(null);
-                    setSocialMousePos({ x: 0, y: 0 });
-                  }}
-                  onMouseMove={(e) => {
-                    const ref = socialRefs.current.behance;
-                    if (!ref) return;
-                    const rect = ref.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
-                    setSocialMousePos({ x: (e.clientX - centerX) * 0.1, y: (e.clientY - centerY) * 0.1 });
-                  }}
-                >
-                  Behance
-                </a>
+                  onMouseLeave={() => { setHoveredSocial(null); setSocialMousePos({ x: 0, y: 0 }); }}
+                  onMouseMove={(e) => { const ref = socialRefs.current.behance; if (!ref) return; const rect = ref.getBoundingClientRect(); setSocialMousePos({ x: (e.clientX - rect.left - rect.width / 2) * 0.1, y: (e.clientY - rect.top - rect.height / 2) * 0.1 }); }}
+                >Behance</a>
                 {hoveredSocial === 'behance' && siteConfig.socialImages?.behance && (
-                  <div
-                    className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none"
-                    style={{ transform: `translateX(-50%) translate(${socialMousePos.x}px, ${socialMousePos.y}px)` }}
-                  >
+                  <div className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none" style={{ transform: `translateX(-50%) translate(${socialMousePos.x}px, ${socialMousePos.y}px)` }}>
                     <div className="bg-white rounded-lg shadow-lg p-2 border border-gray-100">
                       <Image src={siteConfig.socialImages.behance} alt="Behance preview" width={200} height={150} className="w-48 h-auto rounded" />
                     </div>
@@ -578,33 +495,13 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
               {/* Instagram */}
               <div className="relative inline-block">
-                <a
-                  ref={(el) => { socialRefs.current.instagram = el; }}
-                  href={siteConfig.social.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-gray-900 transition-colors"
+                <a ref={(el) => { socialRefs.current.instagram = el; }} href={siteConfig.social.instagram} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors"
                   onMouseEnter={() => setHoveredSocial('instagram')}
-                  onMouseLeave={() => {
-                    setHoveredSocial(null);
-                    setSocialMousePos({ x: 0, y: 0 });
-                  }}
-                  onMouseMove={(e) => {
-                    const ref = socialRefs.current.instagram;
-                    if (!ref) return;
-                    const rect = ref.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
-                    setSocialMousePos({ x: (e.clientX - centerX) * 0.1, y: (e.clientY - centerY) * 0.1 });
-                  }}
-                >
-                  Instagram
-                </a>
+                  onMouseLeave={() => { setHoveredSocial(null); setSocialMousePos({ x: 0, y: 0 }); }}
+                  onMouseMove={(e) => { const ref = socialRefs.current.instagram; if (!ref) return; const rect = ref.getBoundingClientRect(); setSocialMousePos({ x: (e.clientX - rect.left - rect.width / 2) * 0.1, y: (e.clientY - rect.top - rect.height / 2) * 0.1 }); }}
+                >Instagram</a>
                 {hoveredSocial === 'instagram' && siteConfig.socialImages?.instagram && (
-                  <div
-                    className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none"
-                    style={{ transform: `translateX(-50%) translate(${socialMousePos.x}px, ${socialMousePos.y}px)` }}
-                  >
+                  <div className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none" style={{ transform: `translateX(-50%) translate(${socialMousePos.x}px, ${socialMousePos.y}px)` }}>
                     <div className="bg-white rounded-lg shadow-lg p-2 border border-gray-100">
                       <Image src={siteConfig.socialImages.instagram} alt="Instagram preview" width={200} height={150} className="w-48 h-auto rounded" />
                     </div>
@@ -614,31 +511,13 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
               {/* Email */}
               <div className="relative inline-block">
-                <a
-                  ref={(el) => { socialRefs.current.email = el; }}
-                  href={`mailto:${siteConfig.social.email}`}
-                  className="text-gray-400 hover:text-gray-900 transition-colors"
+                <a ref={(el) => { socialRefs.current.email = el; }} href={`mailto:${siteConfig.social.email}`} className="text-gray-400 hover:text-gray-900 transition-colors"
                   onMouseEnter={() => setHoveredSocial('email')}
-                  onMouseLeave={() => {
-                    setHoveredSocial(null);
-                    setSocialMousePos({ x: 0, y: 0 });
-                  }}
-                  onMouseMove={(e) => {
-                    const ref = socialRefs.current.email;
-                    if (!ref) return;
-                    const rect = ref.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
-                    setSocialMousePos({ x: (e.clientX - centerX) * 0.1, y: (e.clientY - centerY) * 0.1 });
-                  }}
-                >
-                  Email
-                </a>
+                  onMouseLeave={() => { setHoveredSocial(null); setSocialMousePos({ x: 0, y: 0 }); }}
+                  onMouseMove={(e) => { const ref = socialRefs.current.email; if (!ref) return; const rect = ref.getBoundingClientRect(); setSocialMousePos({ x: (e.clientX - rect.left - rect.width / 2) * 0.1, y: (e.clientY - rect.top - rect.height / 2) * 0.1 }); }}
+                >Email</a>
                 {hoveredSocial === 'email' && siteConfig.socialImages?.email && (
-                  <div
-                    className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none"
-                    style={{ transform: `translateX(-50%) translate(${socialMousePos.x}px, ${socialMousePos.y}px)` }}
-                  >
+                  <div className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none" style={{ transform: `translateX(-50%) translate(${socialMousePos.x}px, ${socialMousePos.y}px)` }}>
                     <div className="bg-white rounded-lg shadow-lg p-2 border border-gray-100">
                       <Image src={siteConfig.socialImages.email} alt="Email preview" width={200} height={150} className="w-48 h-auto rounded" />
                     </div>
@@ -649,52 +528,105 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </footer>
         </div>
 
-        {/* Column 7: Gap (desktop only) */}
+        {/* Gap Column */}
         <div className="hidden md:block md:col-span-1" />
 
-        {/* Columns 7-11: Project Images Preview (desktop only) */}
-        <div className="hidden md:flex md:col-span-5 items-stretch">
-          <div
-            className={`transition-opacity duration-300 w-full h-full ${
-              hoveredProject && projectImages.length > 0 ? 'opacity-100' : 'opacity-0'
-            }`}
-          >
-            {hoveredProject && projectImages.length > 0 && (
-              <div className="relative w-full h-full rounded-lg overflow-hidden">
-                <Image
-                  key={projectImages[previewImageIndex]}
-                  src={projectImages[previewImageIndex]}
-                  alt={hoveredProject.title}
-                  fill
-                  className="object-contain"
-                  sizes="(max-width: 768px) 100vw, 25vw"
-                />
+        {/* Right Column - Project Content or Preview Images */}
+        <div className="hidden md:flex md:col-span-5 items-start overflow-y-auto max-h-[calc(100vh-8rem)]">
+          {selectedProject ? (
+            // Show full project content when selected
+            <div className="w-full pr-4">
+              {/* Close button */}
+              <button
+                onClick={() => setSelectedProject(null)}
+                className="mb-4 text-sm text-gray-400 hover:text-gray-600 transition-colors flex items-center gap-1"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+                Back
+              </button>
+
+              {/* Project Title */}
+              <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedProject.title}</h2>
+              <div className="flex gap-4 text-sm text-gray-400 mb-6">
+                {selectedProject.year && <span>{selectedProject.year}</span>}
+                {selectedProject.role && <span>{selectedProject.role}</span>}
               </div>
-            )}
-          </div>
+
+              {/* Project Content */}
+              {selectedProject.blocks && selectedProject.blocks.length > 0 ? (
+                <div className="prose prose-gray max-w-none">
+                  {selectedProject.blocks.map((block, index) => renderBlock(block, index))}
+                </div>
+              ) : selectedProject.caseStudy ? (
+                <div className="space-y-8">
+                  <section>
+                    <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Overview</h3>
+                    <p className="text-base text-gray-600 leading-relaxed">{selectedProject.caseStudy.overview}</p>
+                  </section>
+                  <section>
+                    <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Challenge</h3>
+                    <p className="text-base text-gray-600 leading-relaxed">{selectedProject.caseStudy.challenge}</p>
+                  </section>
+                  <section>
+                    <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Approach</h3>
+                    <p className="text-base text-gray-600 leading-relaxed">{selectedProject.caseStudy.approach}</p>
+                  </section>
+                  <section>
+                    <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Outcome</h3>
+                    <p className="text-base text-gray-600 leading-relaxed">{selectedProject.caseStudy.outcome}</p>
+                  </section>
+                </div>
+              ) : (
+                <p className="text-base text-gray-600 leading-relaxed">{selectedProject.description}</p>
+              )}
+
+              {/* Project Link */}
+              {selectedProject.link && (
+                <a
+                  href={selectedProject.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-gray-400 hover:text-gray-900 transition-colors mt-8 inline-block"
+                >
+                  View Project →
+                </a>
+              )}
+            </div>
+          ) : (
+            // Show hover preview images when not selected
+            <div className={`transition-opacity duration-300 w-full h-full ${hoveredProject && projectImages.length > 0 ? 'opacity-100' : 'opacity-0'}`}>
+              {hoveredProject && projectImages.length > 0 && (
+                <div className="relative w-full h-full rounded-lg overflow-hidden">
+                  <Image
+                    key={projectImages[previewImageIndex]}
+                    src={projectImages[previewImageIndex]}
+                    alt={hoveredProject.title}
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 768px) 100vw, 25vw"
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Column 12: Whitespace (desktop only) */}
+        {/* Column 12: Whitespace */}
         <div className="hidden md:block md:col-span-1" />
       </div>
 
-      {/* Mobile Bottom Section - Now Playing & Contacts */}
+      {/* Mobile Bottom Section */}
       <div className="md:hidden mt-auto pt-6">
         <div className="flex gap-4">
-          {/* Music Icon */}
           <div className="flex-shrink-0">
             <NowPlayingImage data={nowPlayingData} />
           </div>
-          {/* Now Playing Text & Contacts */}
           <div className="flex-1 min-w-0">
             {nowPlayingData?.isPlaying ? (
               <>
-                <a
-                  href={nowPlayingData.songUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-gray-900 hover:text-gray-600 transition-colors truncate block"
-                >
+                <a href={nowPlayingData.songUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-900 hover:text-gray-600 transition-colors truncate block">
                   {nowPlayingData.title}
                 </a>
                 <p className="text-sm text-gray-400 truncate">{nowPlayingData.artist}</p>
@@ -703,15 +635,12 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               <>
                 <p className="text-sm text-gray-900">Not listening right now</p>
                 {nowPlayingData?.lastPlayed ? (
-                  <p className="text-sm text-gray-400 truncate">
-                    last: {nowPlayingData.lastPlayed.title}
-                  </p>
+                  <p className="text-sm text-gray-400 truncate">last: {nowPlayingData.lastPlayed.title}</p>
                 ) : (
                   <p className="text-sm text-gray-400">check again shortly</p>
                 )}
               </>
             )}
-            {/* Contact Links */}
             <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm mt-4">
               <a href={siteConfig.social.twitter} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">Twitter</a>
               <a href={siteConfig.social.github} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">GitHub</a>
@@ -726,24 +655,15 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
       {/* Video Modal */}
       {activeVideo && activeVideo.youtubeUrl && (
-        <div
-          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-8"
-          onClick={() => setActiveVideo(null)}
-        >
-          <div
-            className="relative w-full max-w-4xl aspect-video"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-8" onClick={() => setActiveVideo(null)}>
+          <div className="relative w-full max-w-4xl aspect-video" onClick={(e) => e.stopPropagation()}>
             <iframe
               src={`https://www.youtube.com/embed/${getYouTubeId(activeVideo.youtubeUrl)}?autoplay=1`}
               className="w-full h-full rounded-lg"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />
-            <button
-              onClick={() => setActiveVideo(null)}
-              className="absolute -top-12 right-0 text-white/60 hover:text-white transition-colors text-sm"
-            >
+            <button onClick={() => setActiveVideo(null)} className="absolute -top-12 right-0 text-white/60 hover:text-white transition-colors text-sm">
               Close
             </button>
           </div>
