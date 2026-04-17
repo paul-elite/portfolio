@@ -604,23 +604,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   })}
               </div>
             </div>
-          ) : (
-            // Show hover preview images when not selected
-            <div className={`transition-opacity duration-300 w-full h-full ${hoveredProject && projectImages.length > 0 ? 'opacity-100' : 'opacity-0'}`}>
-              {hoveredProject && projectImages.length > 0 && (
-                <div className="relative w-full h-full rounded-lg overflow-hidden">
-                  <Image
-                    key={projectImages[previewImageIndex]}
-                    src={projectImages[previewImageIndex]}
-                    alt={hoveredProject.title}
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 768px) 100vw, 25vw"
-                  />
-                </div>
-              )}
-            </div>
-          )}
+          ) : null}
         </div>
 
         {/* Right Whitespace */}
@@ -662,6 +646,22 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
         </div>
       </div>
+
+      {/* Hover Preview - Centered on screen */}
+      {hoveredProject && projectImages.length > 0 && !selectedProject && (
+        <div className="hidden md:flex fixed inset-0 items-center justify-center pointer-events-none z-10">
+          <div className="relative w-[40vw] h-[40vh] transition-opacity duration-300">
+            <Image
+              key={projectImages[previewImageIndex]}
+              src={projectImages[previewImageIndex]}
+              alt={hoveredProject.title}
+              fill
+              className="object-contain"
+              sizes="40vw"
+            />
+          </div>
+        </div>
+      )}
 
       {/* Video Modal */}
       {activeVideo && activeVideo.youtubeUrl && (
