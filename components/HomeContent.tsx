@@ -174,9 +174,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   ];
 
   return (
-    <div className="min-h-screen flex flex-col pt-16 pb-4 md:pt-32 md:pb-16 pl-2 pr-3 md:px-6">
+    <div className="h-screen flex flex-col pt-16 pb-4 md:pt-32 md:pb-8 pl-2 pr-3 md:px-6 overflow-hidden">
       {/* Main content area */}
-      <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6">
+      <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6 min-h-0">
         {/* Avatar Column */}
         <div className="flex-shrink-0 md:col-span-1 md:flex md:flex-col md:items-end">
           {/* Main User Avatar */}
@@ -198,7 +198,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         </div>
 
         {/* Left Column - Name, Tabs, Content List, Now Playing, Contacts */}
-        <div className="flex-1 md:col-span-3 flex flex-col min-w-0">
+        <div className="flex-1 md:col-span-3 flex flex-col min-w-0 h-full">
           {/* Name */}
           <div className="h-auto md:h-14 mb-6 md:mb-4">
             <h1 className="text-base font-semibold text-gray-900">
@@ -253,7 +253,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Content List */}
-          <div className="flex-1">
+          <div className="flex-1 overflow-y-auto min-h-0">
             {activeTab === 'projects' && (
               <div>
                 {content.projects.map((project) => {
@@ -395,13 +395,14 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             })()}
           </div>
 
-          {/* Now Playing - Desktop only */}
-          <div className={`hidden md:block ${activeTab === 'illustration' ? 'w-full md:w-[calc(166%+1.5rem)]' : ''}`}>
-            <NowPlayingContent data={nowPlayingData} />
-          </div>
+          {/* Now Playing & Contact - Desktop only, pinned to bottom */}
+          <div className="hidden md:block flex-shrink-0 mt-auto pt-4">
+            <div className={`${activeTab === 'illustration' ? 'w-full md:w-[calc(166%+1.5rem)]' : ''}`}>
+              <NowPlayingContent data={nowPlayingData} />
+            </div>
 
-          {/* Contact - Desktop only */}
-          <footer className="hidden md:block pt-4">
+            {/* Contact */}
+            <footer className="pt-4">
             <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
               {/* Twitter */}
               <div className="relative inline-block">
@@ -500,11 +501,12 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                 )}
               </div>
             </div>
-          </footer>
+            </footer>
+          </div>
         </div>
 
         {/* Right Column - Content Display */}
-        <div className="hidden md:flex md:col-span-5 items-start overflow-y-auto max-h-[calc(100vh-8rem)]">
+        <div className="hidden md:flex md:col-span-5 items-start overflow-y-auto">
           {selectedProject ? (
             // Show full project content when selected
             <div className="w-full pr-4">
