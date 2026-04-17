@@ -28,6 +28,8 @@ interface Project {
   };
 }
 
+type IllustrationCategory = 'app-icons' | 'characters' | 'assets';
+
 interface Illustration {
   id: string;
   slug: string;
@@ -35,7 +37,14 @@ interface Illustration {
   description: string;
   thumbnail?: string;
   youtubeUrl?: string;
+  category?: IllustrationCategory;
 }
+
+const ILLUSTRATION_CATEGORIES: { key: IllustrationCategory; label: string }[] = [
+  { key: 'app-icons', label: 'App Icons' },
+  { key: 'characters', label: 'Character Illustrations' },
+  { key: 'assets', label: 'Assets' },
+];
 
 interface Writing {
   id: string;
@@ -449,6 +458,7 @@ export default function AdminPage() {
     } else if (activeTab === 'illustrations') {
       data.thumbnail = (item.thumbnail as string) || '';
       data.youtubeUrl = (item.youtubeUrl as string) || '';
+      data.category = (item.category as string) || 'assets';
     } else if (activeTab === 'writings') {
       data.avatar = (item.avatar as string) || '';
       data.cover = (item.cover as string) || '';
@@ -1217,6 +1227,18 @@ export default function AdminPage() {
                           </svg>
                         }
                       />
+                      <div className="space-y-1.5">
+                        <label className="block text-sm font-medium text-gray-700">Category</label>
+                        <select
+                          value={formData.category || 'assets'}
+                          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
+                        >
+                          {ILLUSTRATION_CATEGORIES.map((cat) => (
+                            <option key={cat.key} value={cat.key}>{cat.label}</option>
+                          ))}
+                        </select>
+                      </div>
                     </>
                   )}
 

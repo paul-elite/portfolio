@@ -123,6 +123,8 @@ export interface Writing {
   cover?: string;
 }
 
+export type IllustrationCategory = 'app-icons' | 'characters' | 'assets';
+
 export interface Illustration {
   id: string;
   slug: string;
@@ -130,6 +132,7 @@ export interface Illustration {
   description: string;
   thumbnail?: string;
   youtubeUrl?: string;
+  category?: IllustrationCategory;
 }
 
 export interface Interaction {
@@ -174,6 +177,7 @@ export const illustrations: Illustration[] = [
     title: "Abstract forms",
     description: "Geometric compositions exploring shape and color.",
     youtubeUrl: "https://youtube.com/watch?v=example1",
+    category: "assets",
   },
   {
     id: "i2",
@@ -181,6 +185,7 @@ export const illustrations: Illustration[] = [
     title: "Interface sketches",
     description: "Early-stage explorations and wireframes.",
     youtubeUrl: "https://youtube.com/watch?v=example2",
+    category: "assets",
   },
   {
     id: "i3",
@@ -188,6 +193,7 @@ export const illustrations: Illustration[] = [
     title: "Motion studies",
     description: "Animation principles in practice.",
     youtubeUrl: "https://youtube.com/watch?v=example3",
+    category: "assets",
   },
   {
     id: "i4",
@@ -195,6 +201,7 @@ export const illustrations: Illustration[] = [
     title: "Color experiments",
     description: "Exploring palettes and gradients.",
     youtubeUrl: "https://youtube.com/watch?v=example4",
+    category: "assets",
   },
   {
     id: "i5",
@@ -202,6 +209,7 @@ export const illustrations: Illustration[] = [
     title: "Typography play",
     description: "Letterforms and type compositions.",
     youtubeUrl: "https://youtube.com/watch?v=example5",
+    category: "assets",
   },
   {
     id: "i6",
@@ -209,6 +217,7 @@ export const illustrations: Illustration[] = [
     title: "3D renders",
     description: "Abstract 3D scenes and objects.",
     youtubeUrl: "https://youtube.com/watch?v=example6",
+    category: "assets",
   },
 ];
 

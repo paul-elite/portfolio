@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import OptimizedImage from './OptimizedImage';
-import { Project, Illustration, ContentBlock } from '@/lib/data';
+import { Project, Illustration, ContentBlock, IllustrationCategory } from '@/lib/data';
 import { useNowPlaying, NowPlayingContent, NowPlayingImage } from './NowPlaying';
 
 function getGitHubUsername(url: string): string | null {
@@ -43,9 +43,15 @@ interface SiteConfig {
 interface ContentData {
   projects: Project[];
   writings: { id: string; slug: string; title: string; description: string; cover?: string; date?: string; avatar?: string }[];
-  illustrations: Illustration[];
+  illustrations: (Illustration & { category?: IllustrationCategory })[];
   interactions: { id: string; slug: string; title: string; description: string }[];
 }
+
+const ILLUSTRATION_CATEGORIES: { key: IllustrationCategory; label: string }[] = [
+  { key: 'app-icons', label: 'App Icons' },
+  { key: 'characters', label: 'Character Illustrations' },
+  { key: 'assets', label: 'Assets' },
+];
 
 interface HomeContentProps {
   initialConfig: SiteConfig;
@@ -107,9 +113,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const [activeTab, setActiveTab] = useState<Tab>('projects');
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<IllustrationCategory | null>(null);
   const [activeVideo, setActiveVideo] = useState<Illustration | null>(null);
   const [playingInlineId, setPlayingInlineId] = useState<string | null>(null);
-  const [illustrationPage, setIllustrationPage] = useState(0);
   const [githubHovered, setGithubHovered] = useState(false);
   const [githubMousePos, setGithubMousePos] = useState({ x: 0, y: 0 });
   const [showMoreTabs, setShowMoreTabs] = useState(false);
@@ -151,9 +157,10 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     return () => clearInterval(interval);
   }, [hoveredProject, projectImages.length, selectedProject]);
 
-  // Clear selected project when switching tabs
+  // Clear selections when switching tabs
   useEffect(() => {
     setSelectedProject(null);
+    setSelectedCategory(null);
   }, [activeTab]);
 
   const mainTabs: { key: Tab; label: string }[] = [
@@ -175,16 +182,14 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden">
             {(() => {
               // Determine which avatar to show
+              const hasActiveContent = selectedProject || selectedCategory;
               const projectAvatar = selectedProject?.avatar;
               const focusedAvatar = siteConfig.avatarFocused;
               const defaultAvatar = siteConfig.avatar;
 
-              const currentAvatar = selectedProject
+              const currentAvatar = hasActiveContent
                 ? (projectAvatar || focusedAvatar || defaultAvatar)
                 : defaultAvatar;
-
-              // Debug: remove after testing
-              console.log('Avatar debug:', { projectAvatar, focusedAvatar, defaultAvatar, currentAvatar, hasSelectedProject: !!selectedProject });
 
               return currentAvatar ? (
                 <Image
@@ -301,90 +306,31 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               </div>
             )}
 
-            {activeTab === 'illustration' && (() => {
-              const itemsPerPage = 4;
-              const totalPages = Math.ceil(content.illustrations.length / itemsPerPage);
-              const startIndex = illustrationPage * itemsPerPage;
-              const currentItems = content.illustrations.slice(startIndex, startIndex + itemsPerPage);
-
-              const handleWheel = (e: React.WheelEvent) => {
-                e.preventDefault();
-                if (e.deltaY > 0 && illustrationPage < totalPages - 1) {
-                  setIllustrationPage(illustrationPage + 1);
-                } else if (e.deltaY < 0 && illustrationPage > 0) {
-                  setIllustrationPage(illustrationPage - 1);
-                }
-              };
-
-              return (
-                <div className="flex gap-6 h-full items-center w-full md:w-[calc(166%+1.5rem)]" onWheel={handleWheel}>
-                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-2 gap-4 content-center">
-                    {currentItems.map((item) => {
-                      const isPlayingInline = playingInlineId === item.id;
-                      const youtubeId = item.youtubeUrl ? getYouTubeId(item.youtubeUrl) : null;
-
-                      return (
-                        <div key={item.id} className="group block">
-                          <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden relative">
-                            {isPlayingInline && youtubeId ? (
-                              <>
-                                <iframe
-                                  src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1`}
-                                  className="w-full h-full"
-                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                  allowFullScreen
-                                />
-                                <button
-                                  onClick={() => { setActiveVideo(item); setPlayingInlineId(null); }}
-                                  className="absolute bottom-2 right-2 text-xs px-2 py-1 bg-white/90 rounded transition-colors hover:bg-white"
-                                  style={{ color: '#0066f5' }}
-                                >
-                                  Expand
-                                </button>
-                              </>
-                            ) : (
-                              <button
-                                onClick={() => { if (youtubeId) setPlayingInlineId(item.id); }}
-                                className="w-full h-full relative cursor-pointer"
-                              >
-                                {item.thumbnail ? (
-                                  <OptimizedImage src={item.thumbnail} alt={item.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 50vw" />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center">
-                                    <span className="text-gray-300 text-xs">{item.title}</span>
-                                  </div>
-                                )}
-                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors">
-                                  <h3 className="text-sm text-white font-medium opacity-0 group-hover:opacity-100 transition-opacity text-center px-4">
-                                    {item.title}
-                                  </h3>
-                                  {youtubeId && (
-                                    <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity mt-2">
-                                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="text-gray-900 ml-0.5">
-                                        <polygon points="5 3 19 12 5 21 5 3" />
-                                      </svg>
-                                    </div>
-                                  )}
-                                </div>
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  {totalPages > 1 && (
-                    <div className="flex flex-col justify-center gap-3">
-                      {Array.from({ length: totalPages }, (_, i) => (
-                        <button key={i} onClick={(e) => { e.stopPropagation(); setIllustrationPage(i); }} className="w-4 h-8 flex items-center justify-center cursor-pointer" aria-label={`Page ${i + 1}`}>
-                          <span className={`w-1 h-6 rounded-full transition-colors ${illustrationPage === i ? 'bg-gray-900' : 'bg-gray-300 hover:bg-gray-400'}`} />
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
+            {activeTab === 'illustration' && (
+              <div>
+                {ILLUSTRATION_CATEGORIES.map((cat) => {
+                  const count = content.illustrations.filter(i => (i.category || 'assets') === cat.key).length;
+                  return (
+                    <button
+                      key={cat.key}
+                      onClick={() => setSelectedCategory(selectedCategory === cat.key ? null : cat.key)}
+                      className={`group block py-3 w-full text-left ${selectedCategory === cat.key ? 'opacity-100' : ''}`}
+                    >
+                      <h2 className={`text-base font-normal mb-0.5 transition-colors ${
+                        selectedCategory === cat.key
+                          ? 'text-gray-900'
+                          : 'text-gray-900 group-hover:text-gray-600'
+                      }`}>
+                        {cat.label}
+                      </h2>
+                      <p className="text-sm text-gray-400">
+                        {count} {count === 1 ? 'item' : 'items'}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
             {activeTab === 'writings' && (() => {
               const writingsByYear = content.writings.reduce((acc, item) => {
@@ -541,7 +487,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </footer>
         </div>
 
-        {/* Right Column - Project Content or Preview Images */}
+        {/* Right Column - Content Display */}
         <div className="hidden md:flex md:col-span-5 items-start overflow-y-auto max-h-[calc(100vh-8rem)]">
           {selectedProject ? (
             // Show full project content when selected
@@ -592,6 +538,53 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   View Project →
                 </a>
               )}
+            </div>
+          ) : selectedCategory ? (
+            // Show illustrations grid when category is selected
+            <div className="w-full pr-4">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                {ILLUSTRATION_CATEGORIES.find(c => c.key === selectedCategory)?.label}
+              </h2>
+              <div className="grid grid-cols-2 gap-4">
+                {content.illustrations
+                  .filter(item => (item.category || 'assets') === selectedCategory)
+                  .map((item) => {
+                    const youtubeId = item.youtubeUrl ? getYouTubeId(item.youtubeUrl) : null;
+                    return (
+                      <div key={item.id} className="group">
+                        <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden relative">
+                          {item.thumbnail ? (
+                            <OptimizedImage
+                              src={item.thumbnail}
+                              alt={item.title}
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 50vw, 20vw"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <span className="text-gray-300 text-xs">{item.title}</span>
+                            </div>
+                          )}
+                          {youtubeId && (
+                            <button
+                              onClick={() => setActiveVideo(item)}
+                              className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors"
+                            >
+                              <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-gray-900 ml-0.5">
+                                  <polygon points="5 3 19 12 5 21 5 3" />
+                                </svg>
+                              </div>
+                            </button>
+                          )}
+                        </div>
+                        <h3 className="text-sm text-gray-900 mt-2">{item.title}</h3>
+                        <p className="text-xs text-gray-400">{item.description}</p>
+                      </div>
+                    );
+                  })}
+              </div>
             </div>
           ) : (
             // Show hover preview images when not selected

@@ -102,6 +102,7 @@ export async function GET(request: NextRequest) {
       description: item.description,
       thumbnail: item.thumbnail,
       youtubeUrl: item.youtube_url,
+      category: item.category || 'assets',
     }));
 
     // Transform projects to camelCase for frontend
@@ -172,6 +173,7 @@ export async function POST(request: NextRequest) {
         ...insertData,
         thumbnail: data.thumbnail || '',
         youtube_url: data.youtubeUrl || '',
+        category: data.category || 'assets',
       };
     } else if (type === 'interactions') {
       insertData = {
