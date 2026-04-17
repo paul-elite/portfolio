@@ -207,6 +207,13 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               );
             })()}
           </div>
+          {/* DEBUG: Remove after testing */}
+          <div className="hidden md:block fixed top-2 left-2 text-[10px] bg-black/90 text-white p-2 rounded z-50 font-mono">
+            <div>default: {siteConfig.avatar ? 'YES' : 'NO'}</div>
+            <div>focused: {siteConfig.avatarFocused ? 'YES' : 'NO'}</div>
+            <div>projAvatar: {selectedProject?.avatar ? 'YES' : 'NO'}</div>
+            <div>hasSelection: {selectedProject ? 'YES' : 'NO'}</div>
+          </div>
         </div>
 
         {/* Left Column - Name, Tabs, Content List, Now Playing, Contacts */}
