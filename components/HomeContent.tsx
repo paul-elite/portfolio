@@ -548,7 +548,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         <div className="hidden md:flex md:col-span-8 items-start overflow-y-auto custom-scrollbar pr-6">
           {selectedProject ? (
             // Show full project content when selected
-            <div className="w-full max-w-2xl">
+            <div className="w-full max-w-[572px]">
               {/* Project Title */}
               <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedProject.title}</h2>
               <div className="flex gap-4 text-sm text-gray-400 mb-6">
@@ -598,7 +598,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             </div>
           ) : selectedCategory ? (
             // Show illustrations grid when category is selected
-            <div className="w-full max-w-2xl">
+            <div className="w-full max-w-[572px]">
               <h2 className="text-xl font-semibold text-gray-900 mb-6">
                 {ILLUSTRATION_CATEGORIES.find(c => c.key === selectedCategory)?.label}
               </h2>
