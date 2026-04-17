@@ -181,7 +181,10 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         <div className="hidden md:flex md:col-span-1 flex-col items-end h-full">
           {/* User Avatar - matches Name section height */}
           <div className="h-14 mb-4 flex items-start">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden">
+            <button
+              onClick={() => { setSelectedProject(null); setSelectedCategory(null); }}
+              className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden cursor-pointer hover:ring-2 hover:ring-purple-300 transition-all"
+            >
               {siteConfig.avatar ? (
                 <Image
                   src={siteConfig.avatar}
@@ -195,7 +198,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   {siteConfig.name.charAt(0)}
                 </span>
               )}
-            </div>
+            </button>
           </div>
 
           {/* Tabs spacer */}
