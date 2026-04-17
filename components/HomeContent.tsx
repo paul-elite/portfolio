@@ -177,10 +177,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     <div className="h-screen flex flex-col pt-16 pb-4 md:pt-32 md:pb-8 pl-2 pr-3 md:px-6 overflow-hidden">
       {/* Main content area */}
       <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6 min-h-0">
-        {/* Left Section - Avatar + Content */}
-        <div className="flex-1 md:col-span-4 flex gap-6 min-w-0 h-full">
-          {/* Avatar Sub-column */}
-          <div className="hidden md:flex flex-col items-end w-10 flex-shrink-0">
+        {/* Avatar Column */}
+        <div className="hidden md:block md:col-span-1">
+          <div className="flex flex-col items-end h-full">
             {/* Main User Avatar */}
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden">
               {siteConfig.avatar ? (
@@ -198,16 +197,17 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               )}
             </div>
           </div>
+        </div>
 
-          {/* Content Sub-column */}
-          <div className="flex-1 flex flex-col min-w-0 h-full">
-            {/* Name */}
-            <div className="h-auto md:h-14 mb-6 md:mb-4">
-              <h1 className="text-base font-semibold text-gray-900">
-                {siteConfig.name}
-              </h1>
-              <p className="text-base font-normal text-gray-500">{siteConfig.title}</p>
-            </div>
+        {/* Left Content Column */}
+        <div className="flex-1 md:col-span-3 flex flex-col min-w-0 h-full">
+          {/* Name */}
+          <div className="h-auto md:h-14 mb-6 md:mb-4">
+            <h1 className="text-base font-semibold text-gray-900">
+              {siteConfig.name}
+            </h1>
+            <p className="text-base font-normal text-gray-500">{siteConfig.title}</p>
+          </div>
 
           {/* Tabs */}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-base mb-6">
@@ -254,63 +254,65 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             </button>
           </div>
 
-            {/* Content List */}
-            <div className="flex-1 overflow-y-auto min-h-0">
-              {activeTab === 'projects' && (
-                <div>
-                  {content.projects.map((project, index) => {
-                    const isSelected = selectedProject?.id === project.id;
-                    // Generate consistent colors based on project index
-                    const colors = [
-                      'from-blue-400 to-cyan-400',
-                      'from-purple-400 to-pink-400',
-                      'from-orange-400 to-red-400',
-                      'from-green-400 to-teal-400',
-                      'from-indigo-400 to-purple-400',
-                      'from-pink-400 to-rose-400',
-                    ];
-                    const colorClass = colors[index % colors.length];
+          {/* Content List */}
+          <div className="flex-1 overflow-y-auto min-h-0">
+            {activeTab === 'projects' && (
+              <div>
+                {content.projects.map((project, index) => {
+                  const isSelected = selectedProject?.id === project.id;
+                  const colors = [
+                    'from-blue-400 to-cyan-400',
+                    'from-purple-400 to-pink-400',
+                    'from-orange-400 to-red-400',
+                    'from-green-400 to-teal-400',
+                    'from-indigo-400 to-purple-400',
+                    'from-pink-400 to-rose-400',
+                  ];
+                  const colorClass = colors[index % colors.length];
 
-                    return (
-                      <div key={project.id} className="flex items-start gap-6">
-                        {/* Project Avatar */}
-                        <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex-shrink-0 flex items-center justify-center overflow-hidden mt-3 transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`}>
-                          {project.avatar ? (
-                            <Image
-                              src={project.avatar}
-                              alt={project.title}
-                              width={40}
-                              height={40}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <span className="text-sm font-medium text-white">
-                              {project.title.charAt(0)}
-                            </span>
-                          )}
-                        </div>
-                        <button
-                          onClick={() => setSelectedProject(isSelected ? null : project)}
-                          className={`group block py-3 flex-1 text-left ${isSelected ? 'opacity-100' : ''}`}
-                          onMouseEnter={() => !selectedProject && setHoveredProject(project)}
-                          onMouseLeave={() => !selectedProject && setHoveredProject(null)}
-                        >
-                          <h2 className={`text-base font-normal mb-0.5 transition-colors ${
-                            isSelected
-                              ? 'text-gray-900'
-                              : 'text-gray-900 group-hover:text-gray-600'
-                          }`}>
-                            {project.title}
-                          </h2>
-                          <p className="text-sm text-gray-400">
-                            {project.year} <span className="mx-1">·</span> {project.description}
-                          </p>
-                        </button>
+                  return (
+                    <div key={project.id} className="relative">
+                      {/* Project Avatar - positioned in avatar column via negative margin */}
+                      <div
+                        className={`absolute top-3 w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center overflow-hidden transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`}
+                        style={{ left: 'calc(-40px - 1.5rem)' }}
+                      >
+                        {project.avatar ? (
+                          <Image
+                            src={project.avatar}
+                            alt={project.title}
+                            width={40}
+                            height={40}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-sm font-medium text-white">
+                            {project.title.charAt(0)}
+                          </span>
+                        )}
                       </div>
-                    );
-                  })}
-                </div>
-              )}
+                      <button
+                        onClick={() => setSelectedProject(isSelected ? null : project)}
+                        className={`group block py-3 w-full text-left ${isSelected ? 'opacity-100' : ''}`}
+                        onMouseEnter={() => !selectedProject && setHoveredProject(project)}
+                        onMouseLeave={() => !selectedProject && setHoveredProject(null)}
+                      >
+                        <h2 className={`text-base font-normal mb-0.5 transition-colors ${
+                          isSelected
+                            ? 'text-gray-900'
+                            : 'text-gray-900 group-hover:text-gray-600'
+                        }`}>
+                          {project.title}
+                        </h2>
+                        <p className="text-sm text-gray-400">
+                          {project.year} <span className="mx-1">·</span> {project.description}
+                        </p>
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             {activeTab === 'interaction' && (
               <div>
@@ -327,46 +329,49 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               </div>
             )}
 
-              {activeTab === 'illustration' && (
-                <div>
-                  {ILLUSTRATION_CATEGORIES.map((cat, index) => {
-                    const count = content.illustrations.filter(i => (i.category || 'assets') === cat.key).length;
-                    const isSelected = selectedCategory === cat.key;
-                    const colors = [
-                      'from-yellow-400 to-orange-400',
-                      'from-pink-400 to-purple-400',
-                      'from-cyan-400 to-blue-400',
-                    ];
-                    const colorClass = colors[index % colors.length];
+            {activeTab === 'illustration' && (
+              <div>
+                {ILLUSTRATION_CATEGORIES.map((cat, index) => {
+                  const count = content.illustrations.filter(i => (i.category || 'assets') === cat.key).length;
+                  const isSelected = selectedCategory === cat.key;
+                  const colors = [
+                    'from-yellow-400 to-orange-400',
+                    'from-pink-400 to-purple-400',
+                    'from-cyan-400 to-blue-400',
+                  ];
+                  const colorClass = colors[index % colors.length];
 
-                    return (
-                      <div key={cat.key} className="flex items-start gap-6">
-                        {/* Category Icon */}
-                        <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex-shrink-0 flex items-center justify-center mt-3 transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`}>
-                          <span className="text-base">
-                            {cat.key === 'app-icons' ? '📱' : cat.key === 'characters' ? '🎨' : '🖼️'}
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => setSelectedCategory(isSelected ? null : cat.key)}
-                          className={`group block py-3 flex-1 text-left ${isSelected ? 'opacity-100' : ''}`}
-                        >
-                          <h2 className={`text-base font-normal mb-0.5 transition-colors ${
-                            isSelected
-                              ? 'text-gray-900'
-                              : 'text-gray-900 group-hover:text-gray-600'
-                          }`}>
-                            {cat.label}
-                          </h2>
-                          <p className="text-sm text-gray-400">
-                            {count} {count === 1 ? 'item' : 'items'}
-                          </p>
-                        </button>
+                  return (
+                    <div key={cat.key} className="relative">
+                      {/* Category Icon - positioned in avatar column */}
+                      <div
+                        className={`absolute top-3 w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`}
+                        style={{ left: 'calc(-40px - 1.5rem)' }}
+                      >
+                        <span className="text-base">
+                          {cat.key === 'app-icons' ? '📱' : cat.key === 'characters' ? '🎨' : '🖼️'}
+                        </span>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
+                      <button
+                        onClick={() => setSelectedCategory(isSelected ? null : cat.key)}
+                        className={`group block py-3 w-full text-left ${isSelected ? 'opacity-100' : ''}`}
+                      >
+                        <h2 className={`text-base font-normal mb-0.5 transition-colors ${
+                          isSelected
+                            ? 'text-gray-900'
+                            : 'text-gray-900 group-hover:text-gray-600'
+                        }`}>
+                          {cat.label}
+                        </h2>
+                        <p className="text-sm text-gray-400">
+                          {count} {count === 1 ? 'item' : 'items'}
+                        </p>
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             {activeTab === 'writings' && (() => {
               const writingsByYear = content.writings.reduce((acc, item) => {
@@ -522,7 +527,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               </div>
             </div>
             </footer>
-          </div>
           </div>
         </div>
 
