@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
 import {
   siteConfig as staticConfig,
@@ -95,7 +96,9 @@ export default async function Home() {
   return (
     <main className="h-screen bg-white overflow-hidden">
       <div className="w-full h-full px-6">
-        <HomeContent initialConfig={config} initialContent={content} />
+        <Suspense fallback={<div className="h-full flex items-center justify-center text-gray-400">Loading...</div>}>
+          <HomeContent initialConfig={config} initialContent={content} />
+        </Suspense>
       </div>
     </main>
   );

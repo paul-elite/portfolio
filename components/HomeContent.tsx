@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useSearchParams, useRouter } from 'next/navigation';
 import OptimizedImage from './OptimizedImage';
 import { Project, Illustration, ContentBlock, IllustrationCategory } from '@/lib/data';
 import { useNowPlaying, NowPlayingContent, NowPlayingImage } from './NowPlaying';
@@ -111,6 +112,9 @@ function renderBlock(block: ContentBlock, index: number) {
 }
 
 export default function HomeContent({ initialConfig, initialContent }: HomeContentProps) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [activeTab, setActiveTab] = useState<Tab>('projects');
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -126,9 +130,59 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const githubRef = useRef<HTMLAnchorElement>(null);
   const socialRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
   const nowPlayingData = useNowPlaying();
+  const isInitialized = useRef(false);
 
   const siteConfig = initialConfig;
   const content = initialContent;
+
+  // Update URL when selection changes
+  const updateURL = useCallback((projectSlug: string | null, category: IllustrationCategory | null) => {
+    const params = new URLSearchParams();
+    if (projectSlug) {
+      params.set('project', projectSlug);
+    } else if (category) {
+      params.set('category', category);
+    }
+    const newURL = params.toString() ? `?${params.toString()}` : '/';
+    router.replace(newURL, { scroll: false });
+  }, [router]);
+
+  // Initialize state from URL on mount
+  useEffect(() => {
+    if (isInitialized.current) return;
+    isInitialized.current = true;
+
+    const projectSlug = searchParams.get('project');
+    const category = searchParams.get('category') as IllustrationCategory | null;
+
+    if (projectSlug) {
+      const project = content.projects.find(p => p.slug === projectSlug);
+      if (project) {
+        setActiveTab('projects');
+        setSelectedProject(project);
+      }
+    } else if (category && ILLUSTRATION_CATEGORIES.some(c => c.key === category)) {
+      setActiveTab('illustration');
+      setSelectedCategory(category);
+    }
+  }, [searchParams, content.projects]);
+
+  // Wrapper functions to update selection and URL together
+  const handleSelectProject = useCallback((project: Project | null) => {
+    setSelectedProject(project);
+    updateURL(project?.slug || null, null);
+  }, [updateURL]);
+
+  const handleSelectCategory = useCallback((category: IllustrationCategory | null) => {
+    setSelectedCategory(category);
+    updateURL(null, category);
+  }, [updateURL]);
+
+  const handleClearSelection = useCallback(() => {
+    setSelectedProject(null);
+    setSelectedCategory(null);
+    updateURL(null, null);
+  }, [updateURL]);
 
   // Get preview images from the hovered project
   const projectImages = useMemo(() => {
@@ -160,9 +214,10 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
   // Clear selections when switching tabs
   useEffect(() => {
-    setSelectedProject(null);
-    setSelectedCategory(null);
-  }, [activeTab]);
+    if (isInitialized.current) {
+      handleClearSelection();
+    }
+  }, [activeTab, handleClearSelection]);
 
   const mainTabs: { key: Tab; label: string }[] = [
     { key: 'projects', label: 'Projects' },
@@ -186,7 +241,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           {/* User Avatar - matches Name section height */}
           <div className="h-14 mb-4 flex items-start">
             <button
-              onClick={() => { setSelectedProject(null); setSelectedCategory(null); }}
+              onClick={handleClearSelection}
               className={`w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden cursor-pointer hover:ring-2 hover:ring-purple-300 transition-all ${hasSelection ? 'opacity-30' : ''}`}
             >
               {siteConfig.avatar ? (
@@ -328,7 +383,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   return (
                     <button
                       key={project.id}
-                      onClick={() => setSelectedProject(isSelected ? null : project)}
+                      onClick={() => handleSelectProject(isSelected ? null : project)}
                       className={`group block py-3 w-full text-left transition-opacity ${hasSelection && !isSelected ? 'opacity-30' : ''}`}
                       onMouseEnter={() => !selectedProject && setHoveredProject(project)}
                       onMouseLeave={() => !selectedProject && setHoveredProject(null)}
@@ -372,7 +427,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   return (
                     <button
                       key={cat.key}
-                      onClick={() => setSelectedCategory(isSelected ? null : cat.key)}
+                      onClick={() => handleSelectCategory(isSelected ? null : cat.key)}
                       className={`group block py-3 w-full text-left transition-opacity ${hasSelection && !isSelected ? 'opacity-30' : ''}`}
                     >
                       <h2 className={`text-base font-normal mb-0.5 transition-colors ${
