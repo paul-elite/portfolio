@@ -475,7 +475,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         </div>
 
         {/* Left Content Column */}
-        <div className="flex-1 md:col-span-3 flex flex-col min-w-0 h-full overflow-hidden -mt-[100px] pt-[100px]">
+        <div className="flex-1 md:col-span-3 flex flex-col min-w-0 md:h-[calc(100%+100px)] overflow-hidden pt-[100px]">
           {/* Name */}
           <div className={`h-auto md:h-14 mb-6 md:mb-4 transition-opacity ${hasSelection ? 'opacity-30' : ''}`}>
             <h1 className="text-base font-semibold text-gray-900">
@@ -760,7 +760,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         </div>
 
         {/* Right Column - Content Display (extends to right edge for scrollbar positioning) */}
-        <div className="hidden md:block md:col-span-8 relative -mt-[100px] pt-[100px]">
+        <div className="hidden md:block md:col-span-8 relative md:h-[calc(100%+100px)] pt-[100px]">
           {/* Top fade overlay - extends upward into page padding */}
           <div className="absolute top-0 left-0 right-4 h-[100px] bg-gradient-to-b from-white from-0% via-white/30 via-60% to-transparent to-100% z-10 pointer-events-none" />
           <div className="absolute top-[100px] left-0 right-0 bottom-0 overflow-y-auto custom-scrollbar">
