@@ -762,7 +762,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         {/* Right Column - Content Display (extends to right edge for scrollbar positioning) */}
         <div className="hidden md:block md:col-span-8 relative">
           {/* Top fade overlay */}
-          <div className="absolute top-0 left-0 right-4 h-8 bg-gradient-to-b from-white via-white/80 to-transparent z-10 pointer-events-none backdrop-blur-[2px]" />
+          <div className="absolute top-0 left-0 right-4 h-16 bg-gradient-to-b from-white from-0% via-white/40 via-25% to-transparent to-60% z-10 pointer-events-none" />
           <div className="absolute inset-0 overflow-y-auto custom-scrollbar">
           {selectedProject ? (
             // Show full project content when selected
