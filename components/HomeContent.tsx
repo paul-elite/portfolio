@@ -901,14 +901,14 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       {/* Hover Preview - Centered on screen */}
       {hoveredProject && projectImages.length > 0 && !selectedProject && (
         <div className="hidden md:flex fixed inset-0 items-center justify-center pointer-events-none z-10">
-          <div className="relative w-[40vw] h-[40vh] transition-opacity duration-300">
+          <div className="relative w-[60vw] h-[60vh] transition-opacity duration-300">
             <Image
               key={projectImages[previewImageIndex]}
               src={projectImages[previewImageIndex]}
               alt={hoveredProject.title}
               fill
               className="object-contain"
-              sizes="40vw"
+              sizes="60vw"
             />
           </div>
         </div>
