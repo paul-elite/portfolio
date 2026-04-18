@@ -279,20 +279,20 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       return;
     }
 
-    // Start sliding animation
+    // Start sliding animation (synced with content panel: 200ms)
     setSlidingAvatar({ fromIndex, toIndex, phase: 'sliding' });
     setDisplayedAvatarProject(prevProject); // Start with old avatar
 
     // Change avatar halfway through
     const halfwayTimer = setTimeout(() => {
       setDisplayedAvatarProject(newProject);
-    }, 150); // Half of 300ms animation
+    }, 100); // Half of 200ms animation
 
     // End animation
     const endTimer = setTimeout(() => {
       setSlidingAvatar(null);
       prevSelectedProject.current = newProject;
-    }, 300);
+    }, 200);
 
     return () => {
       clearTimeout(halfwayTimer);
@@ -414,7 +414,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                 {displayedAvatarProject && (
                   <div
                     className={`absolute right-0 w-10 h-10 flex items-center justify-center ${
-                      slidingAvatar ? 'transition-all duration-300 ease-out' : selectedProject ? 'transition-all duration-300 ease-out' : 'transition-opacity duration-150'
+                      slidingAvatar ? 'transition-all duration-200 ease-out' : selectedProject ? 'transition-all duration-200 ease-out' : 'transition-opacity duration-150'
                     }`}
                     style={{
                       top: `${avatarTopPosition}px`,
