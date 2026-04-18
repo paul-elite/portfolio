@@ -363,7 +363,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   return (
     <div className="h-screen flex flex-col pt-16 pb-4 md:pt-32 md:pb-8 pl-2 pr-3 md:px-6 overflow-hidden">
       {/* Main content area */}
-      <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6 min-h-0">
+      <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6 min-h-0 overflow-hidden">
         {/* Avatar Column */}
         <div className="hidden md:flex md:col-span-1 flex-col items-end h-full">
           {/* User Avatar - matches Name section height */}
@@ -475,7 +475,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         </div>
 
         {/* Left Content Column */}
-        <div className="flex-1 md:col-span-3 flex flex-col min-w-0 h-full">
+        <div className="flex-1 md:col-span-3 flex flex-col min-w-0 h-full overflow-hidden">
           {/* Name */}
           <div className={`h-auto md:h-14 mb-6 md:mb-4 transition-opacity ${hasSelection ? 'opacity-30' : ''}`}>
             <h1 className="text-base font-semibold text-gray-900">
