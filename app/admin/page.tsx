@@ -356,6 +356,8 @@ export default function AdminPage() {
   const [previewImages, setPreviewImages] = useState<Record<string, string>>({});
   const [homepageImages, setHomepageImages] = useState<string[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [pendingSaveAction, setPendingSaveAction] = useState<'continue' | 'close' | null>(null);
 
   const fetchContent = async () => {
     try {
@@ -489,6 +491,20 @@ export default function AdminPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // If editing, show modal to ask user what to do
+    if (editingId) {
+      setShowSaveModal(true);
+      return;
+    }
+
+    // For new items, just create directly
+    await performSave('close');
+  };
+
+  const performSave = async (action: 'continue' | 'close') => {
+    setShowSaveModal(false);
+    setPendingSaveAction(null);
     setLoading(true);
     const isEditing = !!editingId;
     const loadingToast = toast.loading(isEditing ? 'Updating...' : 'Creating...');
@@ -543,13 +559,20 @@ export default function AdminPage() {
 
       if (res.ok) {
         toast.update(loadingToast, isEditing ? 'Updated successfully!' : 'Created successfully!', 'success');
-        setFormData({});
-        setPreviewImages({});
-        setProjectBlocks([]);
-        setWritingBlocks([]);
-        setHomepageImages([]);
-        setEditingId(null);
         fetchContent();
+
+        if (action === 'close') {
+          // Clear form and close editing
+          setFormData({});
+          setPreviewImages({});
+          setProjectBlocks([]);
+          setWritingBlocks([]);
+          setHomepageImages([]);
+          setEditingId(null);
+        } else {
+          // Keep form open for more edits
+          toast.info('You can continue editing');
+        }
       } else {
         const errorData = await res.json().catch(() => ({}));
         const errorMsg = errorData.details || (isEditing ? 'Failed to update' : 'Failed to create');
@@ -1364,6 +1387,41 @@ export default function AdminPage() {
             Content synced to Supabase with 60-second cache
           </p>
         </div>
+
+        {/* Save Modal */}
+        {showSaveModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Save Changes</h3>
+              <p className="text-gray-600 mb-6">How would you like to save your changes?</p>
+
+              <div className="space-y-3">
+                <button
+                  onClick={() => performSave('continue')}
+                  className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg font-medium transition-colors text-left"
+                >
+                  <span className="block">Save & Continue Editing</span>
+                  <span className="text-sm text-gray-500">Keep the form open for more changes</span>
+                </button>
+
+                <button
+                  onClick={() => performSave('close')}
+                  className="w-full py-3 px-4 bg-gray-900 hover:bg-gray-800 text-white rounded-lg font-medium transition-colors text-left"
+                >
+                  <span className="block">Save & Close</span>
+                  <span className="text-sm text-gray-400">Save and return to the list</span>
+                </button>
+              </div>
+
+              <button
+                onClick={() => setShowSaveModal(false)}
+                className="w-full mt-4 py-2 text-gray-500 hover:text-gray-700 text-sm transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </main>
     </>
   );
