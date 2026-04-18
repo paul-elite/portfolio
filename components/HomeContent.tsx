@@ -127,10 +127,15 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const [previewImageIndex, setPreviewImageIndex] = useState(0);
   const [hoveredSocial, setHoveredSocial] = useState<string | null>(null);
   const [socialMousePos, setSocialMousePos] = useState({ x: 0, y: 0 });
+  const [slidingAvatar, setSlidingAvatar] = useState<{ fromIndex: number; toIndex: number; phase: 'sliding' | 'idle' } | null>(null);
+  const [displayedAvatarProject, setDisplayedAvatarProject] = useState<Project | null>(null);
   const githubRef = useRef<HTMLAnchorElement>(null);
   const socialRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
+  const projectItemRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const avatarContainerRef = useRef<HTMLDivElement>(null);
   const nowPlayingData = useNowPlaying();
   const isInitialized = useRef(false);
+  const prevSelectedProject = useRef<Project | null>(null);
 
   const siteConfig = initialConfig;
   const content = initialContent;
@@ -219,6 +224,68 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     }
   }, [activeTab, handleClearSelection]);
 
+  // Handle sliding avatar animation when project changes
+  useEffect(() => {
+    if (activeTab !== 'projects') {
+      setDisplayedAvatarProject(null);
+      prevSelectedProject.current = null;
+      return;
+    }
+
+    const prevProject = prevSelectedProject.current;
+    const newProject = selectedProject;
+
+    if (!newProject) {
+      // Deselecting - just hide
+      setDisplayedAvatarProject(null);
+      setSlidingAvatar(null);
+      prevSelectedProject.current = null;
+      return;
+    }
+
+    if (!prevProject) {
+      // First selection - no animation, just show
+      setDisplayedAvatarProject(newProject);
+      setSlidingAvatar(null);
+      prevSelectedProject.current = newProject;
+      return;
+    }
+
+    if (prevProject.id === newProject.id) {
+      return;
+    }
+
+    // Animate from prev to new
+    const fromIndex = content.projects.findIndex(p => p.id === prevProject.id);
+    const toIndex = content.projects.findIndex(p => p.id === newProject.id);
+
+    if (fromIndex === -1 || toIndex === -1) {
+      setDisplayedAvatarProject(newProject);
+      prevSelectedProject.current = newProject;
+      return;
+    }
+
+    // Start sliding animation
+    setSlidingAvatar({ fromIndex, toIndex, phase: 'sliding' });
+    setDisplayedAvatarProject(prevProject); // Start with old avatar
+
+    // Change avatar halfway through
+    const halfwayTimer = setTimeout(() => {
+      setDisplayedAvatarProject(newProject);
+    }, 150); // Half of 300ms animation
+
+    // End animation
+    const endTimer = setTimeout(() => {
+      setSlidingAvatar(null);
+      prevSelectedProject.current = newProject;
+    }, 300);
+
+    return () => {
+      clearTimeout(halfwayTimer);
+      clearTimeout(endTimer);
+    };
+  }, [selectedProject, activeTab, content.projects]);
+
   const mainTabs: { key: Tab; label: string }[] = [
     { key: 'projects', label: 'Projects' },
     { key: 'illustration', label: 'Illustration' },
@@ -264,41 +331,70 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           <div className="mb-6 h-6" />
 
           {/* Project Avatars - synced with content list */}
-          <div className="flex-1 overflow-y-auto min-h-0">
-            {activeTab === 'projects' && content.projects.map((project, index) => {
-              const isSelected = selectedProject?.id === project.id;
-              const colors = [
-                'from-blue-400 to-cyan-400',
-                'from-purple-400 to-pink-400',
-                'from-orange-400 to-red-400',
-                'from-green-400 to-teal-400',
-                'from-indigo-400 to-purple-400',
-                'from-pink-400 to-rose-400',
-              ];
-              const colorClass = colors[index % colors.length];
-
-              return (
-                <div key={project.id} className="py-3 flex items-start justify-end">
-                  <div className={`w-10 h-10 flex items-center justify-center transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`}>
-                    {project.avatar ? (
-                      <Image
-                        src={project.avatar}
-                        alt={project.title}
-                        width={40}
-                        height={40}
-                        className="w-auto h-auto max-w-[40px] max-h-[40px] object-contain"
-                      />
-                    ) : (
-                      <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center`}>
-                        <span className="text-sm font-medium text-white">
-                          {project.title.charAt(0)}
-                        </span>
-                      </div>
-                    )}
+          <div ref={avatarContainerRef} className="flex-1 overflow-y-auto min-h-0 relative">
+            {activeTab === 'projects' && (
+              <>
+                {/* Invisible placeholders for positioning */}
+                {content.projects.map((project, index) => (
+                  <div
+                    key={project.id}
+                    ref={(el) => { projectItemRefs.current[project.id] = el; }}
+                    className="py-3 flex items-start justify-end"
+                  >
+                    <div className="w-10 h-10" />
                   </div>
-                </div>
-              );
-            })}
+                ))}
+
+                {/* Sliding avatar */}
+                {displayedAvatarProject && (
+                  <div
+                    className="absolute right-0 w-10 h-10 flex items-center justify-center transition-all duration-300 ease-out"
+                    style={{
+                      top: (() => {
+                        const targetIndex = slidingAvatar
+                          ? slidingAvatar.toIndex
+                          : content.projects.findIndex(p => p.id === selectedProject?.id);
+                        // Each item is py-3 (12px top + 12px bottom) + 40px height = 64px per item
+                        // py-3 = 12px, so center of first item is at 12px + 20px = 32px from top
+                        // Actually let's calculate: py-3 means padding-top: 0.75rem = 12px
+                        // So first item starts at 12px, avatar center at 12px + 20px = 32px
+                        // Each subsequent item: 12px padding + 40px height + 12px padding = 64px stride
+                        return targetIndex >= 0 ? `${12 + targetIndex * 64}px` : '12px';
+                      })(),
+                    }}
+                  >
+                    {(() => {
+                      const projectIndex = content.projects.findIndex(p => p.id === displayedAvatarProject.id);
+                      const colors = [
+                        'from-blue-400 to-cyan-400',
+                        'from-purple-400 to-pink-400',
+                        'from-orange-400 to-red-400',
+                        'from-green-400 to-teal-400',
+                        'from-indigo-400 to-purple-400',
+                        'from-pink-400 to-rose-400',
+                      ];
+                      const colorClass = colors[projectIndex % colors.length];
+
+                      return displayedAvatarProject.avatar ? (
+                        <Image
+                          src={displayedAvatarProject.avatar}
+                          alt={displayedAvatarProject.title}
+                          width={40}
+                          height={40}
+                          className="w-auto h-auto max-w-[40px] max-h-[40px] object-contain"
+                        />
+                      ) : (
+                        <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center`}>
+                          <span className="text-sm font-medium text-white">
+                            {displayedAvatarProject.title.charAt(0)}
+                          </span>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+              </>
+            )}
             {activeTab === 'illustration' && ILLUSTRATION_CATEGORIES.map((cat, index) => {
               const isSelected = selectedCategory === cat.key;
               const colors = [
