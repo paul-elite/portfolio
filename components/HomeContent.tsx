@@ -235,10 +235,16 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     const prevProject = prevSelectedProject.current;
     const newProject = selectedProject;
 
-    if (!newProject) {
-      // Deselecting - just hide
+    // If hovering and no selection, show hovered avatar (handled separately)
+    if (!newProject && !hoveredProject) {
       setDisplayedAvatarProject(null);
       setSlidingAvatar(null);
+      prevSelectedProject.current = null;
+      return;
+    }
+
+    // If only hovering (no selection), don't update via this effect
+    if (!newProject) {
       prevSelectedProject.current = null;
       return;
     }
@@ -284,7 +290,21 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       clearTimeout(halfwayTimer);
       clearTimeout(endTimer);
     };
-  }, [selectedProject, activeTab, content.projects]);
+  }, [selectedProject, activeTab, content.projects, hoveredProject]);
+
+  // Handle hover avatar (only when no project is selected)
+  useEffect(() => {
+    if (activeTab !== 'projects' || selectedProject) {
+      return;
+    }
+
+    if (hoveredProject) {
+      setDisplayedAvatarProject(hoveredProject);
+      setSlidingAvatar(null);
+    } else {
+      setDisplayedAvatarProject(null);
+    }
+  }, [hoveredProject, selectedProject, activeTab]);
 
   const mainTabs: { key: Tab; label: string }[] = [
     { key: 'projects', label: 'Projects' },
@@ -349,12 +369,14 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                 {/* Sliding avatar */}
                 {displayedAvatarProject && (
                   <div
-                    className="absolute right-0 w-10 h-10 flex items-center justify-center transition-all duration-300 ease-out"
+                    className={`absolute right-0 w-10 h-10 flex items-center justify-center ${
+                      slidingAvatar ? 'transition-all duration-300 ease-out' : selectedProject ? 'transition-all duration-300 ease-out' : 'transition-opacity duration-150'
+                    }`}
                     style={{
                       top: (() => {
                         const targetIndex = slidingAvatar
                           ? slidingAvatar.toIndex
-                          : content.projects.findIndex(p => p.id === selectedProject?.id);
+                          : content.projects.findIndex(p => p.id === displayedAvatarProject.id);
                         // Each row: py-3 (12px top) + 38px content + py-3 (12px bottom) = 62px
                         // Center the 40px avatar: offset by (38-40)/2 = -1px adjustment
                         const rowHeight = 62;
