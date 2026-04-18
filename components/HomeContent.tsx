@@ -130,6 +130,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const [slidingAvatar, setSlidingAvatar] = useState<{ fromIndex: number; toIndex: number; phase: 'sliding' | 'idle' } | null>(null);
   const [displayedAvatarProject, setDisplayedAvatarProject] = useState<Project | null>(null);
   const [avatarTopPosition, setAvatarTopPosition] = useState<number>(0);
+  const [contentAnimationKey, setContentAnimationKey] = useState<string | null>(null);
+  const [exitingContent, setExitingContent] = useState<{ type: 'project' | 'category'; data: Project | IllustrationCategory } | null>(null);
   const githubRef = useRef<HTMLAnchorElement>(null);
   const socialRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
   const projectItemRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -177,20 +179,56 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
   // Wrapper functions to update selection and URL together
   const handleSelectProject = useCallback((project: Project | null) => {
+    // If switching from one project to another, or from category to project
+    if (selectedProject && project && selectedProject.id !== project.id) {
+      setExitingContent({ type: 'project', data: selectedProject });
+      setTimeout(() => setExitingContent(null), 250);
+    } else if (selectedCategory && project) {
+      setExitingContent({ type: 'category', data: selectedCategory });
+      setTimeout(() => setExitingContent(null), 250);
+    } else if (selectedProject && !project) {
+      setExitingContent({ type: 'project', data: selectedProject });
+      setTimeout(() => setExitingContent(null), 250);
+    }
+
     setSelectedProject(project);
+    setContentAnimationKey(project ? `project-${project.id}` : null);
     updateURL(project?.slug || null, null);
-  }, [updateURL]);
+  }, [updateURL, selectedProject, selectedCategory]);
 
   const handleSelectCategory = useCallback((category: IllustrationCategory | null) => {
+    // If switching from project to category, or category to category
+    if (selectedProject && category) {
+      setExitingContent({ type: 'project', data: selectedProject });
+      setTimeout(() => setExitingContent(null), 250);
+    } else if (selectedCategory && category && selectedCategory !== category) {
+      setExitingContent({ type: 'category', data: selectedCategory });
+      setTimeout(() => setExitingContent(null), 250);
+    } else if (selectedCategory && !category) {
+      setExitingContent({ type: 'category', data: selectedCategory });
+      setTimeout(() => setExitingContent(null), 250);
+    }
+
     setSelectedCategory(category);
+    setSelectedProject(null);
+    setContentAnimationKey(category ? `category-${category}` : null);
     updateURL(null, category);
-  }, [updateURL]);
+  }, [updateURL, selectedProject, selectedCategory]);
 
   const handleClearSelection = useCallback(() => {
+    if (selectedProject) {
+      setExitingContent({ type: 'project', data: selectedProject });
+      setTimeout(() => setExitingContent(null), 250);
+    } else if (selectedCategory) {
+      setExitingContent({ type: 'category', data: selectedCategory });
+      setTimeout(() => setExitingContent(null), 250);
+    }
+
     setSelectedProject(null);
     setSelectedCategory(null);
+    setContentAnimationKey(null);
     updateURL(null, null);
-  }, [updateURL]);
+  }, [updateURL, selectedProject, selectedCategory]);
 
   // Get preview images from the hovered project
   const projectImages = useMemo(() => {
@@ -755,10 +793,29 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         </div>
 
         {/* Right Column - Content Display (extends to right edge for scrollbar positioning) */}
-        <CustomScrollbar className="hidden md:block md:col-span-8 h-full" thumbHeight={40}>
+        <CustomScrollbar className="hidden md:block md:col-span-8 h-full overflow-hidden" thumbHeight={40}>
+          <div className="relative">
+            {/* Exiting content - slides out to left */}
+            {exitingContent && exitingContent.type === 'project' && (
+              <div className="absolute inset-0 w-full max-w-[572px] animate-slideOutToLeft">
+                <h2 className="text-xl font-semibold text-gray-900 mb-1">{(exitingContent.data as Project).title}</h2>
+                <div className="flex gap-4 text-sm text-gray-400 mb-6">
+                  {(exitingContent.data as Project).year && <span>{(exitingContent.data as Project).year}</span>}
+                  {(exitingContent.data as Project).role && <span>{(exitingContent.data as Project).role}</span>}
+                </div>
+              </div>
+            )}
+            {exitingContent && exitingContent.type === 'category' && (
+              <div className="absolute inset-0 w-full max-w-[572px] animate-slideOutToLeft">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                  {ILLUSTRATION_CATEGORIES.find(c => c.key === exitingContent.data)?.label}
+                </h2>
+              </div>
+            )}
+
           {selectedProject ? (
             // Show full project content when selected
-            <div className="w-full max-w-[572px]">
+            <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
               {/* Project Title */}
               <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedProject.title}</h2>
               <div className="flex gap-4 text-sm text-gray-400 mb-6">
@@ -808,7 +865,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             </div>
           ) : selectedCategory ? (
             // Show illustrations grid when category is selected
-            <div className="w-full max-w-[572px]">
+            <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
               <h2 className="text-xl font-semibold text-gray-900 mb-6">
                 {ILLUSTRATION_CATEGORIES.find(c => c.key === selectedCategory)?.label}
               </h2>
@@ -854,6 +911,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               </div>
             </div>
           ) : null}
+          </div>
         </CustomScrollbar>
       </div>
 
