@@ -6,6 +6,7 @@ import Image from 'next/image';
 import OptimizedImage from './OptimizedImage';
 import { Project, Illustration, ContentBlock, IllustrationCategory } from '@/lib/data';
 import { useNowPlaying, NowPlayingContent, NowPlayingImage } from './NowPlaying';
+import CustomScrollbar from './CustomScrollbar';
 
 function getGitHubUsername(url: string): string | null {
   const match = url.match(/github\.com\/([^\/]+)/);
@@ -548,7 +549,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         </div>
 
         {/* Right Column - Content Display (extends to right edge for scrollbar positioning) */}
-        <div className="hidden md:flex md:col-span-8 items-start overflow-y-auto custom-scrollbar pr-6">
+        <CustomScrollbar className="hidden md:block md:col-span-8 h-full" thumbHeight={40}>
           {selectedProject ? (
             // Show full project content when selected
             <div className="w-full max-w-[572px]">
@@ -647,7 +648,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               </div>
             </div>
           ) : null}
-        </div>
+        </CustomScrollbar>
       </div>
 
       {/* Mobile Bottom Section */}
