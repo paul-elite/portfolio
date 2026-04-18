@@ -120,7 +120,7 @@ export default function CustomScrollbar({
   };
 
   return (
-    <div ref={containerRef} className={`relative flex flex-col ${className}`}>
+    <div ref={containerRef} className={`relative flex flex-col overflow-hidden ${className}`}>
       {/* Scrollable content - hide native scrollbar */}
       <div
         ref={contentRef}

@@ -760,7 +760,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         </div>
 
         {/* Right Column - Content Display (extends to right edge for scrollbar positioning) */}
-        <CustomScrollbar className="hidden md:block md:col-span-8 h-full" thumbHeight={40}>
+        <div className="hidden md:block md:col-span-8 relative">
+          <CustomScrollbar className="absolute inset-0" thumbHeight={40}>
           {selectedProject ? (
             // Show full project content when selected
             <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
@@ -859,7 +860,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               </div>
             </div>
           ) : null}
-        </CustomScrollbar>
+          </CustomScrollbar>
+        </div>
       </div>
 
       {/* Mobile Bottom Section */}
@@ -901,14 +903,14 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       {/* Hover Preview - Centered on screen */}
       {hoveredProject && projectImages.length > 0 && !selectedProject && (
         <div className="hidden md:flex fixed inset-0 items-center justify-center pointer-events-none z-10">
-          <div className="relative w-[60vw] h-[60vh] transition-opacity duration-300">
+          <div className="relative w-[72vw] h-[72vh] transition-opacity duration-300">
             <Image
               key={projectImages[previewImageIndex]}
               src={projectImages[previewImageIndex]}
               alt={hoveredProject.title}
               fill
               className="object-contain"
-              sizes="60vw"
+              sizes="72vw"
             />
           </div>
         </div>
