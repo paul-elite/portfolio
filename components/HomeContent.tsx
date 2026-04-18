@@ -761,7 +761,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
         {/* Right Column - Content Display (extends to right edge for scrollbar positioning) */}
         <div className="hidden md:block md:col-span-8 relative">
-          <CustomScrollbar className="absolute inset-0" thumbHeight={40}>
+          <div className="absolute inset-0 overflow-y-auto custom-scrollbar">
           {selectedProject ? (
             // Show full project content when selected
             <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
@@ -860,7 +860,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               </div>
             </div>
           ) : null}
-          </CustomScrollbar>
+          </div>
         </div>
       </div>
 
