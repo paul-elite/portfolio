@@ -361,9 +361,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   ];
 
   return (
-    <div className="h-screen flex flex-col pt-16 pb-4 md:pt-32 md:pb-8 pl-2 pr-3 md:px-6 overflow-hidden">
+    <div className="h-screen flex flex-col pt-16 pb-4 md:pt-32 md:pb-8 pl-2 pr-3 md:px-6">
       {/* Main content area */}
-      <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6 min-h-0 overflow-hidden">
+      <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6 min-h-0">
         {/* Avatar Column */}
         <div className="hidden md:flex md:col-span-1 flex-col items-end h-full">
           {/* User Avatar - matches Name section height */}
