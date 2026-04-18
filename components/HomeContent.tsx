@@ -242,7 +242,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           <div className="h-14 mb-4 flex items-start">
             <button
               onClick={handleClearSelection}
-              className={`w-10 h-10 flex items-center justify-center flex-shrink-0 mt-1 cursor-pointer transition-all ${hasSelection ? 'opacity-30' : ''}`}
+              className={`w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden cursor-pointer hover:ring-2 hover:ring-purple-300 transition-all ${hasSelection ? 'opacity-30' : ''}`}
             >
               {siteConfig.avatar ? (
                 <Image
@@ -250,14 +250,12 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   alt={siteConfig.name}
                   width={40}
                   height={40}
-                  className="w-auto h-auto max-w-[40px] max-h-[40px] object-contain hover:scale-110 transition-transform"
+                  className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center hover:ring-2 hover:ring-purple-300">
-                  <span className="text-sm font-medium text-white">
-                    {siteConfig.name.charAt(0)}
-                  </span>
-                </div>
+                <span className="text-sm font-medium text-white">
+                  {siteConfig.name.charAt(0)}
+                </span>
               )}
             </button>
           </div>
