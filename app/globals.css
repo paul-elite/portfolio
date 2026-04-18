@@ -79,9 +79,9 @@ html {
   animation: slideIn 0.3s ease-out forwards;
 }
 
-/* Custom scrollbar styling - ultra thin */
+/* Custom scrollbar styling */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 3px;
+  width: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -90,15 +90,15 @@ html {
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: hsl(210, 100%, 48%);
-  border-radius: 1.5px;
-  max-height: 40px;
+  border-radius: 2px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: hsl(210, 100%, 40%);
 }
 
-/* Firefox - hide scrollbar as it can't be styled as thin */
+/* Firefox scrollbar */
 .custom-scrollbar {
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(210, 100%, 48%) transparent;
 }
