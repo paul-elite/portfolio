@@ -94,7 +94,7 @@ export default async function Home() {
   ]);
 
   return (
-    <main className="h-screen bg-white overflow-hidden">
+    <main className="h-screen bg-white">
       <div className="w-full h-full px-6">
         <Suspense fallback={<div className="h-full flex items-center justify-center text-gray-400">Loading...</div>}>
           <HomeContent initialConfig={config} initialContent={content} />

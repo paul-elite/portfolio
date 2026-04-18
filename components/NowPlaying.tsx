@@ -208,7 +208,7 @@ export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
       {/* Cover art and album name on hover */}
       {isHovered && data?.isPlaying && data.albumImageUrl && imageReady && (
         <div
-          className="absolute bottom-full mb-3 flex items-center gap-4 z-10 transition-transform duration-75 ease-out"
+          className="absolute bottom-full mb-3 flex items-center gap-4 z-50 transition-transform duration-75 ease-out"
           style={{
             left: '-64px',
             transform: `translate(${mousePos.x}px, ${mousePos.y}px)`,
