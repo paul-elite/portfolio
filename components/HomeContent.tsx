@@ -361,8 +361,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                     ref={(el) => { projectItemRefs.current[project.id] = el; }}
                     className="py-3 flex items-center justify-end"
                   >
-                    {/* Match content structure: title (text-base mb-0.5) + description (text-sm) */}
-                    <div className="w-10 h-[38px]" />
+                    {/* Match content structure: title (text-base ~20px) + description (text-sm ~20px) = ~40px */}
+                    <div className="w-10">
+                      <div className="text-base mb-0.5 leading-tight">&nbsp;</div>
+                      <div className="text-sm leading-tight">&nbsp;</div>
+                    </div>
                   </div>
                 ))}
 
@@ -377,12 +380,12 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                         const targetIndex = slidingAvatar
                           ? slidingAvatar.toIndex
                           : content.projects.findIndex(p => p.id === displayedAvatarProject.id);
-                        // Each row: py-3 (12px top) + 38px content + py-3 (12px bottom) = 62px
-                        // Center the 40px avatar: offset by (38-40)/2 = -1px adjustment
-                        const rowHeight = 62;
-                        const topPadding = 12;
-                        const avatarOffset = -1; // Fine-tune centering
-                        return targetIndex >= 0 ? `${topPadding + targetIndex * rowHeight + avatarOffset}px` : '12px';
+                        // Each row: py-3 (12px) + content (~32px) + py-3 (12px) = 56px
+                        // Content center is at 12 + 16 = 28px from row top
+                        // Avatar (40px) top = center - 20 = 8px from row top
+                        const rowHeight = 56;
+                        const avatarTopInRow = 8;
+                        return targetIndex >= 0 ? `${targetIndex * rowHeight + avatarTopInRow}px` : '8px';
                       })(),
                     }}
                   >
