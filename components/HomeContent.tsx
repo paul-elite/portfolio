@@ -129,10 +129,13 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const [socialMousePos, setSocialMousePos] = useState({ x: 0, y: 0 });
   const [slidingAvatar, setSlidingAvatar] = useState<{ fromIndex: number; toIndex: number; phase: 'sliding' | 'idle' } | null>(null);
   const [displayedAvatarProject, setDisplayedAvatarProject] = useState<Project | null>(null);
+  const [avatarTopPosition, setAvatarTopPosition] = useState<number>(0);
   const githubRef = useRef<HTMLAnchorElement>(null);
   const socialRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
   const projectItemRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const contentProjectRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const avatarContainerRef = useRef<HTMLDivElement>(null);
+  const contentListRef = useRef<HTMLDivElement>(null);
   const nowPlayingData = useNowPlaying();
   const isInitialized = useRef(false);
   const prevSelectedProject = useRef<Project | null>(null);
@@ -306,6 +309,39 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     }
   }, [hoveredProject, selectedProject, activeTab]);
 
+  // Calculate avatar position based on actual DOM measurements
+  useEffect(() => {
+    if (!displayedAvatarProject || activeTab !== 'projects') {
+      return;
+    }
+
+    const calculatePosition = () => {
+      const projectButton = contentProjectRefs.current[displayedAvatarProject.id];
+      const contentList = contentListRef.current;
+      const avatarContainer = avatarContainerRef.current;
+
+      if (projectButton && contentList && avatarContainer) {
+        const buttonRect = projectButton.getBoundingClientRect();
+        const containerRect = avatarContainer.getBoundingClientRect();
+
+        // Calculate the center of the project button relative to the avatar container
+        const buttonCenterY = buttonRect.top + buttonRect.height / 2;
+        const relativeTop = buttonCenterY - containerRect.top - 20; // 20 = half of 40px avatar
+
+        setAvatarTopPosition(relativeTop);
+      }
+    };
+
+    calculatePosition();
+
+    // Recalculate on scroll
+    const contentList = contentListRef.current;
+    if (contentList) {
+      contentList.addEventListener('scroll', calculatePosition);
+      return () => contentList.removeEventListener('scroll', calculatePosition);
+    }
+  }, [displayedAvatarProject, activeTab, slidingAvatar]);
+
   const mainTabs: { key: Tab; label: string }[] = [
     { key: 'projects', label: 'Projects' },
     { key: 'illustration', label: 'Illustration' },
@@ -376,17 +412,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                       slidingAvatar ? 'transition-all duration-300 ease-out' : selectedProject ? 'transition-all duration-300 ease-out' : 'transition-opacity duration-150'
                     }`}
                     style={{
-                      top: (() => {
-                        const targetIndex = slidingAvatar
-                          ? slidingAvatar.toIndex
-                          : content.projects.findIndex(p => p.id === displayedAvatarProject.id);
-                        // Each row: py-3 (12px) + content (~32px) + py-3 (12px) = 56px
-                        // Content center is at 12 + 16 = 28px from row top
-                        // Avatar (40px) top = center - 20 = 8px from row top
-                        const rowHeight = 56;
-                        const avatarTopInRow = 8;
-                        return targetIndex >= 0 ? `${targetIndex * rowHeight + avatarTopInRow}px` : '8px';
-                      })(),
+                      top: `${avatarTopPosition}px`,
                     }}
                   >
                     {(() => {
@@ -499,7 +525,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Content List */}
-          <div className="flex-1 overflow-y-auto min-h-0">
+          <div ref={contentListRef} className="flex-1 overflow-y-auto min-h-0">
             {activeTab === 'projects' && (
               <div>
                 {content.projects.map((project) => {
@@ -507,6 +533,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   return (
                     <button
                       key={project.id}
+                      ref={(el) => { contentProjectRefs.current[project.id] = el; }}
                       onClick={() => handleSelectProject(isSelected ? null : project)}
                       className={`group block py-3 w-full text-left transition-opacity ${hasSelection && !isSelected ? 'opacity-30' : ''}`}
                       onMouseEnter={() => !selectedProject && setHoveredProject(project)}
