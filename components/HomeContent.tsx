@@ -334,14 +334,15 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           <div ref={avatarContainerRef} className="flex-1 overflow-y-auto min-h-0 relative">
             {activeTab === 'projects' && (
               <>
-                {/* Invisible placeholders for positioning */}
-                {content.projects.map((project, index) => (
+                {/* Invisible placeholders matching content item structure */}
+                {content.projects.map((project) => (
                   <div
                     key={project.id}
                     ref={(el) => { projectItemRefs.current[project.id] = el; }}
-                    className="py-3 flex items-start justify-end"
+                    className="py-3 flex items-center justify-end"
                   >
-                    <div className="w-10 h-10" />
+                    {/* Match content structure: title (text-base mb-0.5) + description (text-sm) */}
+                    <div className="w-10 h-[38px]" />
                   </div>
                 ))}
 
@@ -354,12 +355,12 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                         const targetIndex = slidingAvatar
                           ? slidingAvatar.toIndex
                           : content.projects.findIndex(p => p.id === selectedProject?.id);
-                        // Each item is py-3 (12px top + 12px bottom) + 40px height = 64px per item
-                        // py-3 = 12px, so center of first item is at 12px + 20px = 32px from top
-                        // Actually let's calculate: py-3 means padding-top: 0.75rem = 12px
-                        // So first item starts at 12px, avatar center at 12px + 20px = 32px
-                        // Each subsequent item: 12px padding + 40px height + 12px padding = 64px stride
-                        return targetIndex >= 0 ? `${12 + targetIndex * 64}px` : '12px';
+                        // Each row: py-3 (12px top) + 38px content + py-3 (12px bottom) = 62px
+                        // Center the 40px avatar: offset by (38-40)/2 = -1px adjustment
+                        const rowHeight = 62;
+                        const topPadding = 12;
+                        const avatarOffset = -1; // Fine-tune centering
+                        return targetIndex >= 0 ? `${topPadding + targetIndex * rowHeight + avatarOffset}px` : '12px';
                       })(),
                     }}
                   >
