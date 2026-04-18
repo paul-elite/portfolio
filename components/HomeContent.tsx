@@ -475,7 +475,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         </div>
 
         {/* Left Content Column */}
-        <div className="flex-1 md:col-span-3 flex flex-col min-w-0 h-full overflow-hidden">
+        <div className="flex-1 md:col-span-3 flex flex-col min-w-0 h-full">
           {/* Name */}
           <div className={`h-auto md:h-14 mb-6 md:mb-4 transition-opacity ${hasSelection ? 'opacity-30' : ''}`}>
             <h1 className="text-base font-semibold text-gray-900">
@@ -650,8 +650,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Now Playing & Contact - Desktop only, pinned to bottom */}
-          <div className={`hidden md:block flex-shrink-0 mt-auto pt-4 transition-opacity ${hasSelection ? 'opacity-30' : ''}`}>
-            <div className={`${activeTab === 'illustration' ? 'w-full md:w-[calc(166%+1.5rem)]' : ''}`}>
+          <div className={`hidden md:block flex-shrink-0 mt-auto pt-4 transition-opacity overflow-visible ${hasSelection ? 'opacity-30' : ''}`}>
+            <div className={`overflow-visible ${activeTab === 'illustration' ? 'w-full md:w-[calc(166%+1.5rem)]' : ''}`}>
               <NowPlayingContent data={nowPlayingData} />
             </div>
 
@@ -868,36 +868,62 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
       {/* Mobile Bottom Section */}
       <div className="md:hidden mt-auto pt-6">
-        <div className="flex gap-4">
-          <div className="flex-shrink-0">
-            <NowPlayingImage data={nowPlayingData} />
-          </div>
-          <div className="flex-1 min-w-0">
-            {nowPlayingData?.isPlaying ? (
-              <>
-                <a href={nowPlayingData.songUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-900 hover:text-gray-600 transition-colors truncate block">
-                  {nowPlayingData.title}
-                </a>
-                <p className="text-sm text-gray-400 truncate">{nowPlayingData.artist}</p>
-              </>
-            ) : (
-              <>
-                <p className="text-sm text-gray-900">Not listening right now</p>
-                {nowPlayingData?.lastPlayed ? (
-                  <p className="text-sm text-gray-400 truncate">last: {nowPlayingData.lastPlayed.title}</p>
-                ) : (
-                  <p className="text-sm text-gray-400">check again shortly</p>
-                )}
-              </>
-            )}
-            <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm mt-4">
-              <a href={siteConfig.social.twitter} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">Twitter</a>
-              <a href={siteConfig.social.github} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">GitHub</a>
-              <a href={siteConfig.social.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">LinkedIn</a>
-              <a href={siteConfig.social.behance} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">Behance</a>
-              <a href={siteConfig.social.instagram} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">Instagram</a>
-              <a href={`mailto:${siteConfig.social.email}`} className="text-gray-400 hover:text-gray-900 transition-colors">Email</a>
+        <div className="flex flex-col gap-4">
+          {/* Avatar */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 overflow-hidden">
+              {siteConfig.avatar ? (
+                <Image
+                  src={siteConfig.avatar}
+                  alt={siteConfig.name}
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-sm font-medium text-white">
+                  {siteConfig.name.charAt(0)}
+                </span>
+              )}
             </div>
+            <div>
+              <h1 className="text-base font-semibold text-gray-900">{siteConfig.name}</h1>
+              <p className="text-sm text-gray-500">{siteConfig.title}</p>
+            </div>
+          </div>
+
+          {/* Now Playing */}
+          <div className="flex items-center gap-3">
+            <NowPlayingImage data={nowPlayingData} />
+            <div className="min-w-0">
+              {nowPlayingData?.isPlaying ? (
+                <>
+                  <a href={nowPlayingData.songUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-900 hover:text-gray-600 transition-colors truncate block">
+                    {nowPlayingData.title}
+                  </a>
+                  <p className="text-sm text-gray-400 truncate">{nowPlayingData.artist}</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-gray-900">Not listening right now</p>
+                  {nowPlayingData?.lastPlayed ? (
+                    <p className="text-sm text-gray-400 truncate">last: {nowPlayingData.lastPlayed.title}</p>
+                  ) : (
+                    <p className="text-sm text-gray-400">check again shortly</p>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Social links */}
+          <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+            <a href={siteConfig.social.twitter} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">Twitter</a>
+            <a href={siteConfig.social.github} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">GitHub</a>
+            <a href={siteConfig.social.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">LinkedIn</a>
+            <a href={siteConfig.social.behance} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">Behance</a>
+            <a href={siteConfig.social.instagram} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">Instagram</a>
+            <a href={`mailto:${siteConfig.social.email}`} className="text-gray-400 hover:text-gray-900 transition-colors">Email</a>
           </div>
         </div>
       </div>
