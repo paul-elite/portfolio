@@ -489,8 +489,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
         </div>
 
-        {/* Left Content Column */}
-        <div className="flex-1 md:col-span-3 flex flex-col min-w-0 h-full overflow-visible">
+        {/* Left Content Column - Fixed at 100vh, non-scrollable */}
+        <div className="flex-1 md:col-span-3 flex flex-col min-w-0 h-full overflow-hidden">
           {/* Name */}
           <div className={`h-auto md:h-14 mb-6 md:mb-4 transition-opacity ${hasSelection ? 'opacity-60' : ''}`}>
             <h1 className="text-base font-semibold text-gray-900">
@@ -545,7 +545,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Content List */}
-          <div ref={contentListRef} className="flex-1 overflow-y-auto min-h-0">
+          <div ref={contentListRef} className="flex-1 overflow-hidden min-h-0">
             {activeTab === 'projects' && (
               <div>
                 {content.projects.map((project) => {
