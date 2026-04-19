@@ -382,7 +382,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           <div className="h-14 mb-4 flex items-start">
             <button
               onClick={handleClearSelection}
-              className={`w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden cursor-pointer hover:ring-2 hover:ring-purple-300 transition-all ${hasSelection ? 'opacity-30' : ''}`}
+              className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden cursor-pointer hover:ring-2 hover:ring-purple-300 transition-all"
             >
               {(() => {
                 const avatarSrc = hasSelection && siteConfig.avatarFocused ? siteConfig.avatarFocused : siteConfig.avatar;
