@@ -774,8 +774,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
         </div>
 
-        {/* Right Column - Content Display (extends to right edge for scrollbar positioning) */}
-        <div className="hidden md:block md:col-span-8 relative ml-[-50px]">
+        {/* Right Column - Content Display (scrollable) */}
+        <div className="hidden md:block md:col-span-8 relative h-full ml-[-50px]">
           {/* Top fade overlay */}
           <div className="absolute -top-8 left-[50px] right-4 h-12 bg-gradient-to-b from-background from-0% via-background/20 via-50% to-transparent to-100% z-10 pointer-events-none" />
           <CustomScrollbar
