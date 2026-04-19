@@ -94,8 +94,8 @@ export default async function Home() {
   ]);
 
   return (
-    <main className="min-h-screen bg-background overflow-visible">
-      <div className="w-full min-h-screen px-6 overflow-visible">
+    <main className="h-screen bg-white overflow-visible">
+      <div className="w-full h-full px-6 overflow-visible">
         <Suspense fallback={<div className="h-full flex items-center justify-center text-gray-400">Loading...</div>}>
           <HomeContent initialConfig={config} initialContent={content} />
         </Suspense>
