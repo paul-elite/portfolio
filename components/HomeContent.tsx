@@ -767,14 +767,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           {/* Top fade overlay */}
           <div className="absolute -top-8 left-0 right-4 h-12 bg-gradient-to-b from-white from-0% via-white/20 via-50% to-transparent to-100% z-10 pointer-events-none" />
           <div className="absolute inset-0 overflow-y-auto custom-scrollbar">
-          {!selectedProject && !selectedCategory ? (
-            // Show home/about content when nothing is selected
-            <div className="w-full max-w-[572px]">
-              <p className="text-base text-gray-600 leading-relaxed">
-                {siteConfig.bio}
-              </p>
-            </div>
-          ) : selectedProject ? (
+          {selectedProject ? (
             // Show full project content when selected
             <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
               {/* Project Title */}
