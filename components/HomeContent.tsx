@@ -777,9 +777,14 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         {/* Right Column - Content Display with scrollbar on left */}
         <div className="hidden md:block md:col-span-8 relative ml-[-50px]">
           {/* Top fade overlay */}
-          <div className="absolute -top-8 left-0 right-4 h-12 bg-gradient-to-b from-white from-0% via-white/20 via-50% to-transparent to-100% z-10 pointer-events-none" />
-          <div className="absolute inset-0 overflow-y-auto custom-scrollbar" style={{ direction: 'rtl' }}>
-            <div style={{ direction: 'ltr' }} className="pl-[50px]">
+          <div className="absolute -top-8 left-[50px] right-4 h-12 bg-gradient-to-b from-white from-0% via-white/20 via-50% to-transparent to-100% z-10 pointer-events-none" />
+          <CustomScrollbar
+            className="absolute inset-0"
+            position="left"
+            thumbHeight={30}
+            thumbWidth={2}
+          >
+            <div className="pl-[46px]">
           {selectedProject ? (
             // Show full project content when selected
             <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
@@ -879,7 +884,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             </div>
           ) : null}
             </div>
-          </div>
+          </CustomScrollbar>
         </div>
       </div>
 
