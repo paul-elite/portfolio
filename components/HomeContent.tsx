@@ -492,7 +492,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         {/* Left Content Column */}
         <div className="flex-1 md:col-span-3 flex flex-col min-w-0 h-full overflow-visible">
           {/* Name */}
-          <div className={`h-auto md:h-14 mb-6 md:mb-4 transition-opacity ${hasSelection ? 'opacity-30' : ''}`}>
+          <div className={`h-auto md:h-14 mb-6 md:mb-4 transition-opacity ${hasSelection ? 'opacity-60' : ''}`}>
             <h1 className="text-base font-semibold text-gray-900">
               {siteConfig.name}
             </h1>
@@ -500,15 +500,15 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Tabs */}
-          <div className={`flex flex-wrap items-center gap-x-4 gap-y-1 text-base mb-6 transition-opacity ${hasSelection ? 'opacity-30' : ''}`}>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-base mb-6">
             {mainTabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`transition-colors font-normal ${
+                className={`transition-all font-normal ${
                   activeTab === tab.key
-                    ? 'text-gray-900'
-                    : 'text-gray-400 hover:text-gray-600'
+                    ? `text-gray-900 ${hasSelection ? 'opacity-60' : ''}`
+                    : `text-gray-400 hover:text-gray-600 ${hasSelection ? 'opacity-30' : ''}`
                 }`}
               >
                 {tab.label}
@@ -518,10 +518,10 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`transition-colors font-normal ${
+                className={`transition-all font-normal ${
                   activeTab === tab.key
-                    ? 'text-gray-900'
-                    : 'text-gray-400 hover:text-gray-600'
+                    ? `text-gray-900 ${hasSelection ? 'opacity-60' : ''}`
+                    : `text-gray-400 hover:text-gray-600 ${hasSelection ? 'opacity-30' : ''}`
                 }`}
               >
                 {tab.label}
@@ -529,7 +529,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             ))}
             <button
               onClick={() => setShowMoreTabs(!showMoreTabs)}
-              className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:border-gray-400 transition-colors"
+              className={`w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:border-gray-400 transition-all ${hasSelection ? 'opacity-30' : ''}`}
             >
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                 {showMoreTabs ? (
