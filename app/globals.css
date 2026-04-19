@@ -118,3 +118,15 @@ html {
   scrollbar-width: thin;
   scrollbar-color: hsl(210, 100%, 48%) transparent;
 }
+
+/* Hide scrollbar completely */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}

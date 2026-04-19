@@ -130,14 +130,8 @@ export default function CustomScrollbar({
       {/* Scrollable content - hide native scrollbar */}
       <div
         ref={contentRef}
-        className={`flex-1 min-h-0 overflow-y-auto ${contentClassName}`}
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        className={`flex-1 min-h-0 overflow-y-auto hide-scrollbar ${contentClassName}`}
       >
-        <style jsx>{`
-          div::-webkit-scrollbar {
-            display: none;
-          }
-        `}</style>
         {children}
       </div>
 
