@@ -372,19 +372,22 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               onClick={handleClearSelection}
               className={`w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden cursor-pointer hover:ring-2 hover:ring-purple-300 transition-all ${hasSelection ? 'opacity-30' : ''}`}
             >
-              {siteConfig.avatar ? (
-                <Image
-                  src={siteConfig.avatar}
-                  alt={siteConfig.name}
-                  width={40}
-                  height={40}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="text-sm font-medium text-white">
-                  {siteConfig.name.charAt(0)}
-                </span>
-              )}
+              {(() => {
+                const avatarSrc = hasSelection && siteConfig.avatarFocused ? siteConfig.avatarFocused : siteConfig.avatar;
+                return avatarSrc ? (
+                  <Image
+                    src={avatarSrc}
+                    alt={siteConfig.name}
+                    width={40}
+                    height={40}
+                    className="w-full h-full object-cover transition-all duration-200"
+                  />
+                ) : (
+                  <span className="text-sm font-medium text-white">
+                    {siteConfig.name.charAt(0)}
+                  </span>
+                );
+              })()}
             </button>
           </div>
 
@@ -764,7 +767,14 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           {/* Top fade overlay */}
           <div className="absolute -top-8 left-0 right-4 h-12 bg-gradient-to-b from-white from-0% via-white/20 via-50% to-transparent to-100% z-10 pointer-events-none" />
           <div className="absolute inset-0 overflow-y-auto custom-scrollbar">
-          {selectedProject ? (
+          {!selectedProject && !selectedCategory ? (
+            // Show home/about content when nothing is selected
+            <div className="w-full max-w-[572px]">
+              <p className="text-base text-gray-600 leading-relaxed">
+                {siteConfig.bio}
+              </p>
+            </div>
+          ) : selectedProject ? (
             // Show full project content when selected
             <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
               {/* Project Title */}
