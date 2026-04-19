@@ -144,6 +144,18 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const siteConfig = initialConfig;
   const content = initialContent;
 
+  // Preload both avatar images on mount to prevent delay when switching
+  useEffect(() => {
+    if (siteConfig.avatar) {
+      const img1 = new window.Image();
+      img1.src = siteConfig.avatar;
+    }
+    if (siteConfig.avatarFocused) {
+      const img2 = new window.Image();
+      img2.src = siteConfig.avatarFocused;
+    }
+  }, [siteConfig.avatar, siteConfig.avatarFocused]);
+
   // Update URL when selection changes
   const updateURL = useCallback((projectSlug: string | null, category: IllustrationCategory | null) => {
     const params = new URLSearchParams();
