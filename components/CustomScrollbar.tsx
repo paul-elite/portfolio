@@ -126,11 +126,11 @@ export default function CustomScrollbar({
   };
 
   return (
-    <div ref={containerRef} className={`relative overflow-hidden ${className}`}>
+    <div ref={containerRef} className={`relative h-full ${className}`}>
       {/* Scrollable content - hide native scrollbar */}
       <div
         ref={contentRef}
-        className={`h-full overflow-y-auto hide-scrollbar ${contentClassName}`}
+        className={`absolute inset-0 overflow-y-auto hide-scrollbar ${contentClassName}`}
       >
         {children}
       </div>
