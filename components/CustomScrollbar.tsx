@@ -6,14 +6,20 @@ interface CustomScrollbarProps {
   children: ReactNode;
   className?: string;
   thumbHeight?: number;
+  thumbWidth?: number;
   thumbColor?: string;
+  position?: 'left' | 'right';
+  contentClassName?: string;
 }
 
 export default function CustomScrollbar({
   children,
   className = '',
   thumbHeight = 40,
+  thumbWidth = 2,
   thumbColor = 'hsl(210, 100%, 48%)',
+  position = 'right',
+  contentClassName = '',
 }: CustomScrollbarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -124,7 +130,7 @@ export default function CustomScrollbar({
       {/* Scrollable content - hide native scrollbar */}
       <div
         ref={contentRef}
-        className="flex-1 min-h-0 overflow-y-auto pr-4"
+        className={`flex-1 min-h-0 overflow-y-auto ${contentClassName}`}
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         <style jsx>{`
@@ -139,15 +145,17 @@ export default function CustomScrollbar({
       {showScrollbar && (
         <div
           ref={trackRef}
-          className="absolute top-0 right-0 w-1 h-full cursor-pointer"
+          className={`absolute top-0 ${position === 'left' ? 'left-0' : 'right-0'} h-full cursor-pointer`}
+          style={{ width: thumbWidth }}
           onClick={handleTrackClick}
         >
           {/* Thumb */}
           <div
             ref={thumbRef}
-            className={`absolute right-0 w-1 rounded-full cursor-grab ${isDragging ? 'cursor-grabbing' : ''}`}
+            className={`absolute ${position === 'left' ? 'left-0' : 'right-0'} rounded-full cursor-grab ${isDragging ? 'cursor-grabbing' : ''}`}
             style={{
               height: thumbHeight,
+              width: thumbWidth,
               top: thumbTop,
               backgroundColor: thumbColor,
               transition: isDragging ? 'none' : 'top 0.1s ease-out',
