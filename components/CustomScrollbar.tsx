@@ -8,6 +8,7 @@ interface CustomScrollbarProps {
   thumbHeight?: number;
   thumbWidth?: number;
   thumbColor?: string;
+  thumbDragColor?: string;
   position?: 'left' | 'right';
   contentClassName?: string;
 }
@@ -18,6 +19,7 @@ export default function CustomScrollbar({
   thumbHeight = 40,
   thumbWidth = 2,
   thumbColor = 'hsl(210, 100%, 48%)',
+  thumbDragColor = '#FF4D8C',
   position = 'right',
   contentClassName = '',
 }: CustomScrollbarProps) {
@@ -29,6 +31,7 @@ export default function CustomScrollbar({
   const [thumbTop, setThumbTop] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [showScrollbar, setShowScrollbar] = useState(false);
+  const [overscroll, setOverscroll] = useState(0); // -50 to 50 for elastic effect
   const dragStartY = useRef(0);
   const dragStartScrollTop = useRef(0);
 
@@ -93,11 +96,24 @@ export default function CustomScrollbar({
       const scrollableHeight = content.scrollHeight - container.clientHeight;
 
       const scrollDelta = (deltaY / trackHeight) * scrollableHeight;
-      content.scrollTop = dragStartScrollTop.current + scrollDelta;
+      const newScrollTop = dragStartScrollTop.current + scrollDelta;
+
+      // Calculate overscroll (elastic effect up to 50px)
+      if (newScrollTop < 0) {
+        setOverscroll(Math.max(-50, newScrollTop * 0.3));
+        content.scrollTop = 0;
+      } else if (newScrollTop > scrollableHeight) {
+        setOverscroll(Math.min(50, (newScrollTop - scrollableHeight) * 0.3));
+        content.scrollTop = scrollableHeight;
+      } else {
+        setOverscroll(0);
+        content.scrollTop = newScrollTop;
+      }
     };
 
     const handleMouseUp = () => {
       setIsDragging(false);
+      setOverscroll(0);
     };
 
     document.addEventListener('mousemove', handleMouseMove);
@@ -125,6 +141,11 @@ export default function CustomScrollbar({
     content.scrollTop = scrollRatio * scrollableHeight;
   };
 
+  // Calculate dynamic sizes
+  const currentWidth = isDragging ? thumbWidth * 2 : thumbWidth;
+  const currentHeight = isDragging ? thumbHeight * 2 : thumbHeight;
+  const currentColor = isDragging ? thumbDragColor : thumbColor;
+
   return (
     <div ref={containerRef} className={`relative h-full ${className}`}>
       {/* Scrollable content - hide native scrollbar */}
@@ -135,24 +156,31 @@ export default function CustomScrollbar({
         {children}
       </div>
 
-      {/* Custom scrollbar track */}
+      {/* Custom scrollbar track - wider hit area when dragging */}
       {showScrollbar && (
         <div
           ref={trackRef}
           className={`absolute top-0 ${position === 'left' ? 'left-0' : 'right-0'} h-full cursor-pointer`}
-          style={{ width: thumbWidth }}
+          style={{
+            width: isDragging ? currentWidth + 20 : currentWidth + 10,
+            transform: position === 'left' ? 'translateX(0)' : 'translateX(0)',
+          }}
           onClick={handleTrackClick}
         >
           {/* Thumb */}
           <div
             ref={thumbRef}
-            className={`absolute ${position === 'left' ? 'left-0' : 'right-0'} rounded-full cursor-grab ${isDragging ? 'cursor-grabbing' : ''}`}
+            className={`absolute rounded-full cursor-grab ${isDragging ? 'cursor-grabbing' : ''}`}
             style={{
-              height: thumbHeight,
-              width: thumbWidth,
-              top: thumbTop,
-              backgroundColor: thumbColor,
-              transition: isDragging ? 'none' : 'top 0.1s ease-out',
+              height: currentHeight,
+              width: currentWidth,
+              top: thumbTop + overscroll,
+              [position === 'left' ? 'left' : 'right']: 0,
+              backgroundColor: currentColor,
+              transition: isDragging
+                ? 'width 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), height 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.1s ease-out'
+                : 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), top 0.1s ease-out',
+              transformOrigin: position === 'left' ? 'left center' : 'right center',
             }}
             onMouseDown={handleMouseDown}
           />
