@@ -550,6 +550,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             position="right"
             thumbHeight={30}
             thumbWidth={2}
+            contentRef={contentListRef}
           >
             {activeTab === 'projects' && (
               <div>

@@ -11,6 +11,7 @@ interface CustomScrollbarProps {
   thumbDragColor?: string;
   position?: 'left' | 'right';
   contentClassName?: string;
+  contentRef?: React.RefObject<HTMLDivElement>;
 }
 
 export default function CustomScrollbar({
@@ -22,9 +23,11 @@ export default function CustomScrollbar({
   thumbDragColor = '#FF4D8C',
   position = 'right',
   contentClassName = '',
+  contentRef: externalContentRef,
 }: CustomScrollbarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const internalContentRef = useRef<HTMLDivElement>(null);
+  const contentRef = externalContentRef || internalContentRef;
   const thumbRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
