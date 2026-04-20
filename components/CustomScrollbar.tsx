@@ -149,10 +149,9 @@ export default function CustomScrollbar({
     content.scrollTop = scrollRatio * scrollableHeight;
   };
 
-  // Calculate dynamic sizes
-  const currentWidth = isDragging ? thumbWidth * 2 : thumbWidth;
-  const currentHeight = isDragging ? thumbHeight * 2 : thumbHeight;
+  // Calculate dynamic styles
   const currentColor = isDragging ? thumbDragColor : thumbColor;
+  const currentScale = isDragging ? 2 : 1;
 
   return (
     <div ref={containerRef} className={`relative h-full ${className}`}>
@@ -170,7 +169,7 @@ export default function CustomScrollbar({
           ref={trackRef}
           className="absolute top-0 h-full cursor-pointer z-[100]"
           style={{
-            width: 100 + currentWidth, // 50px on each side + thumb width
+            width: 100 + thumbWidth, // 50px on each side + thumb width
             left: position === 'left' ? -50 : 'auto',
             right: position === 'right' ? -50 : 'auto',
           }}
@@ -181,13 +180,16 @@ export default function CustomScrollbar({
             ref={thumbRef}
             className="absolute rounded-full cursor-grab active:cursor-grabbing"
             style={{
-              height: currentHeight,
-              width: currentWidth,
+              height: thumbHeight,
+              width: thumbWidth,
               top: thumbTop + overscroll,
               left: position === 'left' ? 50 : 'auto',
               right: position === 'right' ? 50 : 'auto',
               backgroundColor: currentColor,
-              transition: 'width 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), height 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.1s ease-out, top 0.1s ease-out',
+              transform: `scale(${currentScale})`,
+              transformOrigin: 'center center',
+              transition: 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, top 0.15s ease-out',
+              willChange: 'transform, background-color, top',
             }}
             onMouseDown={handleMouseDown}
           />
