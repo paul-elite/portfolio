@@ -268,43 +268,15 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     ? content.projects.findIndex(p => p.id === targetProject.id)
     : -1;
 
-  // Track avatar position based on the actual content row position
-  const [avatarTop, setAvatarTop] = useState<number | null>(null);
-
-  // Update avatar position when target project changes
-  useEffect(() => {
-    if (!targetProject || !contentListRef.current) {
-      setAvatarTop(null);
-      return;
-    }
-
-    const contentEl = contentProjectRefs.current[targetProject.id];
-    const containerEl = contentListRef.current;
-
-    if (!contentEl || !containerEl) {
-      setAvatarTop(null);
-      return;
-    }
-
-    // Calculate position relative to the scroll container
-    const containerRect = containerEl.getBoundingClientRect();
-    const elementRect = contentEl.getBoundingClientRect();
-    const relativeTop = elementRect.top - containerRect.top + containerEl.scrollTop;
-
-    setAvatarTop(relativeTop);
-  }, [targetProject, contentListReady]);
-
-  // Track scroll position for avatar positioning
-  const [scrollTop, setScrollTop] = useState(0);
-
   // Sync scroll between content list and avatar column
   useEffect(() => {
     const contentList = contentListRef.current;
+    const avatarContainer = avatarContainerRef.current;
 
-    if (!contentList) return;
+    if (!contentList || !avatarContainer) return;
 
     const handleScroll = () => {
-      setScrollTop(contentList.scrollTop);
+      avatarContainer.scrollTop = contentList.scrollTop;
     };
 
     contentList.addEventListener('scroll', handleScroll);
@@ -371,10 +343,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             </button>
           </div>
 
-          {/* Project Avatars - absolutely positioned based on content row position */}
+          {/* Project Avatars - synced with content list scroll */}
           <div className="flex-1 min-h-0 relative">
-            <div ref={avatarContainerRef} className="absolute inset-0 overflow-hidden">
-            {activeTab === 'projects' && targetProject && avatarTop !== null && (() => {
+            <div ref={avatarContainerRef} className="absolute inset-0 overflow-y-auto hide-scrollbar">
+            {activeTab === 'projects' && content.projects.map((project, index) => {
+              const isActive = targetProjectIndex === index;
               const colors = [
                 'from-blue-400 to-cyan-400',
                 'from-purple-400 to-pink-400',
@@ -383,36 +356,38 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                 'from-indigo-400 to-purple-400',
                 'from-pink-400 to-rose-400',
               ];
-              const colorClass = colors[targetProjectIndex % colors.length];
-              const contentEl = contentProjectRefs.current[targetProject.id];
-              const rowHeight = contentEl?.offsetHeight || 60;
+              const colorClass = colors[index % colors.length];
 
               return (
                 <div
-                  className="absolute right-0 flex items-center justify-end transition-all duration-150"
-                  style={{
-                    top: avatarTop - scrollTop,
-                    height: rowHeight,
-                  }}
+                  key={project.id}
+                  className="py-3 flex items-center justify-end"
+                  style={{ minHeight: '60px' }}
                 >
-                  {targetProject.avatar ? (
-                    <Image
-                      src={targetProject.avatar}
-                      alt={targetProject.title}
-                      width={40}
-                      height={40}
-                      className="w-auto h-auto max-w-[40px] max-h-[40px] object-contain"
-                    />
-                  ) : (
-                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center`}>
-                      <span className="text-sm font-medium text-white">
-                        {targetProject.title.charAt(0)}
-                      </span>
-                    </div>
-                  )}
+                  <div
+                    className={`transition-all duration-150 ${
+                      isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
+                    }`}
+                  >
+                    {project.avatar ? (
+                      <Image
+                        src={project.avatar}
+                        alt={project.title}
+                        width={40}
+                        height={40}
+                        className="w-auto h-auto max-w-[40px] max-h-[40px] object-contain"
+                      />
+                    ) : (
+                      <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center`}>
+                        <span className="text-sm font-medium text-white">
+                          {project.title.charAt(0)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
-            })()}
+            })}
             {activeTab === 'illustration' && ILLUSTRATION_CATEGORIES.map((cat, index) => {
               const isSelected = selectedCategory === cat.key;
               const colors = [
