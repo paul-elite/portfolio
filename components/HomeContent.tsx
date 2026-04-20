@@ -489,8 +489,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
         </div>
 
-        {/* Left Content Column - Fixed at 100vh, non-scrollable */}
-        <div className="flex-1 md:col-span-3 flex flex-col min-w-0 h-full overflow-hidden">
+        {/* Left Content Column - Fixed at 100vh */}
+        <div className="flex-1 md:col-span-3 flex flex-col min-w-0 h-full overflow-visible">
           {/* Name */}
           <div className={`h-auto md:h-14 mb-6 md:mb-4 transition-opacity ${hasSelection ? 'opacity-60' : ''}`}>
             <h1 className="text-base font-semibold text-gray-900">
@@ -545,7 +545,12 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Content List */}
-          <div ref={contentListRef} className="flex-1 overflow-hidden min-h-0">
+          <CustomScrollbar
+            className="flex-1 min-h-0"
+            position="right"
+            thumbHeight={30}
+            thumbWidth={2}
+          >
             {activeTab === 'projects' && (
               <div>
                 {content.projects.map((project) => {
@@ -662,7 +667,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                 </div>
               );
             })()}
-          </div>
+          </CustomScrollbar>
 
           {/* Now Playing & Contact - Desktop only, pinned to bottom */}
           <div className={`hidden md:block flex-shrink-0 mt-auto pt-4 transition-opacity overflow-visible ${hasSelection ? 'opacity-30' : ''}`}>
