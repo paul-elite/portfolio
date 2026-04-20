@@ -156,11 +156,11 @@ export default function CustomScrollbar({
         {children}
       </div>
 
-      {/* Custom scrollbar track - 50px hit area on each side */}
+      {/* Custom scrollbar track - 50px hit area on each side, highest z-index */}
       {showScrollbar && (
         <div
           ref={trackRef}
-          className={`absolute top-0 h-full cursor-pointer`}
+          className="absolute top-0 h-full cursor-pointer z-[100]"
           style={{
             width: 100 + currentWidth, // 50px on each side + thumb width
             left: position === 'left' ? -50 : 'auto',
