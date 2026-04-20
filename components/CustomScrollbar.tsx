@@ -54,7 +54,7 @@ export default function CustomScrollbar({
     setThumbTop(scrollRatio * trackHeight);
   };
 
-  // Handle scroll event
+  // Handle scroll event and detect scrollable content
   useEffect(() => {
     const content = contentRef.current;
     if (!content) return;
@@ -62,16 +62,24 @@ export default function CustomScrollbar({
     const handleScroll = () => updateThumbPosition();
     content.addEventListener('scroll', handleScroll);
 
-    // Initial check
+    // Initial check with slight delay to ensure content is rendered
     updateThumbPosition();
+    requestAnimationFrame(() => updateThumbPosition());
+    const initialTimer = setTimeout(() => updateThumbPosition(), 100);
 
     // Recheck on resize
     const resizeObserver = new ResizeObserver(() => updateThumbPosition());
     resizeObserver.observe(content);
 
+    // Watch for content changes (children added/removed)
+    const mutationObserver = new MutationObserver(() => updateThumbPosition());
+    mutationObserver.observe(content, { childList: true, subtree: true });
+
     return () => {
       content.removeEventListener('scroll', handleScroll);
       resizeObserver.disconnect();
+      mutationObserver.disconnect();
+      clearTimeout(initialTimer);
     };
   }, [thumbHeight]);
 
