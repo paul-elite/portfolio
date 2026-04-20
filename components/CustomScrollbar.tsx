@@ -156,31 +156,30 @@ export default function CustomScrollbar({
         {children}
       </div>
 
-      {/* Custom scrollbar track - wider hit area when dragging */}
+      {/* Custom scrollbar track - 50px hit area on each side */}
       {showScrollbar && (
         <div
           ref={trackRef}
-          className={`absolute top-0 ${position === 'left' ? 'left-0' : 'right-0'} h-full cursor-pointer`}
+          className={`absolute top-0 h-full cursor-pointer`}
           style={{
-            width: isDragging ? currentWidth + 20 : currentWidth + 10,
-            transform: position === 'left' ? 'translateX(0)' : 'translateX(0)',
+            width: 100 + currentWidth, // 50px on each side + thumb width
+            left: position === 'left' ? -50 : 'auto',
+            right: position === 'right' ? -50 : 'auto',
           }}
           onClick={handleTrackClick}
         >
           {/* Thumb */}
           <div
             ref={thumbRef}
-            className={`absolute rounded-full cursor-grab ${isDragging ? 'cursor-grabbing' : ''}`}
+            className="absolute rounded-full cursor-grab active:cursor-grabbing"
             style={{
               height: currentHeight,
               width: currentWidth,
               top: thumbTop + overscroll,
-              [position === 'left' ? 'left' : 'right']: 0,
+              left: position === 'left' ? 50 : 'auto',
+              right: position === 'right' ? 50 : 'auto',
               backgroundColor: currentColor,
-              transition: isDragging
-                ? 'width 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), height 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.1s ease-out'
-                : 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), top 0.1s ease-out',
-              transformOrigin: position === 'left' ? 'left center' : 'right center',
+              transition: 'width 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), height 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.1s ease-out, top 0.1s ease-out',
             }}
             onMouseDown={handleMouseDown}
           />
