@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import Image from 'next/image';
 
-export type BlockType = 'text' | 'heading' | 'image' | 'svg' | 'code' | 'quote';
+export type BlockType = 'text' | 'heading' | 'image' | 'svg' | 'code' | 'quote' | 'list';
 
 export interface Block {
   id: string;
@@ -14,6 +14,8 @@ export interface Block {
     caption?: string;
     language?: string;
     size?: 'small' | 'medium' | 'large' | 'full';
+    listItems?: string[];
+    listBullets?: (string | null)[]; // null means default bullet, string is emoji
   };
 }
 
@@ -31,6 +33,7 @@ const blockTypeLabels: Record<BlockType, string> = {
   svg: 'SVG',
   code: 'Code',
   quote: 'Quote',
+  list: 'List',
 };
 
 const blockTypeIcons: Record<BlockType, string> = {
@@ -40,6 +43,7 @@ const blockTypeIcons: Record<BlockType, string> = {
   svg: '◇',
   code: '</>',
   quote: '"',
+  list: '•',
 };
 
 function generateId(): string {
@@ -57,7 +61,7 @@ export default function BlockEditor({ blocks, onChange, onUpload, uploading }: B
       id: generateId(),
       type,
       content: '',
-      meta: type === 'image' ? { size: 'large' } : undefined,
+      meta: type === 'image' ? { size: 'large' } : type === 'list' ? { listItems: [''] } : undefined,
     };
     onChange([...blocks, newBlock]);
   };
@@ -351,6 +355,14 @@ export default function BlockEditor({ blocks, onChange, onUpload, uploading }: B
                   />
                 </div>
               )}
+
+              {/* List Block */}
+              {block.type === 'list' && (
+                <ListBlockEditor
+                  block={block}
+                  onUpdate={(updates) => updateBlock(index, updates)}
+                />
+              )}
             </div>
           </div>
         ))}
@@ -404,3 +416,168 @@ export default function BlockEditor({ blocks, onChange, onUpload, uploading }: B
     </div>
   );
 }
+
+// Common emojis for list bullets
+const BULLET_EMOJIS = [
+  null, // default bullet
+  '✅', '⭐', '🔥', '💡', '🎯', '🚀', '💪', '✨',
+  '📌', '🔹', '🔸', '▶️', '➡️', '👉', '🎨', '💻',
+  '📱', '🛠️', '⚡', '🎉', '❤️', '💎', '🌟', '📍',
+];
+
+// List Block Editor Component
+function ListBlockEditor({ block, onUpdate }: { block: Block; onUpdate: (updates: Partial<Block>) => void }) {
+  const [openEmojiPicker, setOpenEmojiPicker] = useState<number | null>(null);
+
+  const items = block.meta?.listItems || [''];
+  const bullets = block.meta?.listBullets || [];
+
+  const updateItems = (newItems: string[], newBullets?: (string | null)[]) => {
+    onUpdate({
+      content: newItems.filter(i => i.trim()).join('\n'),
+      meta: {
+        ...block.meta,
+        listItems: newItems,
+        ...(newBullets !== undefined && { listBullets: newBullets }),
+      }
+    });
+  };
+
+  const setBullet = (itemIndex: number, emoji: string | null) => {
+    const newBullets = [...bullets];
+    // Ensure array is long enough
+    while (newBullets.length <= itemIndex) {
+      newBullets.push(null);
+    }
+    newBullets[itemIndex] = emoji;
+    updateItems(items, newBullets);
+    setOpenEmojiPicker(null);
+  };
+
+  const addItem = (afterIndex: number) => {
+    const newItems = [...items];
+    const newBullets = [...bullets];
+    newItems.splice(afterIndex + 1, 0, '');
+    newBullets.splice(afterIndex + 1, 0, null);
+    updateItems(newItems, newBullets);
+  };
+
+  const removeItem = (itemIndex: number) => {
+    const newItems = [...items];
+    const newBullets = [...bullets];
+    newItems.splice(itemIndex, 1);
+    newBullets.splice(itemIndex, 1);
+    updateItems(newItems, newBullets);
+  };
+
+  return (
+    <div className="space-y-2">
+      {items.map((item, itemIndex) => (
+        <div key={itemIndex} className="flex items-center gap-2">
+          {/* Bullet selector */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setOpenEmojiPicker(openEmojiPicker === itemIndex ? null : itemIndex)}
+              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-lg"
+              title="Click to change bullet"
+            >
+              {bullets[itemIndex] || <span className="text-gray-400">•</span>}
+            </button>
+
+            {/* Emoji picker dropdown */}
+            {openEmojiPicker === itemIndex && (
+              <div className="absolute left-0 top-full mt-1 z-10 bg-white border border-gray-200 rounded-lg shadow-lg p-2 w-64">
+                <div className="grid grid-cols-8 gap-1">
+                  {BULLET_EMOJIS.map((emoji, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setBullet(itemIndex, emoji)}
+                      className={`w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 transition-colors text-base ${
+                        (emoji === null && !bullets[itemIndex]) || bullets[itemIndex] === emoji
+                          ? 'bg-blue-100 ring-1 ring-blue-400'
+                          : ''
+                      }`}
+                    >
+                      {emoji || <span className="text-gray-400">•</span>}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-2 pt-2 border-t border-gray-100">
+                  <input
+                    type="text"
+                    placeholder="Or type any emoji..."
+                    maxLength={2}
+                    className="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:border-gray-400"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const value = (e.target as HTMLInputElement).value.trim();
+                        if (value) {
+                          setBullet(itemIndex, value);
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Item input */}
+          <input
+            type="text"
+            value={item}
+            onChange={(e) => {
+              const newItems = [...items];
+              newItems[itemIndex] = e.target.value;
+              updateItems(newItems);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addItem(itemIndex);
+                setTimeout(() => {
+                  const container = e.currentTarget.closest('.space-y-2');
+                  const inputs = container?.querySelectorAll('input[type="text"]:not([placeholder*="emoji"])');
+                  (inputs?.[itemIndex + 1] as HTMLInputElement)?.focus();
+                }, 0);
+              } else if (e.key === 'Backspace' && item === '' && items.length > 1) {
+                e.preventDefault();
+                removeItem(itemIndex);
+                setTimeout(() => {
+                  const container = e.currentTarget.closest('.space-y-2');
+                  const inputs = container?.querySelectorAll('input[type="text"]:not([placeholder*="emoji"])');
+                  (inputs?.[Math.max(0, itemIndex - 1)] as HTMLInputElement)?.focus();
+                }, 0);
+              }
+            }}
+            placeholder="List item..."
+            className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
+          />
+
+          {/* Delete button */}
+          {items.length > 1 && (
+            <button
+              type="button"
+              onClick={() => removeItem(itemIndex)}
+              className="p-1 text-gray-400 hover:text-red-500"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      ))}
+
+      <button
+        type="button"
+        onClick={() => addItem(items.length - 1)}
+        className="flex items-center gap-2 px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+      >
+        <span>+</span>
+        <span>Add item</span>
+      </button>
+    </div>
+  );
+}
+

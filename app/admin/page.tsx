@@ -199,15 +199,36 @@ function FileUpload({
     if (file) onUpload(file);
   };
 
+  const handleClick = () => {
+    if (!uploading) {
+      inputRef.current?.click();
+    }
+  };
+
   return (
     <div className="space-y-1.5">
       <label className="block text-sm font-medium text-gray-700">{label}</label>
       <div className="flex items-start gap-4">
-        {/* Preview */}
+        {/* Hidden file input */}
+        <input
+          type="file"
+          ref={inputRef}
+          accept={accept}
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) onUpload(file);
+            // Reset input so same file can be selected again
+            e.target.value = '';
+          }}
+        />
+
+        {/* Preview - clickable to replace */}
         <div
-          className={`${aspectClasses[aspectRatio]} rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center border-2 border-dashed transition-colors ${
-            dragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+          className={`${aspectClasses[aspectRatio]} rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center border-2 border-dashed transition-colors cursor-pointer group relative ${
+            dragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
           }`}
+          onClick={handleClick}
           onDragOver={(e) => {
             e.preventDefault();
             setDragOver(true);
@@ -224,14 +245,25 @@ function FileUpload({
               <span className="text-xs text-gray-400">Uploading...</span>
             </div>
           ) : preview ? (
-            <Image
-              src={preview}
-              alt="Preview"
-              width={192}
-              height={192}
-              className="w-full h-full object-cover"
-              unoptimized
-            />
+            <>
+              <Image
+                src={preview}
+                alt="Preview"
+                width={192}
+                height={192}
+                className="w-full h-full object-cover"
+                unoptimized
+              />
+              {/* Hover overlay for replace */}
+              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <div className="flex flex-col items-center gap-1 text-white">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                  </svg>
+                  <span className="text-xs font-medium">Replace</span>
+                </div>
+              </div>
+            </>
           ) : (
             <div className="flex flex-col items-center gap-1 p-2">
               <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -242,28 +274,8 @@ function FileUpload({
           )}
         </div>
 
-        {/* Upload Button */}
-        <div className="flex flex-col gap-2">
-          <input
-            type="file"
-            ref={inputRef}
-            accept={accept}
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) onUpload(file);
-            }}
-          />
-          <button
-            type="button"
-            onClick={() => inputRef.current?.click()}
-            disabled={uploading}
-            className="px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {preview ? 'Change' : 'Upload'}
-          </button>
-          {helpText && <p className="text-xs text-gray-400 max-w-[150px]">{helpText}</p>}
-        </div>
+        {/* Help text */}
+        {helpText && <p className="text-xs text-gray-400 max-w-[150px] self-center">{helpText}</p>}
       </div>
     </div>
   );
@@ -328,7 +340,7 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<TabType>('profile');
   const [content, setContent] = useState<ContentStore | null>(null);
   const [loading, setLoading] = useState(false);
-  const [uploadingField, setUploadingField] = useState<string | null>(null);
+  const [uploadingFields, setUploadingFields] = useState<Set<string>>(new Set());
 
   // Form states
   const [formData, setFormData] = useState<Record<string, string>>({});
@@ -404,7 +416,9 @@ export default function AdminPage() {
   };
 
   const handleFileUpload = async (file: File, folder: string, fieldId?: string): Promise<string | null> => {
-    if (fieldId) setUploadingField(fieldId);
+    if (fieldId) {
+      setUploadingFields(prev => new Set(prev).add(fieldId));
+    }
     const loadingToast = toast.loading(`Uploading ${file.name}...`);
 
     try {
@@ -428,7 +442,13 @@ export default function AdminPage() {
     } catch {
       toast.update(loadingToast, 'Upload failed', 'error');
     } finally {
-      setUploadingField(null);
+      if (fieldId) {
+        setUploadingFields(prev => {
+          const next = new Set(prev);
+          next.delete(fieldId);
+          return next;
+        });
+      }
     }
     return null;
   };
@@ -800,7 +820,7 @@ export default function AdminPage() {
                       label=""
                       accept="image/*"
                       preview={avatarPreview || settings.avatar}
-                      uploading={uploadingField === 'avatar'}
+                      uploading={uploadingFields.has('avatar')}
                       aspectRatio="square"
                       helpText="Shows on home"
                       onUpload={async (file) => {
@@ -819,7 +839,7 @@ export default function AdminPage() {
                       label=""
                       accept="image/*"
                       preview={avatarFocusedPreview || settings.avatarFocused}
-                      uploading={uploadingField === 'avatarFocused'}
+                      uploading={uploadingFields.has('avatarFocused')}
                       aspectRatio="square"
                       helpText="Shows when viewing content"
                       onUpload={async (file) => {
@@ -841,7 +861,7 @@ export default function AdminPage() {
                   label=""
                   accept="image/png,image/svg+xml,image/jpeg"
                   preview={metaImagePreview || settings.metaImage}
-                  uploading={uploadingField === 'metaImage'}
+                  uploading={uploadingFields.has('metaImage')}
                   aspectRatio="wide"
                   helpText="Recommended: 1200x630px"
                   onUpload={async (file) => {
@@ -941,7 +961,7 @@ export default function AdminPage() {
                       label=""
                       accept="image/*"
                       preview={settings.twitterImage}
-                      uploading={uploadingField === 'twitterImage'}
+                      uploading={uploadingFields.has('twitterImage')}
                       aspectRatio="video"
                       onUpload={async (file) => {
                         const path = await handleFileUpload(file, 'social', 'twitterImage');
@@ -957,7 +977,7 @@ export default function AdminPage() {
                       label=""
                       accept="image/*"
                       preview={settings.linkedinImage}
-                      uploading={uploadingField === 'linkedinImage'}
+                      uploading={uploadingFields.has('linkedinImage')}
                       aspectRatio="video"
                       onUpload={async (file) => {
                         const path = await handleFileUpload(file, 'social', 'linkedinImage');
@@ -973,7 +993,7 @@ export default function AdminPage() {
                       label=""
                       accept="image/*"
                       preview={settings.behanceImage}
-                      uploading={uploadingField === 'behanceImage'}
+                      uploading={uploadingFields.has('behanceImage')}
                       aspectRatio="video"
                       onUpload={async (file) => {
                         const path = await handleFileUpload(file, 'social', 'behanceImage');
@@ -989,7 +1009,7 @@ export default function AdminPage() {
                       label=""
                       accept="image/*"
                       preview={settings.instagramImage}
-                      uploading={uploadingField === 'instagramImage'}
+                      uploading={uploadingFields.has('instagramImage')}
                       aspectRatio="video"
                       onUpload={async (file) => {
                         const path = await handleFileUpload(file, 'social', 'instagramImage');
@@ -1005,7 +1025,7 @@ export default function AdminPage() {
                       label=""
                       accept="image/*"
                       preview={settings.emailImage}
-                      uploading={uploadingField === 'emailImage'}
+                      uploading={uploadingFields.has('emailImage')}
                       aspectRatio="video"
                       onUpload={async (file) => {
                         const path = await handleFileUpload(file, 'social', 'emailImage');
@@ -1082,7 +1102,7 @@ export default function AdminPage() {
                         label="Project Avatar"
                         accept="image/*"
                         preview={previewImages.avatar || formData.avatar}
-                        uploading={uploadingField === 'projectAvatar'}
+                        uploading={uploadingFields.has('projectAvatar')}
                         aspectRatio="square"
                         helpText="Shows when this project is selected"
                         onUpload={async (file) => {
@@ -1099,7 +1119,7 @@ export default function AdminPage() {
                         label="Preview Image"
                         accept="image/*"
                         preview={previewImages.preview || formData.preview}
-                        uploading={uploadingField === 'preview'}
+                        uploading={uploadingFields.has('preview')}
                         aspectRatio="video"
                         helpText="Shown in project list"
                         onUpload={async (file) => {
@@ -1179,10 +1199,10 @@ export default function AdminPage() {
                           <button
                             type="button"
                             onClick={() => document.getElementById('homepage-image-upload')?.click()}
-                            disabled={uploadingField === 'homepageImage'}
+                            disabled={uploadingFields.has('homepageImage')}
                             className="px-4 py-2 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
-                            {uploadingField === 'homepageImage' ? (
+                            {uploadingFields.has('homepageImage') ? (
                               <>
                                 <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -1214,7 +1234,7 @@ export default function AdminPage() {
                           blocks={projectBlocks}
                           onChange={setProjectBlocks}
                           onUpload={(file, folder) => handleFileUpload(file, folder, 'projectBlock')}
-                          uploading={uploadingField === 'projectBlock'}
+                          uploading={uploadingFields.has('projectBlock')}
                         />
                       </div>
                     </>
@@ -1226,7 +1246,7 @@ export default function AdminPage() {
                         label="Thumbnail"
                         accept="image/*"
                         preview={previewImages.thumbnail || formData.thumbnail}
-                        uploading={uploadingField === 'thumbnail'}
+                        uploading={uploadingFields.has('thumbnail')}
                         aspectRatio="video"
                         helpText="Cover image for the illustration"
                         onUpload={async (file) => {
@@ -1271,7 +1291,7 @@ export default function AdminPage() {
                         label="Writing Avatar"
                         accept="image/*"
                         preview={previewImages.avatar || formData.avatar}
-                        uploading={uploadingField === 'writingAvatar'}
+                        uploading={uploadingFields.has('writingAvatar')}
                         aspectRatio="square"
                         helpText="Shows when this writing is selected"
                         onUpload={async (file) => {
@@ -1292,7 +1312,7 @@ export default function AdminPage() {
                           blocks={writingBlocks}
                           onChange={setWritingBlocks}
                           onUpload={(file, folder) => handleFileUpload(file, folder, 'writingBlock')}
-                          uploading={uploadingField === 'writingBlock'}
+                          uploading={uploadingFields.has('writingBlock')}
                         />
                       </div>
                     </>

@@ -1,6 +1,14 @@
 export interface ContentBlock {
-  type: 'text' | 'heading' | 'image' | 'svg' | 'code' | 'quote';
+  type: 'text' | 'heading' | 'image' | 'svg' | 'code' | 'quote' | 'list';
   content: string;
+  meta?: {
+    listItems?: string[];
+    listBullets?: (string | null)[];
+    alt?: string;
+    caption?: string;
+    language?: string;
+    size?: 'small' | 'medium' | 'large' | 'full';
+  };
 }
 
 export interface Project {
