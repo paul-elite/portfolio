@@ -361,11 +361,10 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               return (
                 <div
                   key={project.id}
-                  className="py-3 flex items-center justify-end"
-                  style={{ minHeight: '60px' }}
+                  className="py-3 h-[60px] flex items-center justify-end"
                 >
                   <div
-                    className={`transition-all duration-150 ${
+                    className={`flex-shrink-0 transition-all duration-150 ${
                       isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
                     }`}
                   >
@@ -375,7 +374,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                         alt={project.title}
                         width={40}
                         height={40}
-                        className="w-auto h-auto max-w-[40px] max-h-[40px] object-contain"
+                        className="w-10 h-10 object-contain"
                       />
                     ) : (
                       <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center`}>
