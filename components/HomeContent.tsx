@@ -377,7 +377,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       {/* Main content area */}
       <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6 min-h-0 overflow-visible">
         {/* Avatar Column */}
-        <div className="hidden md:flex md:col-span-1 flex-col items-end h-full">
+        <div className="hidden md:flex md:col-span-1 flex-col items-end h-full overflow-visible">
           {/* User Avatar - matches Name section height */}
           <div className="h-14 mb-4 flex items-start">
             <button
@@ -670,7 +670,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </CustomScrollbar>
 
           {/* Now Playing & Contact - Desktop only, pinned to bottom */}
-          <div className={`hidden md:block flex-shrink-0 mt-auto pt-4 transition-opacity overflow-visible ${hasSelection ? 'opacity-30' : ''}`}>
+          <div className={`hidden md:block flex-shrink-0 mt-auto pt-4 transition-opacity overflow-visible z-50 ${hasSelection ? 'opacity-30' : ''}`}>
             <div className={`overflow-visible ${activeTab === 'illustration' ? 'w-full md:w-[calc(166%+1.5rem)]' : ''}`}>
               <NowPlayingContent data={nowPlayingData} />
             </div>
