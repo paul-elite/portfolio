@@ -26,8 +26,15 @@ export default function CustomScrollbar({
   contentRef: externalContentRef,
 }: CustomScrollbarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const internalContentRef = useRef<HTMLDivElement>(null);
-  const contentRef = externalContentRef || internalContentRef;
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // Callback to set both internal and external refs
+  const setContentRef = (el: HTMLDivElement | null) => {
+    (contentRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+    if (externalContentRef) {
+      (externalContentRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+    }
+  };
   const thumbRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -160,7 +167,7 @@ export default function CustomScrollbar({
     <div ref={containerRef} className={`relative h-full ${className}`}>
       {/* Scrollable content - hide native scrollbar */}
       <div
-        ref={contentRef}
+        ref={setContentRef}
         className={`absolute inset-0 overflow-y-auto hide-scrollbar ${contentClassName}`}
       >
         {children}
