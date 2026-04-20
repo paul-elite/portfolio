@@ -11,7 +11,8 @@ interface CustomScrollbarProps {
   thumbDragColor?: string;
   position?: 'left' | 'right';
   contentClassName?: string;
-  contentRef?: React.RefObject<HTMLDivElement>;
+  contentRef?: React.RefObject<HTMLDivElement | null>;
+  onContentRefChange?: (el: HTMLDivElement | null) => void;
 }
 
 export default function CustomScrollbar({
@@ -24,6 +25,7 @@ export default function CustomScrollbar({
   position = 'right',
   contentClassName = '',
   contentRef: externalContentRef,
+  onContentRefChange,
 }: CustomScrollbarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -33,6 +35,9 @@ export default function CustomScrollbar({
     (contentRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
     if (externalContentRef) {
       (externalContentRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+    }
+    if (onContentRefChange) {
+      onContentRefChange(el);
     }
   };
   const thumbRef = useRef<HTMLDivElement>(null);

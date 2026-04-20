@@ -106,6 +106,21 @@ function renderBlock(block: ContentBlock, index: number) {
       return (
         <div key={index} className="my-6" dangerouslySetInnerHTML={{ __html: block.content }} />
       );
+    case 'list':
+      const items = block.meta?.listItems || block.content.split('\n').filter((item: string) => item.trim());
+      const bullets = block.meta?.listBullets || [];
+      return (
+        <ul key={index} className="my-4 space-y-2">
+          {items.map((item: string, i: number) => (
+            <li key={i} className="flex items-start gap-3 text-base text-gray-600">
+              <span className={bullets[i] ? 'mt-0.5' : 'text-gray-400 mt-1.5'}>
+                {bullets[i] || '•'}
+              </span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      );
     default:
       return null;
   }
@@ -127,22 +142,25 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const [previewImageIndex, setPreviewImageIndex] = useState(0);
   const [hoveredSocial, setHoveredSocial] = useState<string | null>(null);
   const [socialMousePos, setSocialMousePos] = useState({ x: 0, y: 0 });
-  const [slidingAvatar, setSlidingAvatar] = useState<{ fromIndex: number; toIndex: number; phase: 'sliding' | 'idle' } | null>(null);
-  const [displayedAvatarProject, setDisplayedAvatarProject] = useState<Project | null>(null);
-  const [avatarTopPosition, setAvatarTopPosition] = useState<number>(0);
   const [contentAnimationKey, setContentAnimationKey] = useState<string | null>(null);
   const githubRef = useRef<HTMLAnchorElement>(null);
   const socialRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
-  const projectItemRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const contentProjectRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const avatarContainerRef = useRef<HTMLDivElement>(null);
   const contentListRef = useRef<HTMLDivElement>(null);
+  const [contentListReady, setContentListReady] = useState(false);
   const nowPlayingData = useNowPlaying();
   const isInitialized = useRef(false);
-  const prevSelectedProject = useRef<Project | null>(null);
+  const [avatarHovered, setAvatarHovered] = useState(false);
 
   const siteConfig = initialConfig;
   const content = initialContent;
+
+  // Callback ref handler for contentListRef that triggers state update
+  const handleContentListRef = useCallback((el: HTMLDivElement | null) => {
+    (contentListRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+    setContentListReady(!!el);
+  }, []);
 
   // Preload both avatar images on mount to prevent delay when switching
   useEffect(() => {
@@ -244,120 +262,54 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     }
   }, [activeTab, handleClearSelection]);
 
-  // Handle sliding avatar animation when project changes
+  // Calculate avatar position based on project index
+  const targetProject = selectedProject || hoveredProject;
+  const targetProjectIndex = targetProject
+    ? content.projects.findIndex(p => p.id === targetProject.id)
+    : -1;
+
+  // Track avatar position based on the actual content row position
+  const [avatarTop, setAvatarTop] = useState<number | null>(null);
+
+  // Update avatar position when target project changes
   useEffect(() => {
-    if (activeTab !== 'projects') {
-      setDisplayedAvatarProject(null);
-      prevSelectedProject.current = null;
+    if (!targetProject || !contentListRef.current) {
+      setAvatarTop(null);
       return;
     }
 
-    const prevProject = prevSelectedProject.current;
-    const newProject = selectedProject;
+    const contentEl = contentProjectRefs.current[targetProject.id];
+    const containerEl = contentListRef.current;
 
-    // If hovering and no selection, show hovered avatar (handled separately)
-    if (!newProject && !hoveredProject) {
-      setDisplayedAvatarProject(null);
-      setSlidingAvatar(null);
-      prevSelectedProject.current = null;
+    if (!contentEl || !containerEl) {
+      setAvatarTop(null);
       return;
     }
 
-    // If only hovering (no selection), don't update via this effect
-    if (!newProject) {
-      prevSelectedProject.current = null;
-      return;
-    }
+    // Calculate position relative to the scroll container
+    const containerRect = containerEl.getBoundingClientRect();
+    const elementRect = contentEl.getBoundingClientRect();
+    const relativeTop = elementRect.top - containerRect.top + containerEl.scrollTop;
 
-    if (!prevProject) {
-      // First selection - no animation, just show
-      setDisplayedAvatarProject(newProject);
-      setSlidingAvatar(null);
-      prevSelectedProject.current = newProject;
-      return;
-    }
+    setAvatarTop(relativeTop);
+  }, [targetProject, contentListReady]);
 
-    if (prevProject.id === newProject.id) {
-      return;
-    }
+  // Track scroll position for avatar positioning
+  const [scrollTop, setScrollTop] = useState(0);
 
-    // Animate from prev to new
-    const fromIndex = content.projects.findIndex(p => p.id === prevProject.id);
-    const toIndex = content.projects.findIndex(p => p.id === newProject.id);
-
-    if (fromIndex === -1 || toIndex === -1) {
-      setDisplayedAvatarProject(newProject);
-      prevSelectedProject.current = newProject;
-      return;
-    }
-
-    // Start sliding animation (synced with content panel: 200ms)
-    setSlidingAvatar({ fromIndex, toIndex, phase: 'sliding' });
-    setDisplayedAvatarProject(prevProject); // Start with old avatar
-
-    // Change avatar halfway through
-    const halfwayTimer = setTimeout(() => {
-      setDisplayedAvatarProject(newProject);
-    }, 100); // Half of 200ms animation
-
-    // End animation
-    const endTimer = setTimeout(() => {
-      setSlidingAvatar(null);
-      prevSelectedProject.current = newProject;
-    }, 200);
-
-    return () => {
-      clearTimeout(halfwayTimer);
-      clearTimeout(endTimer);
-    };
-  }, [selectedProject, activeTab, content.projects, hoveredProject]);
-
-  // Handle hover avatar (only when no project is selected)
+  // Sync scroll between content list and avatar column
   useEffect(() => {
-    if (activeTab !== 'projects' || selectedProject) {
-      return;
-    }
-
-    if (hoveredProject) {
-      setDisplayedAvatarProject(hoveredProject);
-      setSlidingAvatar(null);
-    } else {
-      setDisplayedAvatarProject(null);
-    }
-  }, [hoveredProject, selectedProject, activeTab]);
-
-  // Calculate avatar position based on actual DOM measurements
-  useEffect(() => {
-    if (!displayedAvatarProject || activeTab !== 'projects') {
-      return;
-    }
-
-    const calculatePosition = () => {
-      const projectButton = contentProjectRefs.current[displayedAvatarProject.id];
-      const contentList = contentListRef.current;
-      const avatarContainer = avatarContainerRef.current;
-
-      if (projectButton && contentList && avatarContainer) {
-        const buttonRect = projectButton.getBoundingClientRect();
-        const containerRect = avatarContainer.getBoundingClientRect();
-
-        // Calculate the center of the project button relative to the avatar container
-        const buttonCenterY = buttonRect.top + buttonRect.height / 2;
-        const relativeTop = buttonCenterY - containerRect.top - 20; // 20 = half of 40px avatar
-
-        setAvatarTopPosition(relativeTop);
-      }
-    };
-
-    calculatePosition();
-
-    // Recalculate on scroll
     const contentList = contentListRef.current;
-    if (contentList) {
-      contentList.addEventListener('scroll', calculatePosition);
-      return () => contentList.removeEventListener('scroll', calculatePosition);
-    }
-  }, [displayedAvatarProject, activeTab, slidingAvatar]);
+
+    if (!contentList) return;
+
+    const handleScroll = () => {
+      setScrollTop(contentList.scrollTop);
+    };
+
+    contentList.addEventListener('scroll', handleScroll);
+    return () => contentList.removeEventListener('scroll', handleScroll);
+  }, [contentListReady]);
 
   const mainTabs: { key: Tab; label: string }[] = [
     { key: 'projects', label: 'Projects' },
@@ -403,70 +355,64 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             </button>
           </div>
 
-          {/* Tabs spacer */}
-          <div className="mb-6 h-6" />
+          {/* Tabs spacer - matches exact height of tabs section using same elements */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-base mb-6 opacity-0 pointer-events-none" aria-hidden="true">
+            {mainTabs.map((tab) => (
+              <button key={tab.key} type="button" className="font-normal">{tab.label}</button>
+            ))}
+            {showMoreTabs && moreTabs.map((tab) => (
+              <button key={tab.key} type="button" className="font-normal">{tab.label}</button>
+            ))}
+            <button type="button" className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <line x1="6" y1="2" x2="6" y2="10" />
+                <line x1="2" y1="6" x2="10" y2="6" />
+              </svg>
+            </button>
+          </div>
 
-          {/* Project Avatars - synced with content list */}
-          <div ref={avatarContainerRef} className="flex-1 overflow-y-auto min-h-0 relative">
-            {activeTab === 'projects' && (
-              <>
-                {/* Invisible placeholders matching content item structure */}
-                {content.projects.map((project) => (
-                  <div
-                    key={project.id}
-                    ref={(el) => { projectItemRefs.current[project.id] = el; }}
-                    className="py-3 flex items-center justify-end"
-                  >
-                    {/* Match content structure: title (text-base ~20px) + description (text-sm ~20px) = ~40px */}
-                    <div className="w-10">
-                      <div className="text-base mb-0.5 leading-tight">&nbsp;</div>
-                      <div className="text-sm leading-tight">&nbsp;</div>
+          {/* Project Avatars - absolutely positioned based on content row position */}
+          <div className="flex-1 min-h-0 relative">
+            <div ref={avatarContainerRef} className="absolute inset-0 overflow-hidden">
+            {activeTab === 'projects' && targetProject && avatarTop !== null && (() => {
+              const colors = [
+                'from-blue-400 to-cyan-400',
+                'from-purple-400 to-pink-400',
+                'from-orange-400 to-red-400',
+                'from-green-400 to-teal-400',
+                'from-indigo-400 to-purple-400',
+                'from-pink-400 to-rose-400',
+              ];
+              const colorClass = colors[targetProjectIndex % colors.length];
+              const contentEl = contentProjectRefs.current[targetProject.id];
+              const rowHeight = contentEl?.offsetHeight || 60;
+
+              return (
+                <div
+                  className="absolute right-0 flex items-center justify-end transition-all duration-150"
+                  style={{
+                    top: avatarTop - scrollTop,
+                    height: rowHeight,
+                  }}
+                >
+                  {targetProject.avatar ? (
+                    <Image
+                      src={targetProject.avatar}
+                      alt={targetProject.title}
+                      width={40}
+                      height={40}
+                      className="w-auto h-auto max-w-[40px] max-h-[40px] object-contain"
+                    />
+                  ) : (
+                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center`}>
+                      <span className="text-sm font-medium text-white">
+                        {targetProject.title.charAt(0)}
+                      </span>
                     </div>
-                  </div>
-                ))}
-
-                {/* Sliding avatar */}
-                {displayedAvatarProject && (
-                  <div
-                    className={`absolute right-0 w-10 h-10 flex items-center justify-center ${
-                      slidingAvatar ? 'transition-all duration-200 ease-out' : selectedProject ? 'transition-all duration-200 ease-out' : 'transition-opacity duration-150'
-                    }`}
-                    style={{
-                      top: `${avatarTopPosition}px`,
-                    }}
-                  >
-                    {(() => {
-                      const projectIndex = content.projects.findIndex(p => p.id === displayedAvatarProject.id);
-                      const colors = [
-                        'from-blue-400 to-cyan-400',
-                        'from-purple-400 to-pink-400',
-                        'from-orange-400 to-red-400',
-                        'from-green-400 to-teal-400',
-                        'from-indigo-400 to-purple-400',
-                        'from-pink-400 to-rose-400',
-                      ];
-                      const colorClass = colors[projectIndex % colors.length];
-
-                      return displayedAvatarProject.avatar ? (
-                        <Image
-                          src={displayedAvatarProject.avatar}
-                          alt={displayedAvatarProject.title}
-                          width={40}
-                          height={40}
-                          className="w-auto h-auto max-w-[40px] max-h-[40px] object-contain"
-                        />
-                      ) : (
-                        <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center`}>
-                          <span className="text-sm font-medium text-white">
-                            {displayedAvatarProject.title.charAt(0)}
-                          </span>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
-              </>
-            )}
+                  )}
+                </div>
+              );
+            })()}
             {activeTab === 'illustration' && ILLUSTRATION_CATEGORIES.map((cat, index) => {
               const isSelected = selectedCategory === cat.key;
               const colors = [
@@ -486,6 +432,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                 </div>
               );
             })}
+            </div>
           </div>
         </div>
 
@@ -551,35 +498,32 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             thumbHeight={30}
             thumbWidth={2}
             contentRef={contentListRef}
+            onContentRefChange={handleContentListRef}
           >
-            {activeTab === 'projects' && (
-              <div>
-                {content.projects.map((project) => {
-                  const isSelected = selectedProject?.id === project.id;
-                  return (
-                    <button
-                      key={project.id}
-                      ref={(el) => { contentProjectRefs.current[project.id] = el; }}
-                      onClick={() => handleSelectProject(isSelected ? null : project)}
-                      className={`group block py-3 w-full text-left transition-opacity ${hasSelection && !isSelected ? 'opacity-30' : ''}`}
-                      onMouseEnter={() => !selectedProject && setHoveredProject(project)}
-                      onMouseLeave={() => !selectedProject && setHoveredProject(null)}
-                    >
-                      <h2 className={`text-base font-normal mb-0.5 transition-colors ${
-                        isSelected
-                          ? 'text-gray-900'
-                          : 'text-gray-900 group-hover:text-gray-600'
-                      }`}>
-                        {project.title}
-                      </h2>
-                      <p className="text-sm text-gray-400">
-                        {project.year} <span className="mx-1">·</span> {project.description}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+            {activeTab === 'projects' && content.projects.map((project) => {
+              const isSelected = selectedProject?.id === project.id;
+              return (
+                <button
+                  key={project.id}
+                  ref={(el) => { contentProjectRefs.current[project.id] = el; }}
+                  onClick={() => handleSelectProject(isSelected ? null : project)}
+                  className={`group block py-3 w-full text-left transition-opacity ${hasSelection && !isSelected ? 'opacity-30' : ''}`}
+                  onMouseEnter={() => !selectedProject && setHoveredProject(project)}
+                  onMouseLeave={() => !selectedProject && setHoveredProject(null)}
+                >
+                  <h2 className={`text-base font-normal mb-0.5 transition-colors ${
+                    isSelected
+                      ? 'text-gray-900'
+                      : 'text-gray-900 group-hover:text-gray-600'
+                  }`}>
+                    {project.title}
+                  </h2>
+                  <p className="text-sm text-gray-400">
+                    {project.year} <span className="mx-1">·</span> {project.description}
+                  </p>
+                </button>
+              );
+            })}
 
             {activeTab === 'interaction' && (
               <div className={`transition-opacity ${hasSelection ? 'opacity-30' : ''}`}>
