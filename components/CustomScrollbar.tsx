@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, ReactNode } from 'react';
 
 interface CustomScrollbarProps {
   children: ReactNode;
@@ -24,7 +24,6 @@ export default function CustomScrollbar({
   thumbDragColor = '#FF4D8C',
   position = 'right',
   contentClassName = '',
-  contentRef: externalContentRef,
   onContentRefChange,
 }: CustomScrollbarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -33,9 +32,6 @@ export default function CustomScrollbar({
   // Callback to set both internal and external refs
   const setContentRef = (el: HTMLDivElement | null) => {
     (contentRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
-    if (externalContentRef) {
-      (externalContentRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
-    }
     if (onContentRefChange) {
       onContentRefChange(el);
     }
@@ -51,7 +47,7 @@ export default function CustomScrollbar({
   const dragStartScrollTop = useRef(0);
 
   // Update thumb position based on scroll
-  const updateThumbPosition = () => {
+  const updateThumbPosition = useCallback(() => {
     const content = contentRef.current;
     const container = containerRef.current;
     if (!content || !container) return;
@@ -67,7 +63,7 @@ export default function CustomScrollbar({
     setShowScrollbar(true);
     const scrollRatio = content.scrollTop / scrollableHeight;
     setThumbTop(scrollRatio * trackHeight);
-  };
+  }, [thumbHeight]);
 
   // Handle scroll event and detect scrollable content
   useEffect(() => {
@@ -77,8 +73,7 @@ export default function CustomScrollbar({
     const handleScroll = () => updateThumbPosition();
     content.addEventListener('scroll', handleScroll);
 
-    // Initial check with slight delay to ensure content is rendered
-    updateThumbPosition();
+    // Initial check after paint so state updates do not cascade during effect setup.
     requestAnimationFrame(() => updateThumbPosition());
     const initialTimer = setTimeout(() => updateThumbPosition(), 100);
 
@@ -96,7 +91,7 @@ export default function CustomScrollbar({
       mutationObserver.disconnect();
       clearTimeout(initialTimer);
     };
-  }, [thumbHeight]);
+  }, [thumbHeight, updateThumbPosition]);
 
   // Handle thumb drag
   const handleMouseDown = (e: React.MouseEvent) => {

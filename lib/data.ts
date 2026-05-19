@@ -1,36 +1,15 @@
-export interface ContentBlock {
-  type: 'text' | 'heading' | 'image' | 'svg' | 'code' | 'quote' | 'list';
-  content: string;
-  meta?: {
-    listItems?: string[];
-    listBullets?: (string | null)[];
-    alt?: string;
-    caption?: string;
-    language?: string;
-    size?: 'small' | 'medium' | 'large' | 'full';
-  };
-}
+export type {
+  ContentBlock,
+  Illustration,
+  IllustrationCategory,
+  Interaction,
+  PortfolioContent,
+  Project,
+  SiteConfig,
+  Writing,
+} from './content-model';
 
-export interface Project {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  avatar?: string;
-  preview?: string;
-  previewImages?: string[];
-  link?: string;
-  tags?: string[];
-  year?: string;
-  role?: string;
-  caseStudy?: {
-    overview: string;
-    challenge: string;
-    approach: string;
-    outcome: string;
-  };
-  blocks?: ContentBlock[];
-}
+import type { Illustration, Interaction, Project, Writing } from './content-model';
 
 export const siteConfig = {
   name: "Elite",
@@ -119,37 +98,6 @@ export const projects: Project[] = [
 export const getProject = (slug: string): Project | undefined => {
   return projects.find((p) => p.slug === slug);
 };
-
-export interface Writing {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  avatar?: string;
-  link?: string;
-  date?: string;
-  cover?: string;
-}
-
-export type IllustrationCategory = 'app-icons' | 'characters' | 'assets';
-
-export interface Illustration {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  thumbnail?: string;
-  youtubeUrl?: string;
-  category?: IllustrationCategory;
-}
-
-export interface Interaction {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  link?: string;
-}
 
 export const writings: Writing[] = [
   {

@@ -61,45 +61,56 @@ function formatTime(ms: number): string {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
-export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
-  const [remainingMs, setRemainingMs] = useState<number | null>(null);
-  const [isHovered, setIsHovered] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [avgColor, setAvgColor] = useState<string>('rgba(0,0,0,0.15)');
-  const [saturatedColor, setSaturatedColor] = useState<string>('#666666');
-  const [imageReady, setImageReady] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const lastFetchTime = useRef<number>(Date.now());
+function useRemainingMs(data: SpotifyData | null) {
+  const progressKey = data?.isPlaying
+    ? `${data.progressMs ?? 0}-${data.durationMs ?? 0}-${data.title ?? ''}`
+    : '';
+  const [elapsedState, setElapsedState] = useState({ key: '', elapsedMs: 0 });
+  const lastFetchTime = useRef<number>(0);
 
   useEffect(() => {
     if (data?.isPlaying && data.progressMs !== undefined && data.durationMs !== undefined) {
       lastFetchTime.current = Date.now();
-      setRemainingMs(data.durationMs - data.progressMs);
-    } else {
-      setRemainingMs(null);
+      return;
     }
+
+    lastFetchTime.current = 0;
   }, [data?.progressMs, data?.durationMs, data?.isPlaying]);
 
   useEffect(() => {
-    if (!data?.isPlaying || remainingMs === null) return;
+    if (!data?.isPlaying || data.progressMs === undefined || data.durationMs === undefined) return;
 
     const interval = setInterval(() => {
-      const elapsed = Date.now() - lastFetchTime.current;
-      const newRemaining = (data.durationMs || 0) - (data.progressMs || 0) - elapsed;
-      setRemainingMs(Math.max(0, newRemaining));
+      setElapsedState({ key: progressKey, elapsedMs: Date.now() - lastFetchTime.current });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [data?.isPlaying, data?.progressMs, data?.durationMs, remainingMs]);
+  }, [data?.isPlaying, data?.progressMs, data?.durationMs, progressKey]);
+
+  if (!data?.isPlaying || data.progressMs === undefined || data.durationMs === undefined) {
+    return null;
+  }
+
+  const elapsedMs = elapsedState.key === progressKey ? elapsedState.elapsedMs : 0;
+  return Math.max(0, data.durationMs - data.progressMs - elapsedMs);
+}
+
+export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
+  const remainingMs = useRemainingMs(data);
+  const [isHovered, setIsHovered] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [avgColor, setAvgColor] = useState<string>('rgba(0,0,0,0.15)');
+  const [saturatedColor, setSaturatedColor] = useState<string>('#666666');
+  const [readyImageUrl, setReadyImageUrl] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const imageReady = readyImageUrl === data?.albumImageUrl;
 
   // Extract average color and most saturated color from album art
   useEffect(() => {
     if (!data?.albumImageUrl) {
-      setImageReady(false);
       return;
     }
 
-    setImageReady(false);
     const img = document.createElement('img');
     img.crossOrigin = 'anonymous';
     img.src = data.albumImageUrl;
@@ -108,7 +119,7 @@ export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       if (!ctx) {
-        setImageReady(true);
+        setReadyImageUrl(data.albumImageUrl || null);
         return;
       }
 
@@ -173,11 +184,11 @@ export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
       }
 
       setSaturatedColor(`rgb(${mostSaturatedR}, ${mostSaturatedG}, ${mostSaturatedB})`);
-      setImageReady(true);
+      setReadyImageUrl(data.albumImageUrl || null);
     };
 
     img.onerror = () => {
-      setImageReady(true);
+      setReadyImageUrl(data.albumImageUrl || null);
     };
   }, [data?.albumImageUrl]);
 
@@ -270,7 +281,7 @@ export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
             </>
           ) : (
             <>
-              <p className="text-sm text-gray-900">Elite isn't listening to anything right now</p>
+              <p className="text-sm text-gray-900">Elite is not listening to anything right now</p>
               {data?.lastPlayed ? (
                 <p className="text-sm text-gray-400 truncate">
                   last listened to {data.lastPlayed.title}
@@ -288,29 +299,7 @@ export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
 
 // Legacy exports for backwards compatibility
 export function NowPlayingText({ data }: { data: SpotifyData | null }) {
-  const [remainingMs, setRemainingMs] = useState<number | null>(null);
-  const lastFetchTime = useRef<number>(Date.now());
-
-  useEffect(() => {
-    if (data?.isPlaying && data.progressMs !== undefined && data.durationMs !== undefined) {
-      lastFetchTime.current = Date.now();
-      setRemainingMs(data.durationMs - data.progressMs);
-    } else {
-      setRemainingMs(null);
-    }
-  }, [data?.progressMs, data?.durationMs, data?.isPlaying]);
-
-  useEffect(() => {
-    if (!data?.isPlaying || remainingMs === null) return;
-
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - lastFetchTime.current;
-      const newRemaining = (data.durationMs || 0) - (data.progressMs || 0) - elapsed;
-      setRemainingMs(Math.max(0, newRemaining));
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [data?.isPlaying, data?.progressMs, data?.durationMs, remainingMs]);
+  const remainingMs = useRemainingMs(data);
 
   if (data?.isPlaying) {
     return (
@@ -337,7 +326,7 @@ export function NowPlayingText({ data }: { data: SpotifyData | null }) {
 
   return (
     <>
-      <p className="text-sm text-gray-900">Elite isn't listening to anything right now</p>
+      <p className="text-sm text-gray-900">Elite is not listening to anything right now</p>
       {data?.lastPlayed ? (
         <p className="text-sm text-gray-400 truncate">
           last listened to {data.lastPlayed.title}

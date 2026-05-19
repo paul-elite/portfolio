@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, Gochi_Hand, Inter } from "next/font/google";
-import { supabase, defaultSettings } from "@/lib/supabase";
+import { getSettings } from "@/lib/content-service";
 import Analytics from "@/components/Analytics";
 import "./globals.css";
 
@@ -19,22 +19,6 @@ const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
 });
-
-async function getSettings() {
-  try {
-    const { data, error } = await supabase
-      .from('settings')
-      .select('*')
-      .single();
-
-    if (error || !data) {
-      return defaultSettings;
-    }
-    return { ...defaultSettings, ...data };
-  } catch {
-    return defaultSettings;
-  }
-}
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings();

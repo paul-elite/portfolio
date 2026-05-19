@@ -1,7 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+export const hasSupabaseConfig = Boolean(
+  process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY,
+);
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://example.supabase.co';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'missing-supabase-service-role-key';
 
 export const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -16,6 +20,8 @@ export interface Settings {
   github: string;
   linkedin: string;
   email: string;
+  behance: string;
+  instagram: string;
   twitterImage?: string;
   linkedinImage?: string;
   behanceImage?: string;
@@ -34,6 +40,8 @@ export const defaultSettings: Settings = {
   github: '',
   linkedin: '',
   email: '',
+  behance: '',
+  instagram: '',
   twitterImage: '',
   linkedinImage: '',
   behanceImage: '',

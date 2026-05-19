@@ -1,11 +1,18 @@
 'use client';
 
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
 import { useSearchParams, useRouter } from 'next/navigation';
 import OptimizedImage from './OptimizedImage';
-import { Project, Illustration, ContentBlock, IllustrationCategory } from '@/lib/data';
+import ContentBlocks from './content/ContentBlocks';
+import type { Illustration, IllustrationCategory, PortfolioContent, Project, SiteConfig, Writing } from '@/lib/content-model';
+import {
+  ILLUSTRATION_CATEGORIES,
+  MAIN_PORTFOLIO_TABS,
+  SECONDARY_PORTFOLIO_TABS,
+  isIllustrationCategory,
+  type PortfolioTab,
+} from '@/lib/portfolio-options';
 import { useNowPlaying, NowPlayingContent, NowPlayingImage } from './NowPlaying';
 import CustomScrollbar from './CustomScrollbar';
 
@@ -19,123 +26,33 @@ function getYouTubeId(url: string) {
   return match ? match[1] : null;
 }
 
-interface SiteConfig {
-  name: string;
-  title: string;
-  avatar: string;
-  avatarFocused?: string;
-  bio: string;
-  social: {
-    twitter: string;
-    github: string;
-    linkedin: string;
-    email: string;
-    behance: string;
-    instagram: string;
-  };
-  socialImages?: {
-    twitter?: string;
-    linkedin?: string;
-    behance?: string;
-    instagram?: string;
-    email?: string;
-  };
-}
-
-interface ContentData {
-  projects: Project[];
-  writings: { id: string; slug: string; title: string; description: string; cover?: string; date?: string; avatar?: string }[];
-  illustrations: (Illustration & { category?: IllustrationCategory })[];
-  interactions: { id: string; slug: string; title: string; description: string }[];
-}
-
-const ILLUSTRATION_CATEGORIES: { key: IllustrationCategory; label: string }[] = [
-  { key: 'app-icons', label: 'App Icons' },
-  { key: 'characters', label: 'Character Illustrations' },
-  { key: 'assets', label: 'Assets' },
-];
-
 interface HomeContentProps {
   initialConfig: SiteConfig;
-  initialContent: ContentData;
-}
-
-type Tab = 'projects' | 'interaction' | 'illustration' | 'writings';
-
-// Render content blocks for project details
-function renderBlock(block: ContentBlock, index: number) {
-  switch (block.type) {
-    case 'heading':
-      return (
-        <h2 key={index} className="text-base font-semibold text-gray-900 mt-8 mb-4">
-          {block.content}
-        </h2>
-      );
-    case 'text':
-      return (
-        <p key={index} className="text-base text-gray-600 leading-relaxed mb-4">
-          {block.content}
-        </p>
-      );
-    case 'image':
-      return (
-        <div key={index} className="my-6 rounded-lg overflow-hidden">
-          <OptimizedImage
-            src={block.content}
-            alt=""
-            width={800}
-            height={600}
-            className="w-full h-auto"
-            sizes="(max-width: 768px) 100vw, 50vw"
-          />
-        </div>
-      );
-    case 'quote':
-      return (
-        <blockquote key={index} className="border-l-2 border-gray-200 pl-4 my-6 text-gray-500 italic">
-          {block.content}
-        </blockquote>
-      );
-    case 'code':
-      return (
-        <pre key={index} className="bg-gray-50 rounded-lg p-4 my-6 overflow-x-auto text-sm">
-          <code>{block.content}</code>
-        </pre>
-      );
-    case 'svg':
-      return (
-        <div key={index} className="my-6" dangerouslySetInnerHTML={{ __html: block.content }} />
-      );
-    case 'list':
-      const items = block.meta?.listItems || block.content.split('\n').filter((item: string) => item.trim());
-      const bullets = block.meta?.listBullets || [];
-      return (
-        <ul key={index} className="my-4 space-y-2">
-          {items.map((item: string, i: number) => (
-            <li key={i} className="flex items-start gap-3 text-base text-gray-600">
-              <span className={bullets[i] ? 'mt-0.5' : 'text-gray-400 mt-1.5'}>
-                {bullets[i] || '•'}
-              </span>
-              <span>{item}</span>
-            </li>
-          ))}
-        </ul>
-      );
-    default:
-      return null;
-  }
+  initialContent: PortfolioContent;
 }
 
 export default function HomeContent({ initialConfig, initialContent }: HomeContentProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const initialProjectSlug = searchParams.get('project');
+  const initialWritingSlug = searchParams.get('writing');
+  const initialCategory = searchParams.get('category');
+  const initialProject = initialProjectSlug
+    ? initialContent.projects.find((project) => project.slug === initialProjectSlug) || null
+    : null;
+  const initialWriting = initialWritingSlug
+    ? initialContent.writings.find((writing) => writing.slug === initialWritingSlug) || null
+    : null;
+  const initialIllustrationCategory = isIllustrationCategory(initialCategory) ? initialCategory : null;
 
-  const [activeTab, setActiveTab] = useState<Tab>('projects');
+  const [activeTab, setActiveTab] = useState<PortfolioTab>(
+    initialIllustrationCategory ? 'illustration' : initialProject ? 'projects' : initialWriting ? 'writings' : 'projects',
+  );
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<IllustrationCategory | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(initialProject);
+  const [selectedWriting, setSelectedWriting] = useState<Writing | null>(initialWriting);
+  const [selectedCategory, setSelectedCategory] = useState<IllustrationCategory | null>(initialIllustrationCategory);
   const [activeVideo, setActiveVideo] = useState<Illustration | null>(null);
-  const [playingInlineId, setPlayingInlineId] = useState<string | null>(null);
   const [githubHovered, setGithubHovered] = useState(false);
   const [githubMousePos, setGithubMousePos] = useState({ x: 0, y: 0 });
   const [showMoreTabs, setShowMoreTabs] = useState(false);
@@ -145,13 +62,10 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const [contentAnimationKey, setContentAnimationKey] = useState<string | null>(null);
   const githubRef = useRef<HTMLAnchorElement>(null);
   const socialRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
-  const contentProjectRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const avatarContainerRef = useRef<HTMLDivElement>(null);
   const contentListRef = useRef<HTMLDivElement>(null);
   const [contentListReady, setContentListReady] = useState(false);
   const nowPlayingData = useNowPlaying();
-  const isInitialized = useRef(false);
-  const [avatarHovered, setAvatarHovered] = useState(false);
 
   const siteConfig = initialConfig;
   const content = initialContent;
@@ -175,56 +89,68 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   }, [siteConfig.avatar, siteConfig.avatarFocused]);
 
   // Update URL when selection changes
-  const updateURL = useCallback((projectSlug: string | null, category: IllustrationCategory | null) => {
+  const updateURL = useCallback((selection: {
+    projectSlug?: string | null;
+    writingSlug?: string | null;
+    category?: IllustrationCategory | null;
+  }) => {
     const params = new URLSearchParams();
-    if (projectSlug) {
-      params.set('project', projectSlug);
-    } else if (category) {
-      params.set('category', category);
+    if (selection.projectSlug) {
+      params.set('project', selection.projectSlug);
+    } else if (selection.writingSlug) {
+      params.set('writing', selection.writingSlug);
+    } else if (selection.category) {
+      params.set('category', selection.category);
     }
     const newURL = params.toString() ? `?${params.toString()}` : '/';
     router.replace(newURL, { scroll: false });
   }, [router]);
 
-  // Initialize state from URL on mount
-  useEffect(() => {
-    if (isInitialized.current) return;
-    isInitialized.current = true;
-
-    const projectSlug = searchParams.get('project');
-    const category = searchParams.get('category') as IllustrationCategory | null;
-
-    if (projectSlug) {
-      const project = content.projects.find(p => p.slug === projectSlug);
-      if (project) {
-        setActiveTab('projects');
-        setSelectedProject(project);
-      }
-    } else if (category && ILLUSTRATION_CATEGORIES.some(c => c.key === category)) {
-      setActiveTab('illustration');
-      setSelectedCategory(category);
-    }
-  }, [searchParams, content.projects]);
-
   // Wrapper functions to update selection and URL together
   const handleSelectProject = useCallback((project: Project | null) => {
     setSelectedProject(project);
+    setSelectedWriting(null);
+    setSelectedCategory(null);
+    setPreviewImageIndex(0);
     setContentAnimationKey(project ? `project-${project.id}-${Date.now()}` : null);
-    updateURL(project?.slug || null, null);
+    updateURL({ projectSlug: project?.slug || null });
+  }, [updateURL]);
+
+  const handleSelectWriting = useCallback((writing: Writing | null) => {
+    setSelectedWriting(writing);
+    setSelectedProject(null);
+    setSelectedCategory(null);
+    setHoveredProject(null);
+    setPreviewImageIndex(0);
+    setContentAnimationKey(writing ? `writing-${writing.id}-${Date.now()}` : null);
+    updateURL({ writingSlug: writing?.slug || null });
   }, [updateURL]);
 
   const handleSelectCategory = useCallback((category: IllustrationCategory | null) => {
     setSelectedCategory(category);
     setSelectedProject(null);
+    setSelectedWriting(null);
     setContentAnimationKey(category ? `category-${category}-${Date.now()}` : null);
-    updateURL(null, category);
+    updateURL({ category });
   }, [updateURL]);
 
   const handleClearSelection = useCallback(() => {
     setSelectedProject(null);
+    setSelectedWriting(null);
     setSelectedCategory(null);
     setContentAnimationKey(null);
-    updateURL(null, null);
+    updateURL({});
+  }, [updateURL]);
+
+  const handleTabChange = useCallback((tab: PortfolioTab) => {
+    setActiveTab(tab);
+    setSelectedProject(null);
+    setSelectedWriting(null);
+    setSelectedCategory(null);
+    setHoveredProject(null);
+    setPreviewImageIndex(0);
+    setContentAnimationKey(null);
+    updateURL({});
   }, [updateURL]);
 
   // Get preview images from the hovered project
@@ -243,10 +169,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
   // Cycle through project images when hovering (not when selected)
   useEffect(() => {
-    if (selectedProject || !hoveredProject || projectImages.length <= 1) {
-      setPreviewImageIndex(0);
-      return;
-    }
+    if (selectedProject || !hoveredProject || projectImages.length <= 1) return;
 
     const interval = setInterval(() => {
       setPreviewImageIndex((prev) => (prev + 1) % projectImages.length);
@@ -254,13 +177,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
     return () => clearInterval(interval);
   }, [hoveredProject, projectImages.length, selectedProject]);
-
-  // Clear selections when switching tabs
-  useEffect(() => {
-    if (isInitialized.current) {
-      handleClearSelection();
-    }
-  }, [activeTab, handleClearSelection]);
 
   // Calculate avatar position based on project index
   const targetProject = selectedProject || hoveredProject;
@@ -283,18 +199,12 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     return () => contentList.removeEventListener('scroll', handleScroll);
   }, [contentListReady]);
 
-  const mainTabs: { key: Tab; label: string }[] = [
-    { key: 'projects', label: 'Projects' },
-    { key: 'illustration', label: 'Illustration' },
-    { key: 'writings', label: 'Writings' },
-  ];
+  const mainTabs = MAIN_PORTFOLIO_TABS;
 
   // Track if anything is selected to fade other elements
-  const hasSelection = selectedProject !== null || selectedCategory !== null;
+  const hasSelection = selectedProject !== null || selectedWriting !== null || selectedCategory !== null;
 
-  const moreTabs: { key: Tab; label: string }[] = [
-    { key: 'interaction', label: 'Interaction' },
-  ];
+  const moreTabs = SECONDARY_PORTFOLIO_TABS;
 
   return (
     <div className="h-screen flex flex-col pt-16 pb-4 md:pt-32 md:pb-8 pl-2 pr-3 md:px-6">
@@ -399,9 +309,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               return (
                 <div key={cat.key} className="py-3 flex items-start justify-end">
                   <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`}>
-                    <span className="text-base">
-                      {cat.key === 'app-icons' ? '📱' : cat.key === 'characters' ? '🎨' : '🖼️'}
-                    </span>
+                    <span className="text-base">{cat.symbol}</span>
                   </div>
                 </div>
               );
@@ -425,11 +333,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             {mainTabs.map((tab) => (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => handleTabChange(tab.key)}
                 className={`transition-all font-normal ${
                   activeTab === tab.key
-                    ? `text-gray-900 ${hasSelection ? 'opacity-60' : ''}`
-                    : `text-gray-400 hover:text-gray-600 ${hasSelection ? 'opacity-30' : ''}`
+                    ? 'text-gray-900'
+                    : 'text-gray-400 hover:text-gray-600'
                 }`}
               >
                 {tab.label}
@@ -438,11 +346,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             {showMoreTabs && moreTabs.map((tab) => (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => handleTabChange(tab.key)}
                 className={`transition-all font-normal ${
                   activeTab === tab.key
-                    ? `text-gray-900 ${hasSelection ? 'opacity-60' : ''}`
-                    : `text-gray-400 hover:text-gray-600 ${hasSelection ? 'opacity-30' : ''}`
+                    ? 'text-gray-900'
+                    : 'text-gray-400 hover:text-gray-600'
                 }`}
               >
                 {tab.label}
@@ -450,7 +358,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             ))}
             <button
               onClick={() => setShowMoreTabs(!showMoreTabs)}
-              className={`w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:border-gray-400 transition-all ${hasSelection ? 'opacity-30' : ''}`}
+              className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:border-gray-400 transition-all"
             >
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                 {showMoreTabs ? (
@@ -479,10 +387,14 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               return (
                 <button
                   key={project.id}
-                  ref={(el) => { contentProjectRefs.current[project.id] = el; }}
                   onClick={() => handleSelectProject(isSelected ? null : project)}
                   className={`group block py-3 w-full text-left transition-opacity ${hasSelection && !isSelected ? 'opacity-30' : ''}`}
-                  onMouseEnter={() => !selectedProject && setHoveredProject(project)}
+                  onMouseEnter={() => {
+                    if (!selectedProject) {
+                      setPreviewImageIndex(0);
+                      setHoveredProject(project);
+                    }
+                  }}
                   onMouseLeave={() => !selectedProject && setHoveredProject(null)}
                 >
                   <h2 className={`text-base font-normal mb-0.5 transition-colors ${
@@ -560,27 +472,39 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               };
 
               return (
-                <div className={`space-y-2 transition-opacity ${hasSelection ? 'opacity-30' : ''}`}>
+                <div className="space-y-2">
                   {sortedYears.map((year) => (
                     <div key={year}>
-                      {writingsByYear[year].map((item, index) => (
-                        <Link key={item.id} href={`/writing/${item.slug}`} className="group flex flex-col sm:flex-row sm:items-baseline py-3 border-b border-gray-100 last:border-0 gap-1 sm:gap-0">
-                          <span className="w-16 text-sm text-gray-300 flex-shrink-0 hidden sm:block">
-                            {index === 0 ? year : ''}
-                          </span>
-                          <div className="flex-1 flex items-center gap-2">
-                            <h3 className="text-base font-medium text-gray-900 group-hover:text-gray-600 transition-colors">
-                              {item.title}
-                            </h3>
-                            {isNew(item.date) && (
-                              <span className="text-xs text-pink-500 border border-pink-300 rounded-full px-2 py-0.5">New</span>
-                            )}
-                          </div>
-                          <span className="text-sm text-gray-300 flex-shrink-0 sm:ml-8">
-                            {item.date ? new Date(item.date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }).replace('/', '/') : ''}
-                          </span>
-                        </Link>
-                      ))}
+                      {writingsByYear[year].map((item, index) => {
+                        const isSelected = selectedWriting?.id === item.id;
+
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => handleSelectWriting(isSelected ? null : item)}
+                            className={`group flex w-full flex-col sm:flex-row sm:items-baseline py-3 border-b border-gray-100 last:border-0 gap-1 sm:gap-0 text-left transition-opacity ${hasSelection && !isSelected ? 'opacity-30' : ''}`}
+                          >
+                            <span className="w-16 text-sm text-gray-300 flex-shrink-0 hidden sm:block">
+                              {index === 0 ? year : ''}
+                            </span>
+                            <div className="flex-1 flex items-center gap-2">
+                              <h3 className={`text-base font-medium transition-colors ${
+                                isSelected
+                                  ? 'text-gray-900'
+                                  : 'text-gray-900 group-hover:text-gray-600'
+                              }`}>
+                                {item.title}
+                              </h3>
+                              {isNew(item.date) && (
+                                <span className="text-xs text-pink-500 border border-pink-300 rounded-full px-2 py-0.5">New</span>
+                              )}
+                            </div>
+                            <span className="text-sm text-gray-300 flex-shrink-0 sm:ml-8">
+                              {item.date ? new Date(item.date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }).replace('/', '/') : ''}
+                            </span>
+                          </button>
+                        );
+                      })}
                     </div>
                   ))}
                 </div>
@@ -722,7 +646,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               {/* Project Content */}
               {selectedProject.blocks && selectedProject.blocks.length > 0 ? (
                 <div className="prose prose-gray max-w-none">
-                  {selectedProject.blocks.map((block, index) => renderBlock(block, index))}
+                  <ContentBlocks blocks={selectedProject.blocks} />
                 </div>
               ) : selectedProject.caseStudy ? (
                 <div className="space-y-8">
@@ -756,6 +680,54 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   className="text-sm text-gray-400 hover:text-gray-900 transition-colors mt-8 inline-block"
                 >
                   View Project →
+                </a>
+              )}
+            </div>
+          ) : selectedWriting ? (
+            // Show full writing content when selected
+            <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
+              <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedWriting.title}</h2>
+              <div className="flex gap-4 text-sm text-gray-400 mb-6">
+                {selectedWriting.date && (
+                  <span>
+                    {new Date(selectedWriting.date).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </span>
+                )}
+              </div>
+
+              {selectedWriting.cover && (
+                <div className="mb-8 rounded-lg overflow-hidden">
+                  <OptimizedImage
+                    src={selectedWriting.cover}
+                    alt={selectedWriting.title}
+                    width={800}
+                    height={450}
+                    className="w-full h-auto"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                </div>
+              )}
+
+              {selectedWriting.blocks && selectedWriting.blocks.length > 0 ? (
+                <div className="prose prose-gray max-w-none">
+                  <ContentBlocks blocks={selectedWriting.blocks} />
+                </div>
+              ) : (
+                <p className="text-base text-gray-600 leading-relaxed">{selectedWriting.description}</p>
+              )}
+
+              {selectedWriting.link && (
+                <a
+                  href={selectedWriting.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-gray-400 hover:text-gray-900 transition-colors mt-8 inline-block"
+                >
+                  Read More →
                 </a>
               )}
             </div>
@@ -879,7 +851,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           <div className="relative w-[72vw] h-[72vh] transition-opacity duration-300">
             <Image
               key={projectImages[previewImageIndex]}
-              src={projectImages[previewImageIndex]}
+              src={projectImages[previewImageIndex % projectImages.length]}
               alt={hoveredProject.title}
               fill
               className="object-contain"

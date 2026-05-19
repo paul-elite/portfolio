@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { supabase, Settings, defaultSettings } from '@/lib/supabase';
+import { mapIllustration, mapProject, mapSettings } from '@/lib/content-adapters';
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 
@@ -14,18 +15,7 @@ async function loadSettings(): Promise<Settings> {
     if (error || !data) {
       return defaultSettings;
     }
-    // Convert snake_case from database to camelCase for frontend
-    return {
-      ...defaultSettings,
-      ...data,
-      avatarFocused: data.avatar_focused || '',
-      metaImage: data.meta_image || data.metaImage || '',
-      twitterImage: data.twitter_image || '',
-      linkedinImage: data.linkedin_image || '',
-      behanceImage: data.behance_image || '',
-      instagramImage: data.instagram_image || '',
-      emailImage: data.email_image || '',
-    };
+    return mapSettings(data);
   } catch {
     return defaultSettings;
   }
@@ -43,6 +33,8 @@ async function saveSettings(settings: Settings): Promise<void> {
     github: settings.github,
     linkedin: settings.linkedin,
     email: settings.email,
+    behance: settings.behance,
+    instagram: settings.instagram,
     twitter_image: settings.twitterImage || '',
     linkedin_image: settings.linkedinImage || '',
     behance_image: settings.behanceImage || '',
@@ -94,29 +86,11 @@ export async function GET(request: NextRequest) {
       console.error('Illustrations fetch error:', illustrationsRes.error);
     }
 
-    // Transform illustrations to camelCase for frontend
-    const illustrations = (illustrationsRes.data || []).map((item: Record<string, unknown>) => ({
-      id: item.id,
-      slug: item.slug,
-      title: item.title,
-      description: item.description,
-      thumbnail: item.thumbnail,
-      youtubeUrl: item.youtube_url,
-      category: item.category || 'assets',
-    }));
-
-    // Transform projects to camelCase for frontend
-    const projects = (projectsRes.data || []).map((item: Record<string, unknown>) => ({
-      ...item,
-      caseStudy: item.case_study,
-      previewImages: item.preview_images,
-    }));
-
     return NextResponse.json({
       settings,
-      projects,
+      projects: (projectsRes.data || []).map(mapProject),
       writings: writingsRes.data || [],
-      illustrations,
+      illustrations: (illustrationsRes.data || []).map(mapIllustration),
       interactions: interactionsRes.data || [],
     });
   } catch (error) {
@@ -172,7 +146,7 @@ export async function POST(request: NextRequest) {
       insertData = {
         ...insertData,
         thumbnail: data.thumbnail || '',
-        youtube_url: data.youtubeUrl || '',
+        youtube_url: data.youtubeUrl || data.youtube_url || '',
         category: data.category || 'assets',
       };
     } else if (type === 'interactions') {
@@ -228,7 +202,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Transform camelCase to snake_case for database
-    let updateData = { ...data };
+    const updateData = { ...data };
     if (type === 'projects') {
       if ('caseStudy' in updateData) {
         updateData.case_study = updateData.caseStudy;
@@ -237,6 +211,12 @@ export async function PUT(request: NextRequest) {
       if ('previewImages' in updateData) {
         updateData.preview_images = updateData.previewImages;
         delete updateData.previewImages;
+      }
+    }
+    if (type === 'illustrations') {
+      if ('youtubeUrl' in updateData) {
+        updateData.youtube_url = updateData.youtubeUrl;
+        delete updateData.youtubeUrl;
       }
     }
 

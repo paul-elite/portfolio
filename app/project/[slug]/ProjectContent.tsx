@@ -1,67 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import OptimizedImage from '@/components/OptimizedImage';
-import { Project, ContentBlock } from '@/lib/data';
-
-interface ProjectNav {
-  slug: string;
-  title: string;
-}
+import ContentBlocks from '@/components/content/ContentBlocks';
+import type { NavItem, Project } from '@/lib/content-model';
 
 interface ProjectContentProps {
   project: Project;
-  prevProject?: ProjectNav | null;
-  nextProject?: ProjectNav | null;
-}
-
-function renderBlock(block: ContentBlock, index: number) {
-  switch (block.type) {
-    case 'heading':
-      return (
-        <h2 key={index} className="text-base font-semibold text-gray-900 mt-8 mb-4">
-          {block.content}
-        </h2>
-      );
-    case 'text':
-      return (
-        <p key={index} className="text-base text-gray-600 leading-relaxed mb-4">
-          {block.content}
-        </p>
-      );
-    case 'image':
-      return (
-        <div key={index} className="my-6 rounded-lg overflow-hidden">
-          <OptimizedImage
-            src={block.content}
-            alt=""
-            width={800}
-            height={600}
-            className="w-full h-auto"
-            sizes="(max-width: 768px) 100vw, 50vw"
-          />
-        </div>
-      );
-    case 'quote':
-      return (
-        <blockquote key={index} className="border-l-2 border-gray-200 pl-4 my-6 text-gray-500 italic">
-          {block.content}
-        </blockquote>
-      );
-    case 'code':
-      return (
-        <pre key={index} className="bg-gray-50 rounded-lg p-4 my-6 overflow-x-auto text-sm">
-          <code>{block.content}</code>
-        </pre>
-      );
-    case 'svg':
-      return (
-        <div key={index} className="my-6" dangerouslySetInnerHTML={{ __html: block.content }} />
-      );
-    default:
-      return null;
-  }
+  prevProject?: NavItem | null;
+  nextProject?: NavItem | null;
 }
 
 export default function ProjectContent({ project, prevProject, nextProject }: ProjectContentProps) {
@@ -134,7 +81,7 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
             {/* Block Content - for projects with blocks */}
             {hasBlocks && (
               <div className="prose prose-gray max-w-none">
-                {project.blocks!.map((block, index) => renderBlock(block, index))}
+                <ContentBlocks blocks={project.blocks} />
               </div>
             )}
 

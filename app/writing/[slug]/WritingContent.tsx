@@ -2,75 +2,13 @@
 
 import Link from 'next/link';
 import OptimizedImage from '@/components/OptimizedImage';
-import { Writing } from '@/lib/data';
-
-interface ContentBlock {
-  type: string;
-  content: string;
-  meta?: Record<string, unknown>;
-}
-
-interface WritingWithBlocks extends Writing {
-  blocks?: ContentBlock[];
-}
-
-interface WritingNav {
-  slug: string;
-  title: string;
-}
+import ContentBlocks from '@/components/content/ContentBlocks';
+import type { NavItem, Writing } from '@/lib/content-model';
 
 interface WritingContentProps {
-  writing: WritingWithBlocks;
-  prevWriting?: WritingNav | null;
-  nextWriting?: WritingNav | null;
-}
-
-function renderBlock(block: ContentBlock, index: number) {
-  switch (block.type) {
-    case 'heading':
-      return (
-        <h2 key={index} className="text-base font-semibold text-gray-900 mt-8 mb-4">
-          {block.content}
-        </h2>
-      );
-    case 'text':
-      return (
-        <p key={index} className="text-base text-gray-600 leading-relaxed mb-4">
-          {block.content}
-        </p>
-      );
-    case 'image':
-      return (
-        <div key={index} className="my-6 rounded-lg overflow-hidden">
-          <OptimizedImage
-            src={block.content}
-            alt=""
-            width={800}
-            height={600}
-            className="w-full h-auto"
-            sizes="(max-width: 768px) 100vw, 50vw"
-          />
-        </div>
-      );
-    case 'quote':
-      return (
-        <blockquote key={index} className="border-l-2 border-gray-200 pl-4 my-6 text-gray-500 italic">
-          {block.content}
-        </blockquote>
-      );
-    case 'code':
-      return (
-        <pre key={index} className="bg-gray-50 rounded-lg p-4 my-6 overflow-x-auto text-sm">
-          <code>{block.content}</code>
-        </pre>
-      );
-    case 'svg':
-      return (
-        <div key={index} className="my-6" dangerouslySetInnerHTML={{ __html: block.content }} />
-      );
-    default:
-      return null;
-  }
+  writing: Writing;
+  prevWriting?: NavItem | null;
+  nextWriting?: NavItem | null;
 }
 
 export default function WritingContent({ writing, prevWriting, nextWriting }: WritingContentProps) {
@@ -112,11 +50,11 @@ export default function WritingContent({ writing, prevWriting, nextWriting }: Wr
           {/* Content Column */}
           <div className="flex-1 min-w-0 md:col-span-4">
             {/* Writing Title */}
-            <div className="h-auto md:h-14 mb-6 md:mb-8">
+            <div className="h-auto md:h-14 mb-4 md:mb-6">
               <h1 className="text-xl font-semibold text-gray-900">
                 {writing.title}
               </h1>
-              <div className="flex gap-4 text-sm text-gray-400 mt-1">
+              <div className="flex gap-4 text-sm text-gray-400">
                 {writing.date && (
                   <span>
                     {new Date(writing.date).toLocaleDateString('en-US', {
@@ -146,7 +84,7 @@ export default function WritingContent({ writing, prevWriting, nextWriting }: Wr
             {/* Block Content */}
             {hasBlocks && (
               <div className="prose prose-gray max-w-none">
-                {writing.blocks!.map((block, index) => renderBlock(block, index))}
+                <ContentBlocks blocks={writing.blocks} />
               </div>
             )}
 
@@ -157,6 +95,18 @@ export default function WritingContent({ writing, prevWriting, nextWriting }: Wr
               </p>
             )}
 
+            {/* Link */}
+            {writing.link && (
+              <a
+                href={writing.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-gray-400 hover:text-gray-900 transition-colors mt-12 inline-block"
+              >
+                Read More →
+              </a>
+            )}
+
             {/* Writing Navigation */}
             {(prevWriting || nextWriting) && (
               <div className="flex justify-between items-center mt-16 pt-8 border-t border-gray-100">
@@ -165,7 +115,7 @@ export default function WritingContent({ writing, prevWriting, nextWriting }: Wr
                     href={`/writing/${prevWriting.slug}`}
                     className="group flex flex-col items-start"
                   >
-                    <span className="text-xs text-gray-400 mb-1">Previous</span>
+                    <span className="text-xs text-gray-400 mb-1">Previous Writing</span>
                     <span className="text-sm font-medium text-gray-900 group-hover:text-gray-600 transition-colors">
                       ← {prevWriting.title}
                     </span>
@@ -178,7 +128,7 @@ export default function WritingContent({ writing, prevWriting, nextWriting }: Wr
                     href={`/writing/${nextWriting.slug}`}
                     className="group flex flex-col items-end"
                   >
-                    <span className="text-xs text-gray-400 mb-1">Next</span>
+                    <span className="text-xs text-gray-400 mb-1">Next Writing</span>
                     <span className="text-sm font-medium text-gray-900 group-hover:text-gray-600 transition-colors">
                       {nextWriting.title} →
                     </span>
