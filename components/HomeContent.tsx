@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import Image from 'next/image';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import OptimizedImage from './OptimizedImage';
 import ContentBlocks from './content/ContentBlocks';
 import type { Illustration, IllustrationCategory, PortfolioContent, Project, SiteConfig, Writing } from '@/lib/content-model';
@@ -10,7 +10,6 @@ import {
   ILLUSTRATION_CATEGORIES,
   MAIN_PORTFOLIO_TABS,
   SECONDARY_PORTFOLIO_TABS,
-  isIllustrationCategory,
   type PortfolioTab,
 } from '@/lib/portfolio-options';
 import { useNowPlaying, NowPlayingContent, NowPlayingImage } from './NowPlaying';
@@ -32,26 +31,12 @@ interface HomeContentProps {
 }
 
 export default function HomeContent({ initialConfig, initialContent }: HomeContentProps) {
-  const searchParams = useSearchParams();
   const router = useRouter();
-  const initialProjectSlug = searchParams.get('project');
-  const initialWritingSlug = searchParams.get('writing');
-  const initialCategory = searchParams.get('category');
-  const initialProject = initialProjectSlug
-    ? initialContent.projects.find((project) => project.slug === initialProjectSlug) || null
-    : null;
-  const initialWriting = initialWritingSlug
-    ? initialContent.writings.find((writing) => writing.slug === initialWritingSlug) || null
-    : null;
-  const initialIllustrationCategory = isIllustrationCategory(initialCategory) ? initialCategory : null;
-
-  const [activeTab, setActiveTab] = useState<PortfolioTab>(
-    initialIllustrationCategory ? 'illustration' : initialProject ? 'projects' : initialWriting ? 'writings' : 'projects',
-  );
+  const [activeTab, setActiveTab] = useState<PortfolioTab>('projects');
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(initialProject);
-  const [selectedWriting, setSelectedWriting] = useState<Writing | null>(initialWriting);
-  const [selectedCategory, setSelectedCategory] = useState<IllustrationCategory | null>(initialIllustrationCategory);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedWriting, setSelectedWriting] = useState<Writing | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<IllustrationCategory | null>(null);
   const [activeVideo, setActiveVideo] = useState<Illustration | null>(null);
   const [githubHovered, setGithubHovered] = useState(false);
   const [githubMousePos, setGithubMousePos] = useState({ x: 0, y: 0 });
@@ -205,6 +190,146 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const hasSelection = selectedProject !== null || selectedWriting !== null || selectedCategory !== null;
 
   const moreTabs = SECONDARY_PORTFOLIO_TABS;
+  const selectedDetailContent = selectedProject ? (
+    <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
+      <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedProject.title}</h2>
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-400 mb-6">
+        {selectedProject.year && <span>{selectedProject.year}</span>}
+        {selectedProject.role && <span>{selectedProject.role}</span>}
+      </div>
+
+      {selectedProject.blocks && selectedProject.blocks.length > 0 ? (
+        <div className="prose prose-gray max-w-none">
+          <ContentBlocks blocks={selectedProject.blocks} />
+        </div>
+      ) : selectedProject.caseStudy ? (
+        <div className="space-y-8">
+          <section>
+            <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Overview</h3>
+            <p className="text-base text-gray-600 leading-relaxed">{selectedProject.caseStudy.overview}</p>
+          </section>
+          <section>
+            <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Challenge</h3>
+            <p className="text-base text-gray-600 leading-relaxed">{selectedProject.caseStudy.challenge}</p>
+          </section>
+          <section>
+            <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Approach</h3>
+            <p className="text-base text-gray-600 leading-relaxed">{selectedProject.caseStudy.approach}</p>
+          </section>
+          <section>
+            <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Outcome</h3>
+            <p className="text-base text-gray-600 leading-relaxed">{selectedProject.caseStudy.outcome}</p>
+          </section>
+        </div>
+      ) : (
+        <p className="text-base text-gray-600 leading-relaxed">{selectedProject.description}</p>
+      )}
+
+      {selectedProject.link && (
+        <a
+          href={selectedProject.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-gray-400 hover:text-gray-900 transition-colors mt-8 inline-block"
+        >
+          View Project →
+        </a>
+      )}
+    </div>
+  ) : selectedWriting ? (
+    <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
+      <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedWriting.title}</h2>
+      <div className="flex gap-4 text-sm text-gray-400 mb-6">
+        {selectedWriting.date && (
+          <span>
+            {new Date(selectedWriting.date).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </span>
+        )}
+      </div>
+
+      {selectedWriting.cover && (
+        <div className="mb-8 rounded-lg overflow-hidden">
+          <OptimizedImage
+            src={selectedWriting.cover}
+            alt={selectedWriting.title}
+            width={800}
+            height={450}
+            className="w-full h-auto"
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
+        </div>
+      )}
+
+      {selectedWriting.blocks && selectedWriting.blocks.length > 0 ? (
+        <div className="prose prose-gray max-w-none">
+          <ContentBlocks blocks={selectedWriting.blocks} />
+        </div>
+      ) : (
+        <p className="text-base text-gray-600 leading-relaxed">{selectedWriting.description}</p>
+      )}
+
+      {selectedWriting.link && (
+        <a
+          href={selectedWriting.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-gray-400 hover:text-gray-900 transition-colors mt-8 inline-block"
+        >
+          Read More →
+        </a>
+      )}
+    </div>
+  ) : selectedCategory ? (
+    <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
+      <h2 className="text-xl font-semibold text-gray-900 mb-6">
+        {ILLUSTRATION_CATEGORIES.find(c => c.key === selectedCategory)?.label}
+      </h2>
+      <div className="grid grid-cols-2 gap-4">
+        {content.illustrations
+          .filter(item => (item.category || 'assets') === selectedCategory)
+          .map((item) => {
+            const youtubeId = item.youtubeUrl ? getYouTubeId(item.youtubeUrl) : null;
+            return (
+              <div key={item.id} className="group">
+                <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden relative">
+                  {item.thumbnail ? (
+                    <OptimizedImage
+                      src={item.thumbnail}
+                      alt={item.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 50vw, 20vw"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="text-gray-300 text-xs text-center px-2">{item.title}</span>
+                    </div>
+                  )}
+                  {youtubeId && (
+                    <button
+                      onClick={() => setActiveVideo(item)}
+                      className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-gray-900 ml-0.5">
+                          <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
+                      </div>
+                    </button>
+                  )}
+                </div>
+                <h3 className="text-sm text-gray-900 mt-2">{item.title}</h3>
+                <p className="text-xs text-gray-400">{item.description}</p>
+              </div>
+            );
+          })}
+      </div>
+    </div>
+  ) : null;
 
   return (
     <div className="h-screen flex flex-col pt-16 pb-4 md:pt-32 md:pb-8 pl-2 pr-3 md:px-6">
@@ -320,16 +445,47 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
         {/* Left Content Column - Fixed at 100vh */}
         <div className="flex-1 md:col-span-3 flex flex-col min-w-0 h-full overflow-visible">
-          {/* Name */}
-          <div className={`h-auto md:h-14 mb-6 md:mb-4 transition-opacity ${hasSelection ? 'opacity-60' : ''}`}>
+          {/* Identity */}
+          <div className={`hidden md:block h-auto md:h-14 mb-6 md:mb-4 transition-opacity ${hasSelection ? 'opacity-60' : ''}`}>
             <h1 className="text-base font-semibold text-gray-900">
               {siteConfig.name}
             </h1>
             <p className="text-base font-normal text-gray-500">{siteConfig.title}</p>
           </div>
+          <div className={`md:hidden mb-6 transition-opacity ${hasSelection ? 'opacity-60' : ''}`}>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleClearSelection}
+                className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 overflow-hidden"
+                aria-label="Show all work"
+              >
+                {(() => {
+                  const avatarSrc = hasSelection && siteConfig.avatarFocused ? siteConfig.avatarFocused : siteConfig.avatar;
+                  return avatarSrc ? (
+                    <Image
+                      src={avatarSrc}
+                      alt={siteConfig.name}
+                      width={40}
+                      height={40}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-sm font-medium text-white">
+                      {siteConfig.name.charAt(0)}
+                    </span>
+                  );
+                })()}
+              </button>
+              <div>
+                <h1 className="text-base font-semibold text-gray-900">{siteConfig.name}</h1>
+                <p className="text-sm text-gray-500">{siteConfig.title}</p>
+              </div>
+            </div>
+          </div>
 
           {/* Tabs */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-base mb-6">
+          <div className="ml-[52px] md:ml-0 flex flex-wrap items-center gap-x-3 md:gap-x-4 gap-y-1 text-[15px] md:text-base mb-6">
             {mainTabs.map((tab) => (
               <button
                 key={tab.key}
@@ -379,9 +535,26 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             position="right"
             thumbHeight={30}
             thumbWidth={2}
+            contentClassName="pl-[52px] md:pl-0"
             contentRef={contentListRef}
             onContentRefChange={handleContentListRef}
           >
+            {hasSelection && selectedDetailContent && (
+              <div className="md:hidden pb-8">
+                <button
+                  type="button"
+                  onClick={handleClearSelection}
+                  aria-label="Back to list"
+                  className="mb-6 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-900 transition-colors"
+                >
+                  <span aria-hidden="true">←</span>
+                  Back to list
+                </button>
+                {selectedDetailContent}
+              </div>
+            )}
+
+            <div className={hasSelection ? 'hidden md:block' : ''}>
             {activeTab === 'projects' && content.projects.map((project) => {
               const isSelected = selectedProject?.id === project.id;
               return (
@@ -510,6 +683,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                 </div>
               );
             })()}
+            </div>
           </CustomScrollbar>
 
           {/* Now Playing & Contact - Desktop only, pinned to bottom */}
@@ -784,31 +958,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       </div>
 
       {/* Mobile Bottom Section */}
-      <div className="md:hidden mt-auto pt-6">
+      <div className={`md:hidden mt-auto pt-6 ${hasSelection ? 'hidden' : ''}`}>
         <div className="flex flex-col gap-4">
-          {/* Avatar */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 overflow-hidden">
-              {siteConfig.avatar ? (
-                <Image
-                  src={siteConfig.avatar}
-                  alt={siteConfig.name}
-                  width={40}
-                  height={40}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="text-sm font-medium text-white">
-                  {siteConfig.name.charAt(0)}
-                </span>
-              )}
-            </div>
-            <div>
-              <h1 className="text-base font-semibold text-gray-900">{siteConfig.name}</h1>
-              <p className="text-sm text-gray-500">{siteConfig.title}</p>
-            </div>
-          </div>
-
           {/* Now Playing */}
           <div className="flex items-center gap-3">
             <NowPlayingImage data={nowPlayingData} />
@@ -834,7 +985,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Social links */}
-          <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+          <div className="pl-[52px] flex flex-wrap gap-x-4 gap-y-2 text-sm">
             <a href={siteConfig.social.twitter} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">Twitter</a>
             <a href={siteConfig.social.github} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">GitHub</a>
             <a href={siteConfig.social.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">LinkedIn</a>
