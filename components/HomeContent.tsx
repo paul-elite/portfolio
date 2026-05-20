@@ -15,14 +15,75 @@ import {
 import { useNowPlaying, NowPlayingContent, NowPlayingImage } from './NowPlaying';
 import CustomScrollbar from './CustomScrollbar';
 
-function getGitHubUsername(url: string): string | null {
-  const match = url.match(/github\.com\/([^\/]+)/);
-  return match ? match[1] : null;
-}
-
 function getYouTubeId(url: string) {
   const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
   return match ? match[1] : null;
+}
+
+const contactCardBorderStyle = {
+  boxShadow: '0 0 0 0.5px rgb(0 0 0 / 10%)',
+};
+
+type ContactIconName = 'twitter' | 'github' | 'linkedin' | 'behance' | 'instagram' | 'email';
+
+function ContactIcon({ name }: { name: ContactIconName }) {
+  const iconClassName = name === 'email' ? 'h-4 w-4 text-white' : 'h-4 w-4 text-gray-700';
+
+  if (name === 'twitter') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className={iconClassName} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 4l16 16" />
+        <path d="M20 4L4 20" />
+      </svg>
+    );
+  }
+
+  if (name === 'github') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className={iconClassName} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 19c-4 1.5-4-2-5-2.5" />
+        <path d="M15 22v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.1-1.5 6.1-6.7a5.2 5.2 0 0 0-1.4-3.6 4.8 4.8 0 0 0-.1-3.6s-1.1-.3-3.6 1.4a12.4 12.4 0 0 0-6.4 0C6.2.3 5.1.6 5.1.6A4.8 4.8 0 0 0 5 4.2a5.2 5.2 0 0 0-1.4 3.6c0 5.2 3.1 6.4 6.1 6.7a3.4 3.4 0 0 0-.9 2.6V22" />
+      </svg>
+    );
+  }
+
+  if (name === 'linkedin') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className={iconClassName} fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M16 8a6 6 0 0 1 6 6v6h-4v-6a2 2 0 0 0-4 0v6h-4v-12h4v1.4A4.9 4.9 0 0 1 16 8z" />
+        <path d="M2 9h4v11H2z" />
+        <circle cx="4" cy="4" r="2" />
+      </svg>
+    );
+  }
+
+  if (name === 'behance') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className={iconClassName} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 6h6.2c2 0 3.2 1.1 3.2 2.8 0 1.1-.6 2-1.6 2.4 1.4.4 2.2 1.4 2.2 2.8 0 1.9-1.4 3.1-3.7 3.1H3z" />
+        <path d="M3 11.2h6" />
+        <path d="M16 8.5h5" />
+        <path d="M15.3 14h6.5c0-2.2-1.2-3.7-3.2-3.7-2.1 0-3.5 1.6-3.5 3.6 0 2.2 1.4 3.8 3.8 3.8 1.2 0 2.1-.3 2.8-1" />
+      </svg>
+    );
+  }
+
+  if (name === 'instagram') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className={iconClassName} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="5" />
+        <circle cx="12" cy="12" r="4" />
+        <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={iconClassName} fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 6h16v12H4z" />
+      <path d="M4 7l8 6 8-6" />
+    </svg>
+  );
 }
 
 interface HomeContentProps {
@@ -38,15 +99,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const [selectedWriting, setSelectedWriting] = useState<Writing | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<IllustrationCategory | null>(null);
   const [activeVideo, setActiveVideo] = useState<Illustration | null>(null);
-  const [githubHovered, setGithubHovered] = useState(false);
-  const [githubMousePos, setGithubMousePos] = useState({ x: 0, y: 0 });
   const [showMoreTabs, setShowMoreTabs] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
+  const [contactHovered, setContactHovered] = useState(false);
   const [previewImageIndex, setPreviewImageIndex] = useState(0);
-  const [hoveredSocial, setHoveredSocial] = useState<string | null>(null);
-  const [socialMousePos, setSocialMousePos] = useState({ x: 0, y: 0 });
   const [contentAnimationKey, setContentAnimationKey] = useState<string | null>(null);
-  const githubRef = useRef<HTMLAnchorElement>(null);
-  const socialRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
   const avatarContainerRef = useRef<HTMLDivElement>(null);
   const contentListRef = useRef<HTMLDivElement>(null);
   const [contentListReady, setContentListReady] = useState(false);
@@ -188,14 +245,55 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
   // Track if anything is selected to fade other elements
   const hasSelection = selectedProject !== null || selectedWriting !== null || selectedCategory !== null;
+  const contactVisible = contactOpen || contactHovered;
 
   const moreTabs = SECONDARY_PORTFOLIO_TABS;
+  const contactItems: { name: ContactIconName; label: string; href: string }[] = [
+    { name: 'twitter', label: 'Twitter', href: siteConfig.social.twitter },
+    { name: 'github', label: 'GitHub', href: siteConfig.social.github },
+    { name: 'linkedin', label: 'LinkedIn', href: siteConfig.social.linkedin },
+    { name: 'behance', label: 'Behance', href: siteConfig.social.behance },
+    { name: 'instagram', label: 'Instagram', href: siteConfig.social.instagram },
+  ];
+  const contactLinks = (
+    <>
+      {contactItems.map((item) => (
+        <a
+          key={item.name}
+          href={item.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => {
+            setContactOpen(false);
+            setContactHovered(false);
+          }}
+          className="flex items-center gap-3 border-b border-gray-200 py-3 text-base font-normal text-gray-800 transition-colors last:border-b-0 hover:text-gray-950"
+        >
+          <ContactIcon name={item.name} />
+          <span>{item.label}</span>
+        </a>
+      ))}
+      <a
+        href={`mailto:${siteConfig.social.email}`}
+        onClick={() => {
+          setContactOpen(false);
+          setContactHovered(false);
+        }}
+        className="mt-2 flex items-center justify-center gap-3 rounded-full bg-black px-4 py-3 text-base font-normal text-white transition-colors hover:bg-gray-800"
+      >
+        <ContactIcon name="email" />
+        <span>send me an email</span>
+      </a>
+    </>
+  );
   const selectedDetailContent = selectedProject ? (
     <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
-      <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedProject.title}</h2>
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-400 mb-6">
-        {selectedProject.year && <span>{selectedProject.year}</span>}
-        {selectedProject.role && <span>{selectedProject.role}</span>}
+      <div className="sticky top-0 z-20 -mx-1 mb-6 bg-background px-1 py-3">
+        <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedProject.title}</h2>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-400">
+          {selectedProject.year && <span>{selectedProject.year}</span>}
+          {selectedProject.role && <span>{selectedProject.role}</span>}
+        </div>
       </div>
 
       {selectedProject.blocks && selectedProject.blocks.length > 0 ? (
@@ -238,17 +336,19 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     </div>
   ) : selectedWriting ? (
     <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
-      <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedWriting.title}</h2>
-      <div className="flex gap-4 text-sm text-gray-400 mb-6">
-        {selectedWriting.date && (
-          <span>
-            {new Date(selectedWriting.date).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </span>
-        )}
+      <div className="sticky top-0 z-20 -mx-1 mb-6 bg-background px-1 py-3">
+        <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedWriting.title}</h2>
+        <div className="flex gap-4 text-sm text-gray-400">
+          {selectedWriting.date && (
+            <span>
+              {new Date(selectedWriting.date).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </span>
+          )}
+        </div>
       </div>
 
       {selectedWriting.cover && (
@@ -332,7 +432,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   ) : null;
 
   return (
-    <div className="portfolio-home h-screen flex flex-col pt-16 pb-4 md:pt-32 md:pb-8 pl-2 pr-3 md:px-6">
+    <div className="portfolio-home h-full max-h-dvh flex flex-col overflow-hidden pt-12 pb-5 md:pt-24 md:pb-6 pl-2 pr-3 md:px-6">
       {/* Main content area */}
       <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6 min-h-0 overflow-visible">
         {/* Avatar Column */}
@@ -446,7 +546,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         {/* Left Content Column - Fixed at 100vh */}
         <div className="flex-1 md:col-span-3 flex flex-col min-w-0 h-full overflow-visible">
           {/* Identity */}
-          <div className={`hidden md:block h-auto md:h-14 mb-6 md:mb-4 transition-opacity ${hasSelection ? 'opacity-60' : ''}`}>
+          <div className={`hidden md:block h-auto mb-6 transition-opacity ${hasSelection ? 'opacity-60' : ''}`}>
             <h1 className="text-base font-semibold text-gray-900">
               {siteConfig.name}
             </h1>
@@ -485,7 +585,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
 
           {/* Tabs */}
-          <div className="ml-[52px] md:ml-0 flex flex-wrap items-center gap-x-3 md:gap-x-4 gap-y-1 text-[15px] md:text-base mb-6">
+          <div className="portfolio-tabs ml-[52px] md:ml-0 flex flex-wrap items-center gap-x-3 md:gap-x-4 gap-y-1 text-sm mb-6">
             {mainTabs.map((tab) => (
               <button
                 key={tab.key}
@@ -686,113 +786,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             </div>
           </CustomScrollbar>
 
-          {/* Now Playing & Contact - Desktop only, pinned to bottom */}
+          {/* Now Playing - Desktop only, pinned to bottom */}
           <div className={`hidden md:block flex-shrink-0 mt-auto pt-4 transition-opacity overflow-visible z-50 ${hasSelection ? 'opacity-30' : ''}`}>
             <div className={`overflow-visible ${activeTab === 'illustration' ? 'w-full md:w-[calc(166%+1.5rem)]' : ''}`}>
               <NowPlayingContent data={nowPlayingData} />
             </div>
-
-            {/* Contact */}
-            <footer className="pt-4">
-            <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-              {/* Twitter */}
-              <div className="relative inline-block">
-                <a ref={(el) => { socialRefs.current.twitter = el; }} href={siteConfig.social.twitter} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors"
-                  onMouseEnter={() => setHoveredSocial('twitter')}
-                  onMouseLeave={() => { setHoveredSocial(null); setSocialMousePos({ x: 0, y: 0 }); }}
-                  onMouseMove={(e) => { const ref = socialRefs.current.twitter; if (!ref) return; const rect = ref.getBoundingClientRect(); setSocialMousePos({ x: (e.clientX - rect.left - rect.width / 2) * 0.1, y: (e.clientY - rect.top - rect.height / 2) * 0.1 }); }}
-                >Twitter</a>
-                {hoveredSocial === 'twitter' && siteConfig.socialImages?.twitter && (
-                  <div className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none" style={{ transform: `translateX(-50%) translate(${socialMousePos.x}px, ${socialMousePos.y}px)` }}>
-                    <div className="bg-white rounded-lg shadow-lg p-2 border border-gray-100">
-                      <Image src={siteConfig.socialImages.twitter} alt="Twitter preview" width={200} height={150} className="w-48 h-auto rounded" />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* GitHub */}
-              <div className="relative inline-block">
-                <a ref={githubRef} href={siteConfig.social.github} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors"
-                  onMouseEnter={() => setGithubHovered(true)}
-                  onMouseLeave={() => { setGithubHovered(false); setGithubMousePos({ x: 0, y: 0 }); }}
-                  onMouseMove={(e) => { if (!githubRef.current) return; const rect = githubRef.current.getBoundingClientRect(); setGithubMousePos({ x: (e.clientX - rect.left - rect.width / 2) * 0.1, y: (e.clientY - rect.top - rect.height / 2) * 0.1 }); }}
-                >GitHub</a>
-                {githubHovered && getGitHubUsername(siteConfig.social.github) && (
-                  <div className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none" style={{ transform: `translateX(-50%) translate(${githubMousePos.x}px, ${githubMousePos.y}px)` }}>
-                    <div className="bg-white rounded-lg shadow-lg p-3 border border-gray-100">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={`https://ghchart.rshah.org/${getGitHubUsername(siteConfig.social.github)}`} alt="GitHub Contributions" className="w-64 h-auto" />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* LinkedIn */}
-              <div className="relative inline-block">
-                <a ref={(el) => { socialRefs.current.linkedin = el; }} href={siteConfig.social.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors"
-                  onMouseEnter={() => setHoveredSocial('linkedin')}
-                  onMouseLeave={() => { setHoveredSocial(null); setSocialMousePos({ x: 0, y: 0 }); }}
-                  onMouseMove={(e) => { const ref = socialRefs.current.linkedin; if (!ref) return; const rect = ref.getBoundingClientRect(); setSocialMousePos({ x: (e.clientX - rect.left - rect.width / 2) * 0.1, y: (e.clientY - rect.top - rect.height / 2) * 0.1 }); }}
-                >LinkedIn</a>
-                {hoveredSocial === 'linkedin' && siteConfig.socialImages?.linkedin && (
-                  <div className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none" style={{ transform: `translateX(-50%) translate(${socialMousePos.x}px, ${socialMousePos.y}px)` }}>
-                    <div className="bg-white rounded-lg shadow-lg p-2 border border-gray-100">
-                      <Image src={siteConfig.socialImages.linkedin} alt="LinkedIn preview" width={200} height={150} className="w-48 h-auto rounded" />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Behance */}
-              <div className="relative inline-block">
-                <a ref={(el) => { socialRefs.current.behance = el; }} href={siteConfig.social.behance} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors"
-                  onMouseEnter={() => setHoveredSocial('behance')}
-                  onMouseLeave={() => { setHoveredSocial(null); setSocialMousePos({ x: 0, y: 0 }); }}
-                  onMouseMove={(e) => { const ref = socialRefs.current.behance; if (!ref) return; const rect = ref.getBoundingClientRect(); setSocialMousePos({ x: (e.clientX - rect.left - rect.width / 2) * 0.1, y: (e.clientY - rect.top - rect.height / 2) * 0.1 }); }}
-                >Behance</a>
-                {hoveredSocial === 'behance' && siteConfig.socialImages?.behance && (
-                  <div className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none" style={{ transform: `translateX(-50%) translate(${socialMousePos.x}px, ${socialMousePos.y}px)` }}>
-                    <div className="bg-white rounded-lg shadow-lg p-2 border border-gray-100">
-                      <Image src={siteConfig.socialImages.behance} alt="Behance preview" width={200} height={150} className="w-48 h-auto rounded" />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Instagram */}
-              <div className="relative inline-block">
-                <a ref={(el) => { socialRefs.current.instagram = el; }} href={siteConfig.social.instagram} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors"
-                  onMouseEnter={() => setHoveredSocial('instagram')}
-                  onMouseLeave={() => { setHoveredSocial(null); setSocialMousePos({ x: 0, y: 0 }); }}
-                  onMouseMove={(e) => { const ref = socialRefs.current.instagram; if (!ref) return; const rect = ref.getBoundingClientRect(); setSocialMousePos({ x: (e.clientX - rect.left - rect.width / 2) * 0.1, y: (e.clientY - rect.top - rect.height / 2) * 0.1 }); }}
-                >Instagram</a>
-                {hoveredSocial === 'instagram' && siteConfig.socialImages?.instagram && (
-                  <div className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none" style={{ transform: `translateX(-50%) translate(${socialMousePos.x}px, ${socialMousePos.y}px)` }}>
-                    <div className="bg-white rounded-lg shadow-lg p-2 border border-gray-100">
-                      <Image src={siteConfig.socialImages.instagram} alt="Instagram preview" width={200} height={150} className="w-48 h-auto rounded" />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Email */}
-              <div className="relative inline-block">
-                <a ref={(el) => { socialRefs.current.email = el; }} href={`mailto:${siteConfig.social.email}`} className="text-gray-400 hover:text-gray-900 transition-colors"
-                  onMouseEnter={() => setHoveredSocial('email')}
-                  onMouseLeave={() => { setHoveredSocial(null); setSocialMousePos({ x: 0, y: 0 }); }}
-                  onMouseMove={(e) => { const ref = socialRefs.current.email; if (!ref) return; const rect = ref.getBoundingClientRect(); setSocialMousePos({ x: (e.clientX - rect.left - rect.width / 2) * 0.1, y: (e.clientY - rect.top - rect.height / 2) * 0.1 }); }}
-                >Email</a>
-                {hoveredSocial === 'email' && siteConfig.socialImages?.email && (
-                  <div className="absolute bottom-full left-1/2 mb-3 z-50 transition-transform duration-75 ease-out pointer-events-none" style={{ transform: `translateX(-50%) translate(${socialMousePos.x}px, ${socialMousePos.y}px)` }}>
-                    <div className="bg-white rounded-lg shadow-lg p-2 border border-gray-100">
-                      <Image src={siteConfig.socialImages.email} alt="Email preview" width={200} height={150} className="w-48 h-auto rounded" />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-            </footer>
           </div>
         </div>
 
@@ -983,17 +981,47 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               )}
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Social links */}
-          <div className="pl-[52px] flex flex-wrap gap-x-4 gap-y-2 text-sm">
-            <a href={siteConfig.social.twitter} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">Twitter</a>
-            <a href={siteConfig.social.github} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">GitHub</a>
-            <a href={siteConfig.social.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">LinkedIn</a>
-            <a href={siteConfig.social.behance} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">Behance</a>
-            <a href={siteConfig.social.instagram} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">Instagram</a>
-            <a href={`mailto:${siteConfig.social.email}`} className="text-gray-400 hover:text-gray-900 transition-colors">Email</a>
+      {/* Floating Contact */}
+      <div
+        className="fixed bottom-4 right-4 z-[9999] md:bottom-6 md:right-6"
+        onMouseEnter={() => setContactHovered(true)}
+        onMouseLeave={() => setContactHovered(false)}
+      >
+        <div
+          style={contactCardBorderStyle}
+          className={`absolute bottom-full right-0 mb-3 w-72 rounded-[20px] bg-white p-5 transition-all duration-150 ${
+            contactVisible
+              ? 'translate-y-0 scale-100 opacity-100 pointer-events-auto'
+              : 'translate-y-2 scale-95 opacity-0 pointer-events-none'
+          }`}
+        >
+          <div className="flex flex-col">
+            {contactLinks}
           </div>
         </div>
+        <button
+          type="button"
+          onClick={() => setContactOpen((open) => !open)}
+          aria-expanded={contactVisible}
+          aria-label="Open contact links"
+          style={contactCardBorderStyle}
+          className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-white/95 py-1.5 pl-2 pr-4 text-sm font-medium text-gray-900 backdrop-blur transition-colors hover:bg-gray-50"
+        >
+          <span className="relative block h-6 w-6 overflow-hidden rounded-full bg-gray-100">
+            <Image
+              src="/chat-icon.jpg"
+              alt=""
+              fill
+              sizes="24px"
+              className="object-cover"
+              priority
+            />
+          </span>
+          <span>Contact</span>
+        </button>
       </div>
 
       {/* Hover Preview - Centered on screen */}
