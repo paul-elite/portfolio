@@ -740,46 +740,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   });
   const projectAvatarButtons = renderProjectAvatarButtons({ showInactive: false, keyPrefix: 'desktop-project-avatar' });
   const mobileProjectAvatarButtons = renderProjectAvatarButtons({ showInactive: true, keyPrefix: 'mobile-project-avatar' });
-  const musicAvatar = nowPlayingData?.songUrl ? (
-    <a
-      href={nowPlayingData.songUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={`block transition-all duration-150 ${nowPlayingData?.isPlaying ? 'opacity-100 scale-100' : 'opacity-55 scale-95'}`}
-      aria-label={nowPlayingData?.isPlaying ? `Open ${nowPlayingData.title || 'current track'}` : 'Open music'}
-    >
-      <NowPlayingImage data={nowPlayingData} useAlbumArt />
-    </a>
-  ) : (
-    <span
-      className={`block transition-all duration-150 ${nowPlayingData?.isPlaying ? 'opacity-100 scale-100' : 'opacity-55 scale-95'}`}
-      aria-label="Music"
-    >
-      <NowPlayingImage data={nowPlayingData} useAlbumArt />
-    </span>
-  );
   const mobileAvatarRail = (
     <div className="-ml-[52px] sticky top-0 flex max-h-[calc(100dvh-8rem)] w-10 shrink-0 flex-col items-end overflow-y-auto overscroll-contain hide-scrollbar [touch-action:pan-y]">
-      <div className="flex h-[60px] items-center justify-end py-3">
-        <button
-          type="button"
-          onClick={openSettings}
-          aria-pressed={showSettingsDetail}
-          aria-label="Customize experience"
-          className={`inline-grid h-10 w-10 place-items-center rounded-full bg-[var(--experience-card)] text-[var(--experience-text)] backdrop-blur transition-all duration-150 hover:bg-[var(--experience-surface)] ${
-            showSettingsDetail ? 'opacity-100 scale-100 ring-2 ring-[var(--experience-accent)]/25' : 'opacity-45 scale-95'
-          }`}
-          style={{ boxShadow: '0 0 0 0.5px var(--experience-border)' }}
-        >
-          <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--experience-accent-soft)] text-[var(--experience-accent)]">
-            <SettingsIcon />
-          </span>
-        </button>
-      </div>
       {mobileProjectAvatarButtons}
-      <div className="flex h-[60px] items-center justify-end py-3">
-        {musicAvatar}
-      </div>
     </div>
   );
 
@@ -1234,7 +1197,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       </div>
 
       {/* Mobile Bottom Section */}
-      <div className={`md:hidden mt-auto pt-6 ${hasDetailContent ? 'hidden' : ''}`}>
+      <div className="md:hidden mt-auto pt-6">
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
             {settingsTrigger}
@@ -1242,25 +1205,27 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           {/* Now Playing */}
           <div className="flex items-center gap-3">
             <NowPlayingImage data={nowPlayingData} useAlbumArt />
-            <div className="min-w-0">
-              {nowPlayingData?.isPlaying ? (
-                <>
-                  <a href={nowPlayingData.songUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors truncate block">
-                    {nowPlayingData.title}
-                  </a>
-                  <p className="text-sm text-gray-400 truncate">{nowPlayingData.artist}</p>
-                </>
-              ) : (
-                <>
-                  <p className="text-sm text-gray-900">Not listening right now</p>
-                  {nowPlayingData?.lastPlayed ? (
-                    <p className="text-sm text-gray-400 truncate">last: {nowPlayingData.lastPlayed.title}</p>
-                  ) : (
-                    <p className="text-sm text-gray-400">check again shortly</p>
-                  )}
-                </>
-              )}
-            </div>
+            {!hasDetailContent && (
+              <div className="min-w-0">
+                {nowPlayingData?.isPlaying ? (
+                  <>
+                    <a href={nowPlayingData.songUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors truncate block">
+                      {nowPlayingData.title}
+                    </a>
+                    <p className="text-sm text-gray-400 truncate">{nowPlayingData.artist}</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-gray-900">Not listening right now</p>
+                    {nowPlayingData?.lastPlayed ? (
+                      <p className="text-sm text-gray-400 truncate">last: {nowPlayingData.lastPlayed.title}</p>
+                    ) : (
+                      <p className="text-sm text-gray-400">check again shortly</p>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
