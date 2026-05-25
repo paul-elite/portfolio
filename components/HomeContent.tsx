@@ -747,7 +747,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   );
 
   return (
-    <div className="portfolio-home relative h-full max-h-dvh flex flex-col overflow-hidden pt-12 pb-5 md:pt-24 md:pb-6 pl-2 pr-3 md:px-6">
+    <div className="portfolio-home relative h-full max-h-dvh flex flex-col overflow-hidden p-0 md:pt-24 md:pb-6 md:px-6">
       {/* Main content area */}
       <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6 min-h-0 overflow-visible">
         {/* Avatar Column */}
@@ -1249,13 +1249,15 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           setContactHovered(false);
         }}
         className={`fixed inset-0 z-[9998] bg-[#a3a3a3]/[0.33] backdrop-blur-[4px] transition-opacity duration-150 md:hidden ${
-          contactVisible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
+          contactVisible && !hasDetailContent ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
         }`}
       />
 
       {/* Floating Contact */}
       <div
-        className="fixed bottom-4 right-4 z-[9999] md:bottom-6 md:right-6"
+        className={`fixed bottom-4 right-4 z-[9999] transition-opacity md:bottom-6 md:right-6 ${
+          hasDetailContent ? 'pointer-events-none opacity-0 md:pointer-events-auto md:opacity-100' : 'opacity-100'
+        }`}
         onMouseEnter={() => setContactHovered(true)}
         onMouseLeave={() => setContactHovered(false)}
       >
