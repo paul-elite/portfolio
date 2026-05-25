@@ -874,9 +874,33 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             />
           )}
 
+          {hasDetailContent && (settingsDetailContent || selectedDetailContent) && (
+            <div className="md:hidden flex-1 min-h-0 overflow-y-auto overscroll-contain hide-scrollbar [touch-action:pan-y] pl-[52px] pb-8">
+              <div className="flex items-start gap-3">
+                {mobileAvatarRail}
+                <div className="min-w-0 flex-1">
+                  {showSettingsDetail ? settingsDetailContent : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleClearSelection}
+                        aria-label="Back to list"
+                        className="mb-6 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-900 transition-colors"
+                      >
+                        <span aria-hidden="true">←</span>
+                        Back to list
+                      </button>
+                      {selectedDetailContent}
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Content List */}
           <CustomScrollbar
-            className="flex-1 min-h-0"
+            className={`flex-1 min-h-0 ${hasDetailContent ? 'hidden md:block' : ''}`}
             position="right"
             thumbHeight={30}
             thumbWidth={2}
