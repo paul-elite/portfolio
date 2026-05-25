@@ -741,7 +741,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const projectAvatarButtons = renderProjectAvatarButtons({ showInactive: false, keyPrefix: 'desktop-project-avatar' });
   const mobileProjectAvatarButtons = renderProjectAvatarButtons({ showInactive: true, keyPrefix: 'mobile-project-avatar' });
   const mobileAvatarRail = (
-    <div className="-ml-[52px] sticky top-0 flex max-h-[calc(100dvh-8rem)] w-10 shrink-0 flex-col items-end overflow-y-auto overscroll-contain hide-scrollbar [touch-action:pan-y]">
+    <div className="-ml-[52px] sticky top-0 flex max-h-dvh w-10 shrink-0 flex-col items-end overflow-y-auto overscroll-contain hide-scrollbar [touch-action:pan-y]">
       {mobileProjectAvatarButtons}
     </div>
   );
@@ -872,30 +872,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               onChange={handleTabChange}
               radialTrigger={radialTrigger}
             />
-          )}
-
-          {hasDetailContent && (settingsDetailContent || selectedDetailContent) && (
-            <div className="md:hidden flex-1 min-h-0 overflow-y-auto overscroll-contain hide-scrollbar [touch-action:pan-y] pl-[52px]">
-              <div className="flex items-start gap-3">
-                {mobileAvatarRail}
-                <div className="min-w-0 flex-1">
-                  {showSettingsDetail ? settingsDetailContent : (
-                    <>
-                      <button
-                        type="button"
-                        onClick={handleClearSelection}
-                        aria-label="Back to list"
-                        className="mb-6 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-900 transition-colors"
-                      >
-                        <span aria-hidden="true">←</span>
-                        Back to list
-                      </button>
-                      {selectedDetailContent}
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
           )}
 
           {/* Content List */}
@@ -1196,6 +1172,30 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         </div>
       </div>
 
+      {hasDetailContent && (settingsDetailContent || selectedDetailContent) && (
+        <div className="fixed inset-0 z-30 overflow-y-auto overscroll-contain hide-scrollbar [touch-action:pan-y] pl-[52px] md:hidden">
+          <div className="flex min-h-dvh items-start gap-3">
+            {mobileAvatarRail}
+            <div className="min-w-0 flex-1">
+              {showSettingsDetail ? settingsDetailContent : (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleClearSelection}
+                    aria-label="Back to list"
+                    className="mb-6 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-900 transition-colors"
+                  >
+                    <span aria-hidden="true">←</span>
+                    Back to list
+                  </button>
+                  {selectedDetailContent}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Mobile Bottom Section */}
       <div className={`md:hidden ${hasDetailContent ? 'absolute bottom-5 left-2 right-3 z-40 pt-0' : 'shrink-0 pt-4'}`}>
         <div className="flex flex-col gap-4">
@@ -1249,15 +1249,13 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           setContactHovered(false);
         }}
         className={`fixed inset-0 z-[9998] bg-[#a3a3a3]/[0.33] backdrop-blur-[4px] transition-opacity duration-150 md:hidden ${
-          contactVisible && !hasDetailContent ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
+          contactVisible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
         }`}
       />
 
       {/* Floating Contact */}
       <div
-        className={`fixed bottom-4 right-4 z-[9999] transition-opacity md:bottom-6 md:right-6 ${
-          hasDetailContent ? 'pointer-events-none opacity-0 md:pointer-events-auto md:opacity-100' : 'opacity-100'
-        }`}
+        className="fixed bottom-4 right-4 z-[9999] md:bottom-6 md:right-6"
         onMouseEnter={() => setContactHovered(true)}
         onMouseLeave={() => setContactHovered(false)}
       >
