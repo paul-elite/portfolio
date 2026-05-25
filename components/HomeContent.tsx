@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { AnimatePresence, motion } from 'framer-motion';
 import OptimizedImage from './OptimizedImage';
 import ContentBlocks from './content/ContentBlocks';
 import type { Illustration, IllustrationCategory, PortfolioContent, Project, SiteConfig, Writing } from '@/lib/content-model';
@@ -433,6 +434,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const hasSelection = selectedProject !== null || selectedWriting !== null || selectedCategory !== null;
   const hasDetailContent = hasSelection || showSettingsDetail;
   const contactVisible = contactOpen || contactHovered;
+  const mobileDetailTitle = showSettingsDetail
+    ? 'Customize'
+    : selectedProject?.title || selectedWriting?.title || ILLUSTRATION_CATEGORIES.find((category) => category.key === selectedCategory)?.label || 'Details';
 
   const moreTabs = SECONDARY_PORTFOLIO_TABS;
   const radialTabs = [...mainTabs, ...moreTabs];
@@ -463,6 +467,24 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     { name: 'behance', label: 'Behance', href: siteConfig.social.behance },
     { name: 'instagram', label: 'Instagram', href: siteConfig.social.instagram },
   ];
+
+  useEffect(() => {
+    if (!hasDetailContent || typeof window === 'undefined') return;
+
+    const media = window.matchMedia('(max-width: 767px)');
+    if (!media.matches) return;
+
+    const bodyOverflow = document.body.style.overflow;
+    const htmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = bodyOverflow;
+      document.documentElement.style.overflow = htmlOverflow;
+    };
+  }, [hasDetailContent]);
   const contactLinks = (
     <>
       {contactItems.map((item) => (
@@ -496,7 +518,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   );
   const selectedDetailContent = selectedProject ? (
     <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
-      <div className="sticky top-0 z-20 -mx-1 mb-6 bg-background px-1 py-3">
+      <div className="hidden md:sticky md:top-0 md:z-20 md:-mx-1 md:mb-6 md:block md:bg-background md:px-1 md:py-3">
         <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedProject.title}</h2>
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-400">
           {selectedProject.year && <span>{selectedProject.year}</span>}
@@ -544,7 +566,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     </div>
   ) : selectedWriting ? (
     <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
-      <div className="sticky top-0 z-20 -mx-1 mb-6 bg-background px-1 py-3">
+      <div className="hidden md:sticky md:top-0 md:z-20 md:-mx-1 md:mb-6 md:block md:bg-background md:px-1 md:py-3">
         <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedWriting.title}</h2>
         <div className="flex gap-4 text-sm text-gray-400">
           {selectedWriting.date && (
@@ -593,7 +615,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     </div>
   ) : selectedCategory ? (
     <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">
+      <h2 className="hidden text-xl font-semibold text-gray-900 mb-6 md:block">
         {ILLUSTRATION_CATEGORIES.find(c => c.key === selectedCategory)?.label}
       </h2>
       <div className="grid grid-cols-2 gap-4">
@@ -1172,32 +1194,54 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         </div>
       </div>
 
-      {hasDetailContent && (settingsDetailContent || selectedDetailContent) && (
-        <div className="fixed inset-0 z-30 overflow-y-auto overscroll-contain hide-scrollbar [touch-action:pan-y] pl-[52px] md:hidden">
-          <div className="flex min-h-dvh items-start gap-3">
-            {mobileAvatarRail}
-            <div className="min-w-0 flex-1">
-              {showSettingsDetail ? settingsDetailContent : (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleClearSelection}
-                    aria-label="Back to list"
-                    className="mb-6 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-900 transition-colors"
-                  >
-                    <span aria-hidden="true">←</span>
-                    Back to list
-                  </button>
-                  {selectedDetailContent}
-                </>
-              )}
+      <AnimatePresence>
+        {hasDetailContent && (settingsDetailContent || selectedDetailContent) && (
+          <motion.div
+            className="mobile-detail-pane md:hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-label={mobileDetailTitle}
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div className="mobile-detail-inner">
+              <div className="mobile-detail-header">
+                <button
+                  type="button"
+                  onClick={handleClearSelection}
+                  aria-label="Close details"
+                  className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[var(--experience-surface)] text-[var(--experience-muted)] transition-colors hover:text-[var(--experience-text)]"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true">
+                    <path d="M4 4l8 8M12 4l-8 8" />
+                  </svg>
+                </button>
+                <h2 className="min-w-0 truncate text-base font-semibold text-[var(--experience-text)]">
+                  {mobileDetailTitle}
+                </h2>
+              </div>
+
+              <div className="mobile-detail-scroll">
+                <div className="flex min-h-full items-start gap-3">
+                  {mobileAvatarRail}
+                  <div className="min-w-0 flex-1 pb-8">
+                    {showSettingsDetail ? (
+                      <CustomizeExperienceContent />
+                    ) : (
+                      selectedDetailContent
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Mobile Bottom Section */}
-      <div className={`md:hidden ${hasDetailContent ? 'absolute bottom-5 left-2 right-3 z-40 pt-0' : 'shrink-0 pt-4'}`}>
+      <div className={`md:hidden ${hasDetailContent ? 'absolute bottom-5 left-2 right-3 z-[9020] pt-0' : 'shrink-0 pt-4'}`}>
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
             {settingsTrigger}
