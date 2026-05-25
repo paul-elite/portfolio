@@ -875,7 +875,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           )}
 
           {hasDetailContent && (settingsDetailContent || selectedDetailContent) && (
-            <div className="md:hidden flex-1 min-h-0 overflow-y-auto overscroll-contain hide-scrollbar [touch-action:pan-y] pl-[52px] pb-8">
+            <div className="md:hidden flex-1 min-h-0 overflow-y-auto overscroll-contain hide-scrollbar [touch-action:pan-y] pl-[52px] pt-1 pb-28">
               <div className="flex items-start gap-3">
                 {mobileAvatarRail}
                 <div className="min-w-0 flex-1">
@@ -908,30 +908,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             contentRef={contentListRef}
             onContentRefChange={handleContentListRef}
           >
-            {hasDetailContent && (settingsDetailContent || selectedDetailContent) && (
-              <div className="md:hidden pb-8">
-                <div className="flex items-start gap-3">
-                  {mobileAvatarRail}
-                  <div className="min-w-0 flex-1">
-                    {showSettingsDetail ? settingsDetailContent : (
-                      <>
-                    <button
-                      type="button"
-                      onClick={handleClearSelection}
-                      aria-label="Back to list"
-                      className="mb-6 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-900 transition-colors"
-                    >
-                      <span aria-hidden="true">←</span>
-                      Back to list
-                    </button>
-                    {selectedDetailContent}
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
             <div className={hasDetailContent ? 'hidden md:block' : ''}>
             {activeTab === 'projects' && (
               <ProjectBrowser
@@ -1221,7 +1197,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       </div>
 
       {/* Mobile Bottom Section */}
-      <div className="md:hidden mt-auto pt-6">
+      <div className="md:hidden shrink-0 pt-4">
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
             {settingsTrigger}
