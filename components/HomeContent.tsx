@@ -310,6 +310,19 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     updateURL({});
   }, [updateURL]);
 
+  const openSettings = useCallback(() => {
+    setSelectedProject(null);
+    setSelectedWriting(null);
+    setSelectedCategory(null);
+    setHoveredProject(null);
+    setShowMoreTabs(false);
+    setRadialPinned(false);
+    setPreviewImageIndex(0);
+    setContentAnimationKey(`settings-${Date.now()}`);
+    setShowSettingsDetail(true);
+    updateURL({});
+  }, [updateURL]);
+
   const positionRadialAtTrigger = useCallback(() => {
     const rect = radialTriggerRef.current?.getBoundingClientRect();
 
@@ -648,18 +661,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const settingsTrigger = (
     <button
       type="button"
-      onClick={() => {
-        setSelectedProject(null);
-        setSelectedWriting(null);
-        setSelectedCategory(null);
-        setHoveredProject(null);
-        setShowMoreTabs(false);
-        setRadialPinned(false);
-        setPreviewImageIndex(0);
-        setContentAnimationKey(`settings-${Date.now()}`);
-        setShowSettingsDetail(true);
-        updateURL({});
-      }}
+      onClick={openSettings}
       aria-pressed={showSettingsDetail}
       aria-label="Customize experience"
       className={`inline-grid h-10 w-10 place-items-center rounded-full bg-[var(--experience-card)] text-[var(--experience-text)] backdrop-blur transition-colors hover:bg-[var(--experience-surface)] ${
@@ -670,14 +672,20 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--experience-accent-soft)] text-[var(--experience-accent)]">
         <SettingsIcon />
       </span>
-    </button>
+      </button>
   );
   const settingsDetailContent = showSettingsDetail ? (
     <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
       <CustomizeExperienceContent onClose={handleClearSelection} />
     </div>
   ) : null;
-  const projectAvatarButtons = content.projects.map((project, index) => {
+  const renderProjectAvatarButtons = ({
+    showInactive,
+    keyPrefix,
+  }: {
+    showInactive: boolean;
+    keyPrefix: string;
+  }) => content.projects.map((project, index) => {
     const isActive = targetProjectIndex === index;
     const colors = [
       'from-blue-400 to-cyan-400',
@@ -689,10 +697,17 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     ];
     const colorClass = colors[index % colors.length];
     const visible = showSettingsDetail || isActive;
+    const stateClass = showInactive
+      ? isActive && activeTab === 'projects' && !showSettingsDetail
+        ? 'opacity-100 scale-100 ring-2 ring-[var(--experience-accent)]/25'
+        : 'opacity-45 scale-95'
+      : visible
+        ? 'opacity-100 scale-100'
+        : 'opacity-0 scale-75';
 
     return (
       <button
-        key={project.id}
+        key={`${keyPrefix}-${project.id}`}
         type="button"
         onClick={() => {
           setActiveTab('projects');
@@ -702,9 +717,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         aria-label={`Open ${project.title}`}
       >
         <span
-          className={`flex-shrink-0 transition-all duration-150 ${
-            visible ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
-          }`}
+          className={`flex-shrink-0 transition-all duration-150 ${stateClass}`}
         >
           {project.avatar ? (
             <AvatarImage
@@ -725,6 +738,50 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       </button>
     );
   });
+  const projectAvatarButtons = renderProjectAvatarButtons({ showInactive: false, keyPrefix: 'desktop-project-avatar' });
+  const mobileProjectAvatarButtons = renderProjectAvatarButtons({ showInactive: true, keyPrefix: 'mobile-project-avatar' });
+  const musicAvatar = nowPlayingData?.songUrl ? (
+    <a
+      href={nowPlayingData.songUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`block transition-all duration-150 ${nowPlayingData?.isPlaying ? 'opacity-100 scale-100' : 'opacity-55 scale-95'}`}
+      aria-label={nowPlayingData?.isPlaying ? `Open ${nowPlayingData.title || 'current track'}` : 'Open music'}
+    >
+      <NowPlayingImage data={nowPlayingData} useAlbumArt />
+    </a>
+  ) : (
+    <span
+      className={`block transition-all duration-150 ${nowPlayingData?.isPlaying ? 'opacity-100 scale-100' : 'opacity-55 scale-95'}`}
+      aria-label="Music"
+    >
+      <NowPlayingImage data={nowPlayingData} useAlbumArt />
+    </span>
+  );
+  const mobileAvatarRail = (
+    <div className="-ml-[52px] sticky top-0 flex max-h-[calc(100dvh-8rem)] w-10 shrink-0 flex-col items-end overflow-y-auto overscroll-contain hide-scrollbar [touch-action:pan-y]">
+      <div className="flex h-[60px] items-center justify-end py-3">
+        <button
+          type="button"
+          onClick={openSettings}
+          aria-pressed={showSettingsDetail}
+          aria-label="Customize experience"
+          className={`inline-grid h-10 w-10 place-items-center rounded-full bg-[var(--experience-card)] text-[var(--experience-text)] backdrop-blur transition-all duration-150 hover:bg-[var(--experience-surface)] ${
+            showSettingsDetail ? 'opacity-100 scale-100 ring-2 ring-[var(--experience-accent)]/25' : 'opacity-45 scale-95'
+          }`}
+          style={{ boxShadow: '0 0 0 0.5px var(--experience-border)' }}
+        >
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--experience-accent-soft)] text-[var(--experience-accent)]">
+            <SettingsIcon />
+          </span>
+        </button>
+      </div>
+      {mobileProjectAvatarButtons}
+      <div className="flex h-[60px] items-center justify-end py-3">
+        {musicAvatar}
+      </div>
+    </div>
+  );
 
   return (
     <div className="portfolio-home h-full max-h-dvh flex flex-col overflow-hidden pt-12 pb-5 md:pt-24 md:pb-6 pl-2 pr-3 md:px-6">
@@ -866,17 +923,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           >
             {hasDetailContent && (settingsDetailContent || selectedDetailContent) && (
               <div className="md:hidden pb-8">
-                {showSettingsDetail ? (
-                  <div className="flex items-start gap-3">
-                    <div className="-ml-[52px] sticky top-0 flex max-h-[calc(100dvh-8rem)] w-10 shrink-0 flex-col items-end overflow-y-auto overscroll-contain hide-scrollbar [touch-action:pan-y]">
-                      {projectAvatarButtons}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      {settingsDetailContent}
-                    </div>
-                  </div>
-                ) : (
-                  <>
+                <div className="flex items-start gap-3">
+                  {mobileAvatarRail}
+                  <div className="min-w-0 flex-1">
+                    {showSettingsDetail ? settingsDetailContent : (
+                      <>
                     <button
                       type="button"
                       onClick={handleClearSelection}
@@ -887,8 +938,10 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                       Back to list
                     </button>
                     {selectedDetailContent}
-                  </>
-                )}
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
