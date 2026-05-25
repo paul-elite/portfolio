@@ -1237,7 +1237,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="mobile-detail-scroll">
-              <div className="mobile-detail-content">
+              <div className={`mobile-detail-content ${showSettingsDetail ? 'mobile-detail-content--settings' : ''}`}>
                 {mobileAvatarRail}
                 <div className="min-w-0 flex-1">
                   <button
