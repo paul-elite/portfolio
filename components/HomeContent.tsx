@@ -762,8 +762,38 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   });
   const projectAvatarButtons = renderProjectAvatarButtons({ showInactive: false, keyPrefix: 'desktop-project-avatar' });
   const mobileProjectAvatarButtons = renderProjectAvatarButtons({ showInactive: true, keyPrefix: 'mobile-project-avatar' });
+  const mobileNameAvatar = (
+    <button
+      type="button"
+      onClick={handleClearSelection}
+      className="flex h-[60px] items-center justify-end py-3"
+      aria-label="Show all work"
+    >
+      <span className="flex-shrink-0 opacity-100 scale-100 transition-all duration-150">
+        {(() => {
+          const avatarSrc = hasDetailContent && avatarFocused ? avatarFocused : avatar;
+          return avatarSrc ? (
+            <AvatarImage
+              src={avatarSrc}
+              alt={siteConfig.name}
+              width={40}
+              height={40}
+              className="w-10 h-10 rounded-full object-cover"
+            />
+          ) : (
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-pink-400">
+              <span className="text-sm font-medium text-white">
+                {siteConfig.name.charAt(0)}
+              </span>
+            </span>
+          );
+        })()}
+      </span>
+    </button>
+  );
   const mobileAvatarRail = (
     <div className="-ml-[52px] sticky top-0 flex max-h-dvh w-10 shrink-0 flex-col items-end overflow-y-auto overscroll-contain hide-scrollbar [touch-action:pan-y]">
+      {mobileNameAvatar}
       {mobileProjectAvatarButtons}
     </div>
   );
