@@ -747,7 +747,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   );
 
   return (
-    <div className="portfolio-home h-full max-h-dvh flex flex-col overflow-hidden pt-12 pb-5 md:pt-24 md:pb-6 pl-2 pr-3 md:px-6">
+    <div className="portfolio-home relative h-full max-h-dvh flex flex-col overflow-hidden pt-12 pb-5 md:pt-24 md:pb-6 pl-2 pr-3 md:px-6">
       {/* Main content area */}
       <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6 min-h-0 overflow-visible">
         {/* Avatar Column */}
@@ -830,39 +830,39 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               <p className="text-base font-normal text-gray-500">{siteConfig.title}</p>
             </div>
           )}
-          <div className={`md:hidden mb-6 transition-opacity ${hasDetailContent ? 'opacity-60' : ''}`}>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={handleClearSelection}
-                className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 overflow-hidden"
-                aria-label="Show all work"
-              >
-                {(() => {
-                  const avatarSrc = hasDetailContent && avatarFocused ? avatarFocused : avatar;
-                  return avatarSrc ? (
-                    <AvatarImage
-                      src={avatarSrc}
-                      alt={siteConfig.name}
-                      width={40}
-                      height={40}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-sm font-medium text-white">
-                      {siteConfig.name.charAt(0)}
-                    </span>
-                  );
-                })()}
-              </button>
-              {!showSettingsDetail && (
+          {!hasDetailContent && (
+            <div className="md:hidden mb-6 transition-opacity">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleClearSelection}
+                  className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 overflow-hidden"
+                  aria-label="Show all work"
+                >
+                  {(() => {
+                    const avatarSrc = avatar;
+                    return avatarSrc ? (
+                      <AvatarImage
+                        src={avatarSrc}
+                        alt={siteConfig.name}
+                        width={40}
+                        height={40}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-sm font-medium text-white">
+                        {siteConfig.name.charAt(0)}
+                      </span>
+                    );
+                  })()}
+                </button>
                 <div>
                   <h1 className="text-base font-semibold text-gray-900">{siteConfig.name}</h1>
                   <p className="text-sm text-gray-500">{siteConfig.title}</p>
                 </div>
-              )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Tabs */}
           {!showSettingsDetail && (
@@ -875,7 +875,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           )}
 
           {hasDetailContent && (settingsDetailContent || selectedDetailContent) && (
-            <div className="md:hidden flex-1 min-h-0 overflow-y-auto overscroll-contain hide-scrollbar [touch-action:pan-y] pl-[52px] pt-1 pb-28">
+            <div className="md:hidden flex-1 min-h-0 overflow-y-auto overscroll-contain hide-scrollbar [touch-action:pan-y] pl-[52px]">
               <div className="flex items-start gap-3">
                 {mobileAvatarRail}
                 <div className="min-w-0 flex-1">
@@ -1197,7 +1197,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       </div>
 
       {/* Mobile Bottom Section */}
-      <div className="md:hidden shrink-0 pt-4">
+      <div className={`md:hidden ${hasDetailContent ? 'absolute bottom-5 left-2 right-3 z-40 pt-0' : 'shrink-0 pt-4'}`}>
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
             {settingsTrigger}
