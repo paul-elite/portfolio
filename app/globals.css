@@ -299,28 +299,9 @@ body {
   background: var(--experience-bg);
 }
 
-.mobile-detail-inner {
-  display: flex;
-  min-height: 100%;
-  height: 100%;
-  flex-direction: column;
-  padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
-  padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
-  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
-  padding-left: calc(52px + max(0.5rem, env(safe-area-inset-left, 0px)));
-}
-
-.mobile-detail-header {
-  display: flex;
-  min-height: 3rem;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 0.75rem;
-}
-
 .mobile-detail-scroll {
-  min-height: 0;
-  flex: 1;
+  width: 100%;
+  height: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
@@ -332,6 +313,17 @@ body {
   display: none;
   width: 0;
   height: 0;
+}
+
+.mobile-detail-content {
+  display: flex;
+  min-height: 100dvh;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
+  padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  padding-left: calc(52px + max(0.5rem, env(safe-area-inset-left, 0px)));
 }
 
 .portfolio-home :where(.text-gray-900, .text-gray-600, .text-pink-500, .hover\:text-gray-900:hover, .hover\:text-gray-600:hover) {

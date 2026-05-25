@@ -769,7 +769,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   );
 
   return (
-    <div className="portfolio-home relative h-full max-h-dvh flex flex-col overflow-hidden p-0 md:pt-24 md:pb-6 md:px-6">
+    <div className="portfolio-home relative h-full max-h-dvh flex flex-col overflow-hidden pt-12 pb-5 pl-2 pr-3 md:pt-24 md:pb-6 md:px-6">
       {/* Main content area */}
       <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6 min-h-0 overflow-visible">
         {/* Avatar Column */}
@@ -1206,33 +1206,25 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             exit={{ opacity: 0, y: 12 }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="mobile-detail-inner">
-              <div className="mobile-detail-header">
-                <button
-                  type="button"
-                  onClick={handleClearSelection}
-                  aria-label="Close details"
-                  className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[var(--experience-surface)] text-[var(--experience-muted)] transition-colors hover:text-[var(--experience-text)]"
-                >
-                  <svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true">
-                    <path d="M4 4l8 8M12 4l-8 8" />
-                  </svg>
-                </button>
-                <h2 className="min-w-0 truncate text-base font-semibold text-[var(--experience-text)]">
-                  {mobileDetailTitle}
-                </h2>
-              </div>
-
-              <div className="mobile-detail-scroll">
-                <div className="flex min-h-full items-start gap-3">
-                  {mobileAvatarRail}
-                  <div className="min-w-0 flex-1 pb-8">
-                    {showSettingsDetail ? (
-                      <CustomizeExperienceContent />
-                    ) : (
-                      selectedDetailContent
-                    )}
-                  </div>
+            <div className="mobile-detail-scroll">
+              <div className="mobile-detail-content">
+                {mobileAvatarRail}
+                <div className="min-w-0 flex-1">
+                  <button
+                    type="button"
+                    onClick={handleClearSelection}
+                    aria-label="Close details"
+                    className="mb-5 grid h-11 w-11 place-items-center rounded-full bg-[var(--experience-surface)] text-[var(--experience-muted)] transition-colors hover:text-[var(--experience-text)]"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true">
+                      <path d="M4 4l8 8M12 4l-8 8" />
+                    </svg>
+                  </button>
+                  {showSettingsDetail ? (
+                    <CustomizeExperienceContent />
+                  ) : (
+                    selectedDetailContent
+                  )}
                 </div>
               </div>
             </div>
