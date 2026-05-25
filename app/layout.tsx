@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Archivo, Gochi_Hand, Inter } from "next/font/google";
 import { getSettings } from "@/lib/content-service";
 import Analytics from "@/components/Analytics";
+import SiteInteractionGuards from "@/components/SiteInteractionGuards";
+import { PreferenceProvider } from "@/components/experience/PreferenceProvider";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -55,9 +57,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${archivo.variable} ${gochiHand.variable} ${inter.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans bg-background">
-        {children}
-        <Analytics />
+      <body className="ignore-safe-edges min-h-full flex flex-col font-sans bg-background">
+        <PreferenceProvider>
+          <SiteInteractionGuards />
+          {children}
+          <Analytics />
+        </PreferenceProvider>
       </body>
     </html>
   );

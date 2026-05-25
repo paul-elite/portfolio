@@ -3,6 +3,26 @@
 :root {
   --background: hsl(215, 10%, 98%);
   --foreground: #171717;
+  --experience-bg: #f8fafc;
+  --experience-surface: #f4f6f8;
+  --experience-card: #ffffff;
+  --experience-text: #15171c;
+  --experience-muted: #aeb6c2;
+  --experience-border: rgb(0 0 0 / 10%);
+  --experience-accent: #2388e8;
+  --experience-accent-soft: #e8f3ff;
+  --experience-body-size: 1rem;
+  --experience-caption-size: 0.875rem;
+  --experience-line-height: 1.5rem;
+  --experience-row-padding: 0.75rem;
+  --experience-gap: 1rem;
+  --experience-card-padding: 1rem;
+  --experience-motion: 150ms;
+  --experience-scale: 1.01;
+  --ignored-safe-area-top: 0px;
+  --ignored-safe-area-right: 0px;
+  --ignored-safe-area-bottom: 0px;
+  --ignored-safe-area-left: 0px;
 }
 
 @theme inline {
@@ -14,16 +34,111 @@
 }
 
 body {
-  background: var(--background);
+  background: var(--experience-bg);
   color: var(--foreground);
   font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.experience-root {
+  background: var(--experience-bg);
+  color: var(--experience-text);
+  transition:
+    background-color var(--experience-motion) ease,
+    color var(--experience-motion) ease;
+}
+
+img,
+svg,
+picture,
+video,
+canvas {
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+input,
+textarea,
+[contenteditable="true"] {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.scopeguard,
+.scopeguard * {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.scopeguard button {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  .print-contract,
+  .print-contract * {
+    visibility: visible !important;
+  }
+
+  .print-contract {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    min-height: 100vh !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+    padding: 32px !important;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace !important;
+    font-size: 12px !important;
+    line-height: 1.6 !important;
+    resize: none !important;
+  }
 }
 
 /* Background */
 html {
   background: var(--background);
+}
+
+html,
+body {
+  min-height: 100%;
+  width: 100%;
+}
+
+@supports (height: 100dvh) {
+  html,
+  body {
+    min-height: 100dvh;
+  }
+}
+
+.ignore-safe-edges {
+  min-height: 100dvh;
+  min-width: 100dvw;
+  padding-top: var(--ignored-safe-area-top);
+  padding-right: var(--ignored-safe-area-right);
+  padding-bottom: var(--ignored-safe-area-bottom);
+  padding-left: var(--ignored-safe-area-left);
 }
 
 /* Selection styling */
@@ -132,19 +247,45 @@ html {
 
 /* Portfolio typography: two sizes, two gray text colors. */
 .portfolio-home {
-  --portfolio-text-dark: #15171c;
-  --portfolio-text-light: #aeb6c2;
+  --portfolio-text-dark: var(--experience-text);
+  --portfolio-text-light: var(--experience-muted);
   color: var(--portfolio-text-dark);
 }
 
 .portfolio-home :where(.text-xl, .text-base, .text-\[15px\], .text-\[32px\]) {
-  font-size: 1rem !important;
-  line-height: 1.5rem !important;
+  font-size: var(--experience-body-size) !important;
+  line-height: var(--experience-line-height) !important;
 }
 
 .portfolio-home :where(.text-sm, .text-xs) {
-  font-size: 0.875rem !important;
+  font-size: var(--experience-caption-size) !important;
   line-height: 1.25rem !important;
+}
+
+.portfolio-home :where(.bg-background) {
+  background-color: var(--experience-bg) !important;
+}
+
+.portfolio-home :where(.from-background) {
+  --tw-gradient-from: var(--experience-bg) !important;
+}
+
+.portfolio-home :where(.via-background\/20) {
+  --tw-gradient-via: color-mix(in srgb, var(--experience-bg) 20%, transparent) !important;
+}
+
+.experience-root[data-color-personality="funky"] .portfolio-home {
+  background:
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--experience-accent) 13%, transparent), transparent 28rem),
+    radial-gradient(circle at 88% 74%, color-mix(in srgb, #fb9120 18%, transparent), transparent 24rem),
+    var(--experience-bg);
+}
+
+.experience-root[data-motion="reduced"] *,
+.experience-root[data-motion="reduced"] *::before,
+.experience-root[data-motion="reduced"] *::after {
+  animation-duration: 1ms !important;
+  transition-duration: 1ms !important;
 }
 
 .portfolio-home :where(.text-gray-900, .text-gray-600, .text-pink-500, .hover\:text-gray-900:hover, .hover\:text-gray-600:hover) {

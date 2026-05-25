@@ -14,10 +14,52 @@ import {
 } from '@/lib/portfolio-options';
 import { useNowPlaying, NowPlayingContent, NowPlayingImage } from './NowPlaying';
 import CustomScrollbar from './CustomScrollbar';
+import RadialToolkit, { type RadialToolkitItem } from './RadialToolkit';
+import { usePreferences } from './experience/PreferenceProvider';
+import PortfolioNavigation from './experience/PortfolioNavigation';
+import ProjectBrowser from './experience/ProjectBrowsers';
+import { CustomizeExperienceContent } from './experience/CustomizeExperiencePanel';
 
 function getYouTubeId(url: string) {
   const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
   return match ? match[1] : null;
+}
+
+function isSvgImage(src: string) {
+  const [path] = src.toLowerCase().split('?');
+  return path.endsWith('.svg') || src.startsWith('data:image/svg+xml');
+}
+
+function AvatarImage({
+  src,
+  alt,
+  width,
+  height,
+  className,
+  unoptimized = false,
+}: {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  className: string;
+  unoptimized?: boolean;
+}) {
+  if (isSvgImage(src)) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={src} alt={alt} width={width} height={height} className={className} />;
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      width={width}
+      height={height}
+      className={className}
+      unoptimized={unoptimized}
+    />
+  );
 }
 
 const contactCardBorderStyle = {
@@ -25,6 +67,47 @@ const contactCardBorderStyle = {
 };
 
 type ContactIconName = 'twitter' | 'github' | 'linkedin' | 'behance' | 'instagram' | 'email';
+
+const radialTabMeta: Record<PortfolioTab, { shortcut: string; icon: 'grid' | 'spark' | 'write' | 'chat' }> = {
+  projects: { shortcut: 'P', icon: 'grid' },
+  illustration: { shortcut: 'I', icon: 'spark' },
+  writings: { shortcut: 'W', icon: 'write' },
+  interaction: { shortcut: 'N', icon: 'chat' },
+};
+
+function RadialTabIcon({ icon }: { icon: 'grid' | 'spark' | 'write' | 'chat' }) {
+  if (icon === 'grid') {
+    return (
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+        <path d="M4 4h5v5H4zM13 4h5v5h-5zM4 13h5v5H4zM13 13h5v5h-5z" />
+      </svg>
+    );
+  }
+
+  if (icon === 'spark') {
+    return (
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M11 3l1.8 5.2L18 10l-5.2 1.8L11 17l-1.8-5.2L4 10l5.2-1.8z" />
+      </svg>
+    );
+  }
+
+  if (icon === 'write') {
+    return (
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 17h12" />
+        <path d="M6 14l8.6-8.6 2 2L8 16H6z" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 6h12v8H8l-3 3z" />
+      <path d="M8 9h6M8 12h4" />
+    </svg>
+  );
+}
 
 function ContactIcon({ name }: { name: ContactIconName }) {
   const iconClassName = name === 'email' ? 'h-4 w-4 text-white' : 'h-4 w-4 text-gray-700';
@@ -86,6 +169,15 @@ function ContactIcon({ name }: { name: ContactIconName }) {
   );
 }
 
+function SettingsIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 3v3M12 18v3M4.2 7.5l2.6 1.5M17.2 15l2.6 1.5M4.2 16.5l2.6-1.5M17.2 9l2.6-1.5" />
+      <circle cx="12" cy="12" r="4" />
+    </svg>
+  );
+}
+
 interface HomeContentProps {
   initialConfig: SiteConfig;
   initialContent: PortfolioContent;
@@ -93,6 +185,7 @@ interface HomeContentProps {
 
 export default function HomeContent({ initialConfig, initialContent }: HomeContentProps) {
   const router = useRouter();
+  const { preferences } = usePreferences();
   const [activeTab, setActiveTab] = useState<PortfolioTab>('projects');
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -100,17 +193,24 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const [selectedCategory, setSelectedCategory] = useState<IllustrationCategory | null>(null);
   const [activeVideo, setActiveVideo] = useState<Illustration | null>(null);
   const [showMoreTabs, setShowMoreTabs] = useState(false);
+  const [radialPinned, setRadialPinned] = useState(false);
+  const [radialAnchor, setRadialAnchor] = useState<{ x: number; y: number } | null>(null);
   const [contactOpen, setContactOpen] = useState(false);
   const [contactHovered, setContactHovered] = useState(false);
+  const [showSettingsDetail, setShowSettingsDetail] = useState(false);
   const [previewImageIndex, setPreviewImageIndex] = useState(0);
   const [contentAnimationKey, setContentAnimationKey] = useState<string | null>(null);
   const avatarContainerRef = useRef<HTMLDivElement>(null);
   const contentListRef = useRef<HTMLDivElement>(null);
+  const radialTriggerRef = useRef<HTMLButtonElement>(null);
+  const radialCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [contentListReady, setContentListReady] = useState(false);
   const nowPlayingData = useNowPlaying();
 
   const siteConfig = initialConfig;
   const content = initialContent;
+  const avatar = siteConfig.avatar;
+  const avatarFocused = siteConfig.avatarFocused || '';
 
   // Callback ref handler for contentListRef that triggers state update
   const handleContentListRef = useCallback((el: HTMLDivElement | null) => {
@@ -120,15 +220,23 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
   // Preload both avatar images on mount to prevent delay when switching
   useEffect(() => {
-    if (siteConfig.avatar) {
+    if (avatar) {
       const img1 = new window.Image();
-      img1.src = siteConfig.avatar;
+      img1.src = avatar;
     }
-    if (siteConfig.avatarFocused) {
+    if (avatarFocused) {
       const img2 = new window.Image();
-      img2.src = siteConfig.avatarFocused;
+      img2.src = avatarFocused;
     }
-  }, [siteConfig.avatar, siteConfig.avatarFocused]);
+  }, [avatar, avatarFocused]);
+
+  useEffect(() => {
+    return () => {
+      if (radialCloseTimerRef.current) {
+        clearTimeout(radialCloseTimerRef.current);
+      }
+    };
+  }, []);
 
   // Update URL when selection changes
   const updateURL = useCallback((selection: {
@@ -150,6 +258,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
   // Wrapper functions to update selection and URL together
   const handleSelectProject = useCallback((project: Project | null) => {
+    setShowSettingsDetail(false);
     setSelectedProject(project);
     setSelectedWriting(null);
     setSelectedCategory(null);
@@ -159,6 +268,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   }, [updateURL]);
 
   const handleSelectWriting = useCallback((writing: Writing | null) => {
+    setShowSettingsDetail(false);
     setSelectedWriting(writing);
     setSelectedProject(null);
     setSelectedCategory(null);
@@ -169,6 +279,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   }, [updateURL]);
 
   const handleSelectCategory = useCallback((category: IllustrationCategory | null) => {
+    setShowSettingsDetail(false);
     setSelectedCategory(category);
     setSelectedProject(null);
     setSelectedWriting(null);
@@ -177,6 +288,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   }, [updateURL]);
 
   const handleClearSelection = useCallback(() => {
+    setShowSettingsDetail(false);
     setSelectedProject(null);
     setSelectedWriting(null);
     setSelectedCategory(null);
@@ -185,15 +297,76 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   }, [updateURL]);
 
   const handleTabChange = useCallback((tab: PortfolioTab) => {
+    setShowSettingsDetail(false);
     setActiveTab(tab);
     setSelectedProject(null);
     setSelectedWriting(null);
     setSelectedCategory(null);
     setHoveredProject(null);
+    setShowMoreTabs(false);
+    setRadialPinned(false);
     setPreviewImageIndex(0);
     setContentAnimationKey(null);
     updateURL({});
   }, [updateURL]);
+
+  const positionRadialAtTrigger = useCallback(() => {
+    const rect = radialTriggerRef.current?.getBoundingClientRect();
+
+    if (rect) {
+      setRadialAnchor({
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      });
+    }
+  }, []);
+
+  const isDesktopHoverPointer = useCallback(() => {
+    return typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  }, []);
+
+  const clearRadialCloseTimer = useCallback(() => {
+    if (radialCloseTimerRef.current) {
+      clearTimeout(radialCloseTimerRef.current);
+      radialCloseTimerRef.current = null;
+    }
+  }, []);
+
+  const closeRadialMenu = useCallback(() => {
+    clearRadialCloseTimer();
+    setRadialPinned(false);
+    setShowMoreTabs(false);
+  }, [clearRadialCloseTimer]);
+
+  const scheduleRadialClose = useCallback(() => {
+    if (!isDesktopHoverPointer() || radialPinned) return;
+
+    clearRadialCloseTimer();
+    radialCloseTimerRef.current = setTimeout(() => {
+      setShowMoreTabs(false);
+      setRadialPinned(false);
+    }, 420);
+  }, [clearRadialCloseTimer, isDesktopHoverPointer, radialPinned]);
+
+  const handleRadialHoverStart = useCallback(() => {
+    if (!isDesktopHoverPointer() || preferences.navigationStyle !== 'radial') return;
+
+    clearRadialCloseTimer();
+    setRadialPinned(false);
+    positionRadialAtTrigger();
+    setShowMoreTabs(true);
+  }, [clearRadialCloseTimer, isDesktopHoverPointer, positionRadialAtTrigger, preferences.navigationStyle]);
+
+  const handleRadialTrigger = useCallback(() => {
+    clearRadialCloseTimer();
+    positionRadialAtTrigger();
+
+    setShowMoreTabs((open) => {
+      const nextOpen = !open;
+      setRadialPinned(nextOpen);
+      return nextOpen;
+    });
+  }, [clearRadialCloseTimer, positionRadialAtTrigger]);
 
   // Get preview images from the hovered project
   const projectImages = useMemo(() => {
@@ -245,9 +418,31 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
   // Track if anything is selected to fade other elements
   const hasSelection = selectedProject !== null || selectedWriting !== null || selectedCategory !== null;
+  const hasDetailContent = hasSelection || showSettingsDetail;
   const contactVisible = contactOpen || contactHovered;
 
   const moreTabs = SECONDARY_PORTFOLIO_TABS;
+  const radialTabs = [...mainTabs, ...moreTabs];
+  const navigationItems = radialTabs.map((tab) => {
+    const meta = radialTabMeta[tab.key];
+    return {
+      key: tab.key,
+      label: tab.label,
+      icon: <RadialTabIcon icon={meta.icon} />,
+    };
+  });
+  const radialMenuItems: RadialToolkitItem[] = radialTabs.map((tab) => {
+    const meta = radialTabMeta[tab.key];
+
+    return {
+      id: tab.key,
+      label: tab.label,
+      shortcut: meta.shortcut,
+      icon: <RadialTabIcon icon={meta.icon} />,
+      active: activeTab === tab.key,
+      onSelect: () => handleTabChange(tab.key),
+    };
+  });
   const contactItems: { name: ContactIconName; label: string; href: string }[] = [
     { name: 'twitter', label: 'Twitter', href: siteConfig.social.twitter },
     { name: 'github', label: 'GitHub', href: siteConfig.social.github },
@@ -431,6 +626,106 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     </div>
   ) : null;
 
+  const radialTrigger = (
+    <button
+      ref={radialTriggerRef}
+      type="button"
+      onClick={handleRadialTrigger}
+      onMouseEnter={handleRadialHoverStart}
+      onMouseLeave={scheduleRadialClose}
+      aria-expanded={showMoreTabs}
+      aria-label="Open radial navigation options"
+      className={`w-6 h-6 rounded-full border border-[var(--experience-border)] flex items-center justify-center text-[var(--experience-muted)] hover:text-[var(--experience-text)] transition-all ${
+        showMoreTabs ? 'rotate-45 bg-[var(--experience-card)] text-[var(--experience-text)]' : ''
+      }`}
+    >
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+        <line x1="6" y1="2" x2="6" y2="10" />
+        <line x1="2" y1="6" x2="10" y2="6" />
+      </svg>
+    </button>
+  );
+  const settingsTrigger = (
+    <button
+      type="button"
+      onClick={() => {
+        setSelectedProject(null);
+        setSelectedWriting(null);
+        setSelectedCategory(null);
+        setHoveredProject(null);
+        setShowMoreTabs(false);
+        setRadialPinned(false);
+        setPreviewImageIndex(0);
+        setContentAnimationKey(`settings-${Date.now()}`);
+        setShowSettingsDetail(true);
+        updateURL({});
+      }}
+      aria-pressed={showSettingsDetail}
+      aria-label="Customize experience"
+      className={`inline-grid h-10 w-10 place-items-center rounded-full bg-[var(--experience-card)] text-[var(--experience-text)] backdrop-blur transition-colors hover:bg-[var(--experience-surface)] ${
+        showSettingsDetail ? 'text-[var(--experience-accent)]' : ''
+      }`}
+      style={{ boxShadow: '0 0 0 0.5px var(--experience-border)' }}
+    >
+      <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--experience-accent-soft)] text-[var(--experience-accent)]">
+        <SettingsIcon />
+      </span>
+    </button>
+  );
+  const settingsDetailContent = showSettingsDetail ? (
+    <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
+      <CustomizeExperienceContent onClose={handleClearSelection} />
+    </div>
+  ) : null;
+  const projectAvatarButtons = content.projects.map((project, index) => {
+    const isActive = targetProjectIndex === index;
+    const colors = [
+      'from-blue-400 to-cyan-400',
+      'from-purple-400 to-pink-400',
+      'from-orange-400 to-red-400',
+      'from-green-400 to-teal-400',
+      'from-indigo-400 to-purple-400',
+      'from-pink-400 to-rose-400',
+    ];
+    const colorClass = colors[index % colors.length];
+    const visible = showSettingsDetail || isActive;
+
+    return (
+      <button
+        key={project.id}
+        type="button"
+        onClick={() => {
+          setActiveTab('projects');
+          handleSelectProject(project);
+        }}
+        className="py-3 h-[60px] flex items-center justify-end"
+        aria-label={`Open ${project.title}`}
+      >
+        <span
+          className={`flex-shrink-0 transition-all duration-150 ${
+            visible ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
+          }`}
+        >
+          {project.avatar ? (
+            <AvatarImage
+              src={project.avatar}
+              alt={project.title}
+              width={40}
+              height={40}
+              className="w-10 h-10 object-contain"
+            />
+          ) : (
+            <span className={`w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center`}>
+              <span className="text-sm font-medium text-white">
+                {project.title.charAt(0)}
+              </span>
+            </span>
+          )}
+        </span>
+      </button>
+    );
+  });
+
   return (
     <div className="portfolio-home h-full max-h-dvh flex flex-col overflow-hidden pt-12 pb-5 md:pt-24 md:pb-6 pl-2 pr-3 md:px-6">
       {/* Main content area */}
@@ -444,9 +739,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden cursor-pointer hover:ring-2 hover:ring-purple-300 transition-all"
             >
               {(() => {
-                const avatarSrc = hasSelection && siteConfig.avatarFocused ? siteConfig.avatarFocused : siteConfig.avatar;
+                const avatarSrc = hasDetailContent && avatarFocused ? avatarFocused : avatar;
                 return avatarSrc ? (
-                  <Image
+                  <AvatarImage
                     src={avatarSrc}
                     alt={siteConfig.name}
                     width={40}
@@ -467,9 +762,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             {mainTabs.map((tab) => (
               <button key={tab.key} type="button" className="font-normal">{tab.label}</button>
             ))}
-            {showMoreTabs && moreTabs.map((tab) => (
-              <button key={tab.key} type="button" className="font-normal">{tab.label}</button>
-            ))}
             <button type="button" className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                 <line x1="6" y1="2" x2="6" y2="10" />
@@ -481,47 +773,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           {/* Project Avatars - synced with content list scroll */}
           <div className="flex-1 min-h-0 relative">
             <div ref={avatarContainerRef} className="absolute inset-0 overflow-y-auto hide-scrollbar">
-            {activeTab === 'projects' && content.projects.map((project, index) => {
-              const isActive = targetProjectIndex === index;
-              const colors = [
-                'from-blue-400 to-cyan-400',
-                'from-purple-400 to-pink-400',
-                'from-orange-400 to-red-400',
-                'from-green-400 to-teal-400',
-                'from-indigo-400 to-purple-400',
-                'from-pink-400 to-rose-400',
-              ];
-              const colorClass = colors[index % colors.length];
-
-              return (
-                <div
-                  key={project.id}
-                  className="py-3 h-[60px] flex items-center justify-end"
-                >
-                  <div
-                    className={`flex-shrink-0 transition-all duration-150 ${
-                      isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
-                    }`}
-                  >
-                    {project.avatar ? (
-                      <Image
-                        src={project.avatar}
-                        alt={project.title}
-                        width={40}
-                        height={40}
-                        className="w-10 h-10 object-contain"
-                      />
-                    ) : (
-                      <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center`}>
-                        <span className="text-sm font-medium text-white">
-                          {project.title.charAt(0)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            {(activeTab === 'projects' || showSettingsDetail) && projectAvatarButtons}
             {activeTab === 'illustration' && ILLUSTRATION_CATEGORIES.map((cat, index) => {
               const isSelected = selectedCategory === cat.key;
               const colors = [
@@ -541,18 +793,24 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             })}
             </div>
           </div>
+
+          <div className="mt-4 flex h-12 items-center justify-end">
+            {settingsTrigger}
+          </div>
         </div>
 
         {/* Left Content Column - Fixed at 100vh */}
         <div className="flex-1 md:col-span-3 flex flex-col min-w-0 h-full overflow-visible">
           {/* Identity */}
-          <div className={`hidden md:block h-auto mb-6 transition-opacity ${hasSelection ? 'opacity-60' : ''}`}>
-            <h1 className="text-base font-semibold text-gray-900">
-              {siteConfig.name}
-            </h1>
-            <p className="text-base font-normal text-gray-500">{siteConfig.title}</p>
-          </div>
-          <div className={`md:hidden mb-6 transition-opacity ${hasSelection ? 'opacity-60' : ''}`}>
+          {!showSettingsDetail && (
+            <div className={`hidden md:block h-auto mb-6 transition-opacity ${hasDetailContent ? 'opacity-60' : ''}`}>
+              <h1 className="text-base font-semibold text-gray-900">
+                {siteConfig.name}
+              </h1>
+              <p className="text-base font-normal text-gray-500">{siteConfig.title}</p>
+            </div>
+          )}
+          <div className={`md:hidden mb-6 transition-opacity ${hasDetailContent ? 'opacity-60' : ''}`}>
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -561,9 +819,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                 aria-label="Show all work"
               >
                 {(() => {
-                  const avatarSrc = hasSelection && siteConfig.avatarFocused ? siteConfig.avatarFocused : siteConfig.avatar;
+                  const avatarSrc = hasDetailContent && avatarFocused ? avatarFocused : avatar;
                   return avatarSrc ? (
-                    <Image
+                    <AvatarImage
                       src={avatarSrc}
                       alt={siteConfig.name}
                       width={40}
@@ -577,57 +835,24 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   );
                 })()}
               </button>
-              <div>
-                <h1 className="text-base font-semibold text-gray-900">{siteConfig.name}</h1>
-                <p className="text-sm text-gray-500">{siteConfig.title}</p>
-              </div>
+              {!showSettingsDetail && (
+                <div>
+                  <h1 className="text-base font-semibold text-gray-900">{siteConfig.name}</h1>
+                  <p className="text-sm text-gray-500">{siteConfig.title}</p>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Tabs */}
-          <div className="portfolio-tabs ml-[52px] md:ml-0 flex flex-wrap items-center gap-x-3 md:gap-x-4 gap-y-1 text-sm mb-6">
-            {mainTabs.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => handleTabChange(tab.key)}
-                className={`transition-all font-normal ${
-                  activeTab === tab.key
-                    ? 'text-gray-900'
-                    : 'text-gray-400 hover:text-gray-600'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-            {showMoreTabs && moreTabs.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => handleTabChange(tab.key)}
-                className={`transition-all font-normal ${
-                  activeTab === tab.key
-                    ? 'text-gray-900'
-                    : 'text-gray-400 hover:text-gray-600'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-            <button
-              onClick={() => setShowMoreTabs(!showMoreTabs)}
-              className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:border-gray-400 transition-all"
-            >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                {showMoreTabs ? (
-                  <line x1="2" y1="6" x2="10" y2="6" />
-                ) : (
-                  <>
-                    <line x1="6" y1="2" x2="6" y2="10" />
-                    <line x1="2" y1="6" x2="10" y2="6" />
-                  </>
-                )}
-              </svg>
-            </button>
-          </div>
+          {!showSettingsDetail && (
+            <PortfolioNavigation
+              items={navigationItems}
+              activeTab={activeTab}
+              onChange={handleTabChange}
+              radialTrigger={radialTrigger}
+            />
+          )}
 
           {/* Content List */}
           <CustomScrollbar
@@ -639,50 +864,47 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             contentRef={contentListRef}
             onContentRefChange={handleContentListRef}
           >
-            {hasSelection && selectedDetailContent && (
+            {hasDetailContent && (settingsDetailContent || selectedDetailContent) && (
               <div className="md:hidden pb-8">
-                <button
-                  type="button"
-                  onClick={handleClearSelection}
-                  aria-label="Back to list"
-                  className="mb-6 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-900 transition-colors"
-                >
-                  <span aria-hidden="true">←</span>
-                  Back to list
-                </button>
-                {selectedDetailContent}
+                {showSettingsDetail ? (
+                  <div className="flex items-start gap-3">
+                    <div className="-ml-[52px] sticky top-0 flex max-h-[calc(100dvh-8rem)] w-10 shrink-0 flex-col items-end overflow-y-auto overscroll-contain hide-scrollbar [touch-action:pan-y]">
+                      {projectAvatarButtons}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      {settingsDetailContent}
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleClearSelection}
+                      aria-label="Back to list"
+                      className="mb-6 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-900 transition-colors"
+                    >
+                      <span aria-hidden="true">←</span>
+                      Back to list
+                    </button>
+                    {selectedDetailContent}
+                  </>
+                )}
               </div>
             )}
 
-            <div className={hasSelection ? 'hidden md:block' : ''}>
-            {activeTab === 'projects' && content.projects.map((project) => {
-              const isSelected = selectedProject?.id === project.id;
-              return (
-                <button
-                  key={project.id}
-                  onClick={() => handleSelectProject(isSelected ? null : project)}
-                  className={`group block py-3 w-full text-left transition-opacity ${hasSelection && !isSelected ? 'opacity-30' : ''}`}
-                  onMouseEnter={() => {
-                    if (!selectedProject) {
-                      setPreviewImageIndex(0);
-                      setHoveredProject(project);
-                    }
-                  }}
-                  onMouseLeave={() => !selectedProject && setHoveredProject(null)}
-                >
-                  <h2 className={`text-base font-normal mb-0.5 transition-colors ${
-                    isSelected
-                      ? 'text-gray-900'
-                      : 'text-gray-900 group-hover:text-gray-600'
-                  }`}>
-                    {project.title}
-                  </h2>
-                  <p className="text-sm text-gray-400">
-                    {project.year} <span className="mx-1">·</span> {project.description}
-                  </p>
-                </button>
-              );
-            })}
+            <div className={hasDetailContent ? 'hidden md:block' : ''}>
+            {activeTab === 'projects' && (
+              <ProjectBrowser
+                projects={content.projects}
+                selectedProject={selectedProject}
+                hasSelection={hasSelection}
+                onSelect={handleSelectProject}
+                onHover={(project) => {
+                  if (project) setPreviewImageIndex(0);
+                  setHoveredProject(project);
+                }}
+              />
+            )}
 
             {activeTab === 'interaction' && (
               <div className={`transition-opacity ${hasSelection ? 'opacity-30' : ''}`}>
@@ -787,7 +1009,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </CustomScrollbar>
 
           {/* Now Playing - Desktop only, pinned to bottom */}
-          <div className={`hidden md:block flex-shrink-0 mt-auto pt-4 transition-opacity overflow-visible z-50 ${hasSelection ? 'opacity-30' : ''}`}>
+          <div className={`hidden md:block flex-shrink-0 mt-auto pt-4 transition-opacity overflow-visible z-50 ${hasDetailContent ? 'opacity-30' : ''}`}>
             <div className={`overflow-visible ${activeTab === 'illustration' ? 'w-full md:w-[calc(166%+1.5rem)]' : ''}`}>
               <NowPlayingContent data={nowPlayingData} />
             </div>
@@ -796,8 +1018,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
         {/* Right Column - Content Display (scrollable) */}
         <div className="hidden md:block md:col-span-8 relative h-full ml-[-50px]">
-          {/* Top fade overlay */}
-          <div className="absolute -top-8 left-[50px] right-4 h-12 bg-gradient-to-b from-background from-0% via-background/20 via-50% to-transparent to-100% z-10 pointer-events-none" />
+          {!showSettingsDetail && (
+            <div className="absolute -top-8 left-[50px] right-4 h-12 bg-gradient-to-b from-background from-0% via-background/20 via-50% to-transparent to-100% z-10 pointer-events-none" />
+          )}
           <CustomScrollbar
             className="absolute inset-0"
             position="left"
@@ -805,7 +1028,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             thumbWidth={2}
             contentClassName="pl-[50px]"
           >
-          {selectedProject ? (
+          {showSettingsDetail ? (
+            settingsDetailContent
+          ) : selectedProject ? (
             // Show full project content when selected
             <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
               {/* Project Title */}
@@ -956,15 +1181,18 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       </div>
 
       {/* Mobile Bottom Section */}
-      <div className={`md:hidden mt-auto pt-6 ${hasSelection ? 'hidden' : ''}`}>
+      <div className={`md:hidden mt-auto pt-6 ${hasDetailContent ? 'hidden' : ''}`}>
         <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            {settingsTrigger}
+          </div>
           {/* Now Playing */}
           <div className="flex items-center gap-3">
-            <NowPlayingImage data={nowPlayingData} />
+            <NowPlayingImage data={nowPlayingData} useAlbumArt />
             <div className="min-w-0">
               {nowPlayingData?.isPlaying ? (
                 <>
-                  <a href={nowPlayingData.songUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-900 hover:text-gray-600 transition-colors truncate block">
+                  <a href={nowPlayingData.songUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors truncate block">
                     {nowPlayingData.title}
                   </a>
                   <p className="text-sm text-gray-400 truncate">{nowPlayingData.artist}</p>
@@ -983,6 +1211,29 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
         </div>
       </div>
+
+      {preferences.navigationStyle === 'radial' && (
+        <RadialToolkit
+          anchor={radialAnchor}
+          items={radialMenuItems}
+          open={showMoreTabs}
+          onClose={closeRadialMenu}
+          onMouseEnter={clearRadialCloseTimer}
+          onMouseLeave={scheduleRadialClose}
+        />
+      )}
+
+      <button
+        type="button"
+        aria-label="Close contact links"
+        onClick={() => {
+          setContactOpen(false);
+          setContactHovered(false);
+        }}
+        className={`fixed inset-0 z-[9998] bg-[#a3a3a3]/[0.33] backdrop-blur-[4px] transition-opacity duration-150 md:hidden ${
+          contactVisible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
+        }`}
+      />
 
       {/* Floating Contact */}
       <div

@@ -41,15 +41,24 @@ export function useNowPlaying() {
   return data;
 }
 
-export function NowPlayingImage({ data }: { data: SpotifyData | null }) {
+export function NowPlayingImage({ data, useAlbumArt = false }: { data: SpotifyData | null; useAlbumArt?: boolean }) {
+  const showAlbumArt = useAlbumArt && Boolean(data?.albumImageUrl);
+
   return (
     <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 relative">
       <Image
-        src="/music-icon.svg"
-        alt="Music"
+        src={showAlbumArt ? data?.albumImageUrl || '/music-icon.svg' : '/music-icon.svg'}
+        alt={showAlbumArt ? data?.album || 'Album art' : 'Music'}
         fill
         className={`object-cover ${data?.isPlaying ? 'animate-spin-slow' : ''}`}
+        unoptimized={showAlbumArt}
       />
+      {showAlbumArt && (
+        <span
+          aria-hidden="true"
+          className="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black"
+        />
+      )}
     </div>
   );
 }
@@ -267,7 +276,7 @@ export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
                   href={data.songUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-gray-900 hover:text-gray-600 transition-colors truncate"
+                  className="text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors truncate"
                 >
                   {data.title}
                 </a>
@@ -309,7 +318,7 @@ export function NowPlayingText({ data }: { data: SpotifyData | null }) {
             href={data.songUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-gray-900 hover:text-gray-600 transition-colors truncate"
+            className="text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors truncate"
           >
             {data.title}
           </a>
