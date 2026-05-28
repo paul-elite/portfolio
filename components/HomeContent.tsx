@@ -686,18 +686,18 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       onClick={openSettings}
       aria-pressed={showSettingsDetail}
       aria-label="Customize experience"
-      className={`inline-grid h-10 w-10 place-items-center rounded-full bg-[var(--experience-card)] text-[var(--experience-text)] backdrop-blur transition-colors hover:bg-[var(--experience-surface)] ${
+      className={`home-settings-trigger inline-grid h-10 w-10 place-items-center rounded-full bg-[var(--experience-card)] text-[var(--experience-text)] backdrop-blur transition-colors hover:bg-[var(--experience-surface)] ${
         showSettingsDetail ? 'text-[var(--experience-accent)]' : ''
       }`}
       style={{ boxShadow: '0 0 0 0.5px var(--experience-border)' }}
     >
-      <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--experience-accent-soft)] text-[var(--experience-accent)]">
+      <span className="home-settings-trigger-icon grid h-8 w-8 place-items-center rounded-full bg-[var(--experience-accent-soft)] text-[var(--experience-accent)]">
         <SettingsIcon />
       </span>
       </button>
   );
   const settingsDetailContent = showSettingsDetail ? (
-    <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
+    <div key={contentAnimationKey} className="home-settings-detail w-full max-w-[572px] animate-slideInFromRight">
       <CustomizeExperienceContent onClose={handleClearSelection} />
     </div>
   ) : null;

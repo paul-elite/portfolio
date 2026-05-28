@@ -85,9 +85,9 @@ function ControlGroup<Value extends ExperiencePreferences[PreferenceKey]>({
   compact?: boolean;
 }) {
   return (
-    <section className="space-y-2">
-      <h3 className="text-[0.72rem] font-medium uppercase tracking-[0.14em] text-[var(--experience-muted)]">{title}</h3>
-      <div className={`grid gap-2 ${compact ? 'grid-cols-2' : ''}`}>
+    <section className="home-settings-group space-y-2">
+      <h3 className="home-settings-label text-[0.72rem] font-medium uppercase tracking-[0.14em] text-[var(--experience-muted)]">{title}</h3>
+      <div className={`home-settings-options grid gap-2 ${compact ? 'grid-cols-2' : ''}`}>
         {options.map((option) => {
           const active = value === option.value;
 
@@ -96,9 +96,9 @@ function ControlGroup<Value extends ExperiencePreferences[PreferenceKey]>({
               key={option.value}
               type="button"
               onClick={() => onChange(option.value)}
-              className={`rounded-2xl px-3 py-2 text-left transition-colors ${
+              className={`home-settings-option rounded-2xl px-3 py-2 text-left transition-colors ${
                 active
-                  ? 'bg-[var(--experience-accent)] text-white'
+                  ? 'home-settings-option--active bg-[var(--experience-accent)] text-white'
                   : 'bg-[var(--experience-surface)] text-[var(--experience-text)] hover:bg-[var(--experience-accent-soft)]'
               }`}
               style={{ boxShadow: '0 0 0 0.5px var(--experience-border)' }}
@@ -156,8 +156,8 @@ export function CustomizeExperienceContent({ onClose }: { onClose?: () => void }
   const { resetPreferences } = usePreferences();
 
   return (
-    <div className="w-full max-w-[572px] text-[var(--experience-text)]">
-      <div className="mb-6 flex items-start justify-between gap-4">
+    <div className="home-settings-panel w-full max-w-[572px] text-[var(--experience-text)]">
+      <div className="home-settings-header mb-6 flex items-start justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold">Customize the portfolio</h2>
           <p className="mt-1 text-sm text-[var(--experience-muted)]">Adjust the interface without hiding the work.</p>
@@ -166,7 +166,7 @@ export function CustomizeExperienceContent({ onClose }: { onClose?: () => void }
           <button
             type="button"
             onClick={onClose}
-            className="grid h-9 w-9 place-items-center rounded-full bg-[var(--experience-surface)] text-[var(--experience-muted)] hover:text-[var(--experience-text)]"
+            className="home-settings-close grid h-9 w-9 place-items-center rounded-full bg-[var(--experience-surface)] text-[var(--experience-muted)] hover:text-[var(--experience-text)]"
             aria-label="Close"
           >
             <svg width="15" height="15" viewBox="0 0 16 16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
@@ -189,7 +189,7 @@ export function CustomizeExperienceContent({ onClose }: { onClose?: () => void }
       <button
         type="button"
         onClick={resetPreferences}
-        className="mt-5 w-full rounded-full bg-[var(--experience-surface)] px-4 py-2.5 text-sm font-medium text-[var(--experience-text)] hover:bg-[var(--experience-accent-soft)]"
+        className="home-settings-reset mt-5 w-full rounded-full bg-[var(--experience-surface)] px-4 py-2.5 text-sm font-medium text-[var(--experience-text)] hover:bg-[var(--experience-accent-soft)]"
       >
         Reset to smart defaults
       </button>
@@ -212,11 +212,11 @@ export default function CustomizeExperiencePanel({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={`${isAvatarVariant ? 'inline-grid h-10 w-10 place-items-center rounded-full p-0' : 'fixed bottom-4 left-4 z-[9997] inline-flex h-11 items-center gap-2 rounded-full px-3 md:bottom-6 md:left-6'} bg-[var(--experience-card)] text-sm font-medium text-[var(--experience-text)] backdrop-blur transition-colors hover:bg-[var(--experience-surface)] ${className}`}
+        className={`home-settings-trigger ${isAvatarVariant ? 'inline-grid h-10 w-10 place-items-center rounded-full p-0' : 'fixed bottom-4 left-4 z-[9997] inline-flex h-11 items-center gap-2 rounded-full px-3 md:bottom-6 md:left-6'} bg-[var(--experience-card)] text-sm font-medium text-[var(--experience-text)] backdrop-blur transition-colors hover:bg-[var(--experience-surface)] ${className}`}
         style={{ boxShadow: '0 0 0 0.5px var(--experience-border)' }}
         aria-label="Customize experience"
       >
-        <span className={`${isAvatarVariant ? 'h-8 w-8' : 'h-7 w-7'} grid place-items-center rounded-full bg-[var(--experience-accent-soft)] text-[var(--experience-accent)]`}>
+        <span className={`home-settings-trigger-icon ${isAvatarVariant ? 'h-8 w-8' : 'h-7 w-7'} grid place-items-center rounded-full bg-[var(--experience-accent-soft)] text-[var(--experience-accent)]`}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M12 3v3M12 18v3M4.2 7.5l2.6 1.5M17.2 15l2.6 1.5M4.2 16.5l2.6-1.5M17.2 9l2.6-1.5" />
             <circle cx="12" cy="12" r="4" />
@@ -241,7 +241,7 @@ export default function CustomizeExperiencePanel({
               role="dialog"
               aria-modal="true"
               aria-label="Customize experience"
-              className="fixed bottom-4 left-4 right-4 z-[10001] max-h-[82dvh] overflow-y-auto rounded-[28px] bg-[var(--experience-card)] p-5 text-[var(--experience-text)] md:bottom-6 md:left-6 md:right-auto md:w-[25rem]"
+              className="home-settings-popover fixed bottom-4 left-4 right-4 z-[10001] max-h-[82dvh] overflow-y-auto rounded-[28px] bg-[var(--experience-card)] p-5 text-[var(--experience-text)] md:bottom-6 md:left-6 md:right-auto md:w-[25rem]"
               style={{ boxShadow: '0 0 0 0.5px var(--experience-border)' }}
               initial={{ opacity: 0, y: 20, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
