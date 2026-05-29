@@ -699,9 +699,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const renderProjectAvatarButtons = ({
     showInactive,
     keyPrefix,
+    rowClassName = 'project-avatar-row flex items-center justify-end py-[var(--experience-row-padding)]',
   }: {
     showInactive: boolean;
     keyPrefix: string;
+    rowClassName?: string;
   }) => content.projects.map((project, index) => {
     const isActive = selectedProject?.id === project.id;
     const colors = [
@@ -730,7 +732,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           setActiveTab('projects');
           handleSelectProject(project);
         }}
-        className="project-avatar-row flex items-center justify-end py-[var(--experience-row-padding)]"
+        className={rowClassName}
         aria-label={`Open ${project.title}`}
         aria-hidden={!isActive}
         disabled={!isActive}
@@ -759,7 +761,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     );
   });
   const projectAvatarButtons = renderProjectAvatarButtons({ showInactive: false, keyPrefix: 'desktop-project-avatar' });
-  const mobileProjectAvatarButtons = renderProjectAvatarButtons({ showInactive: true, keyPrefix: 'mobile-project-avatar' });
+  const mobileProjectAvatarButtons = renderProjectAvatarButtons({
+    showInactive: true,
+    keyPrefix: 'mobile-project-avatar',
+    rowClassName: 'mobile-rail-avatar-row flex h-[60px] items-center justify-end py-3',
+  });
   const mobileNameAvatar = (
     <button
       type="button"

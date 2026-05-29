@@ -365,6 +365,10 @@ body {
   padding-bottom: 0;
 }
 
+.mobile-detail-rail .mobile-rail-avatar-row {
+  height: 3.75rem;
+}
+
 .project-avatar-row {
   min-height: calc(2.75rem + var(--experience-row-padding) + var(--experience-row-padding));
 }
