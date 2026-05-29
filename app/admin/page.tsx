@@ -604,9 +604,7 @@ export default function AdminPage() {
     setLoading(false);
   };
 
-  const handleSaveSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const saveSettingsData = async (nextSettings: Settings, successMessage = 'Settings saved!') => {
     const loadingToast = toast.loading('Saving settings...');
 
     try {
@@ -616,18 +614,26 @@ export default function AdminPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${password}`,
         },
-        body: JSON.stringify({ type: 'settings', data: settings }),
+        body: JSON.stringify({ type: 'settings', data: nextSettings }),
       });
 
       if (res.ok) {
-        toast.update(loadingToast, 'Settings saved!', 'success');
+        toast.update(loadingToast, successMessage, 'success');
         fetchContent();
+        return true;
       } else {
         toast.update(loadingToast, 'Failed to save settings', 'error');
       }
     } catch {
       toast.update(loadingToast, 'Something went wrong', 'error');
     }
+    return false;
+  };
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    await saveSettingsData(settings);
     setLoading(false);
   };
 
@@ -827,7 +833,9 @@ export default function AdminPage() {
                         setAvatarPreview(previewUrl);
                         const path = await handleFileUpload(file, '', 'avatar');
                         if (path) {
-                          setSettings((prev) => ({ ...prev, avatar: path }));
+                          const nextSettings = { ...settings, avatar: path };
+                          setSettings(nextSettings);
+                          await saveSettingsData(nextSettings, 'Default avatar saved!');
                         }
                       }}
                     />
@@ -846,7 +854,9 @@ export default function AdminPage() {
                         setAvatarFocusedPreview(previewUrl);
                         const path = await handleFileUpload(file, '', 'avatarFocused');
                         if (path) {
-                          setSettings((prev) => ({ ...prev, avatarFocused: path }));
+                          const nextSettings = { ...settings, avatarFocused: path };
+                          setSettings(nextSettings);
+                          await saveSettingsData(nextSettings, 'Focused avatar saved!');
                         }
                       }}
                     />
