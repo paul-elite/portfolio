@@ -433,6 +433,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   // Track if anything is selected to fade other elements
   const hasSelection = selectedProject !== null || selectedWriting !== null || selectedCategory !== null;
   const hasDetailContent = hasSelection || showSettingsDetail;
+  const shouldUseFocusedAvatar = hasSelection;
   const contactVisible = contactOpen || contactHovered;
   const mobileDetailTitle = showSettingsDetail
     ? 'Customize'
@@ -718,14 +719,16 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       'from-pink-400 to-rose-400',
     ];
     const colorClass = colors[index % colors.length];
-    const visible = showSettingsDetail || isActive;
+    const visible = activeTab === 'projects' && isActive;
     const stateClass = showInactive
       ? isActive && activeTab === 'projects' && !showSettingsDetail
-        ? 'opacity-100 scale-100 ring-2 ring-[var(--experience-accent)]/25'
-        : 'opacity-45 scale-95'
+        ? 'opacity-100 ring-2 ring-[var(--experience-accent)]/25'
+        : activeTab === 'projects'
+          ? 'opacity-45'
+          : 'opacity-0'
       : visible
-        ? 'opacity-100 scale-100'
-        : 'opacity-0 scale-75';
+        ? 'opacity-100'
+        : 'opacity-0';
 
     return (
       <button
@@ -739,7 +742,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         aria-label={`Open ${project.title}`}
       >
         <span
-          className={`flex-shrink-0 transition-all duration-150 ${stateClass}`}
+          className={`flex-shrink-0 transition-opacity duration-150 ${stateClass}`}
         >
           {project.avatar ? (
             <AvatarImage
@@ -771,7 +774,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     >
       <span className="flex-shrink-0 opacity-100 scale-100 transition-all duration-150">
         {(() => {
-          const avatarSrc = hasDetailContent && avatarFocused ? avatarFocused : avatar;
+          const avatarSrc = shouldUseFocusedAvatar && avatarFocused ? avatarFocused : avatar;
           return avatarSrc ? (
             <AvatarImage
               src={avatarSrc}
@@ -811,7 +814,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden cursor-pointer hover:ring-2 hover:ring-purple-300 transition-all"
             >
               {(() => {
-                const avatarSrc = hasDetailContent && avatarFocused ? avatarFocused : avatar;
+                const avatarSrc = shouldUseFocusedAvatar && avatarFocused ? avatarFocused : avatar;
                 return avatarSrc ? (
                   <AvatarImage
                     src={avatarSrc}
@@ -845,7 +848,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           {/* Project Avatars - synced with content list scroll */}
           <div className="flex-1 min-h-0 relative">
             <div ref={avatarContainerRef} className="absolute inset-0 overflow-y-auto hide-scrollbar">
-            {(activeTab === 'projects' || showSettingsDetail) && projectAvatarButtons}
+            {projectAvatarButtons}
             {activeTab === 'illustration' && ILLUSTRATION_CATEGORIES.map((cat, index) => {
               const isSelected = selectedCategory === cat.key;
               const colors = [
