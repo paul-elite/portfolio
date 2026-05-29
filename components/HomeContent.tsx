@@ -212,6 +212,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const siteConfig = initialConfig;
   const content = initialContent;
   const avatar = siteConfig.avatar;
+  const avatarFocused = siteConfig.avatarFocused || '';
 
   // Callback ref handler for contentListRef that triggers state update
   const handleContentListRef = useCallback((el: HTMLDivElement | null) => {
@@ -219,13 +220,17 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     setContentListReady(!!el);
   }, []);
 
-  // Preload the avatar image on mount to prevent delay when rendering.
+  // Preload both avatar images on mount to prevent delay when switching.
   useEffect(() => {
     if (avatar) {
       const img1 = new window.Image();
       img1.src = avatar;
     }
-  }, [avatar]);
+    if (avatarFocused) {
+      const img2 = new window.Image();
+      img2.src = avatarFocused;
+    }
+  }, [avatar, avatarFocused]);
 
   useEffect(() => {
     return () => {
@@ -444,6 +449,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   // Track if anything is selected to fade other elements
   const hasSelection = selectedProject !== null || selectedWriting !== null || selectedInteraction !== null || selectedCategory !== null;
   const hasDetailContent = hasSelection || showSettingsDetail;
+  const activeAvatar = hasDetailContent && avatarFocused ? avatarFocused : avatar;
   const contactVisible = contactOpen || contactHovered;
   const mobileDetailTitle = showSettingsDetail
     ? 'Customize'
@@ -862,7 +868,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     >
       <span className="flex-shrink-0 opacity-100 scale-100 transition-all duration-150">
         {(() => {
-          const avatarSrc = avatar;
+          const avatarSrc = activeAvatar;
           return avatarSrc ? (
             <AvatarImage
               src={avatarSrc}
@@ -906,7 +912,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden cursor-pointer hover:ring-2 hover:ring-purple-300 transition-all"
             >
               {(() => {
-                const avatarSrc = avatar;
+                const avatarSrc = activeAvatar;
                 return avatarSrc ? (
                   <AvatarImage
                     src={avatarSrc}
