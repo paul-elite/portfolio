@@ -877,14 +877,17 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         {/* Left Content Column - Fixed at 100vh */}
         <div className="flex-1 md:col-span-3 flex flex-col min-w-0 h-full overflow-visible">
           {/* Identity */}
-          {!showSettingsDetail && (
-            <div className={`hidden md:block h-auto mb-6 transition-opacity ${hasDetailContent ? 'opacity-60' : ''}`}>
-              <h1 className="text-base font-semibold text-gray-900">
-                {siteConfig.name}
-              </h1>
-              <p className="text-base font-normal text-gray-500">{siteConfig.title}</p>
-            </div>
-          )}
+          <div
+            className={`hidden md:block h-auto mb-6 transition-opacity ${
+              showSettingsDetail ? 'pointer-events-none opacity-0' : hasDetailContent ? 'opacity-60' : ''
+            }`}
+            aria-hidden={showSettingsDetail}
+          >
+            <h1 className="text-base font-semibold text-gray-900">
+              {siteConfig.name}
+            </h1>
+            <p className="text-base font-normal text-gray-500">{siteConfig.title}</p>
+          </div>
           {!hasDetailContent && (
             <div className="md:hidden mb-6 transition-opacity">
               <div className="flex items-center gap-3">
@@ -1234,9 +1237,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             role="dialog"
             aria-modal="true"
             aria-label={mobileDetailTitle}
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="mobile-detail-scroll">
