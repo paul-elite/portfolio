@@ -789,19 +789,19 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           disabled={!isActive}
           tabIndex={isActive ? 0 : -1}
         >
-          <span className={`grid h-10 w-10 flex-shrink-0 place-items-center overflow-hidden rounded-full bg-white transition-opacity duration-150 ${stateClass}`}>
+          <span className={`grid h-10 w-10 flex-shrink-0 place-items-center transition-opacity duration-150 ${stateClass}`}>
             {imageSrc ? (
-            <AvatarImage
-              src={imageSrc}
-              alt={title}
-              width={26}
-              height={26}
-              className="h-[26px] w-[26px] object-contain"
-            />
+              <AvatarImage
+                src={imageSrc}
+                alt={title}
+                width={40}
+                height={40}
+                className="h-auto max-h-[26px] w-auto max-w-[26px] object-contain"
+              />
             ) : (
-            <span className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br ${colorClass}`}>
-              <span className="text-sm font-medium text-white">{fallbackSymbol}</span>
-            </span>
+              <span className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br ${colorClass}`}>
+                <span className="text-sm font-medium text-white">{fallbackSymbol}</span>
+              </span>
             )}
           </span>
         </button>
