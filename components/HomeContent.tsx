@@ -443,6 +443,18 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       icon: <RadialTabIcon icon={meta.icon} />,
     };
   });
+  const activeNavigationItem = navigationItems.find((item) => item.key === activeTab) || navigationItems[0];
+  const sectionNavigationAvatar = (
+    <div
+      className="section-navigation-avatar grid h-10 w-10 place-items-center rounded-full bg-white text-[var(--experience-accent)] transition-opacity duration-[var(--experience-motion)]"
+      style={{ boxShadow: '0 1px 2px rgb(24 24 27 / 12%), 0 8px 18px rgb(24 24 27 / 9%)' }}
+      aria-hidden="true"
+    >
+      <span className="grid h-5 w-5 place-items-center [&_svg]:h-5 [&_svg]:w-5">
+        {activeNavigationItem?.icon}
+      </span>
+    </div>
+  );
   const radialMenuItems: RadialToolkitItem[] = radialTabs.map((tab) => {
     const meta = radialTabMeta[tab.key];
 
@@ -837,17 +849,13 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             </button>
           </div>
 
-          {/* Tabs spacer - matches exact height of tabs section using same elements */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-base mb-6 opacity-0 pointer-events-none" aria-hidden="true">
-            {mainTabs.map((tab) => (
-              <button key={tab.key} type="button" className="font-normal">{tab.label}</button>
-            ))}
-            <button type="button" className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                <line x1="6" y1="2" x2="6" y2="10" />
-                <line x1="2" y1="6" x2="10" y2="6" />
-              </svg>
-            </button>
+          {/* Section avatar - aligns with the navigation row */}
+          <div
+            className={`mb-6 flex h-5 items-center justify-end overflow-visible transition-opacity ${
+              showSettingsDetail ? 'opacity-0' : 'opacity-100'
+            }`}
+          >
+            {sectionNavigationAvatar}
           </div>
 
           {/* Project Avatars - synced with content list scroll */}
@@ -930,12 +938,17 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
           {/* Tabs */}
           {!showSettingsDetail && (
-            <PortfolioNavigation
-              items={navigationItems}
-              activeTab={activeTab}
-              onChange={handleTabChange}
-              radialTrigger={radialTrigger}
-            />
+            <div className="relative">
+              <div className="pointer-events-none absolute left-0 top-[-10px] z-40 md:hidden">
+                {sectionNavigationAvatar}
+              </div>
+              <PortfolioNavigation
+                items={navigationItems}
+                activeTab={activeTab}
+                onChange={handleTabChange}
+                radialTrigger={radialTrigger}
+              />
+            </div>
           )}
 
           {/* Content List */}
