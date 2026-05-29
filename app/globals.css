@@ -332,6 +332,19 @@ body {
   padding-bottom: 0;
 }
 
+.mobile-detail-content--settings .mobile-avatar-rail {
+  position: fixed;
+  top: 3rem;
+  left: max(1.25rem, env(safe-area-inset-left, 0px));
+  margin-left: 0;
+}
+
+.mobile-detail-content--settings .mobile-name-avatar {
+  height: 2.5rem;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 .portfolio-home :where(.text-gray-900, .text-gray-600, .text-pink-500, .hover\:text-gray-900:hover, .hover\:text-gray-600:hover) {
   color: var(--portfolio-text-dark) !important;
 }

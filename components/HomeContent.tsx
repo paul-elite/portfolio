@@ -699,7 +699,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   );
   const settingsDetailContent = showSettingsDetail ? (
     <div key={contentAnimationKey} className="home-settings-detail w-full max-w-[572px] animate-slideInFromRight">
-      <CustomizeExperienceContent onClose={handleClearSelection} />
+      <CustomizeExperienceContent />
     </div>
   ) : null;
   const renderProjectAvatarButtons = ({
@@ -769,7 +769,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     <button
       type="button"
       onClick={handleClearSelection}
-      className="flex h-[60px] items-center justify-end py-3"
+      className="mobile-name-avatar flex h-[60px] items-center justify-end py-3"
       aria-label="Show all work"
     >
       <span className="flex-shrink-0 opacity-100 scale-100 transition-all duration-150">
@@ -795,7 +795,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     </button>
   );
   const mobileAvatarRail = (
-    <div className="-ml-[52px] sticky top-0 flex max-h-dvh w-10 shrink-0 flex-col items-end overflow-y-auto overscroll-contain hide-scrollbar [touch-action:pan-y]">
+    <div className="mobile-avatar-rail -ml-[52px] sticky top-0 flex max-h-dvh w-10 shrink-0 flex-col items-end overflow-y-auto overscroll-contain hide-scrollbar [touch-action:pan-y]">
       {mobileNameAvatar}
       {mobileProjectAvatarButtons}
     </div>
@@ -1246,16 +1246,18 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               <div className={`mobile-detail-content ${showSettingsDetail ? 'mobile-detail-content--settings' : ''}`}>
                 {mobileAvatarRail}
                 <div className="min-w-0 flex-1">
-                  <button
-                    type="button"
-                    onClick={handleClearSelection}
-                    aria-label="Close details"
-                    className="mb-5 grid h-11 w-11 place-items-center rounded-full bg-[var(--experience-surface)] text-[var(--experience-muted)] transition-colors hover:text-[var(--experience-text)]"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true">
-                      <path d="M4 4l8 8M12 4l-8 8" />
-                    </svg>
-                  </button>
+                  {!showSettingsDetail && (
+                    <button
+                      type="button"
+                      onClick={handleClearSelection}
+                      aria-label="Close details"
+                      className="mb-5 grid h-11 w-11 place-items-center rounded-full bg-[var(--experience-surface)] text-[var(--experience-muted)] transition-colors hover:text-[var(--experience-text)]"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true">
+                        <path d="M4 4l8 8M12 4l-8 8" />
+                      </svg>
+                    </button>
+                  )}
                   {showSettingsDetail ? (
                     <CustomizeExperienceContent />
                   ) : (
