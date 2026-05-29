@@ -794,16 +794,10 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       </span>
     </button>
   );
-  const mobileAvatarRail = (
-    <div className="mobile-avatar-rail -ml-[52px] sticky top-0 flex max-h-dvh w-10 shrink-0 flex-col items-end overflow-y-auto overscroll-contain hide-scrollbar [touch-action:pan-y]">
-      {mobileNameAvatar}
-      {mobileProjectAvatarButtons}
-    </div>
-  );
-  const mobileSettingsRail = (
+  const mobileDetailRail = (
     <div
-      className={`mobile-settings-rail md:hidden ${showSettingsDetail ? 'mobile-settings-rail--active' : ''}`}
-      aria-hidden={!showSettingsDetail}
+      className={`mobile-detail-rail md:hidden ${hasDetailContent ? 'mobile-detail-rail--active' : ''}`}
+      aria-hidden={!hasDetailContent}
     >
       {mobileNameAvatar}
       {mobileProjectAvatarButtons}
@@ -812,7 +806,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
   return (
     <div className="portfolio-home relative h-full max-h-dvh flex flex-col overflow-hidden pt-12 pb-5 pl-2 pr-3 md:pt-24 md:pb-6 md:px-6">
-      {mobileSettingsRail}
+      {mobileDetailRail}
       {/* Main content area */}
       <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6 min-h-0 overflow-visible">
         {/* Avatar Column */}
@@ -1254,7 +1248,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           >
             <div className="mobile-detail-scroll">
               <div className={`mobile-detail-content ${showSettingsDetail ? 'mobile-detail-content--settings' : ''}`}>
-                {!showSettingsDetail && mobileAvatarRail}
                 <div className="min-w-0 flex-1">
                   {!showSettingsDetail && (
                     <button

@@ -317,25 +317,19 @@ body {
 }
 
 .mobile-detail-content {
-  display: flex;
-  min-height: 100dvh;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
-  padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
-  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
-  padding-left: calc(52px + max(0.5rem, env(safe-area-inset-left, 0px)));
-}
-
-.mobile-detail-content--settings {
   display: block;
+  min-height: 100dvh;
   padding-top: 3rem;
   padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
-  padding-bottom: 0;
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
   padding-left: calc(max(1.25rem, env(safe-area-inset-left, 0px)) + 3.9rem);
 }
 
-.mobile-settings-rail {
+.mobile-detail-content--settings {
+  padding-bottom: 0;
+}
+
+.mobile-detail-rail {
   position: fixed;
   z-index: 9010;
   top: 3rem;
@@ -354,24 +348,24 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-.mobile-settings-rail--active {
+.mobile-detail-rail--active {
   pointer-events: auto;
   opacity: 1;
 }
 
-.mobile-settings-rail::-webkit-scrollbar {
+.mobile-detail-rail::-webkit-scrollbar {
   display: none;
   width: 0;
   height: 0;
 }
 
-.mobile-settings-rail .mobile-name-avatar {
+.mobile-detail-rail .mobile-name-avatar {
   height: 2.5rem;
   padding-top: 0;
   padding-bottom: 0;
 }
 
-.mobile-settings-rail [aria-label^="Open "] > span {
+.mobile-detail-rail [aria-label^="Open "] > span {
   opacity: 1 !important;
 }
 
