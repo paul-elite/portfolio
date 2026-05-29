@@ -716,11 +716,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     const visible = isActive;
     const stateClass = showInactive
       ? isActive
-        ? 'opacity-100'
-        : 'opacity-0'
+        ? 'opacity-100 visible'
+        : 'opacity-0 invisible pointer-events-none'
       : visible
-        ? 'opacity-100'
-        : 'opacity-0';
+        ? 'opacity-100 visible'
+        : 'opacity-0 invisible pointer-events-none';
 
     return (
       <button
@@ -730,8 +730,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           setActiveTab('projects');
           handleSelectProject(project);
         }}
-        className="py-3 h-[60px] flex items-center justify-end"
+        className="project-avatar-row flex items-center justify-end py-[var(--experience-row-padding)]"
         aria-label={`Open ${project.title}`}
+        aria-hidden={!isActive}
+        disabled={!isActive}
+        tabIndex={isActive ? 0 : -1}
       >
         <span
           className={`flex-shrink-0 transition-opacity duration-150 ${stateClass}`}
@@ -845,8 +848,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           <div className="flex-1 min-h-0 relative">
             <div ref={avatarContainerRef} className="absolute inset-0 overflow-y-auto hide-scrollbar">
             {projectAvatarButtons}
-            {activeTab === 'illustration' && ILLUSTRATION_CATEGORIES.map((cat, index) => {
+            {ILLUSTRATION_CATEGORIES.map((cat, index) => {
               const isSelected = selectedCategory === cat.key;
+              const isVisible = activeTab === 'illustration' && isSelected;
               const colors = [
                 'from-yellow-400 to-orange-400',
                 'from-pink-400 to-purple-400',
@@ -855,8 +859,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               const colorClass = colors[index % colors.length];
 
               return (
-                <div key={cat.key} className="py-3 flex items-start justify-end">
-                  <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`}>
+                <div key={cat.key} className="project-avatar-row flex items-center justify-end py-[var(--experience-row-padding)]" aria-hidden={!isVisible}>
+                  <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center transition-opacity duration-150 ${isVisible ? 'visible opacity-100' : 'invisible opacity-0'}`}>
                     <span className="text-base">{cat.symbol}</span>
                   </div>
                 </div>

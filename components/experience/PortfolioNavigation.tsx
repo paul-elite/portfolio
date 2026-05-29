@@ -18,6 +18,22 @@ interface PortfolioNavigationProps {
   radialTrigger: ReactNode;
 }
 
+function ActiveNavAvatar({ active, children }: { active: boolean; children: ReactNode }) {
+  return (
+    <span
+      className={`grid h-[18px] w-[18px] flex-shrink-0 place-items-center rounded-full bg-white text-[var(--experience-accent)] transition-opacity duration-[var(--experience-motion)] ${
+        active ? 'opacity-100' : 'opacity-0'
+      }`}
+      style={{ boxShadow: '0 1px 2px rgb(24 24 27 / 12%), 0 5px 12px rgb(24 24 27 / 10%)' }}
+      aria-hidden="true"
+    >
+      <span className="grid h-3.5 w-3.5 place-items-center [&_svg]:h-3 [&_svg]:w-3">
+        {children}
+      </span>
+    </span>
+  );
+}
+
 export default function PortfolioNavigation({ items, activeTab, onChange, radialTrigger }: PortfolioNavigationProps) {
   const { preferences } = usePreferences();
   const [commandOpen, setCommandOpen] = useState(false);
@@ -50,12 +66,13 @@ export default function PortfolioNavigation({ items, activeTab, onChange, radial
             key={item.key}
             type="button"
             onClick={() => onChange(item.key)}
-            className={`font-normal transition-all ${
+            className={`inline-flex items-center gap-1.5 font-normal transition-all ${
               activeTab === item.key
                 ? 'text-[var(--experience-text)]'
                 : 'text-[var(--experience-muted)] hover:text-[var(--experience-text)]'
             }`}
           >
+            <ActiveNavAvatar active={activeTab === item.key}>{item.icon}</ActiveNavAvatar>
             {item.label}
           </button>
         ))}
@@ -73,6 +90,9 @@ export default function PortfolioNavigation({ items, activeTab, onChange, radial
             className="inline-flex items-center gap-2 rounded-full bg-[var(--experience-surface)] px-3 py-1.5 text-sm font-normal text-[var(--experience-text)] transition-colors hover:bg-[var(--experience-accent-soft)]"
             style={{ boxShadow: '0 0 0 0.5px var(--experience-border)' }}
           >
+            <ActiveNavAvatar active>
+              {items.find((item) => item.key === activeTab)?.icon}
+            </ActiveNavAvatar>
             <span className="grid h-5 w-5 place-items-center rounded-full bg-[var(--experience-card)] text-[var(--experience-accent)]">
               <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true">
                 <path d="M7 12a5 5 0 1 1 3.5-1.45L14 14" />
@@ -123,6 +143,7 @@ export default function PortfolioNavigation({ items, activeTab, onChange, radial
                       }}
                       className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-left text-sm hover:bg-[var(--experience-accent-soft)]"
                     >
+                      <ActiveNavAvatar active={activeTab === item.key}>{item.icon}</ActiveNavAvatar>
                       <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--experience-surface)] text-[var(--experience-accent)]">
                         {item.icon}
                       </span>
@@ -145,12 +166,13 @@ export default function PortfolioNavigation({ items, activeTab, onChange, radial
           key={item.key}
           type="button"
           onClick={() => onChange(item.key)}
-          className={`font-normal transition-all ${
+          className={`inline-flex items-center gap-1.5 font-normal transition-all ${
             activeTab === item.key
               ? 'text-[var(--experience-text)]'
               : 'text-[var(--experience-muted)] hover:text-[var(--experience-text)]'
           }`}
         >
+          <ActiveNavAvatar active={activeTab === item.key}>{item.icon}</ActiveNavAvatar>
           {item.label}
         </button>
       ))}
