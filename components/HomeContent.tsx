@@ -1271,10 +1271,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           <div className="flex items-center gap-3">
             {settingsTrigger}
           </div>
-          {/* Now Playing */}
-          <div className="flex items-center gap-3">
-            <NowPlayingImage data={nowPlayingData} useAlbumArt />
-            {!hasDetailContent && (
+          {!hasDetailContent && (
+            <div className="flex items-center gap-3">
+              <NowPlayingImage data={nowPlayingData} useAlbumArt />
               <div className="min-w-0">
                 {nowPlayingData?.isPlaying ? (
                   <>
@@ -1294,8 +1293,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   </>
                 )}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
