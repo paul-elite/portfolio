@@ -1403,16 +1403,14 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         </div>
       </div>
 
-      {preferences.navigationStyle === 'radial' && (
-        <RadialToolkit
-          anchor={radialAnchor}
-          items={radialMenuItems}
-          open={showMoreTabs}
-          onClose={closeRadialMenu}
-          onMouseEnter={clearRadialCloseTimer}
-          onMouseLeave={scheduleRadialClose}
-        />
-      )}
+      <RadialToolkit
+        anchor={radialAnchor}
+        items={radialMenuItems}
+        open={showMoreTabs}
+        onClose={closeRadialMenu}
+        onMouseEnter={clearRadialCloseTimer}
+        onMouseLeave={scheduleRadialClose}
+      />
 
       <button
         type="button"
