@@ -438,8 +438,8 @@ body {
 }
 
 .home-settings-trigger-icon {
-  background: rgb(240 98 91 / 12%);
-  color: var(--settings-red);
+  background: #efeff1;
+  color: #64656d;
 }
 
 .home-settings-options {
