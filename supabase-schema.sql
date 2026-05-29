@@ -34,3 +34,10 @@ CREATE POLICY "Public read access" ON storage.objects
 -- Allow authenticated uploads
 CREATE POLICY "Allow uploads" ON storage.objects
   FOR INSERT WITH CHECK (bucket_id = 'uploads');
+
+-- Content list avatars
+ALTER TABLE IF EXISTS illustrations
+  ADD COLUMN IF NOT EXISTS avatar TEXT DEFAULT '';
+
+ALTER TABLE IF EXISTS interactions
+  ADD COLUMN IF NOT EXISTS avatar TEXT DEFAULT '';

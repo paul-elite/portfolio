@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import OptimizedImage from './OptimizedImage';
 import ContentBlocks from './content/ContentBlocks';
-import type { Illustration, IllustrationCategory, PortfolioContent, Project, SiteConfig, Writing } from '@/lib/content-model';
+import type { Illustration, IllustrationCategory, Interaction, PortfolioContent, Project, SiteConfig, Writing } from '@/lib/content-model';
 import {
   ILLUSTRATION_CATEGORIES,
   MAIN_PORTFOLIO_TABS,
@@ -191,6 +191,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedWriting, setSelectedWriting] = useState<Writing | null>(null);
+  const [selectedInteraction, setSelectedInteraction] = useState<Interaction | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<IllustrationCategory | null>(null);
   const [activeVideo, setActiveVideo] = useState<Illustration | null>(null);
   const [showMoreTabs, setShowMoreTabs] = useState(false);
@@ -243,6 +244,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const updateURL = useCallback((selection: {
     projectSlug?: string | null;
     writingSlug?: string | null;
+    interactionSlug?: string | null;
     category?: IllustrationCategory | null;
   }) => {
     const params = new URLSearchParams();
@@ -250,6 +252,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       params.set('project', selection.projectSlug);
     } else if (selection.writingSlug) {
       params.set('writing', selection.writingSlug);
+    } else if (selection.interactionSlug) {
+      params.set('interaction', selection.interactionSlug);
     } else if (selection.category) {
       params.set('category', selection.category);
     }
@@ -262,6 +266,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     setShowSettingsDetail(false);
     setSelectedProject(project);
     setSelectedWriting(null);
+    setSelectedInteraction(null);
     setSelectedCategory(null);
     setPreviewImageIndex(0);
     setContentAnimationKey(project ? `project-${project.id}-${Date.now()}` : null);
@@ -272,6 +277,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     setShowSettingsDetail(false);
     setSelectedWriting(writing);
     setSelectedProject(null);
+    setSelectedInteraction(null);
     setSelectedCategory(null);
     setHoveredProject(null);
     setPreviewImageIndex(0);
@@ -279,11 +285,24 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     updateURL({ writingSlug: writing?.slug || null });
   }, [updateURL]);
 
+  const handleSelectInteraction = useCallback((interaction: Interaction | null) => {
+    setShowSettingsDetail(false);
+    setSelectedInteraction(interaction);
+    setSelectedProject(null);
+    setSelectedWriting(null);
+    setSelectedCategory(null);
+    setHoveredProject(null);
+    setPreviewImageIndex(0);
+    setContentAnimationKey(interaction ? `interaction-${interaction.id}-${Date.now()}` : null);
+    updateURL({ interactionSlug: interaction?.slug || null });
+  }, [updateURL]);
+
   const handleSelectCategory = useCallback((category: IllustrationCategory | null) => {
     setShowSettingsDetail(false);
     setSelectedCategory(category);
     setSelectedProject(null);
     setSelectedWriting(null);
+    setSelectedInteraction(null);
     setContentAnimationKey(category ? `category-${category}-${Date.now()}` : null);
     updateURL({ category });
   }, [updateURL]);
@@ -292,6 +311,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     setShowSettingsDetail(false);
     setSelectedProject(null);
     setSelectedWriting(null);
+    setSelectedInteraction(null);
     setSelectedCategory(null);
     setContentAnimationKey(null);
     updateURL({});
@@ -302,6 +322,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     setActiveTab(tab);
     setSelectedProject(null);
     setSelectedWriting(null);
+    setSelectedInteraction(null);
     setSelectedCategory(null);
     setHoveredProject(null);
     setShowMoreTabs(false);
@@ -314,6 +335,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const openSettings = useCallback(() => {
     setSelectedProject(null);
     setSelectedWriting(null);
+    setSelectedInteraction(null);
     setSelectedCategory(null);
     setHoveredProject(null);
     setShowMoreTabs(false);
@@ -425,13 +447,13 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const mainTabs = MAIN_PORTFOLIO_TABS;
 
   // Track if anything is selected to fade other elements
-  const hasSelection = selectedProject !== null || selectedWriting !== null || selectedCategory !== null;
+  const hasSelection = selectedProject !== null || selectedWriting !== null || selectedInteraction !== null || selectedCategory !== null;
   const hasDetailContent = hasSelection || showSettingsDetail;
   const shouldUseFocusedAvatar = hasSelection;
   const contactVisible = contactOpen || contactHovered;
   const mobileDetailTitle = showSettingsDetail
     ? 'Customize'
-    : selectedProject?.title || selectedWriting?.title || ILLUSTRATION_CATEGORIES.find((category) => category.key === selectedCategory)?.label || 'Details';
+    : selectedProject?.title || selectedWriting?.title || selectedInteraction?.title || ILLUSTRATION_CATEGORIES.find((category) => category.key === selectedCategory)?.label || 'Details';
 
   const moreTabs = SECONDARY_PORTFOLIO_TABS;
   const radialTabs = [...mainTabs, ...moreTabs];
@@ -447,7 +469,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const sectionNavigationAvatar = (
     <div
       className="section-navigation-avatar grid h-10 w-10 place-items-center rounded-full bg-white text-[var(--experience-accent)] transition-opacity duration-[var(--experience-motion)]"
-      style={{ boxShadow: '0 1px 2px rgb(24 24 27 / 12%), 0 8px 18px rgb(24 24 27 / 9%)' }}
       aria-hidden="true"
     >
       <span className="grid h-5 w-5 place-items-center [&_svg]:h-5 [&_svg]:w-5">
@@ -620,6 +641,25 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         </a>
       )}
     </div>
+  ) : selectedInteraction ? (
+    <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
+      <div className="hidden md:sticky md:top-0 md:z-20 md:-mx-1 md:mb-6 md:block md:bg-background md:px-1 md:py-3">
+        <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedInteraction.title}</h2>
+      </div>
+
+      <p className="text-base text-gray-600 leading-relaxed">{selectedInteraction.description}</p>
+
+      {selectedInteraction.link && (
+        <a
+          href={selectedInteraction.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-gray-400 hover:text-gray-900 transition-colors mt-8 inline-block"
+        >
+          View Interaction →
+        </a>
+      )}
+    </div>
   ) : selectedCategory ? (
     <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
       <h2 className="hidden text-xl font-semibold text-gray-900 mb-6 md:block">
@@ -708,16 +748,13 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       <CustomizeExperienceContent />
     </div>
   ) : null;
-  const renderProjectAvatarButtons = ({
-    showInactive,
+  const renderContentAvatarButtons = ({
     keyPrefix,
-    rowClassName = 'project-avatar-row flex items-center justify-end py-[var(--experience-row-padding)]',
+    rowClassName = 'project-avatar-row flex items-center justify-center py-[var(--experience-row-padding)]',
   }: {
-    showInactive: boolean;
     keyPrefix: string;
     rowClassName?: string;
-  }) => content.projects.map((project, index) => {
-    const isActive = selectedProject?.id === project.id;
+  }) => {
     const colors = [
       'from-blue-400 to-cyan-400',
       'from-purple-400 to-pink-400',
@@ -726,63 +763,107 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       'from-indigo-400 to-purple-400',
       'from-pink-400 to-rose-400',
     ];
-    const colorClass = colors[index % colors.length];
-    const visible = isActive;
-    const stateClass = showInactive
-      ? isActive
-        ? 'opacity-100 visible'
-        : 'opacity-0 invisible pointer-events-none'
-      : visible
+
+    const renderAvatar = (
+      key: string,
+      title: string,
+      imageSrc: string | undefined,
+      isActive: boolean,
+      index: number,
+      onClick: () => void,
+      fallbackSymbol = title.charAt(0),
+    ) => {
+      const stateClass = isActive
         ? 'opacity-100 visible'
         : 'opacity-0 invisible pointer-events-none';
+      const colorClass = colors[index % colors.length];
 
-    return (
-      <button
-        key={`${keyPrefix}-${project.id}`}
-        type="button"
-        onClick={() => {
-          setActiveTab('projects');
-          handleSelectProject(project);
-        }}
-        className={rowClassName}
-        aria-label={`Open ${project.title}`}
-        aria-hidden={!isActive}
-        disabled={!isActive}
-        tabIndex={isActive ? 0 : -1}
-      >
-        <span
-          className={`flex-shrink-0 transition-opacity duration-150 ${stateClass}`}
+      return (
+        <button
+          key={`${keyPrefix}-${key}`}
+          type="button"
+          onClick={onClick}
+          className={rowClassName}
+          aria-label={`Open ${title}`}
+          aria-hidden={!isActive}
+          disabled={!isActive}
+          tabIndex={isActive ? 0 : -1}
         >
-          {project.avatar ? (
+          <span className={`grid h-10 w-10 flex-shrink-0 place-items-center overflow-hidden rounded-full bg-white transition-opacity duration-150 ${stateClass}`}>
+            {imageSrc ? (
             <AvatarImage
-              src={project.avatar}
-              alt={project.title}
-              width={40}
-              height={40}
-              className="w-10 h-10 object-contain"
+              src={imageSrc}
+              alt={title}
+              width={26}
+              height={26}
+              className="h-[26px] w-[26px] object-contain"
             />
-          ) : (
-            <span className={`w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center`}>
-              <span className="text-sm font-medium text-white">
-                {project.title.charAt(0)}
-              </span>
+            ) : (
+            <span className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br ${colorClass}`}>
+              <span className="text-sm font-medium text-white">{fallbackSymbol}</span>
             </span>
-          )}
-        </span>
-      </button>
-    );
-  });
-  const projectAvatarButtons = renderProjectAvatarButtons({ showInactive: false, keyPrefix: 'desktop-project-avatar' });
-  const mobileProjectAvatarButtons = renderProjectAvatarButtons({
-    showInactive: true,
-    keyPrefix: 'mobile-project-avatar',
-    rowClassName: 'mobile-rail-avatar-row flex h-[60px] items-center justify-end py-3',
+            )}
+          </span>
+        </button>
+      );
+    };
+
+    if (activeTab === 'writings') {
+      return content.writings.map((writing, index) => renderAvatar(
+        writing.id,
+        writing.title,
+        writing.avatar,
+        selectedWriting?.id === writing.id,
+        index,
+        () => handleSelectWriting(writing),
+      ));
+    }
+
+    if (activeTab === 'illustration') {
+      return ILLUSTRATION_CATEGORIES.map((cat, index) => {
+        const categoryPreview = content.illustrations.find((item) => (item.category || 'assets') === cat.key);
+        return renderAvatar(
+          cat.key,
+          cat.label,
+          categoryPreview?.avatar || categoryPreview?.thumbnail,
+          selectedCategory === cat.key,
+          index,
+          () => handleSelectCategory(cat.key),
+          cat.label.charAt(0),
+        );
+      });
+    }
+
+    if (activeTab === 'interaction') {
+      return content.interactions.map((interaction, index) => renderAvatar(
+        interaction.id,
+        interaction.title,
+        interaction.avatar,
+        selectedInteraction?.id === interaction.id,
+        index,
+        () => handleSelectInteraction(interaction),
+      ));
+    }
+
+    return content.projects.map((project, index) => renderAvatar(
+      project.id,
+      project.title,
+      project.avatar,
+      selectedProject?.id === project.id,
+      index,
+      () => handleSelectProject(project),
+    ));
+  };
+  const contentAvatarButtons = renderContentAvatarButtons({ keyPrefix: 'desktop-content-avatar' });
+  const mobileContentAvatarButtons = renderContentAvatarButtons({
+    keyPrefix: 'mobile-content-avatar',
+    rowClassName: 'mobile-rail-avatar-row flex h-[60px] items-center justify-center py-3',
   });
   const mobileNameAvatar = (
     <button
       type="button"
       onClick={handleClearSelection}
-      className="mobile-name-avatar flex h-[60px] items-center justify-end py-3"
+      className="mobile-name-avatar flex h-[60px] items-center justify-center py-3"
       aria-label="Show all work"
     >
       <span className="flex-shrink-0 opacity-100 scale-100 transition-all duration-150">
@@ -813,7 +894,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       aria-hidden={!hasDetailContent}
     >
       {mobileNameAvatar}
-      {mobileProjectAvatarButtons}
+      {mobileContentAvatarButtons}
     </div>
   );
 
@@ -823,9 +904,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       {/* Main content area */}
       <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6 min-h-0 overflow-visible">
         {/* Avatar Column */}
-        <div className="hidden md:flex md:col-span-1 flex-col items-end h-full overflow-visible">
+        <div className="hidden md:flex md:col-span-1 flex-col items-center h-full overflow-visible">
           {/* User Avatar - matches Name section height */}
-          <div className="h-14 mb-4 flex items-start">
+          <div className="h-14 mb-4 flex items-start justify-center">
             <button
               onClick={handleClearSelection}
               className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden cursor-pointer hover:ring-2 hover:ring-purple-300 transition-all"
@@ -851,7 +932,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
           {/* Section avatar - aligns with the navigation row */}
           <div
-            className={`mb-6 flex h-5 items-center justify-end overflow-visible transition-opacity ${
+            className={`mb-6 flex h-5 items-center justify-center overflow-visible transition-opacity ${
               showSettingsDetail ? 'opacity-0' : 'opacity-100'
             }`}
           >
@@ -861,29 +942,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           {/* Project Avatars - synced with content list scroll */}
           <div className="flex-1 min-h-0 relative">
             <div ref={avatarContainerRef} className="absolute inset-0 overflow-y-auto hide-scrollbar">
-            {projectAvatarButtons}
-            {ILLUSTRATION_CATEGORIES.map((cat, index) => {
-              const isSelected = selectedCategory === cat.key;
-              const isVisible = activeTab === 'illustration' && isSelected;
-              const colors = [
-                'from-yellow-400 to-orange-400',
-                'from-pink-400 to-purple-400',
-                'from-cyan-400 to-blue-400',
-              ];
-              const colorClass = colors[index % colors.length];
-
-              return (
-                <div key={cat.key} className="project-avatar-row flex items-center justify-end py-[var(--experience-row-padding)]" aria-hidden={!isVisible}>
-                  <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center transition-opacity duration-150 ${isVisible ? 'visible opacity-100' : 'invisible opacity-0'}`}>
-                    <span className="text-base">{cat.symbol}</span>
-                  </div>
-                </div>
-              );
-            })}
+            {contentAvatarButtons}
             </div>
           </div>
 
-          <div className="mt-4 flex h-12 items-center justify-end">
+          <div className="mt-4 flex h-12 items-center justify-center">
             {settingsTrigger}
           </div>
         </div>
@@ -976,17 +1039,26 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             )}
 
             {activeTab === 'interaction' && (
-              <div className={`transition-opacity ${hasSelection ? 'opacity-30' : ''}`}>
-                {content.interactions.map((item) => (
-                  <article key={item.id} className="py-3">
+              <div>
+                {content.interactions.map((item) => {
+                  const isSelected = selectedInteraction?.id === item.id;
+
+                  return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleSelectInteraction(isSelected ? null : item)}
+                    className={`group block w-full py-3 text-left transition-opacity ${hasSelection && !isSelected ? 'opacity-30' : ''}`}
+                  >
                     <h3 className="text-base font-medium text-gray-900 mb-0.5">
                       {item.title}
                     </h3>
                     <p className="text-sm text-gray-400">
                       {item.description}
                     </p>
-                  </article>
-                ))}
+                  </button>
+                  );
+                })}
               </div>
             )}
 
@@ -1194,6 +1266,22 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   className="text-sm text-gray-400 hover:text-gray-900 transition-colors mt-8 inline-block"
                 >
                   Read More →
+                </a>
+              )}
+            </div>
+          ) : selectedInteraction ? (
+            <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">{selectedInteraction.title}</h2>
+              <p className="text-base text-gray-600 leading-relaxed">{selectedInteraction.description}</p>
+
+              {selectedInteraction.link && (
+                <a
+                  href={selectedInteraction.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-gray-400 hover:text-gray-900 transition-colors mt-8 inline-block"
+                >
+                  View Interaction →
                 </a>
               )}
             </div>

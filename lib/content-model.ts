@@ -51,6 +51,7 @@ export interface Illustration {
   slug: string;
   title: string;
   description: string;
+  avatar?: string;
   thumbnail?: string;
   youtubeUrl?: string;
   category?: IllustrationCategory;
@@ -61,6 +62,7 @@ export interface Interaction {
   slug: string;
   title: string;
   description: string;
+  avatar?: string;
   link?: string;
 }
 

@@ -145,6 +145,7 @@ export async function POST(request: NextRequest) {
     } else if (type === 'illustrations') {
       insertData = {
         ...insertData,
+        avatar: data.avatar || '',
         thumbnail: data.thumbnail || '',
         youtube_url: data.youtubeUrl || data.youtube_url || '',
         category: data.category || 'assets',
@@ -152,6 +153,7 @@ export async function POST(request: NextRequest) {
     } else if (type === 'interactions') {
       insertData = {
         ...insertData,
+        avatar: data.avatar || '',
         link: data.link || '',
       };
     }

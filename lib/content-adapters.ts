@@ -60,6 +60,7 @@ export function mapIllustration(row: RecordLike): Illustration {
     slug: asString(row.slug),
     title: asString(row.title),
     description: asString(row.description),
+    avatar: asString(row.avatar),
     thumbnail: asString(row.thumbnail),
     youtubeUrl: asString(row.youtube_url || row.youtubeUrl),
     category: (row.category || 'assets') as Illustration['category'],
@@ -73,6 +74,7 @@ export function mapInteraction(row: RecordLike): Interaction {
     slug: asString(row.slug),
     title: asString(row.title),
     description: asString(row.description),
+    avatar: asString(row.avatar),
     link: asString(row.link),
   };
 }

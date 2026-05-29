@@ -476,6 +476,7 @@ export default function AdminPage() {
       setProjectBlocks((item.blocks as Block[]) || []);
       setHomepageImages((item.previewImages as string[]) || []);
     } else if (activeTab === 'illustrations') {
+      data.avatar = (item.avatar as string) || '';
       data.thumbnail = (item.thumbnail as string) || '';
       data.youtubeUrl = (item.youtubeUrl as string) || '';
       data.category = (item.category as string) || 'assets';
@@ -485,6 +486,7 @@ export default function AdminPage() {
       data.date = (item.date as string) || '';
       setWritingBlocks((item.blocks as Block[]) || []);
     } else if (activeTab === 'interactions') {
+      data.avatar = (item.avatar as string) || '';
       data.link = (item.link as string) || '';
     }
 
@@ -1278,6 +1280,22 @@ export default function AdminPage() {
                   {activeTab === 'illustrations' && (
                     <>
                       <FileUpload
+                        label="List Avatar"
+                        accept="image/*"
+                        preview={previewImages.avatar || formData.avatar}
+                        uploading={uploadingFields.has('illustrationAvatar')}
+                        aspectRatio="square"
+                        helpText="Shows beside this item on the homepage"
+                        onUpload={async (file) => {
+                          const previewUrl = URL.createObjectURL(file);
+                          setPreviewImages((prev) => ({ ...prev, avatar: previewUrl }));
+                          const path = await handleFileUpload(file, 'avatars', 'illustrationAvatar');
+                          if (path) {
+                            setFormData((prev) => ({ ...prev, avatar: path }));
+                          }
+                        }}
+                      />
+                      <FileUpload
                         label="Thumbnail"
                         accept="image/*"
                         preview={previewImages.thumbnail || formData.thumbnail}
@@ -1350,6 +1368,35 @@ export default function AdminPage() {
                           uploading={uploadingFields.has('writingBlock')}
                         />
                       </div>
+                    </>
+                  )}
+
+                  {activeTab === 'interactions' && (
+                    <>
+                      <FileUpload
+                        label="Interaction Avatar"
+                        accept="image/*"
+                        preview={previewImages.avatar || formData.avatar}
+                        uploading={uploadingFields.has('interactionAvatar')}
+                        aspectRatio="square"
+                        helpText="Shows beside this interaction on the homepage"
+                        onUpload={async (file) => {
+                          const previewUrl = URL.createObjectURL(file);
+                          setPreviewImages((prev) => ({ ...prev, avatar: previewUrl }));
+                          const path = await handleFileUpload(file, 'avatars', 'interactionAvatar');
+                          if (path) {
+                            setFormData((prev) => ({ ...prev, avatar: path }));
+                          }
+                        }}
+                      />
+                      <Input
+                        label="Live Link"
+                        placeholder="https://example.com"
+                        value={formData.link || ''}
+                        onChange={(value) => setFormData({ ...formData, link: value })}
+                        type="url"
+                        helpText="Optional external link"
+                      />
                     </>
                   )}
 
