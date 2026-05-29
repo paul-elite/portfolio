@@ -407,12 +407,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     return () => clearInterval(interval);
   }, [hoveredProject, projectImages.length, selectedProject]);
 
-  // Calculate avatar position based on project index
-  const targetProject = selectedProject || hoveredProject;
-  const targetProjectIndex = targetProject
-    ? content.projects.findIndex(p => p.id === targetProject.id)
-    : -1;
-
   // Sync scroll between content list and avatar column
   useEffect(() => {
     const contentList = contentListRef.current;
@@ -709,7 +703,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     showInactive: boolean;
     keyPrefix: string;
   }) => content.projects.map((project, index) => {
-    const isActive = targetProjectIndex === index;
+    const isActive = selectedProject?.id === project.id;
     const colors = [
       'from-blue-400 to-cyan-400',
       'from-purple-400 to-pink-400',
@@ -719,13 +713,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       'from-pink-400 to-rose-400',
     ];
     const colorClass = colors[index % colors.length];
-    const visible = activeTab === 'projects' && isActive;
+    const visible = isActive;
     const stateClass = showInactive
-      ? isActive && activeTab === 'projects' && !showSettingsDetail
-        ? 'opacity-100 ring-2 ring-[var(--experience-accent)]/25'
-        : activeTab === 'projects'
-          ? 'opacity-45'
-          : 'opacity-0'
+      ? isActive
+        ? 'opacity-100'
+        : 'opacity-0'
       : visible
         ? 'opacity-100'
         : 'opacity-0';
