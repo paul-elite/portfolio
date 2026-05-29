@@ -62,7 +62,7 @@ export function ProjectList(props: ProjectBrowserProps) {
             }}
             className="group block w-full py-[var(--experience-row-padding)] text-left hover:scale-[var(--experience-scale)]"
           >
-            <h2 className="mb-0.5 text-base font-normal text-[var(--experience-text)] transition-colors group-hover:text-[var(--experience-accent)]">
+            <h2 className="mb-0.5 text-sm font-normal text-[var(--experience-text)] transition-colors group-hover:text-[var(--experience-accent)]">
               {project.title}
             </h2>
             <p className="text-sm text-[var(--experience-muted)]">
@@ -95,7 +95,7 @@ export function ProjectGrid(props: ProjectBrowserProps) {
             className="group rounded-2xl bg-[var(--experience-card)] p-[var(--experience-card-padding)] text-left hover:scale-[var(--experience-scale)]"
             style={{ boxShadow: '0 0 0 0.5px var(--experience-border)' }}
           >
-            <h2 className="mb-1 text-base font-medium text-[var(--experience-text)] group-hover:text-[var(--experience-accent)]">
+            <h2 className="mb-1 text-sm font-medium text-[var(--experience-text)] group-hover:text-[var(--experience-accent)]">
               {project.title}
             </h2>
             <p className="text-sm text-[var(--experience-muted)]">{project.year}</p>
@@ -129,7 +129,7 @@ export function ProjectTimeline(props: ProjectBrowserProps) {
             <span className="absolute left-[0.3125rem] top-5 h-3 w-3 rounded-full bg-[var(--experience-card)]" style={{ boxShadow: '0 0 0 0.5px var(--experience-accent)' }} />
             <div className="flex items-baseline gap-2">
               <span className="text-sm text-[var(--experience-muted)]">{project.year}</span>
-              <h2 className="text-base font-normal text-[var(--experience-text)] group-hover:text-[var(--experience-accent)]">{project.title}</h2>
+              <h2 className="text-sm font-normal text-[var(--experience-text)] group-hover:text-[var(--experience-accent)]">{project.title}</h2>
             </div>
             <p className="text-sm text-[var(--experience-muted)]">{project.description}</p>
           </ProjectButton>
@@ -160,7 +160,7 @@ export function ProjectCaseStudyCards(props: ProjectBrowserProps) {
             style={{ boxShadow: '0 0 0 0.5px var(--experience-border)' }}
           >
             <div className="mb-3 flex items-center justify-between gap-3">
-              <h2 className="text-base font-semibold text-[var(--experience-text)] group-hover:text-[var(--experience-accent)]">{project.title}</h2>
+              <h2 className="text-sm font-semibold text-[var(--experience-text)] group-hover:text-[var(--experience-accent)]">{project.title}</h2>
               <span className="rounded-full bg-[var(--experience-accent-soft)] px-2 py-0.5 text-xs text-[var(--experience-accent)]">{project.year}</span>
             </div>
             <p className="text-sm leading-relaxed text-[var(--experience-muted)]">{project.description}</p>
