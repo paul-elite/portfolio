@@ -367,6 +367,10 @@ body {
 
 .mobile-detail-rail [aria-label^="Open "] > span {
   opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+  box-shadow: none !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
 }
 
 .portfolio-home :where(.text-gray-900, .text-gray-600, .text-pink-500, .hover\:text-gray-900:hover, .hover\:text-gray-600:hover) {

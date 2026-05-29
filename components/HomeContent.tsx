@@ -1249,7 +1249,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             <div className="mobile-detail-scroll">
               <div className={`mobile-detail-content ${showSettingsDetail ? 'mobile-detail-content--settings' : ''}`}>
                 <div className="min-w-0 flex-1">
-                  {!showSettingsDetail && (
+                  {!showSettingsDetail && !selectedProject && (
                     <button
                       type="button"
                       onClick={handleClearSelection}
