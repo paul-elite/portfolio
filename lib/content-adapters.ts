@@ -12,6 +12,13 @@ function asArray<T>(value: unknown, fallback: T[] = []): T[] {
   return Array.isArray(value) ? value as T[] : fallback;
 }
 
+function versionedAssetUrl(url: string, version?: string): string {
+  if (!url || !version || url.startsWith('blob:') || url.startsWith('data:')) return url;
+
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}v=${encodeURIComponent(version)}`;
+}
+
 export function mapProject(row: RecordLike): Project {
   return {
     ...(row as unknown as Project),
@@ -88,12 +95,13 @@ export function mapSettings(row?: Partial<Settings> & RecordLike | null): Settin
 
 export function settingsToSiteConfig(settings?: Partial<Settings> | null): SiteConfig {
   const normalized = mapSettings(settings as (Partial<Settings> & RecordLike) | null);
+  const settingsVersion = normalized.updated_at;
 
   return {
     name: normalized.name || staticConfig.name,
     title: normalized.title || staticConfig.title,
-    avatar: normalized.avatar || staticConfig.avatar,
-    avatarFocused: normalized.avatarFocused || '',
+    avatar: versionedAssetUrl(normalized.avatar || staticConfig.avatar, settingsVersion),
+    avatarFocused: versionedAssetUrl(normalized.avatarFocused || '', settingsVersion),
     bio: staticConfig.bio,
     social: {
       twitter: normalized.twitter || staticConfig.social.twitter,
