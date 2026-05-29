@@ -328,21 +328,51 @@ body {
 }
 
 .mobile-detail-content--settings {
+  display: block;
   padding-top: 3rem;
+  padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
   padding-bottom: 0;
+  padding-left: calc(max(1.25rem, env(safe-area-inset-left, 0px)) + 3.9rem);
 }
 
-.mobile-detail-content--settings .mobile-avatar-rail {
+.mobile-settings-rail {
   position: fixed;
+  z-index: 9010;
   top: 3rem;
   left: max(1.25rem, env(safe-area-inset-left, 0px));
-  margin-left: 0;
+  display: flex;
+  width: 2.5rem;
+  max-height: calc(100dvh - 6rem);
+  flex-direction: column;
+  align-items: flex-end;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  pointer-events: none;
+  opacity: 0;
+  scrollbar-width: none;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
-.mobile-detail-content--settings .mobile-name-avatar {
+.mobile-settings-rail--active {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.mobile-settings-rail::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.mobile-settings-rail .mobile-name-avatar {
   height: 2.5rem;
   padding-top: 0;
   padding-bottom: 0;
+}
+
+.mobile-settings-rail [aria-label^="Open "] > span {
+  opacity: 1 !important;
 }
 
 .portfolio-home :where(.text-gray-900, .text-gray-600, .text-pink-500, .hover\:text-gray-900:hover, .hover\:text-gray-600:hover) {
