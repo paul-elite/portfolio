@@ -86,7 +86,7 @@ function ProjectInlineAvatar({ project, visible }: { project: Project; visible: 
 
   return (
     <span
-      className={`absolute left-[-64px] top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center transition-opacity duration-[var(--experience-motion)] ${visibilityClass}`}
+      className={`absolute left-[-72px] top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center transition-opacity duration-[var(--experience-motion)] ${visibilityClass}`}
       aria-hidden="true"
     >
       {project.avatar ? (
