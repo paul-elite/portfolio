@@ -909,6 +909,42 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     ));
   };
   const contentAvatarButtons = renderContentAvatarButtons({ keyPrefix: 'desktop-content-avatar' });
+  const visibleProjectAvatarId = selectedProject?.id || (!hasDetailContent ? hoveredProject?.id : null);
+  const projectAvatarRows = content.projects.map((project) => {
+    const isVisible = visibleProjectAvatarId === project.id;
+
+    return (
+      <div
+        key={`desktop-project-avatar-${project.id}`}
+        className="project-avatar-row flex items-center justify-center"
+        aria-hidden={!isVisible}
+      >
+        <button
+          type="button"
+          onClick={() => handleSelectProject(project)}
+          className={`grid h-10 w-10 place-items-center transition-opacity duration-150 ${
+            isVisible ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
+          }`}
+          tabIndex={isVisible ? 0 : -1}
+          aria-label={`Open ${project.title}`}
+        >
+          {project.avatar ? (
+            <AvatarImage
+              src={project.avatar}
+              alt={project.title}
+              width={40}
+              height={40}
+              className="h-auto max-h-10 w-auto max-w-10 object-contain"
+            />
+          ) : (
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-cyan-400">
+              <span className="text-sm font-medium text-white">{project.title.charAt(0)}</span>
+            </span>
+          )}
+        </button>
+      </div>
+    );
+  });
   const mobileContentAvatarButtons = renderContentAvatarButtons({
     keyPrefix: 'mobile-content-avatar',
     rowClassName: 'mobile-rail-avatar-row flex h-[60px] items-center justify-center py-3',
@@ -996,7 +1032,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           {/* Project Avatars - synced with content list scroll */}
           <div className="flex-1 min-h-0 relative">
             <div ref={avatarContainerRef} className="absolute inset-0 overflow-y-auto hide-scrollbar">
-              {contentAvatarButtons}
+              {activeTab === 'projects' ? projectAvatarRows : contentAvatarButtons}
             </div>
           </div>
 
