@@ -942,7 +942,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           {/* Project Avatars - synced with content list scroll */}
           <div className="flex-1 min-h-0 relative">
             <div ref={avatarContainerRef} className="absolute inset-0 overflow-y-auto hide-scrollbar">
-              {activeTab === 'projects' ? null : contentAvatarButtons}
+              {contentAvatarButtons}
             </div>
           </div>
 

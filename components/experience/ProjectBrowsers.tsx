@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import type { CSSProperties, ReactNode } from 'react';
 import type { Project } from '@/lib/content-model';
 import { usePreferences } from './PreferenceProvider';
@@ -16,7 +15,6 @@ interface ProjectBrowserProps {
 function ProjectButton({
   project,
   dimmed,
-  selected,
   onSelect,
   onHover,
   children,
@@ -25,7 +23,6 @@ function ProjectButton({
 }: {
   project: Project;
   dimmed: boolean;
-  selected: boolean;
   onSelect: () => void;
   onHover: (project: Project | null) => void;
   children: ReactNode;
@@ -36,41 +33,13 @@ function ProjectButton({
     <button
       type="button"
       onClick={onSelect}
-      className={`${className} relative transition-all duration-[var(--experience-motion)] outline-none focus-visible:ring-1 focus-visible:ring-[var(--experience-accent)] ${dimmed ? 'opacity-30' : ''}`}
+      className={`${className} transition-all duration-[var(--experience-motion)] outline-none focus-visible:ring-1 focus-visible:ring-[var(--experience-accent)] ${dimmed ? 'opacity-30' : ''}`}
       onMouseEnter={() => onHover(project)}
       onMouseLeave={() => onHover(null)}
       style={{ transformOrigin: 'left center', ...style }}
     >
-      <ProjectAvatarCue project={project} selected={selected} />
       {children}
     </button>
-  );
-}
-
-function ProjectAvatarCue({ project, selected }: { project: Project; selected: boolean }) {
-  const visibilityClass = selected
-    ? 'opacity-100 visible'
-    : 'opacity-0 invisible group-hover:visible group-hover:opacity-100';
-
-  return (
-    <span
-      className={`pointer-events-none absolute left-[-72px] top-1/2 hidden h-10 w-10 -translate-y-1/2 place-items-center transition-opacity duration-[var(--experience-motion)] md:grid ${visibilityClass}`}
-      aria-hidden="true"
-    >
-      {project.avatar ? (
-        <Image
-          src={project.avatar}
-          alt=""
-          width={40}
-          height={40}
-          className="h-auto max-h-10 w-auto max-w-10 object-contain"
-        />
-      ) : (
-        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-cyan-400">
-          <span className="text-sm font-medium text-white">{project.title.charAt(0)}</span>
-        </span>
-      )}
-    </span>
   );
 }
 
@@ -87,7 +56,6 @@ export function ProjectList(props: ProjectBrowserProps) {
             key={project.id}
             project={project}
             dimmed={hasSelection && !isSelected}
-            selected={isSelected}
             onSelect={() => onSelect(isSelected ? null : project)}
             onHover={(hovered) => {
               if (!selectedProject) onHover(hovered);
@@ -120,7 +88,6 @@ export function ProjectGrid(props: ProjectBrowserProps) {
             key={project.id}
             project={project}
             dimmed={hasSelection && !isSelected}
-            selected={isSelected}
             onSelect={() => onSelect(isSelected ? null : project)}
             onHover={(hovered) => {
               if (!selectedProject) onHover(hovered);
@@ -153,7 +120,6 @@ export function ProjectTimeline(props: ProjectBrowserProps) {
             key={project.id}
             project={project}
             dimmed={hasSelection && !isSelected}
-            selected={isSelected}
             onSelect={() => onSelect(isSelected ? null : project)}
             onHover={(hovered) => {
               if (!selectedProject) onHover(hovered);
@@ -186,7 +152,6 @@ export function ProjectCaseStudyCards(props: ProjectBrowserProps) {
             key={project.id}
             project={project}
             dimmed={hasSelection && !isSelected}
-            selected={isSelected}
             onSelect={() => onSelect(isSelected ? null : project)}
             onHover={(hovered) => {
               if (!selectedProject) onHover(hovered);
