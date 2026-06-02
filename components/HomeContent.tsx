@@ -899,7 +899,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   );
 
   return (
-    <div className="portfolio-home relative h-full max-h-dvh flex flex-col overflow-hidden pt-12 pb-5 pl-2 pr-3 md:pt-24 md:pb-6 md:px-6">
+    <div className="portfolio-home relative h-full max-h-dvh flex flex-col overflow-hidden pt-12 pb-5 pl-2 pr-3 md:pt-6 md:pb-6 md:px-6">
       {mobileDetailRail}
       {/* Main content area */}
       <div className="flex-1 flex md:grid md:grid-cols-[56px_minmax(260px,340px)_minmax(0,572px)_minmax(96px,1fr)] gap-4 md:gap-6 min-h-0 overflow-visible">
