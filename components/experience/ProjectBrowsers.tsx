@@ -33,7 +33,7 @@ function ProjectButton({
     <button
       type="button"
       onClick={onSelect}
-      className={`${className} transition-all duration-[var(--experience-motion)] ${dimmed ? 'opacity-30' : ''}`}
+      className={`${className} transition-all duration-[var(--experience-motion)] outline-none focus-visible:ring-1 focus-visible:ring-[var(--experience-accent)] ${dimmed ? 'opacity-30' : ''}`}
       onMouseEnter={() => onHover(project)}
       onMouseLeave={() => onHover(null)}
       style={{ transformOrigin: 'left center', ...style }}
