@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import type { CSSProperties, ReactNode } from 'react';
 import type { Project } from '@/lib/content-model';
 import { usePreferences } from './PreferenceProvider';
@@ -60,18 +61,48 @@ export function ProjectList(props: ProjectBrowserProps) {
             onHover={(hovered) => {
               if (!selectedProject) onHover(hovered);
             }}
-            className="group block w-full py-[var(--experience-row-padding)] text-left hover:scale-[var(--experience-scale)]"
+            className="group grid w-full grid-cols-[40px_minmax(0,1fr)] items-center gap-6 py-[var(--experience-row-padding)] text-left hover:scale-[var(--experience-scale)]"
           >
-            <h2 className="mb-0.5 text-sm font-normal text-[var(--experience-text)] transition-colors group-hover:text-[var(--experience-accent)]">
-              {project.title}
-            </h2>
-            <p className="text-sm text-[var(--experience-muted)]">
-              {project.year} <span className="mx-1">·</span> {project.description}
-            </p>
+            <ProjectInlineAvatar project={project} visible={isSelected} />
+            <span className="block min-w-0">
+              <span className="mb-0.5 block text-sm font-normal text-[var(--experience-text)] transition-colors group-hover:text-[var(--experience-accent)]">
+                {project.title}
+              </span>
+              <span className="block text-sm text-[var(--experience-muted)]">
+                {project.year} <span className="mx-1">·</span> {project.description}
+              </span>
+            </span>
           </ProjectButton>
         );
       })}
     </>
+  );
+}
+
+function ProjectInlineAvatar({ project, visible }: { project: Project; visible: boolean }) {
+  const visibilityClass = visible
+    ? 'opacity-100'
+    : 'opacity-0 group-hover:opacity-100';
+
+  return (
+    <span
+      className={`grid h-10 w-10 place-items-center transition-opacity duration-[var(--experience-motion)] ${visibilityClass}`}
+      aria-hidden="true"
+    >
+      {project.avatar ? (
+        <Image
+          src={project.avatar}
+          alt=""
+          width={40}
+          height={40}
+          className="h-auto max-h-10 w-auto max-w-10 object-contain"
+        />
+      ) : (
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-cyan-400">
+          <span className="text-sm font-medium text-white">{project.title.charAt(0)}</span>
+        </span>
+      )}
+    </span>
   );
 }
 
