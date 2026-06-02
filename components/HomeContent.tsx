@@ -912,7 +912,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden cursor-pointer hover:ring-2 hover:ring-purple-300 transition-all"
             >
               {(() => {
-                const avatarSrc = activeAvatar;
+                const avatarSrc = avatar;
                 return avatarSrc ? (
                   <AvatarImage
                     src={avatarSrc}
