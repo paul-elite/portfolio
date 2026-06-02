@@ -61,7 +61,7 @@ export function ProjectList(props: ProjectBrowserProps) {
             onHover={(hovered) => {
               if (!selectedProject) onHover(hovered);
             }}
-            className="group grid w-full grid-cols-[40px_minmax(0,1fr)] items-center gap-6 py-[var(--experience-row-padding)] text-left hover:scale-[var(--experience-scale)]"
+            className="group relative block w-full py-[var(--experience-row-padding)] text-left hover:scale-[var(--experience-scale)]"
           >
             <ProjectInlineAvatar project={project} visible={isSelected} />
             <span className="block min-w-0">
@@ -86,7 +86,7 @@ function ProjectInlineAvatar({ project, visible }: { project: Project; visible: 
 
   return (
     <span
-      className={`grid h-10 w-10 place-items-center transition-opacity duration-[var(--experience-motion)] ${visibilityClass}`}
+      className={`absolute left-[-64px] top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center transition-opacity duration-[var(--experience-motion)] ${visibilityClass}`}
       aria-hidden="true"
     >
       {project.avatar ? (

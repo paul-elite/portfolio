@@ -1079,7 +1079,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             position="right"
             thumbHeight={30}
             thumbWidth={2}
-            contentClassName="pl-[52px] md:pl-0"
+            contentClassName="pl-[52px] md:-ml-16 md:w-[calc(100%+4rem)] md:pl-16"
             contentRef={contentListRef}
             onContentRefChange={handleContentListRef}
           >
