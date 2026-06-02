@@ -849,7 +849,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       project.id,
       project.title,
       project.avatar,
-      selectedProject?.id === project.id,
+      selectedProject?.id === project.id || (!hasDetailContent && hoveredProject?.id === project.id),
       index,
       () => handleSelectProject(project),
     ));
