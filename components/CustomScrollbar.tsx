@@ -20,8 +20,8 @@ export default function CustomScrollbar({
   className = '',
   thumbHeight = 40,
   thumbWidth = 2,
-  thumbColor = 'hsl(210, 100%, 48%)',
-  thumbDragColor = '#FF4D8C',
+  thumbColor = '#d1d5db',
+  thumbDragColor = 'hsl(210, 100%, 48%)',
   position = 'right',
   contentClassName = '',
   onContentRefChange,
@@ -41,10 +41,12 @@ export default function CustomScrollbar({
 
   const [thumbTop, setThumbTop] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
   const [showScrollbar, setShowScrollbar] = useState(false);
   const [overscroll, setOverscroll] = useState(0); // -50 to 50 for elastic effect
   const dragStartY = useRef(0);
   const dragStartScrollTop = useRef(0);
+  const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Update thumb position based on scroll
   const updateThumbPosition = useCallback(() => {
@@ -70,7 +72,19 @@ export default function CustomScrollbar({
     const content = contentRef.current;
     if (!content) return;
 
-    const handleScroll = () => updateThumbPosition();
+    const handleScroll = () => {
+      updateThumbPosition();
+      setIsScrolling(true);
+
+      if (scrollEndTimerRef.current) {
+        clearTimeout(scrollEndTimerRef.current);
+      }
+
+      scrollEndTimerRef.current = setTimeout(() => {
+        setIsScrolling(false);
+        scrollEndTimerRef.current = null;
+      }, 450);
+    };
     content.addEventListener('scroll', handleScroll);
 
     // Initial check after paint so state updates do not cascade during effect setup.
@@ -90,6 +104,9 @@ export default function CustomScrollbar({
       resizeObserver.disconnect();
       mutationObserver.disconnect();
       clearTimeout(initialTimer);
+      if (scrollEndTimerRef.current) {
+        clearTimeout(scrollEndTimerRef.current);
+      }
     };
   }, [thumbHeight, updateThumbPosition]);
 
@@ -160,7 +177,7 @@ export default function CustomScrollbar({
   };
 
   // Calculate dynamic styles
-  const currentColor = isDragging ? thumbDragColor : thumbColor;
+  const currentColor = isDragging || isScrolling ? thumbDragColor : thumbColor;
   const currentScale = isDragging ? 2 : 1;
 
   return (
