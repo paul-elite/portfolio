@@ -1262,6 +1262,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             position="left"
             thumbHeight={30}
             thumbWidth={2}
+            contentClassName="pl-8"
           >
           {showSettingsDetail ? (
             settingsDetailContent
