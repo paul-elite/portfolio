@@ -859,45 +859,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     keyPrefix: 'mobile-content-avatar',
     rowClassName: 'mobile-rail-avatar-row flex h-[60px] items-center justify-center py-3',
   });
-  const selectedDesktopAvatar = (() => {
-    const selectedCategoryPreview = selectedCategory
-      ? content.illustrations.find((item) => (item.category || 'assets') === selectedCategory)
-      : null;
-    const imageSrc = selectedProject?.avatar
-      || selectedWriting?.avatar
-      || selectedInteraction?.avatar
-      || selectedCategoryPreview?.avatar
-      || selectedCategoryPreview?.thumbnail;
-    const title = selectedProject?.title
-      || selectedWriting?.title
-      || selectedInteraction?.title
-      || ILLUSTRATION_CATEGORIES.find((category) => category.key === selectedCategory)?.label;
-
-    if (!title) return null;
-
-    return (
-      <button
-        type="button"
-        onClick={handleClearSelection}
-        className="flex h-12 items-center justify-center"
-        aria-label={`Close ${title}`}
-      >
-        {imageSrc ? (
-          <AvatarImage
-            src={imageSrc}
-            alt={title}
-            width={40}
-            height={40}
-            className="h-auto max-h-10 w-auto max-w-10 object-contain"
-          />
-        ) : (
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-cyan-400">
-            <span className="text-sm font-medium text-white">{title.charAt(0)}</span>
-          </span>
-        )}
-      </button>
-    );
-  })();
   const mobileNameAvatar = (
     <button
       type="button"
@@ -951,7 +912,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden cursor-pointer hover:ring-2 hover:ring-purple-300 transition-all"
             >
               {(() => {
-                const avatarSrc = avatar;
+                const avatarSrc = activeAvatar;
                 return avatarSrc ? (
                   <AvatarImage
                     src={avatarSrc}
@@ -980,15 +941,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
           {/* Project Avatars - synced with content list scroll */}
           <div className="flex-1 min-h-0 relative">
-            {hasDetailContent ? (
-              <div className="absolute inset-0">
-                {selectedDesktopAvatar}
-              </div>
-            ) : (
-              <div ref={avatarContainerRef} className="absolute inset-0 overflow-y-auto hide-scrollbar">
-                {contentAvatarButtons}
-              </div>
-            )}
+            <div ref={avatarContainerRef} className="absolute inset-0 overflow-y-auto hide-scrollbar">
+            {contentAvatarButtons}
+            </div>
           </div>
 
           <div className={`mt-4 flex flex-col items-center transition-opacity z-50 ${hasDetailContent ? 'opacity-30' : ''}`}>
