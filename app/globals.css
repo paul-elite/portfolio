@@ -376,7 +376,7 @@ body {
 }
 
 .project-avatar-row {
-  min-height: calc(2.75rem + var(--experience-row-padding) + var(--experience-row-padding));
+  min-height: calc((var(--experience-line-height) * 2) + (var(--experience-row-padding) * 2));
 }
 
 .portfolio-home :where(.text-gray-900, .text-gray-600, .text-pink-500, .hover\:text-gray-900:hover, .hover\:text-gray-600:hover) {

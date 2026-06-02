@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import OptimizedImage from './OptimizedImage';
 import ContentBlocks from './content/ContentBlocks';
@@ -186,6 +186,7 @@ interface HomeContentProps {
 
 export default function HomeContent({ initialConfig, initialContent }: HomeContentProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { preferences } = usePreferences();
   const [activeTab, setActiveTab] = useState<PortfolioTab>('projects');
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null);
@@ -239,6 +240,59 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       }
     };
   }, []);
+
+  useEffect(() => {
+    const projectSlug = searchParams.get('project');
+    const writingSlug = searchParams.get('writing');
+    const interactionSlug = searchParams.get('interaction');
+    const category = searchParams.get('category') as IllustrationCategory | null;
+
+    if (projectSlug) {
+      const project = content.projects.find((item) => item.slug === projectSlug) || null;
+      setActiveTab('projects');
+      setSelectedProject(project);
+      setSelectedWriting(null);
+      setSelectedInteraction(null);
+      setSelectedCategory(null);
+      setShowSettingsDetail(false);
+      setContentAnimationKey(project ? `project-${project.id}-url` : null);
+      return;
+    }
+
+    if (writingSlug) {
+      const writing = content.writings.find((item) => item.slug === writingSlug) || null;
+      setActiveTab('writings');
+      setSelectedWriting(writing);
+      setSelectedProject(null);
+      setSelectedInteraction(null);
+      setSelectedCategory(null);
+      setShowSettingsDetail(false);
+      setContentAnimationKey(writing ? `writing-${writing.id}-url` : null);
+      return;
+    }
+
+    if (interactionSlug) {
+      const interaction = content.interactions.find((item) => item.slug === interactionSlug) || null;
+      setActiveTab('interaction');
+      setSelectedInteraction(interaction);
+      setSelectedProject(null);
+      setSelectedWriting(null);
+      setSelectedCategory(null);
+      setShowSettingsDetail(false);
+      setContentAnimationKey(interaction ? `interaction-${interaction.id}-url` : null);
+      return;
+    }
+
+    if (category && ILLUSTRATION_CATEGORIES.some((item) => item.key === category)) {
+      setActiveTab('illustration');
+      setSelectedCategory(category);
+      setSelectedProject(null);
+      setSelectedWriting(null);
+      setSelectedInteraction(null);
+      setShowSettingsDetail(false);
+      setContentAnimationKey(`category-${category}-url`);
+    }
+  }, [content.interactions, content.projects, content.writings, searchParams]);
 
   // Update URL when selection changes
   const updateURL = useCallback((selection: {
@@ -750,7 +804,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   ) : null;
   const renderContentAvatarButtons = ({
     keyPrefix,
-    rowClassName = 'project-avatar-row flex items-center justify-center py-[var(--experience-row-padding)]',
+    rowClassName = 'project-avatar-row flex items-center justify-center',
   }: {
     keyPrefix: string;
     rowClassName?: string;
