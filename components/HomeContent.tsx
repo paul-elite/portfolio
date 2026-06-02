@@ -946,9 +946,13 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             </div>
           </div>
 
-          <div className={`mt-4 flex flex-col items-center justify-center gap-3 transition-opacity z-50 ${hasDetailContent ? 'opacity-30' : ''}`}>
-            {settingsTrigger}
-            <NowPlayingImage data={nowPlayingData} />
+          <div className={`mt-4 flex flex-col items-center transition-opacity z-50 ${hasDetailContent ? 'opacity-30' : ''}`}>
+            <div className="mb-3">
+              {settingsTrigger}
+            </div>
+            <div className="flex h-[72px] items-center justify-center">
+              <NowPlayingImage data={nowPlayingData} />
+            </div>
           </div>
         </div>
 
