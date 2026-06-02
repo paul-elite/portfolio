@@ -902,9 +902,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     <div className="portfolio-home relative h-full max-h-dvh flex flex-col overflow-hidden pt-12 pb-5 pl-2 pr-3 md:pt-24 md:pb-6 md:px-6">
       {mobileDetailRail}
       {/* Main content area */}
-      <div className="flex-1 flex md:grid md:grid-cols-12 gap-4 md:gap-6 min-h-0 overflow-visible">
+      <div className="flex-1 flex md:grid md:grid-cols-[56px_minmax(260px,340px)_minmax(0,572px)_minmax(96px,1fr)] gap-4 md:gap-6 min-h-0 overflow-visible">
         {/* Avatar Column */}
-        <div className="hidden md:flex md:col-span-1 flex-col items-center h-full overflow-visible">
+        <div className="hidden md:flex md:col-[1] flex-col items-center h-full overflow-visible">
           {/* User Avatar - matches Name section height */}
           <div className="h-14 mb-4 flex items-start justify-center">
             <button
@@ -946,13 +946,14 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             </div>
           </div>
 
-          <div className="mt-4 flex h-12 items-center justify-center">
+          <div className={`mt-4 flex flex-col items-center justify-center gap-3 transition-opacity z-50 ${hasDetailContent ? 'opacity-30' : ''}`}>
             {settingsTrigger}
+            <NowPlayingImage data={nowPlayingData} />
           </div>
         </div>
 
         {/* Left Content Column - Fixed at 100vh */}
-        <div className="flex-1 md:col-span-3 flex flex-col min-w-0 h-full overflow-visible">
+        <div className="flex-1 md:col-[2] flex flex-col min-w-0 h-full overflow-visible">
           {/* Identity */}
           <div
             className={`hidden md:block h-auto mb-6 transition-opacity ${
@@ -1152,22 +1153,21 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           {/* Now Playing - Desktop only, pinned to bottom */}
           <div className={`hidden md:block flex-shrink-0 mt-auto pt-4 transition-opacity overflow-visible z-50 ${hasDetailContent ? 'opacity-30' : ''}`}>
             <div className={`overflow-visible ${activeTab === 'illustration' ? 'w-full md:w-[calc(166%+1.5rem)]' : ''}`}>
-              <NowPlayingContent data={nowPlayingData} />
+              <NowPlayingContent data={nowPlayingData} showImage={false} />
             </div>
           </div>
         </div>
 
         {/* Right Column - Content Display (scrollable) */}
-        <div className="hidden md:block md:col-span-8 relative h-full ml-[-50px]">
+        <div className="hidden md:block md:col-[3] relative h-full min-w-0">
           {!showSettingsDetail && (
-            <div className="absolute -top-8 left-[50px] right-4 h-12 bg-gradient-to-b from-background from-0% via-background/20 via-50% to-transparent to-100% z-10 pointer-events-none" />
+            <div className="absolute -top-8 left-0 right-0 h-12 bg-gradient-to-b from-background from-0% via-background/20 via-50% to-transparent to-100% z-10 pointer-events-none" />
           )}
           <CustomScrollbar
             className="absolute inset-0"
             position="left"
             thumbHeight={30}
             thumbWidth={2}
-            contentClassName="pl-[50px]"
           >
           {showSettingsDetail ? (
             settingsDetailContent
@@ -1335,6 +1335,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           ) : null}
           </CustomScrollbar>
         </div>
+        <div className="hidden md:block md:col-[4]" aria-hidden="true" />
       </div>
 
       <AnimatePresence>

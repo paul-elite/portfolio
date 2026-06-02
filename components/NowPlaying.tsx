@@ -104,7 +104,7 @@ function useRemainingMs(data: SpotifyData | null) {
   return Math.max(0, data.durationMs - data.progressMs - elapsedMs);
 }
 
-export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
+export function NowPlayingContent({ data, showImage = true }: { data: SpotifyData | null; showImage?: boolean }) {
   const remainingMs = useRemainingMs(data);
   const [isHovered, setIsHovered] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -265,9 +265,11 @@ export function NowPlayingContent({ data }: { data: SpotifyData | null }) {
 
       {/* Now Playing content */}
       <div className="flex items-center py-4">
-        <div className="flex-shrink-0" style={{ marginLeft: '-64px', marginRight: '24px' }}>
-          <NowPlayingImage data={data} />
-        </div>
+        {showImage && (
+          <div className="flex-shrink-0" style={{ marginLeft: '-64px', marginRight: '24px' }}>
+            <NowPlayingImage data={data} />
+          </div>
+        )}
         <div className="min-w-0">
           {data?.isPlaying ? (
             <>
