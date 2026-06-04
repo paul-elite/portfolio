@@ -450,8 +450,49 @@ body {
 }
 
 .home-settings-trigger[data-state='selected'] .home-settings-trigger-icon {
-  background: var(--experience-accent-soft);
-  color: var(--experience-accent);
+  background: var(--experience-accent);
+  color: #ffffff;
+}
+
+.settings-trigger-sliders {
+  transform: translateZ(0);
+}
+
+.settings-trigger-slider-line,
+.settings-trigger-slider-knob {
+  transition:
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 180ms ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.home-settings-trigger[data-state='deselected'] .settings-trigger-slider-knob--top {
+  transform: translateX(0);
+}
+
+.home-settings-trigger[data-state='deselected'] .settings-trigger-slider-knob--middle {
+  transform: translateX(0);
+}
+
+.home-settings-trigger[data-state='deselected'] .settings-trigger-slider-knob--bottom {
+  transform: translateX(0);
+}
+
+.home-settings-trigger[data-state='selected'] .settings-trigger-slider-knob--top {
+  transform: translateX(8px);
+}
+
+.home-settings-trigger[data-state='selected'] .settings-trigger-slider-knob--middle {
+  transform: translateX(-8px);
+}
+
+.home-settings-trigger[data-state='selected'] .settings-trigger-slider-knob--bottom {
+  transform: translateX(5px);
+}
+
+.home-settings-trigger[data-state='selected'] .settings-trigger-slider-line {
+  opacity: 0.86;
 }
 
 .home-settings-options {

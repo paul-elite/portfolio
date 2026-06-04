@@ -2,21 +2,26 @@
 
 type SettingsTriggerState = 'selected' | 'deselected';
 
-function SettingsIcon() {
+function AnimatedSettingsIcon() {
   return (
     <svg
-      width="16"
-      height="16"
+      className="settings-trigger-sliders"
+      width="20"
+      height="20"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.8"
+      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d="M12 3v3M12 18v3M4.2 7.5l2.6 1.5M17.2 15l2.6 1.5M4.2 16.5l2.6-1.5M17.2 9l2.6-1.5" />
-      <circle cx="12" cy="12" r="4" />
+      <path className="settings-trigger-slider-line settings-trigger-slider-line--top" d="M4 7h16" />
+      <path className="settings-trigger-slider-line settings-trigger-slider-line--middle" d="M4 12h16" />
+      <path className="settings-trigger-slider-line settings-trigger-slider-line--bottom" d="M4 17h16" />
+      <circle className="settings-trigger-slider-knob settings-trigger-slider-knob--top" cx="8" cy="7" r="2.2" fill="currentColor" stroke="none" />
+      <circle className="settings-trigger-slider-knob settings-trigger-slider-knob--middle" cx="16" cy="12" r="2.2" fill="currentColor" stroke="none" />
+      <circle className="settings-trigger-slider-knob settings-trigger-slider-knob--bottom" cx="11" cy="17" r="2.2" fill="currentColor" stroke="none" />
     </svg>
   );
 }
@@ -28,9 +33,8 @@ interface SettingsTriggerProps {
   selectedIcon?: string;
 }
 
-export default function SettingsTrigger({ selected, onClick, icon, selectedIcon }: SettingsTriggerProps) {
+export default function SettingsTrigger({ selected, onClick }: SettingsTriggerProps) {
   const state: SettingsTriggerState = selected ? 'selected' : 'deselected';
-  const iconSrc = selected ? selectedIcon || icon : icon;
 
   return (
     <button
@@ -43,12 +47,7 @@ export default function SettingsTrigger({ selected, onClick, icon, selectedIcon 
       style={{ boxShadow: '0 0 0 0.5px var(--experience-border)' }}
     >
       <span className="home-settings-trigger-icon grid h-8 w-8 place-items-center overflow-hidden rounded-full">
-        {iconSrc ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={iconSrc} alt="" className="h-full w-full object-cover" />
-        ) : (
-          <SettingsIcon />
-        )}
+        <AnimatedSettingsIcon />
       </span>
     </button>
   );
