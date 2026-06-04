@@ -781,7 +781,14 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       </svg>
     </button>
   );
-  const settingsTrigger = <SettingsTrigger selected={showSettingsDetail} onClick={openSettings} />;
+  const settingsTrigger = (
+    <SettingsTrigger
+      selected={showSettingsDetail}
+      onClick={openSettings}
+      icon={siteConfig.settingsIcon}
+      selectedIcon={siteConfig.settingsIconSelected}
+    />
+  );
   const settingsDetailContent = showSettingsDetail ? (
     <div key={contentAnimationKey} className="home-settings-detail w-full max-w-[572px] animate-slideInFromRight">
       <CustomizeExperienceContent />

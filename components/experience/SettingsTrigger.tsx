@@ -24,10 +24,13 @@ function SettingsIcon() {
 interface SettingsTriggerProps {
   selected: boolean;
   onClick: () => void;
+  icon?: string;
+  selectedIcon?: string;
 }
 
-export default function SettingsTrigger({ selected, onClick }: SettingsTriggerProps) {
+export default function SettingsTrigger({ selected, onClick, icon, selectedIcon }: SettingsTriggerProps) {
   const state: SettingsTriggerState = selected ? 'selected' : 'deselected';
+  const iconSrc = selected ? selectedIcon || icon : icon;
 
   return (
     <button
@@ -40,7 +43,12 @@ export default function SettingsTrigger({ selected, onClick }: SettingsTriggerPr
       style={{ boxShadow: '0 0 0 0.5px var(--experience-border)' }}
     >
       <span className="home-settings-trigger-icon grid h-8 w-8 place-items-center rounded-full">
-        <SettingsIcon />
+        {iconSrc ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={iconSrc} alt="" className="h-5 w-5 object-contain" />
+        ) : (
+          <SettingsIcon />
+        )}
       </span>
     </button>
   );
