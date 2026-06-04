@@ -42,10 +42,10 @@ export default function SettingsTrigger({ selected, onClick, icon, selectedIcon 
       className="home-settings-trigger inline-grid h-10 w-10 place-items-center rounded-full bg-[var(--experience-card)] text-[var(--experience-text)] backdrop-blur transition-colors hover:bg-[var(--experience-surface)]"
       style={{ boxShadow: '0 0 0 0.5px var(--experience-border)' }}
     >
-      <span className="home-settings-trigger-icon grid h-8 w-8 place-items-center rounded-full">
+      <span className="home-settings-trigger-icon grid h-8 w-8 place-items-center overflow-hidden rounded-full">
         {iconSrc ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={iconSrc} alt="" className="h-5 w-5 object-contain" />
+          <img src={iconSrc} alt="" className="h-full w-full object-cover" />
         ) : (
           <SettingsIcon />
         )}
