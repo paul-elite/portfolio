@@ -20,6 +20,7 @@ import { usePreferences } from './experience/PreferenceProvider';
 import PortfolioNavigation from './experience/PortfolioNavigation';
 import ProjectBrowser from './experience/ProjectBrowsers';
 import { CustomizeExperienceContent } from './experience/CustomizeExperiencePanel';
+import SettingsTrigger from './experience/SettingsTrigger';
 import {
   DesktopAvatarRail,
   PROJECT_LIST_CONTENT_CLASS,
@@ -174,15 +175,6 @@ function ContactIcon({ name }: { name: ContactIconName }) {
     <svg viewBox="0 0 24 24" aria-hidden="true" className={iconClassName} fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 6h16v12H4z" />
       <path d="M4 7l8 6 8-6" />
-    </svg>
-  );
-}
-
-function SettingsIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12 3v3M12 18v3M4.2 7.5l2.6 1.5M17.2 15l2.6 1.5M4.2 16.5l2.6-1.5M17.2 9l2.6-1.5" />
-      <circle cx="12" cy="12" r="4" />
     </svg>
   );
 }
@@ -789,22 +781,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       </svg>
     </button>
   );
-  const settingsTrigger = (
-    <button
-      type="button"
-      onClick={openSettings}
-      aria-pressed={showSettingsDetail}
-      aria-label="Customize experience"
-      className={`home-settings-trigger inline-grid h-10 w-10 place-items-center rounded-full bg-[var(--experience-card)] text-[var(--experience-text)] backdrop-blur transition-colors hover:bg-[var(--experience-surface)] ${
-        showSettingsDetail ? 'text-[var(--experience-accent)]' : ''
-      }`}
-      style={{ boxShadow: '0 0 0 0.5px var(--experience-border)' }}
-    >
-      <span className="home-settings-trigger-icon grid h-8 w-8 place-items-center rounded-full bg-[var(--experience-accent-soft)] text-[var(--experience-accent)]">
-        <SettingsIcon />
-      </span>
-      </button>
-  );
+  const settingsTrigger = <SettingsTrigger selected={showSettingsDetail} onClick={openSettings} />;
   const settingsDetailContent = showSettingsDetail ? (
     <div key={contentAnimationKey} className="home-settings-detail w-full max-w-[572px] animate-slideInFromRight">
       <CustomizeExperienceContent />

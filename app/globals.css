@@ -443,9 +443,15 @@ body {
   z-index: 70;
 }
 
-.home-settings-trigger-icon {
+/* Settings icon selected/deselected states. */
+.home-settings-trigger[data-state='deselected'] .home-settings-trigger-icon {
   background: #efeff1;
   color: #64656d;
+}
+
+.home-settings-trigger[data-state='selected'] .home-settings-trigger-icon {
+  background: var(--experience-accent-soft);
+  color: var(--experience-accent);
 }
 
 .home-settings-options {
