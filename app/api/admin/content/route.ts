@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { supabase, Settings, defaultSettings } from '@/lib/supabase';
 import { mapIllustration, mapProject, mapSettings } from '@/lib/content-adapters';
+import { withSettingsIconFallbacks } from '@/lib/settings-icon-assets';
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 
@@ -13,11 +14,11 @@ async function loadSettings(): Promise<Settings> {
       .single();
 
     if (error || !data) {
-      return defaultSettings;
+      return withSettingsIconFallbacks(defaultSettings);
     }
-    return mapSettings(data);
+    return withSettingsIconFallbacks(mapSettings(data));
   } catch {
-    return defaultSettings;
+    return withSettingsIconFallbacks(defaultSettings);
   }
 }
 

@@ -886,7 +886,7 @@ export default function AdminPage() {
                       onUpload={async (file) => {
                         const previewUrl = URL.createObjectURL(file);
                         setSettingsIconPreview(previewUrl);
-                        const path = await handleFileUpload(file, 'settings', 'settingsIcon');
+                        const path = await handleFileUpload(file, 'settings/deselected', 'settingsIcon');
                         if (path) {
                           const nextSettings = { ...settings, settingsIcon: path };
                           setSettings(nextSettings);
@@ -907,7 +907,7 @@ export default function AdminPage() {
                       onUpload={async (file) => {
                         const previewUrl = URL.createObjectURL(file);
                         setSettingsIconSelectedPreview(previewUrl);
-                        const path = await handleFileUpload(file, 'settings', 'settingsIconSelected');
+                        const path = await handleFileUpload(file, 'settings/selected', 'settingsIconSelected');
                         if (path) {
                           const nextSettings = { ...settings, settingsIconSelected: path };
                           setSettings(nextSettings);

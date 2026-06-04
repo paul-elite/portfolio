@@ -10,6 +10,7 @@ import {
 } from './data';
 import { mapPortfolioContent, mapProject, mapSettings, mapWriting, settingsToSiteConfig } from './content-adapters';
 import type { NavItem, PortfolioContent, Project, SiteConfig, Writing } from './content-model';
+import { withSettingsIconFallbacks } from './settings-icon-assets';
 
 export async function getSettings() {
   try {
@@ -18,10 +19,10 @@ export async function getSettings() {
       .select('*')
       .single();
 
-    if (error || !data) return mapSettings(null);
-    return mapSettings(data);
+    if (error || !data) return withSettingsIconFallbacks(mapSettings(null));
+    return withSettingsIconFallbacks(mapSettings(data));
   } catch {
-    return mapSettings(null);
+    return withSettingsIconFallbacks(mapSettings(null));
   }
 }
 
