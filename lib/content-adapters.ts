@@ -19,6 +19,16 @@ function versionedAssetUrl(url: string, version?: string): string {
   return `${url}${separator}v=${encodeURIComponent(version)}`;
 }
 
+function assetUrlVersion(url: string): string {
+  let hash = 0;
+
+  for (let i = 0; i < url.length; i += 1) {
+    hash = ((hash << 5) - hash + url.charCodeAt(i)) | 0;
+  }
+
+  return Math.abs(hash).toString(36);
+}
+
 export function mapProject(row: RecordLike): Project {
   return {
     ...(row as unknown as Project),
@@ -97,13 +107,14 @@ export function mapSettings(row?: Partial<Settings> & RecordLike | null): Settin
 
 export function settingsToSiteConfig(settings?: Partial<Settings> | null): SiteConfig {
   const normalized = mapSettings(settings as (Partial<Settings> & RecordLike) | null);
-  const settingsVersion = normalized.updated_at;
+  const avatar = normalized.avatar || staticConfig.avatar;
+  const avatarFocused = normalized.avatarFocused || '';
 
   return {
     name: normalized.name || staticConfig.name,
     title: normalized.title || staticConfig.title,
-    avatar: versionedAssetUrl(normalized.avatar || staticConfig.avatar, settingsVersion),
-    avatarFocused: versionedAssetUrl(normalized.avatarFocused || '', settingsVersion),
+    avatar: versionedAssetUrl(avatar, assetUrlVersion(avatar)),
+    avatarFocused: versionedAssetUrl(avatarFocused, assetUrlVersion(avatarFocused)),
     bio: staticConfig.bio,
     social: {
       twitter: normalized.twitter || staticConfig.social.twitter,
