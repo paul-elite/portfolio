@@ -976,11 +976,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     </div>
   );
   const desktopAvatarUtility = (
-    <div className={`mt-4 flex flex-col items-center transition-opacity z-50 ${hasDetailContent ? 'opacity-30' : ''}`}>
+    <div className="mt-4 flex flex-col items-center z-50">
       <div className="mb-3">
         {settingsTrigger}
       </div>
-      <div className="flex h-[72px] items-center justify-center">
+      <div className={`flex h-[72px] items-center justify-center transition-opacity ${hasDetailContent ? 'opacity-30' : ''}`}>
         <NowPlayingImage data={nowPlayingData} />
       </div>
     </div>
