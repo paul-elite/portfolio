@@ -7,9 +7,22 @@ CREATE TABLE IF NOT EXISTS settings (
   twitter TEXT DEFAULT '',
   github TEXT DEFAULT '',
   linkedin TEXT DEFAULT '',
+  behance TEXT DEFAULT '',
+  instagram TEXT DEFAULT '',
   email TEXT DEFAULT '',
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+ALTER TABLE IF EXISTS settings
+  ADD COLUMN IF NOT EXISTS avatar_focused TEXT DEFAULT '',
+  ADD COLUMN IF NOT EXISTS meta_image TEXT DEFAULT '',
+  ADD COLUMN IF NOT EXISTS behance TEXT DEFAULT '',
+  ADD COLUMN IF NOT EXISTS instagram TEXT DEFAULT '',
+  ADD COLUMN IF NOT EXISTS twitter_image TEXT DEFAULT '',
+  ADD COLUMN IF NOT EXISTS linkedin_image TEXT DEFAULT '',
+  ADD COLUMN IF NOT EXISTS behance_image TEXT DEFAULT '',
+  ADD COLUMN IF NOT EXISTS instagram_image TEXT DEFAULT '',
+  ADD COLUMN IF NOT EXISTS email_image TEXT DEFAULT '';
 
 -- Enable Row Level Security (optional but recommended)
 ALTER TABLE settings ENABLE ROW LEVEL SECURITY;

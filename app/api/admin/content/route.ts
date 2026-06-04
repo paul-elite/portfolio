@@ -46,13 +46,17 @@ async function saveSettings(settings: Settings): Promise<Settings> {
 
   const { data: existing } = await supabase
     .from('settings')
-    .select('id')
+    .select('*')
     .single();
+  const existingColumns = existing ? new Set(Object.keys(existing)) : null;
+  const writableSettings = existingColumns
+    ? Object.fromEntries(Object.entries(dbSettings).filter(([key]) => existingColumns.has(key)))
+    : dbSettings;
 
   if (existing) {
     const { data, error } = await supabase
       .from('settings')
-      .update(dbSettings)
+      .update(writableSettings)
       .eq('id', existing.id)
       .select('*')
       .single();

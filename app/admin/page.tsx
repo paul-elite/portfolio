@@ -622,7 +622,8 @@ export default function AdminPage() {
         fetchContent();
         return true;
       } else {
-        toast.update(loadingToast, 'Failed to save settings', 'error');
+        const errorData = await res.json().catch(() => ({}));
+        toast.update(loadingToast, errorData.details || errorData.error || 'Failed to save settings', 'error');
       }
     } catch {
       toast.update(loadingToast, 'Something went wrong', 'error');
