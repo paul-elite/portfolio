@@ -20,6 +20,14 @@ import { usePreferences } from './experience/PreferenceProvider';
 import PortfolioNavigation from './experience/PortfolioNavigation';
 import ProjectBrowser from './experience/ProjectBrowsers';
 import { CustomizeExperienceContent } from './experience/CustomizeExperiencePanel';
+import {
+  DesktopAvatarRail,
+  PROJECT_LIST_CONTENT_CLASS,
+  PortfolioDesktopGrid,
+  PortfolioDetailColumn,
+  PortfolioHomeFrame,
+  PortfolioSidebar,
+} from './experience/PortfolioLayout';
 
 function getYouTubeId(url: string) {
   const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
@@ -951,67 +959,64 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       {mobileContentAvatarButtons}
     </div>
   );
+  const desktopProfileAvatar = (
+    <button
+      onClick={handleClearSelection}
+      className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden cursor-pointer hover:ring-2 hover:ring-purple-300 transition-all"
+    >
+      {(() => {
+        const avatarSrc = activeAvatar;
+        return avatarSrc ? (
+          <AvatarImage
+            src={avatarSrc}
+            alt={siteConfig.name}
+            width={40}
+            height={40}
+            className="w-full h-full object-cover transition-all duration-200"
+          />
+        ) : (
+          <span className="text-sm font-medium text-white">
+            {siteConfig.name.charAt(0)}
+          </span>
+        );
+      })()}
+    </button>
+  );
+  const desktopSectionAvatar = (
+    <div
+      className={`mb-6 flex h-5 items-center justify-center overflow-visible transition-opacity ${
+        showSettingsDetail ? 'opacity-0' : 'opacity-100'
+      }`}
+    >
+      {sectionNavigationAvatar}
+    </div>
+  );
+  const desktopAvatarUtility = (
+    <div className={`mt-4 flex flex-col items-center transition-opacity z-50 ${hasDetailContent ? 'opacity-30' : ''}`}>
+      <div className="mb-3">
+        {settingsTrigger}
+      </div>
+      <div className="flex h-[72px] items-center justify-center">
+        <NowPlayingImage data={nowPlayingData} />
+      </div>
+    </div>
+  );
 
   return (
-    <div className="portfolio-home relative h-full max-h-dvh flex flex-col overflow-hidden pt-12 pb-5 pl-2 pr-3 md:pt-[100px] md:pb-6 md:px-6">
+    <PortfolioHomeFrame>
       {mobileDetailRail}
       {/* Main content area */}
-      <div className="flex-1 flex md:grid md:grid-cols-[56px_minmax(260px,340px)_minmax(0,572px)_minmax(96px,1fr)] gap-4 md:gap-6 min-h-0 overflow-visible">
-        {/* Avatar Column */}
-        <div className="hidden md:flex md:col-[1] flex-col items-center h-full overflow-visible">
-          {/* User Avatar - matches Name section height */}
-          <div className="h-14 mb-4 flex items-start justify-center">
-            <button
-              onClick={handleClearSelection}
-              className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden cursor-pointer hover:ring-2 hover:ring-purple-300 transition-all"
-            >
-              {(() => {
-                const avatarSrc = activeAvatar;
-                return avatarSrc ? (
-                  <AvatarImage
-                    src={avatarSrc}
-                    alt={siteConfig.name}
-                    width={40}
-                    height={40}
-                    className="w-full h-full object-cover transition-all duration-200"
-                  />
-                ) : (
-                  <span className="text-sm font-medium text-white">
-                    {siteConfig.name.charAt(0)}
-                  </span>
-                );
-              })()}
-            </button>
-          </div>
-
-          {/* Section avatar - aligns with the navigation row */}
-          <div
-            className={`mb-6 flex h-5 items-center justify-center overflow-visible transition-opacity ${
-              showSettingsDetail ? 'opacity-0' : 'opacity-100'
-            }`}
-          >
-            {sectionNavigationAvatar}
-          </div>
-
-          {/* Project Avatars - synced with content list scroll */}
-          <div className="flex-1 min-h-0 relative">
-            <div ref={avatarContainerRef} className="absolute inset-0 overflow-y-auto hide-scrollbar">
-              {activeTab === 'projects' ? null : contentAvatarButtons}
-            </div>
-          </div>
-
-          <div className={`mt-4 flex flex-col items-center transition-opacity z-50 ${hasDetailContent ? 'opacity-30' : ''}`}>
-            <div className="mb-3">
-              {settingsTrigger}
-            </div>
-            <div className="flex h-[72px] items-center justify-center">
-              <NowPlayingImage data={nowPlayingData} />
-            </div>
-          </div>
-        </div>
+      <PortfolioDesktopGrid>
+        <DesktopAvatarRail
+          profile={desktopProfileAvatar}
+          section={desktopSectionAvatar}
+          content={activeTab === 'projects' ? null : contentAvatarButtons}
+          utility={desktopAvatarUtility}
+          contentRef={avatarContainerRef}
+        />
 
         {/* Left Content Column - Fixed at 100vh */}
-        <div className="flex-1 md:col-[2] flex flex-col min-w-0 h-full overflow-visible">
+        <PortfolioSidebar>
           {/* Identity */}
           <div
             className={`hidden md:block h-auto mb-6 transition-opacity ${
@@ -1079,7 +1084,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             position="right"
             thumbHeight={30}
             thumbWidth={2}
-            contentClassName="pl-[52px] md:-ml-[72px] md:w-[calc(100%+72px)] md:pl-[72px]"
+            contentClassName={PROJECT_LIST_CONTENT_CLASS}
             contentRef={contentListRef}
             onContentRefChange={handleContentListRef}
           >
@@ -1214,13 +1219,10 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               <NowPlayingContent data={nowPlayingData} showImage={false} />
             </div>
           </div>
-        </div>
+        </PortfolioSidebar>
 
         {/* Right Column - Content Display (scrollable) */}
-        <div className="hidden md:block md:col-[3] relative h-full min-w-0">
-          {!showSettingsDetail && (
-            <div className="absolute -top-8 left-0 right-0 h-12 bg-gradient-to-b from-background from-0% via-background/20 via-50% to-transparent to-100% z-10 pointer-events-none" />
-          )}
+        <PortfolioDetailColumn showTopFade={!showSettingsDetail}>
           <CustomScrollbar
             className="absolute inset-0"
             position="left"
@@ -1393,9 +1395,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             </div>
           ) : null}
           </CustomScrollbar>
-        </div>
+        </PortfolioDetailColumn>
         <div className="hidden md:block md:col-[4]" aria-hidden="true" />
-      </div>
+      </PortfolioDesktopGrid>
 
       <AnimatePresence>
         {hasDetailContent && (settingsDetailContent || selectedDetailContent) && (
@@ -1562,6 +1564,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
         </div>
       )}
-    </div>
+    </PortfolioHomeFrame>
   );
 }
