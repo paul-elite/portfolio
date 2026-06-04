@@ -21,8 +21,9 @@ async function loadSettings(): Promise<Settings> {
   }
 }
 
-async function saveSettings(settings: Settings): Promise<void> {
+async function saveSettings(settings: Settings): Promise<Settings> {
   // Convert camelCase to snake_case for database
+  const updatedAt = new Date().toISOString();
   const dbSettings: Record<string, unknown> = {
     name: settings.name,
     title: settings.title,
@@ -40,7 +41,7 @@ async function saveSettings(settings: Settings): Promise<void> {
     behance_image: settings.behanceImage || '',
     instagram_image: settings.instagramImage || '',
     email_image: settings.emailImage || '',
-    updated_at: new Date().toISOString(),
+    updated_at: updatedAt,
   };
 
   const { data: existing } = await supabase
@@ -49,15 +50,25 @@ async function saveSettings(settings: Settings): Promise<void> {
     .single();
 
   if (existing) {
-    await supabase
+    const { data, error } = await supabase
       .from('settings')
       .update(dbSettings)
-      .eq('id', existing.id);
-  } else {
-    await supabase
-      .from('settings')
-      .insert(dbSettings);
+      .eq('id', existing.id)
+      .select('*')
+      .single();
+
+    if (error) throw error;
+    return mapSettings(data);
   }
+
+  const { data, error } = await supabase
+    .from('settings')
+    .insert(dbSettings)
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return mapSettings(data);
 }
 
 function checkAuth(request: NextRequest): boolean {
@@ -194,9 +205,10 @@ export async function PUT(request: NextRequest) {
     if (type === 'settings') {
       const currentSettings = await loadSettings();
       const newSettings = { ...currentSettings, ...data };
-      await saveSettings(newSettings);
-      revalidatePath('/');
-      return NextResponse.json({ success: true, settings: newSettings });
+      const savedSettings = await saveSettings(newSettings);
+      revalidatePath('/', 'page');
+      revalidatePath('/admin', 'page');
+      return NextResponse.json({ success: true, settings: savedSettings });
     }
 
     if (!['projects', 'illustrations', 'writings', 'interactions'].includes(type)) {
