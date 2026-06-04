@@ -4,8 +4,9 @@ import { supabase, type Settings } from './supabase';
 
 const SETTINGS_ICON_BUCKET = 'uploads';
 const SETTINGS_ICON_FOLDERS = {
-  deselected: 'settings/deselected',
-  selected: 'settings/selected',
+  current: 'settings/icon',
+  deselectedLegacy: 'settings/deselected',
+  selectedLegacy: 'settings/selected',
   legacy: 'settings',
 };
 
@@ -41,43 +42,41 @@ async function getLatestSettingsIcon(folder: string) {
   return cacheBustedUrl(urlData.publicUrl, latest.updated_at || latest.created_at || latest.name);
 }
 
-async function getLegacySettingsIcon(index: number) {
+async function getLegacySettingsIcon() {
   const { data, error } = await supabase.storage
     .from(SETTINGS_ICON_BUCKET)
     .list(SETTINGS_ICON_FOLDERS.legacy, { limit: 100 });
 
   if (error || !data?.length) return '';
 
-  const files = data
+  const latest = data
     .filter((item) => item.name && !item.name.startsWith('.') && item.name.includes('.'))
     .sort((a, b) => {
       const aTime = new Date(a.created_at || a.updated_at || 0).getTime();
       const bTime = new Date(b.created_at || b.updated_at || 0).getTime();
-      return aTime - bTime || a.name.localeCompare(b.name);
-    });
+      return bTime - aTime || b.name.localeCompare(a.name);
+    })[0];
 
-  const file = files[index];
-  if (!file) return '';
+  if (!latest) return '';
 
-  const path = `${SETTINGS_ICON_FOLDERS.legacy}/${file.name}`;
+  const path = `${SETTINGS_ICON_FOLDERS.legacy}/${latest.name}`;
   const { data: urlData } = supabase.storage
     .from(SETTINGS_ICON_BUCKET)
     .getPublicUrl(path);
 
-  return cacheBustedUrl(urlData.publicUrl, file.updated_at || file.created_at || file.name);
+  return cacheBustedUrl(urlData.publicUrl, latest.updated_at || latest.created_at || latest.name);
 }
 
 export async function withSettingsIconFallbacks(settings: Settings): Promise<Settings> {
-  const [storedSettingsIcon, storedSettingsIconSelected, legacyDeselected, legacySelected] = await Promise.all([
-    settings.settingsIcon ? settings.settingsIcon : getLatestSettingsIcon(SETTINGS_ICON_FOLDERS.deselected),
-    settings.settingsIconSelected ? settings.settingsIconSelected : getLatestSettingsIcon(SETTINGS_ICON_FOLDERS.selected),
-    getLegacySettingsIcon(0),
-    getLegacySettingsIcon(1),
+  const [currentIcon, selectedLegacyIcon, deselectedLegacyIcon, sharedLegacyIcon] = await Promise.all([
+    settings.settingsIcon ? settings.settingsIcon : getLatestSettingsIcon(SETTINGS_ICON_FOLDERS.current),
+    getLatestSettingsIcon(SETTINGS_ICON_FOLDERS.selectedLegacy),
+    getLatestSettingsIcon(SETTINGS_ICON_FOLDERS.deselectedLegacy),
+    getLegacySettingsIcon(),
   ]);
 
   return {
     ...settings,
-    settingsIcon: storedSettingsIcon || legacyDeselected,
-    settingsIconSelected: storedSettingsIconSelected || legacySelected,
+    settingsIcon: currentIcon || selectedLegacyIcon || deselectedLegacyIcon || sharedLegacyIcon,
   };
 }

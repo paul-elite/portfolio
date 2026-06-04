@@ -29,8 +29,6 @@ function AnimatedSettingsIcon() {
 interface SettingsTriggerProps {
   selected: boolean;
   onClick: () => void;
-  icon?: string;
-  selectedIcon?: string;
 }
 
 export default function SettingsTrigger({ selected, onClick }: SettingsTriggerProps) {

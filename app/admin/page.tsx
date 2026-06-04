@@ -56,7 +56,6 @@ interface Settings {
   avatar: string;
   avatarFocused: string;
   settingsIcon: string;
-  settingsIconSelected: string;
   metaImage: string;
   twitter: string;
   github: string;
@@ -351,7 +350,6 @@ export default function AdminPage() {
     avatar: '',
     avatarFocused: '',
     settingsIcon: '',
-    settingsIconSelected: '',
     metaImage: '',
     twitter: '',
     github: '',
@@ -368,7 +366,6 @@ export default function AdminPage() {
   const [avatarPreview, setAvatarPreview] = useState<string>('');
   const [avatarFocusedPreview, setAvatarFocusedPreview] = useState<string>('');
   const [settingsIconPreview, setSettingsIconPreview] = useState<string>('');
-  const [settingsIconSelectedPreview, setSettingsIconSelectedPreview] = useState<string>('');
   const [metaImagePreview, setMetaImagePreview] = useState<string>('');
   const [previewImages, setPreviewImages] = useState<Record<string, string>>({});
   const [homepageImages, setHomepageImages] = useState<string[]>([]);
@@ -871,52 +868,26 @@ export default function AdminPage() {
                 </div>
               </Section>
 
-              <Section title="Settings Icon States">
-                <p className="text-sm text-gray-500 mb-4">Deselected shows when settings are closed. Selected shows when settings are open.</p>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Deselected Icon</label>
-                    <FileUpload
-                      label=""
-                      accept="image/*"
-                      preview={settingsIconPreview || settings.settingsIcon}
-                      uploading={uploadingFields.has('settingsIcon')}
-                      aspectRatio="square"
-                      helpText="Settings closed"
-                      onUpload={async (file) => {
-                        const previewUrl = URL.createObjectURL(file);
-                        setSettingsIconPreview(previewUrl);
-                        const path = await handleFileUpload(file, 'settings/deselected', 'settingsIcon');
-                        if (path) {
-                          const nextSettings = { ...settings, settingsIcon: path };
-                          setSettings(nextSettings);
-                          await saveSettingsData(nextSettings, 'Deselected settings icon saved!');
-                        }
-                      }}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Selected Icon</label>
-                    <FileUpload
-                      label=""
-                      accept="image/*"
-                      preview={settingsIconSelectedPreview || settings.settingsIconSelected}
-                      uploading={uploadingFields.has('settingsIconSelected')}
-                      aspectRatio="square"
-                      helpText="Settings open"
-                      onUpload={async (file) => {
-                        const previewUrl = URL.createObjectURL(file);
-                        setSettingsIconSelectedPreview(previewUrl);
-                        const path = await handleFileUpload(file, 'settings/selected', 'settingsIconSelected');
-                        if (path) {
-                          const nextSettings = { ...settings, settingsIconSelected: path };
-                          setSettings(nextSettings);
-                          await saveSettingsData(nextSettings, 'Selected settings icon saved!');
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
+              <Section title="Settings Icon">
+                <p className="text-sm text-gray-500 mb-4">Upload one SVG source icon. The frontend handles the grey/blue states and slider animation.</p>
+                <FileUpload
+                  label=""
+                  accept="image/svg+xml,image/*"
+                  preview={settingsIconPreview || settings.settingsIcon}
+                  uploading={uploadingFields.has('settingsIcon')}
+                  aspectRatio="square"
+                  helpText="One SVG source"
+                  onUpload={async (file) => {
+                    const previewUrl = URL.createObjectURL(file);
+                    setSettingsIconPreview(previewUrl);
+                    const path = await handleFileUpload(file, 'settings/icon', 'settingsIcon');
+                    if (path) {
+                      const nextSettings = { ...settings, settingsIcon: path };
+                      setSettings(nextSettings);
+                      await saveSettingsData(nextSettings, 'Settings icon saved!');
+                    }
+                  }}
+                />
               </Section>
 
               <Section title="Social Share Image">

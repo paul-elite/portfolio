@@ -785,8 +785,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     <SettingsTrigger
       selected={showSettingsDetail}
       onClick={openSettings}
-      icon={siteConfig.settingsIcon}
-      selectedIcon={siteConfig.settingsIconSelected}
     />
   );
   const settingsDetailContent = showSettingsDetail ? (

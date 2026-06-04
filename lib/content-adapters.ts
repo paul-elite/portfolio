@@ -97,7 +97,6 @@ export function mapSettings(row?: Partial<Settings> & RecordLike | null): Settin
     ...(row as Settings),
     avatarFocused: asString(row.avatar_focused || row.avatarFocused),
     settingsIcon: asString(row.settings_icon || row.settingsIcon),
-    settingsIconSelected: asString(row.settings_icon_selected || row.settingsIconSelected),
     metaImage: asString(row.meta_image || row.metaImage),
     twitterImage: asString(row.twitter_image || row.twitterImage),
     linkedinImage: asString(row.linkedin_image || row.linkedinImage),
@@ -112,7 +111,6 @@ export function settingsToSiteConfig(settings?: Partial<Settings> | null): SiteC
   const avatar = normalized.avatar || staticConfig.avatar;
   const avatarFocused = normalized.avatarFocused || '';
   const settingsIcon = normalized.settingsIcon || '';
-  const settingsIconSelected = normalized.settingsIconSelected || '';
 
   return {
     name: normalized.name || staticConfig.name,
@@ -120,7 +118,6 @@ export function settingsToSiteConfig(settings?: Partial<Settings> | null): SiteC
     avatar: versionedAssetUrl(avatar, assetUrlVersion(avatar)),
     avatarFocused: versionedAssetUrl(avatarFocused, assetUrlVersion(avatarFocused)),
     settingsIcon: versionedAssetUrl(settingsIcon, assetUrlVersion(settingsIcon)),
-    settingsIconSelected: versionedAssetUrl(settingsIconSelected, assetUrlVersion(settingsIconSelected)),
     bio: staticConfig.bio,
     social: {
       twitter: normalized.twitter || staticConfig.social.twitter,

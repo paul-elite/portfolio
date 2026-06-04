@@ -16,7 +16,6 @@ export interface Settings {
   avatar: string;
   avatarFocused?: string;
   settingsIcon?: string;
-  settingsIconSelected?: string;
   metaImage: string;
   twitter: string;
   github: string;
@@ -38,7 +37,6 @@ export const defaultSettings: Settings = {
   avatar: '',
   avatarFocused: '',
   settingsIcon: '',
-  settingsIconSelected: '',
   metaImage: '',
   twitter: '',
   github: '',
