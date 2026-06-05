@@ -76,6 +76,25 @@ const contactCardBorderStyle = {
   boxShadow: '0 0 0 0.5px rgb(0 0 0 / 10%)',
 };
 
+const detailTransition = {
+  duration: 0.22,
+  ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+};
+
+const desktopDetailMotion = {
+  initial: { opacity: 0, x: 16 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -14 },
+  transition: detailTransition,
+};
+
+const mobileDetailMotion = {
+  initial: { opacity: 0, x: 18 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -18 },
+  transition: detailTransition,
+};
+
 type ContactIconName = 'twitter' | 'github' | 'linkedin' | 'behance' | 'instagram' | 'email';
 
 const radialTabMeta: Record<PortfolioTab, { shortcut: string; icon: 'grid' | 'spark' | 'write' | 'chat' }> = {
@@ -606,7 +625,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     </>
   );
   const selectedDetailContent = selectedProject ? (
-    <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
+    <motion.div key={contentAnimationKey} className="w-full max-w-[572px]" {...mobileDetailMotion}>
       <div className="hidden md:sticky md:top-0 md:z-20 md:-mx-1 md:mb-6 md:block md:bg-background md:px-1 md:py-3">
         <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedProject.title}</h2>
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-400">
@@ -652,9 +671,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           View Project →
         </a>
       )}
-    </div>
+    </motion.div>
   ) : selectedWriting ? (
-    <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
+    <motion.div key={contentAnimationKey} className="w-full max-w-[572px]" {...mobileDetailMotion}>
       <div className="hidden md:sticky md:top-0 md:z-20 md:-mx-1 md:mb-6 md:block md:bg-background md:px-1 md:py-3">
         <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedWriting.title}</h2>
         <div className="flex gap-4 text-sm text-gray-400">
@@ -701,9 +720,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           Read More →
         </a>
       )}
-    </div>
+    </motion.div>
   ) : selectedInteraction ? (
-    <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
+    <motion.div key={contentAnimationKey} className="w-full max-w-[572px]" {...mobileDetailMotion}>
       <div className="hidden md:sticky md:top-0 md:z-20 md:-mx-1 md:mb-6 md:block md:bg-background md:px-1 md:py-3">
         <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedInteraction.title}</h2>
       </div>
@@ -720,9 +739,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           View Interaction →
         </a>
       )}
-    </div>
+    </motion.div>
   ) : selectedCategory ? (
-    <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
+    <motion.div key={contentAnimationKey} className="w-full max-w-[572px]" {...mobileDetailMotion}>
       <h2 className="hidden text-xl font-semibold text-gray-900 mb-6 md:block">
         {ILLUSTRATION_CATEGORIES.find(c => c.key === selectedCategory)?.label}
       </h2>
@@ -766,7 +785,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             );
           })}
       </div>
-    </div>
+    </motion.div>
   ) : null;
 
   const radialTrigger = (
@@ -797,9 +816,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     />
   );
   const settingsDetailContent = showSettingsDetail ? (
-    <div key={contentAnimationKey} className="home-settings-detail w-full max-w-[572px] animate-slideInFromRight">
+    <motion.div key={contentAnimationKey} className="home-settings-detail w-full max-w-[572px]" {...mobileDetailMotion}>
       <CustomizeExperienceContent />
-    </div>
+    </motion.div>
   ) : null;
   const renderContentAvatarButtons = ({
     keyPrefix,
@@ -1221,11 +1240,12 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             thumbWidth={2}
             contentClassName="pl-8"
           >
+          <AnimatePresence mode="wait">
           {showSettingsDetail ? (
             settingsDetailContent
           ) : selectedProject ? (
             // Show full project content when selected
-            <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
+            <motion.div key={contentAnimationKey} className="w-full max-w-[572px]" {...desktopDetailMotion}>
               {/* Project Title */}
               <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedProject.title}</h2>
               <div className="flex gap-4 text-sm text-gray-400 mb-6">
@@ -1272,10 +1292,10 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   View Project →
                 </a>
               )}
-            </div>
+            </motion.div>
           ) : selectedWriting ? (
             // Show full writing content when selected
-            <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
+            <motion.div key={contentAnimationKey} className="w-full max-w-[572px]" {...desktopDetailMotion}>
               <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedWriting.title}</h2>
               <div className="flex gap-4 text-sm text-gray-400 mb-6">
                 {selectedWriting.date && (
@@ -1320,9 +1340,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   Read More →
                 </a>
               )}
-            </div>
+            </motion.div>
           ) : selectedInteraction ? (
-            <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
+            <motion.div key={contentAnimationKey} className="w-full max-w-[572px]" {...desktopDetailMotion}>
               <h2 className="text-xl font-semibold text-gray-900 mb-6">{selectedInteraction.title}</h2>
               <p className="text-sm text-gray-600 leading-relaxed">{selectedInteraction.description}</p>
 
@@ -1336,10 +1356,10 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   View Interaction →
                 </a>
               )}
-            </div>
+            </motion.div>
           ) : selectedCategory ? (
             // Show illustrations grid when category is selected
-            <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
+            <motion.div key={contentAnimationKey} className="w-full max-w-[572px]" {...desktopDetailMotion}>
               <h2 className="text-xl font-semibold text-gray-900 mb-6">
                 {ILLUSTRATION_CATEGORIES.find(c => c.key === selectedCategory)?.label}
               </h2>
@@ -1383,7 +1403,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                     );
                   })}
               </div>
-            </div>
+            </motion.div>
           ) : defaultProject ? (
             <div className="w-full max-w-[572px] animate-fadeIn border-l border-[var(--experience-border)] pl-6">
               <div className="mb-7">
@@ -1451,6 +1471,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               </button>
             </div>
           ) : null}
+          </AnimatePresence>
           </CustomScrollbar>
         </PortfolioDetailColumn>
         <div className="hidden md:block md:col-[4]" aria-hidden="true" />
@@ -1463,10 +1484,10 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             role="dialog"
             aria-modal="true"
             aria-label={mobileDetailTitle}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, x: 18 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -18 }}
+            transition={detailTransition}
           >
             <div className="mobile-detail-scroll">
               <div className={`mobile-detail-content ${showSettingsDetail ? 'mobile-detail-content--settings' : ''}`}>
@@ -1483,11 +1504,13 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                       </svg>
                     </button>
                   )}
-                  {showSettingsDetail ? (
-                    <CustomizeExperienceContent />
-                  ) : (
-                    selectedDetailContent
-                  )}
+                  <AnimatePresence mode="wait">
+                    {showSettingsDetail ? (
+                      settingsDetailContent
+                    ) : (
+                      selectedDetailContent
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
             </div>
