@@ -90,7 +90,7 @@ export default function WritingContent({ writing, prevWriting, nextWriting }: Wr
 
             {/* Description fallback if no blocks */}
             {!hasBlocks && writing.description && (
-              <p className="text-base text-gray-600 leading-relaxed">
+              <p className="text-sm text-gray-600 leading-relaxed">
                 {writing.description}
               </p>
             )}

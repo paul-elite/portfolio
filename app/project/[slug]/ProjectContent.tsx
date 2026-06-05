@@ -92,7 +92,7 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
                   <h2 className="text-xs text-gray-400 uppercase tracking-wider mb-3">
                     Overview
                   </h2>
-                  <p className="text-base text-gray-600 leading-relaxed">
+                  <p className="text-sm text-gray-600 leading-relaxed">
                     {project.caseStudy.overview}
                   </p>
                 </section>
@@ -101,7 +101,7 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
                   <h2 className="text-xs text-gray-400 uppercase tracking-wider mb-3">
                     Challenge
                   </h2>
-                  <p className="text-base text-gray-600 leading-relaxed">
+                  <p className="text-sm text-gray-600 leading-relaxed">
                     {project.caseStudy.challenge}
                   </p>
                 </section>
@@ -110,7 +110,7 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
                   <h2 className="text-xs text-gray-400 uppercase tracking-wider mb-3">
                     Approach
                   </h2>
-                  <p className="text-base text-gray-600 leading-relaxed">
+                  <p className="text-sm text-gray-600 leading-relaxed">
                     {project.caseStudy.approach}
                   </p>
                 </section>
@@ -119,7 +119,7 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
                   <h2 className="text-xs text-gray-400 uppercase tracking-wider mb-3">
                     Outcome
                   </h2>
-                  <p className="text-base text-gray-600 leading-relaxed">
+                  <p className="text-sm text-gray-600 leading-relaxed">
                     {project.caseStudy.outcome}
                   </p>
                 </section>
@@ -128,7 +128,7 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
 
             {/* Description fallback if no blocks or caseStudy */}
             {!hasBlocks && !project.caseStudy && project.description && (
-              <p className="text-base text-gray-600 leading-relaxed">
+              <p className="text-sm text-gray-600 leading-relaxed">
                 {project.description}
               </p>
             )}

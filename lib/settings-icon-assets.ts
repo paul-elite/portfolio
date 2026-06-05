@@ -70,13 +70,15 @@ async function getLegacySettingsIcon() {
 export async function withSettingsIconFallbacks(settings: Settings): Promise<Settings> {
   const [currentIcon, selectedLegacyIcon, deselectedLegacyIcon, sharedLegacyIcon] = await Promise.all([
     settings.settingsIcon ? settings.settingsIcon : getLatestSettingsIcon(SETTINGS_ICON_FOLDERS.current),
-    getLatestSettingsIcon(SETTINGS_ICON_FOLDERS.selectedLegacy),
-    getLatestSettingsIcon(SETTINGS_ICON_FOLDERS.deselectedLegacy),
+    settings.settingsIconSelected ? settings.settingsIconSelected : getLatestSettingsIcon(SETTINGS_ICON_FOLDERS.selectedLegacy),
+    settings.settingsIconDeselected ? settings.settingsIconDeselected : getLatestSettingsIcon(SETTINGS_ICON_FOLDERS.deselectedLegacy),
     getLegacySettingsIcon(),
   ]);
 
   return {
     ...settings,
     settingsIcon: currentIcon || selectedLegacyIcon || deselectedLegacyIcon || sharedLegacyIcon,
+    settingsIconSelected: selectedLegacyIcon || currentIcon || sharedLegacyIcon,
+    settingsIconDeselected: deselectedLegacyIcon || currentIcon || sharedLegacyIcon,
   };
 }

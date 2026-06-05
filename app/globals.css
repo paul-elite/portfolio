@@ -322,7 +322,7 @@ body {
   padding-top: 3rem;
   padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
   padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
-  padding-left: calc(max(1.25rem, env(safe-area-inset-left, 0px)) + 3.9rem);
+  padding-left: calc(max(0.5rem, env(safe-area-inset-left, 0px)) + 3.9rem);
 }
 
 .mobile-detail-content--settings {
@@ -333,7 +333,7 @@ body {
   position: fixed;
   z-index: 9010;
   top: 3rem;
-  left: max(1.25rem, env(safe-area-inset-left, 0px));
+  left: max(0.5rem, env(safe-area-inset-left, 0px));
   display: flex;
   width: 2.5rem;
   max-height: calc(100dvh - 6rem);

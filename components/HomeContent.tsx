@@ -503,6 +503,13 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   // Track if anything is selected to fade other elements
   const hasSelection = selectedProject !== null || selectedWriting !== null || selectedInteraction !== null || selectedCategory !== null;
   const hasDetailContent = hasSelection || showSettingsDetail;
+  const defaultProject = activeTab === 'projects' && !hasDetailContent
+    ? content.projects[0] || null
+    : null;
+  const defaultProjectIntro = defaultProject?.blocks?.find((block) => block.type === 'text')?.content
+    || defaultProject?.caseStudy?.overview
+    || defaultProject?.description
+    || '';
   const activeAvatar = hasDetailContent && avatarFocused ? avatarFocused : avatar;
   const contactVisible = contactOpen || contactHovered;
   const mobileDetailTitle = showSettingsDetail
@@ -616,23 +623,23 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         <div className="space-y-8">
           <section>
             <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Overview</h3>
-            <p className="text-base text-gray-600 leading-relaxed">{selectedProject.caseStudy.overview}</p>
+            <p className="text-sm text-gray-600 leading-relaxed">{selectedProject.caseStudy.overview}</p>
           </section>
           <section>
             <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Challenge</h3>
-            <p className="text-base text-gray-600 leading-relaxed">{selectedProject.caseStudy.challenge}</p>
+            <p className="text-sm text-gray-600 leading-relaxed">{selectedProject.caseStudy.challenge}</p>
           </section>
           <section>
             <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Approach</h3>
-            <p className="text-base text-gray-600 leading-relaxed">{selectedProject.caseStudy.approach}</p>
+            <p className="text-sm text-gray-600 leading-relaxed">{selectedProject.caseStudy.approach}</p>
           </section>
           <section>
             <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Outcome</h3>
-            <p className="text-base text-gray-600 leading-relaxed">{selectedProject.caseStudy.outcome}</p>
+            <p className="text-sm text-gray-600 leading-relaxed">{selectedProject.caseStudy.outcome}</p>
           </section>
         </div>
       ) : (
-        <p className="text-base text-gray-600 leading-relaxed">{selectedProject.description}</p>
+        <p className="text-sm text-gray-600 leading-relaxed">{selectedProject.description}</p>
       )}
 
       {selectedProject.link && (
@@ -681,7 +688,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           <ContentBlocks blocks={selectedWriting.blocks} />
         </div>
       ) : (
-        <p className="text-base text-gray-600 leading-relaxed">{selectedWriting.description}</p>
+        <p className="text-sm text-gray-600 leading-relaxed">{selectedWriting.description}</p>
       )}
 
       {selectedWriting.link && (
@@ -701,7 +708,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         <h2 className="text-xl font-semibold text-gray-900 mb-1">{selectedInteraction.title}</h2>
       </div>
 
-      <p className="text-base text-gray-600 leading-relaxed">{selectedInteraction.description}</p>
+      <p className="text-sm text-gray-600 leading-relaxed">{selectedInteraction.description}</p>
 
       {selectedInteraction.link && (
         <a
@@ -785,6 +792,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     <SettingsTrigger
       selected={showSettingsDetail}
       onClick={openSettings}
+      selectedIconSrc={siteConfig.settingsIconSelected || '/settings-icon-selected.svg'}
+      deselectedIconSrc={siteConfig.settingsIconDeselected || '/settings-icon-deselected.svg'}
     />
   );
   const settingsDetailContent = showSettingsDetail ? (
@@ -1233,23 +1242,23 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                 <div className="space-y-8">
                   <section>
                     <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Overview</h3>
-                    <p className="text-base text-gray-600 leading-relaxed">{selectedProject.caseStudy.overview}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed">{selectedProject.caseStudy.overview}</p>
                   </section>
                   <section>
                     <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Challenge</h3>
-                    <p className="text-base text-gray-600 leading-relaxed">{selectedProject.caseStudy.challenge}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed">{selectedProject.caseStudy.challenge}</p>
                   </section>
                   <section>
                     <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Approach</h3>
-                    <p className="text-base text-gray-600 leading-relaxed">{selectedProject.caseStudy.approach}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed">{selectedProject.caseStudy.approach}</p>
                   </section>
                   <section>
                     <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Outcome</h3>
-                    <p className="text-base text-gray-600 leading-relaxed">{selectedProject.caseStudy.outcome}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed">{selectedProject.caseStudy.outcome}</p>
                   </section>
                 </div>
               ) : (
-                <p className="text-base text-gray-600 leading-relaxed">{selectedProject.description}</p>
+                <p className="text-sm text-gray-600 leading-relaxed">{selectedProject.description}</p>
               )}
 
               {/* Project Link */}
@@ -1298,7 +1307,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   <ContentBlocks blocks={selectedWriting.blocks} />
                 </div>
               ) : (
-                <p className="text-base text-gray-600 leading-relaxed">{selectedWriting.description}</p>
+                <p className="text-sm text-gray-600 leading-relaxed">{selectedWriting.description}</p>
               )}
 
               {selectedWriting.link && (
@@ -1315,7 +1324,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           ) : selectedInteraction ? (
             <div key={contentAnimationKey} className="w-full max-w-[572px] animate-slideInFromRight">
               <h2 className="text-xl font-semibold text-gray-900 mb-6">{selectedInteraction.title}</h2>
-              <p className="text-base text-gray-600 leading-relaxed">{selectedInteraction.description}</p>
+              <p className="text-sm text-gray-600 leading-relaxed">{selectedInteraction.description}</p>
 
               {selectedInteraction.link && (
                 <a
@@ -1375,6 +1384,72 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   })}
               </div>
             </div>
+          ) : defaultProject ? (
+            <div className="w-full max-w-[572px] animate-fadeIn border-l border-[var(--experience-border)] pl-6">
+              <div className="mb-7">
+                <p className="mb-3 text-xs font-medium uppercase tracking-[0.16em] text-[var(--experience-muted)]">
+                  Featured project
+                </p>
+                <h2 className="mb-2 text-[1.375rem] font-semibold leading-7 text-[var(--experience-text)]">
+                  {defaultProject.title}
+                </h2>
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--experience-muted)]">
+                  {defaultProject.year && <span>{defaultProject.year}</span>}
+                  {defaultProject.description && <span>{defaultProject.description}</span>}
+                </div>
+              </div>
+
+              {defaultProject.preview && (
+                <button
+                  type="button"
+                  onClick={() => handleSelectProject(defaultProject)}
+                  className="group relative mb-6 block aspect-[16/10] w-full overflow-hidden rounded-[10px] bg-gray-100 text-left"
+                  aria-label={`Open ${defaultProject.title}`}
+                >
+                  <OptimizedImage
+                    src={defaultProject.preview}
+                    alt={defaultProject.title}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                </button>
+              )}
+
+              {defaultProjectIntro && (
+                <p className="max-w-[34rem] text-sm leading-relaxed text-[var(--experience-text)]">
+                  {defaultProjectIntro}
+                </p>
+              )}
+
+              {defaultProject.role && (
+                <p className="mt-5 text-xs font-medium uppercase tracking-[0.14em] text-[var(--experience-muted)]">
+                  {defaultProject.role}
+                </p>
+              )}
+
+              {defaultProject.tags && defaultProject.tags.length > 0 && (
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {defaultProject.tags.slice(0, 4).map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-[var(--experience-border)] px-2.5 py-1 text-xs text-[var(--experience-muted)]"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => handleSelectProject(defaultProject)}
+                className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-[var(--experience-text)] transition-colors hover:text-[var(--experience-accent)]"
+              >
+                Open case study
+                <span aria-hidden="true">→</span>
+              </button>
+            </div>
           ) : null}
           </CustomScrollbar>
         </PortfolioDetailColumn>
@@ -1421,15 +1496,18 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       </AnimatePresence>
 
       {/* Mobile Bottom Section */}
-      <div className={`md:hidden ${hasDetailContent ? 'absolute bottom-5 left-2 right-3 z-[9020] pt-0' : 'shrink-0 pt-4'}`}>
+      <div className="fixed bottom-5 left-2 right-3 z-[9020] md:hidden">
         <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-3">
+          <div className="flex h-10 items-center gap-3">
             {settingsTrigger}
           </div>
-          {!hasDetailContent && (
-            <div className="flex items-center gap-3">
+          <div className="flex h-10 items-center gap-3">
+            <div className="h-10 w-10 flex-shrink-0">
               <NowPlayingImage data={nowPlayingData} useAlbumArt />
-              <div className="min-w-0">
+            </div>
+            <div className={`min-w-0 transition-opacity duration-150 ${hasDetailContent ? 'pointer-events-none opacity-0' : 'opacity-100'}`}>
+              {!hasDetailContent && (
+                <>
                 {nowPlayingData?.isPlaying ? (
                   <>
                     <a href={nowPlayingData.songUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors truncate block">
@@ -1447,9 +1525,10 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                     )}
                   </>
                 )}
-              </div>
+                </>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
 

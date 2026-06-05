@@ -27,7 +27,7 @@ function ContentBlockView({ block }: { block: ContentBlock }) {
       );
     case 'text':
       return (
-        <p className="text-base text-gray-600 leading-relaxed mb-4">
+        <p className="text-sm text-gray-600 leading-relaxed mb-4">
           {block.content}
         </p>
       );
@@ -72,7 +72,7 @@ function ContentBlockView({ block }: { block: ContentBlock }) {
       return (
         <ul className="my-4 space-y-2">
           {items.map((item, index) => (
-            <li key={`${item}-${index}`} className="flex items-start gap-3 text-base text-gray-600">
+            <li key={`${item}-${index}`} className="flex items-start gap-3 text-sm text-gray-600">
               <span className={bullets[index] ? 'mt-0.5' : 'text-gray-400 mt-1.5'}>
                 {bullets[index] || '•'}
               </span>

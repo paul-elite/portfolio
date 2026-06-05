@@ -89,6 +89,8 @@ export interface SiteConfig {
   avatar: string;
   avatarFocused?: string;
   settingsIcon?: string;
+  settingsIconSelected?: string;
+  settingsIconDeselected?: string;
   bio: string;
   social: SocialLinks;
   socialImages?: SocialImages;

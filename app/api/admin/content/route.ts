@@ -31,6 +31,8 @@ async function saveSettings(settings: Settings): Promise<Settings> {
     avatar: settings.avatar,
     avatar_focused: settings.avatarFocused || '',
     settings_icon: settings.settingsIcon || '',
+    settings_icon_selected: settings.settingsIconSelected || '',
+    settings_icon_deselected: settings.settingsIconDeselected || '',
     meta_image: settings.metaImage,
     twitter: settings.twitter,
     github: settings.github,
