@@ -278,7 +278,7 @@ export function NowPlayingContent({ data, showImage = true }: { data: SpotifyDat
                   href={data.songUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors truncate"
+                  className="text-sm font-normal text-gray-400 hover:text-gray-600 transition-colors truncate"
                 >
                   {data.title}
                 </a>
@@ -320,7 +320,7 @@ export function NowPlayingText({ data }: { data: SpotifyData | null }) {
             href={data.songUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors truncate"
+            className="text-sm font-normal text-gray-400 hover:text-gray-600 transition-colors truncate"
           >
             {data.title}
           </a>
