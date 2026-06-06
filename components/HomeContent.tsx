@@ -260,6 +260,17 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     const category = searchParams.get('category') as IllustrationCategory | null;
 
     if (projectSlug) {
+      if (
+        activeTab === 'projects' &&
+        selectedProject?.slug === projectSlug &&
+        !selectedWriting &&
+        !selectedInteraction &&
+        !selectedCategory &&
+        !showSettingsDetail
+      ) {
+        return;
+      }
+
       const project = content.projects.find((item) => item.slug === projectSlug) || null;
       setActiveTab('projects');
       setSelectedProject(project);
@@ -272,6 +283,17 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     }
 
     if (writingSlug) {
+      if (
+        activeTab === 'writings' &&
+        selectedWriting?.slug === writingSlug &&
+        !selectedProject &&
+        !selectedInteraction &&
+        !selectedCategory &&
+        !showSettingsDetail
+      ) {
+        return;
+      }
+
       const writing = content.writings.find((item) => item.slug === writingSlug) || null;
       setActiveTab('writings');
       setSelectedWriting(writing);
@@ -284,6 +306,17 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     }
 
     if (interactionSlug) {
+      if (
+        activeTab === 'interaction' &&
+        selectedInteraction?.slug === interactionSlug &&
+        !selectedProject &&
+        !selectedWriting &&
+        !selectedCategory &&
+        !showSettingsDetail
+      ) {
+        return;
+      }
+
       const interaction = content.interactions.find((item) => item.slug === interactionSlug) || null;
       setActiveTab('interaction');
       setSelectedInteraction(interaction);
@@ -296,6 +329,17 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     }
 
     if (category && ILLUSTRATION_CATEGORIES.some((item) => item.key === category)) {
+      if (
+        activeTab === 'illustration' &&
+        selectedCategory === category &&
+        !selectedProject &&
+        !selectedWriting &&
+        !selectedInteraction &&
+        !showSettingsDetail
+      ) {
+        return;
+      }
+
       setActiveTab('illustration');
       setSelectedCategory(category);
       setSelectedProject(null);
@@ -304,7 +348,18 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       setShowSettingsDetail(false);
       setContentAnimationKey(`category-${category}-url`);
     }
-  }, [content.interactions, content.projects, content.writings, searchParams]);
+  }, [
+    activeTab,
+    content.interactions,
+    content.projects,
+    content.writings,
+    searchParams,
+    selectedCategory,
+    selectedInteraction,
+    selectedProject,
+    selectedWriting,
+    showSettingsDetail,
+  ]);
 
   // Update URL when selection changes
   const updateURL = useCallback((selection: {
