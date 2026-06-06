@@ -21,7 +21,7 @@ export default function OptimizedImage({
     return (
       <div className="relative w-full h-full">
         <div
-          className={`absolute inset-0 transition-opacity duration-300 ${
+          className={`absolute inset-0 pointer-events-none transition-opacity duration-150 ${
             isLoaded ? 'opacity-0' : 'opacity-100'
           }`}
           style={{ backgroundColor: placeholderColor }}
@@ -30,9 +30,7 @@ export default function OptimizedImage({
           {...props}
           alt={alt}
           fill
-          className={`${className} transition-opacity duration-300 ${
-            isLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={className}
           onLoad={() => setIsLoaded(true)}
         />
       </div>
@@ -43,7 +41,7 @@ export default function OptimizedImage({
   return (
     <div className="relative inline-block w-full">
       <div
-        className={`absolute inset-0 transition-opacity duration-300 rounded-lg ${
+        className={`absolute inset-0 pointer-events-none transition-opacity duration-150 rounded-lg ${
           isLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'
         }`}
         style={{ backgroundColor: placeholderColor }}
@@ -51,9 +49,7 @@ export default function OptimizedImage({
       <Image
         {...props}
         alt={alt}
-        className={`${className} transition-opacity duration-300 ${
-          isLoaded ? 'opacity-100' : 'opacity-0'
-        }`}
+        className={className}
         onLoad={() => setIsLoaded(true)}
       />
     </div>
