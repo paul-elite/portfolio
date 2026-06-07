@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import OptimizedImage from '@/components/OptimizedImage';
 import ContentBlocks from '@/components/content/ContentBlocks';
+import DetailPageTransition from '@/components/experience/DetailPageTransition';
 import type { NavItem, Writing } from '@/lib/content-model';
 
 interface WritingContentProps {
@@ -15,7 +16,7 @@ export default function WritingContent({ writing, prevWriting, nextWriting }: Wr
   const hasBlocks = writing.blocks && writing.blocks.length > 0;
 
   return (
-    <main className="min-h-screen bg-white">
+    <DetailPageTransition>
       <div className="w-full pl-2 pr-3 md:px-6">
         {/* Main Content */}
         <div className="pt-24 md:pt-48 pb-16 flex md:grid md:grid-cols-12 gap-4 md:gap-6">
@@ -25,6 +26,7 @@ export default function WritingContent({ writing, prevWriting, nextWriting }: Wr
           <div className="flex-shrink-0 md:col-span-1 md:flex md:justify-end md:items-start">
             <Link
               href="/"
+              data-detail-transition
               className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-1 transition-all hover:opacity-80"
               style={{
                 background: 'linear-gradient(to bottom, #fefeff, #ffffff)',
@@ -113,6 +115,7 @@ export default function WritingContent({ writing, prevWriting, nextWriting }: Wr
                 {prevWriting ? (
                   <Link
                     href={`/writing/${prevWriting.slug}`}
+                    data-detail-transition
                     className="group flex flex-col items-start"
                   >
                     <span className="text-xs text-gray-400 mb-1">Previous Writing</span>
@@ -126,6 +129,7 @@ export default function WritingContent({ writing, prevWriting, nextWriting }: Wr
                 {nextWriting ? (
                   <Link
                     href={`/writing/${nextWriting.slug}`}
+                    data-detail-transition
                     className="group flex flex-col items-end"
                   >
                     <span className="text-xs text-gray-400 mb-1">Next Writing</span>
@@ -143,6 +147,6 @@ export default function WritingContent({ writing, prevWriting, nextWriting }: Wr
           <div className="hidden md:block md:col-span-3" />
         </div>
       </div>
-    </main>
+    </DetailPageTransition>
   );
 }
