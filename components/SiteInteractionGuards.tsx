@@ -6,6 +6,7 @@ export default function SiteInteractionGuards() {
   useEffect(() => {
     const protectedSelector = 'img, svg, picture, video, canvas';
     const interactiveAppSelector = '.scopeguard';
+    const interactiveMediaSelector = 'a, button, input, label, select, textarea, [role="button"]';
     const editableSelector = 'input, textarea, select, [contenteditable="true"]';
 
     const canUseNativeInteraction = (event: Event) => {
@@ -25,7 +26,11 @@ export default function SiteInteractionGuards() {
     const preventMediaInteraction = (event: Event) => {
       const target = event.target;
 
-      if (target instanceof Element && target.closest(protectedSelector)) {
+      if (
+        target instanceof Element &&
+        target.closest(protectedSelector) &&
+        !target.closest(interactiveMediaSelector)
+      ) {
         event.preventDefault();
       }
     };

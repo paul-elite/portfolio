@@ -219,6 +219,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const contentListRef = useRef<HTMLDivElement>(null);
   const radialTriggerRef = useRef<HTMLButtonElement>(null);
   const radialCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingLocalSearchRef = useRef<string | null>(null);
   const [contentListReady, setContentListReady] = useState(false);
   const nowPlayingData = useNowPlaying();
 
@@ -258,6 +259,33 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     const writingSlug = searchParams.get('writing');
     const interactionSlug = searchParams.get('interaction');
     const category = searchParams.get('category') as IllustrationCategory | null;
+    const routeSelectionKey = projectSlug
+      ? `project:${projectSlug}`
+      : writingSlug
+        ? `writing:${writingSlug}`
+        : interactionSlug
+          ? `interaction:${interactionSlug}`
+          : category
+            ? `category:${category}`
+            : '';
+    const localSelectionKey = selectedProject
+      ? `project:${selectedProject.slug}`
+      : selectedWriting
+        ? `writing:${selectedWriting.slug}`
+        : selectedInteraction
+          ? `interaction:${selectedInteraction.slug}`
+          : selectedCategory
+            ? `category:${selectedCategory}`
+            : '';
+
+    if (pendingLocalSearchRef.current !== null) {
+      if (searchParams.toString() !== pendingLocalSearchRef.current) {
+        return;
+      }
+
+      pendingLocalSearchRef.current = null;
+      if (routeSelectionKey === localSelectionKey) return;
+    }
 
     if (projectSlug) {
       if (
@@ -378,9 +406,16 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     } else if (selection.category) {
       params.set('category', selection.category);
     }
-    const newURL = params.toString() ? `?${params.toString()}` : '/';
+    const nextSearch = params.toString();
+    const currentSearch = typeof window === 'undefined'
+      ? searchParams.toString()
+      : window.location.search.replace(/^\?/, '');
+    if (nextSearch === currentSearch) return;
+
+    pendingLocalSearchRef.current = nextSearch;
+    const newURL = nextSearch ? `?${nextSearch}` : '/';
     router.replace(newURL, { scroll: false });
-  }, [router]);
+  }, [router, searchParams]);
 
   // Wrapper functions to update selection and URL together
   const handleSelectProject = useCallback((project: Project | null) => {
