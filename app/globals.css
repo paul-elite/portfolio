@@ -366,7 +366,9 @@ body {
 }
 
 .mobile-detail-rail .mobile-rail-avatar-row {
-  height: 3.75rem;
+  height: auto;
+  padding-top: var(--experience-row-padding);
+  padding-bottom: var(--experience-row-padding);
 }
 
 @media (min-width: 768px) {
