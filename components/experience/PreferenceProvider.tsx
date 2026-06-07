@@ -20,6 +20,7 @@ export interface ExperiencePreferences {
   projectView: ProjectView;
   personality: PersonalityMode;
   sound: SoundPreference;
+  soundVolume: number;
 }
 
 interface PreferenceContextValue {
@@ -40,6 +41,7 @@ export const defaultPreferences: ExperiencePreferences = {
   projectView: 'list',
   personality: 'friendly',
   sound: 'off',
+  soundVolume: 60,
 };
 
 const fontTokens: Record<FontSizePreference, CSSProperties> = {
@@ -201,6 +203,7 @@ export function PreferenceProvider({ children }: { children: ReactNode }) {
         data-density={preferences.density}
         data-personality={preferences.personality}
         data-sound={preferences.sound}
+        data-sound-volume={preferences.soundVolume}
         style={tokens}
       >
         {children}
