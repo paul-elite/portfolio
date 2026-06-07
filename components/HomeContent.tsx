@@ -906,9 +906,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const renderContentAvatarButtons = ({
     keyPrefix,
     rowClassName = 'project-avatar-row flex items-center justify-center',
+    revealInactive = false,
   }: {
     keyPrefix: string;
     rowClassName?: string;
+    revealInactive?: boolean;
   }) => {
     const colors = [
       'from-blue-400 to-cyan-400',
@@ -930,6 +932,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     ) => {
       const stateClass = isActive
         ? 'opacity-100 visible'
+        : revealInactive
+          ? 'opacity-40 visible hover:opacity-100'
         : 'opacity-0 invisible pointer-events-none';
       const colorClass = colors[index % colors.length];
 
@@ -940,9 +944,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           onClick={onClick}
           className={rowClassName}
           aria-label={`Open ${title}`}
-          aria-hidden={!isActive}
-          disabled={!isActive}
-          tabIndex={isActive ? 0 : -1}
+          aria-hidden={!isActive && !revealInactive}
+          disabled={!isActive && !revealInactive}
+          tabIndex={isActive || revealInactive ? 0 : -1}
         >
           <span className={`grid h-10 w-10 flex-shrink-0 place-items-center transition-opacity duration-150 ${stateClass}`}>
             {imageSrc ? (
@@ -1013,6 +1017,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const mobileContentAvatarButtons = renderContentAvatarButtons({
     keyPrefix: 'mobile-content-avatar',
     rowClassName: 'mobile-rail-avatar-row project-avatar-row flex items-center justify-center',
+    revealInactive: true,
   });
   const mobileNameAvatar = (
     <button
