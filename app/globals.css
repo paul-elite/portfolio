@@ -250,7 +250,14 @@ body {
 .portfolio-home {
   --portfolio-text-dark: var(--experience-text);
   --portfolio-text-light: var(--experience-muted);
+  --project-avatar-offset: 52px;
   color: var(--portfolio-text-dark);
+}
+
+@media (min-width: 768px) {
+  .portfolio-home {
+    --project-avatar-offset: 72px;
+  }
 }
 
 .portfolio-home :where(.text-xl, .text-base, .text-\[15px\], .text-\[32px\]) {

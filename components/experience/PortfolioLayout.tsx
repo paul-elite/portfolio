@@ -2,7 +2,6 @@
 
 import type { ReactNode, Ref } from 'react';
 
-export const PROJECT_AVATAR_OFFSET = 72;
 export const PROJECT_LIST_CONTENT_CLASS = 'pl-[52px] md:-ml-[72px] md:w-[calc(100%+72px)] md:pl-[72px]';
 
 export function PortfolioHomeFrame({ children }: { children: ReactNode }) {

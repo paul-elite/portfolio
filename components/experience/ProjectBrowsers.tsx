@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import type { CSSProperties, ReactNode } from 'react';
 import type { Project } from '@/lib/content-model';
-import { PROJECT_AVATAR_OFFSET } from './PortfolioLayout';
 
 interface ProjectBrowserProps {
   projects: Project[];
@@ -87,7 +86,7 @@ function ProjectInlineAvatar({ project, visible }: { project: Project; visible: 
   return (
     <span
       className={`absolute top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center transition-opacity duration-[var(--experience-motion)] ${visibilityClass}`}
-      style={{ left: -PROJECT_AVATAR_OFFSET }}
+      style={{ left: 'calc(var(--project-avatar-offset) * -1)' }}
       aria-hidden="true"
     >
       {project.avatar ? (
