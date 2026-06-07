@@ -1683,7 +1683,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           aria-expanded={contactVisible}
           aria-label="Open contact links"
           style={contactCardBorderStyle}
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-white/95 py-1.5 pl-2 pr-4 text-sm font-medium text-gray-900 backdrop-blur transition-colors hover:bg-gray-50"
+          className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/95 p-1.5 text-gray-900 backdrop-blur transition-colors hover:bg-gray-50"
         >
           <span className="relative block h-6 w-6 overflow-hidden rounded-full bg-gray-100">
             <Image
@@ -1695,7 +1695,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               priority
             />
           </span>
-          <span>Contact</span>
         </button>
       </div>
 
