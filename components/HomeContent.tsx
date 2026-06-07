@@ -1054,7 +1054,9 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       aria-hidden={!hasDetailContent}
     >
       {mobileNameAvatar}
-      {mobileContentAvatarButtons}
+      <div className="mobile-project-avatar-rail">
+        {mobileContentAvatarButtons}
+      </div>
     </div>
   );
   const desktopProfileAvatar = (
