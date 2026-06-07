@@ -374,7 +374,7 @@ body {
 }
 
 .mobile-detail-rail .mobile-project-avatar-rail {
-  transform: translateY(var(--project-avatar-y-offset));
+  padding-top: var(--project-avatar-y-offset);
 }
 
 @media (min-width: 768px) {

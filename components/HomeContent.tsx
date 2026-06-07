@@ -933,7 +933,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       const stateClass = isActive
         ? 'opacity-100 visible'
         : revealInactive
-          ? 'opacity-40 visible hover:opacity-100'
+          ? 'opacity-100 visible'
         : 'opacity-0 invisible pointer-events-none';
       const colorClass = colors[index % colors.length];
 
