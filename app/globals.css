@@ -275,13 +275,6 @@ body {
   --tw-gradient-via: color-mix(in srgb, var(--experience-bg) 20%, transparent) !important;
 }
 
-.experience-root[data-color-personality="funky"] .portfolio-home {
-  background:
-    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--experience-accent) 13%, transparent), transparent 28rem),
-    radial-gradient(circle at 88% 74%, color-mix(in srgb, #fb9120 18%, transparent), transparent 24rem),
-    var(--experience-bg);
-}
-
 .experience-root[data-motion="reduced"] *,
 .experience-root[data-motion="reduced"] *::before,
 .experience-root[data-motion="reduced"] *::after {

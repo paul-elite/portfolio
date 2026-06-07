@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import type { CSSProperties, ReactNode } from 'react';
 import type { Project } from '@/lib/content-model';
-import { usePreferences } from './PreferenceProvider';
 import { PROJECT_AVATAR_OFFSET } from './PortfolioLayout';
 
 interface ProjectBrowserProps {
@@ -206,10 +205,5 @@ export function ProjectCaseStudyCards(props: ProjectBrowserProps) {
 }
 
 export default function ProjectBrowser(props: ProjectBrowserProps) {
-  const { preferences } = usePreferences();
-
-  if (preferences.projectView === 'grid') return <ProjectGrid {...props} />;
-  if (preferences.projectView === 'case-study') return <ProjectCaseStudyCards {...props} />;
-  if (preferences.projectView === 'timeline') return <ProjectTimeline {...props} />;
   return <ProjectList {...props} />;
 }
