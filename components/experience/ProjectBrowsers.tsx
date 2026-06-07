@@ -61,7 +61,7 @@ export function ProjectList(props: ProjectBrowserProps) {
             onHover={(hovered) => {
               if (!selectedProject) onHover(hovered);
             }}
-            className="group relative block w-full py-[var(--experience-row-padding)] text-left hover:scale-[var(--experience-scale)]"
+            className="project-avatar-row group relative block w-full py-[var(--experience-row-padding)] text-left"
           >
             <ProjectInlineAvatar project={project} visible={isSelected} />
             <span className="block min-w-0">
