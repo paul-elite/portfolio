@@ -85,8 +85,11 @@ function ProjectInlineAvatar({ project, visible }: { project: Project; visible: 
 
   return (
     <span
-      className={`absolute top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center transition-opacity duration-[var(--experience-motion)] ${visibilityClass}`}
-      style={{ left: 'calc(var(--project-avatar-offset) * -1)' }}
+      className={`absolute top-1/2 grid h-10 w-10 place-items-center transition-opacity duration-[var(--experience-motion)] ${visibilityClass}`}
+      style={{
+        left: 'calc(var(--project-avatar-offset) * -1)',
+        transform: 'translateY(calc(-50% + var(--project-avatar-y-offset)))',
+      }}
       aria-hidden="true"
     >
       {project.avatar ? (

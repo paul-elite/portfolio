@@ -251,12 +251,14 @@ body {
   --portfolio-text-dark: var(--experience-text);
   --portfolio-text-light: var(--experience-muted);
   --project-avatar-offset: 52px;
+  --project-avatar-y-offset: 3px;
   color: var(--portfolio-text-dark);
 }
 
 @media (min-width: 768px) {
   .portfolio-home {
     --project-avatar-offset: 72px;
+    --project-avatar-y-offset: 0px;
   }
 }
 
@@ -369,6 +371,10 @@ body {
   height: auto;
   padding-top: var(--experience-row-padding);
   padding-bottom: var(--experience-row-padding);
+}
+
+.mobile-detail-rail .mobile-rail-avatar-row > span {
+  transform: translateY(var(--project-avatar-y-offset));
 }
 
 @media (min-width: 768px) {
