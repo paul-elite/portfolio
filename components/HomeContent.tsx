@@ -1490,36 +1490,25 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               </div>
             </motion.div>
           ) : defaultProject ? (
-            <div className="w-full max-w-[572px] animate-fadeIn border-l border-[var(--experience-border)] pl-6">
+            <div className="w-full max-w-[572px] animate-fadeIn">
               <div className="mb-7">
                 <p className="mb-3 text-xs font-medium uppercase tracking-[0.16em] text-[var(--experience-muted)]">
                   Featured project
                 </p>
-                <h2 className="mb-2 text-[1.375rem] font-semibold leading-7 text-[var(--experience-text)]">
-                  {defaultProject.title}
-                </h2>
-                <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--experience-muted)]">
-                  {defaultProject.year && <span>{defaultProject.year}</span>}
-                  {defaultProject.description && <span>{defaultProject.description}</span>}
-                </div>
-              </div>
-
-              {defaultProject.preview && (
                 <button
                   type="button"
                   onClick={() => handleSelectProject(defaultProject)}
-                  className="group relative mb-6 block aspect-[16/10] w-full overflow-hidden rounded-[10px] bg-gray-100 text-left"
-                  aria-label={`Open ${defaultProject.title}`}
+                  className="group block text-left"
                 >
-                  <OptimizedImage
-                    src={defaultProject.preview}
-                    alt={defaultProject.title}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                  />
+                  <h2 className="mb-2 text-[1.375rem] font-semibold leading-7 text-[var(--experience-text)] transition-colors group-hover:text-[var(--experience-accent)]">
+                    {defaultProject.title}
+                  </h2>
+                  <span className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--experience-muted)]">
+                    {defaultProject.year && <span>{defaultProject.year}</span>}
+                    {defaultProject.description && <span>{defaultProject.description}</span>}
+                  </span>
                 </button>
-              )}
+              </div>
 
               {defaultProjectIntro && (
                 <p className="max-w-[34rem] text-sm leading-relaxed text-[var(--experience-text)]">
@@ -1531,19 +1520,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                 <p className="mt-5 text-xs font-medium uppercase tracking-[0.14em] text-[var(--experience-muted)]">
                   {defaultProject.role}
                 </p>
-              )}
-
-              {defaultProject.tags && defaultProject.tags.length > 0 && (
-                <div className="mt-5 flex flex-wrap gap-2">
-                  {defaultProject.tags.slice(0, 4).map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full border border-[var(--experience-border)] px-2.5 py-1 text-xs text-[var(--experience-muted)]"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
               )}
 
               <button
