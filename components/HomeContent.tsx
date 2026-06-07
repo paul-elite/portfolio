@@ -1017,7 +1017,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const mobileContentAvatarButtons = renderContentAvatarButtons({
     keyPrefix: 'mobile-content-avatar',
     rowClassName: 'mobile-rail-avatar-row project-avatar-row flex items-center justify-center',
-    revealInactive: true,
   });
   const mobileNameAvatar = (
     <button
