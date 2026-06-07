@@ -9,6 +9,7 @@ export type MotionPreference = 'reduced' | 'subtle' | 'playful' | 'full';
 export type LayoutDensity = 'compact' | 'comfortable' | 'spacious';
 export type ProjectView = 'list' | 'grid' | 'case-study' | 'timeline';
 export type PersonalityMode = 'direct' | 'friendly' | 'editorial' | 'playful' | 'studio';
+export type SoundPreference = 'off' | 'on';
 
 export interface ExperiencePreferences {
   fontSize: FontSizePreference;
@@ -18,6 +19,7 @@ export interface ExperiencePreferences {
   density: LayoutDensity;
   projectView: ProjectView;
   personality: PersonalityMode;
+  sound: SoundPreference;
 }
 
 interface PreferenceContextValue {
@@ -37,6 +39,7 @@ export const defaultPreferences: ExperiencePreferences = {
   density: 'comfortable',
   projectView: 'list',
   personality: 'friendly',
+  sound: 'off',
 };
 
 const fontTokens: Record<FontSizePreference, CSSProperties> = {
@@ -197,6 +200,7 @@ export function PreferenceProvider({ children }: { children: ReactNode }) {
         data-motion={preferences.motion}
         data-density={preferences.density}
         data-personality={preferences.personality}
+        data-sound={preferences.sound}
         style={tokens}
       >
         {children}

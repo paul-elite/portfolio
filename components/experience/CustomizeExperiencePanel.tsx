@@ -6,12 +6,7 @@ import {
   usePreferences,
   type ColorPersonality,
   type ExperiencePreferences,
-  type FontSizePreference,
-  type LayoutDensity,
-  type MotionPreference,
-  type NavigationStyle,
-  type PersonalityMode,
-  type ProjectView,
+  type SoundPreference,
 } from './PreferenceProvider';
 
 type PreferenceKey = keyof ExperiencePreferences;
@@ -22,13 +17,6 @@ interface Option<Value extends string> {
   description?: string;
 }
 
-const fontSizeOptions: Option<FontSizePreference>[] = [
-  { value: 'small', label: 'Small' },
-  { value: 'default', label: 'Default' },
-  { value: 'large', label: 'Large' },
-  { value: 'extra-large', label: 'Extra Large' },
-];
-
 const colorOptions: Option<ColorPersonality>[] = [
   { value: 'minimal', label: 'Minimal', description: 'Quiet, mostly neutral' },
   { value: 'balanced', label: 'Balanced', description: 'Clean with tasteful color' },
@@ -37,38 +25,9 @@ const colorOptions: Option<ColorPersonality>[] = [
   { value: 'serious', label: 'Serious', description: 'Case-study restraint' },
 ];
 
-const navigationOptions: Option<NavigationStyle>[] = [
-  { value: 'standard', label: 'Standard' },
-  { value: 'radial', label: 'Radial' },
-  { value: 'command', label: 'Command' },
-];
-
-const motionOptions: Option<MotionPreference>[] = [
-  { value: 'reduced', label: 'Reduced' },
-  { value: 'subtle', label: 'Subtle' },
-  { value: 'playful', label: 'Playful' },
-  { value: 'full', label: 'Full' },
-];
-
-const densityOptions: Option<LayoutDensity>[] = [
-  { value: 'compact', label: 'Compact' },
-  { value: 'comfortable', label: 'Comfortable' },
-  { value: 'spacious', label: 'Spacious' },
-];
-
-const projectViewOptions: Option<ProjectView>[] = [
-  { value: 'list', label: 'List' },
-  { value: 'grid', label: 'Grid' },
-  { value: 'case-study', label: 'Case cards' },
-  { value: 'timeline', label: 'Timeline' },
-];
-
-const personalityOptions: Option<PersonalityMode>[] = [
-  { value: 'direct', label: 'Direct' },
-  { value: 'friendly', label: 'Friendly' },
-  { value: 'editorial', label: 'Editorial' },
-  { value: 'playful', label: 'Playful' },
-  { value: 'studio', label: 'Studio-like' },
+const soundOptions: Option<SoundPreference>[] = [
+  { value: 'off', label: 'Off' },
+  { value: 'on', label: 'On' },
 ];
 
 function ControlGroup<Value extends ExperiencePreferences[PreferenceKey]>({
@@ -117,39 +76,14 @@ function ControlGroup<Value extends ExperiencePreferences[PreferenceKey]>({
   );
 }
 
-export function FontSizeControl() {
+export function ThemeControl() {
   const { preferences, setPreference } = usePreferences();
-  return <ControlGroup title="Font size" options={fontSizeOptions} value={preferences.fontSize} onChange={(value) => setPreference('fontSize', value)} compact />;
+  return <ControlGroup title="Theme" options={colorOptions} value={preferences.colorPersonality} onChange={(value) => setPreference('colorPersonality', value)} />;
 }
 
-export function ColorPersonalityControl() {
+export function SoundControl() {
   const { preferences, setPreference } = usePreferences();
-  return <ControlGroup title="Visual energy" options={colorOptions} value={preferences.colorPersonality} onChange={(value) => setPreference('colorPersonality', value)} />;
-}
-
-export function NavigationStyleControl() {
-  const { preferences, setPreference } = usePreferences();
-  return <ControlGroup title="Navigation" options={navigationOptions} value={preferences.navigationStyle} onChange={(value) => setPreference('navigationStyle', value)} compact />;
-}
-
-export function MotionControl() {
-  const { preferences, setPreference } = usePreferences();
-  return <ControlGroup title="Motion" options={motionOptions} value={preferences.motion} onChange={(value) => setPreference('motion', value)} compact />;
-}
-
-export function LayoutDensityControl() {
-  const { preferences, setPreference } = usePreferences();
-  return <ControlGroup title="Density" options={densityOptions} value={preferences.density} onChange={(value) => setPreference('density', value)} compact />;
-}
-
-export function ProjectViewControl() {
-  const { preferences, setPreference } = usePreferences();
-  return <ControlGroup title="Project browsing" options={projectViewOptions} value={preferences.projectView} onChange={(value) => setPreference('projectView', value)} compact />;
-}
-
-export function PersonalityControl() {
-  const { preferences, setPreference } = usePreferences();
-  return <ControlGroup title="Tone" options={personalityOptions} value={preferences.personality} onChange={(value) => setPreference('personality', value)} compact />;
+  return <ControlGroup title="Sound" options={soundOptions} value={preferences.sound} onChange={(value) => setPreference('sound', value)} compact />;
 }
 
 export function CustomizeExperienceContent({ onClose }: { onClose?: () => void }) {
@@ -160,7 +94,7 @@ export function CustomizeExperienceContent({ onClose }: { onClose?: () => void }
       <div className="home-settings-header mb-6 flex items-start justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold">Customize the portfolio</h2>
-          <p className="mt-1 text-sm text-[var(--experience-muted)]">Adjust the interface without hiding the work.</p>
+          <p className="mt-1 text-sm text-[var(--experience-muted)]">Theme and sound.</p>
         </div>
         {onClose && (
           <button
@@ -177,13 +111,8 @@ export function CustomizeExperienceContent({ onClose }: { onClose?: () => void }
       </div>
 
       <div className="space-y-5">
-        <FontSizeControl />
-        <ColorPersonalityControl />
-        <NavigationStyleControl />
-        <MotionControl />
-        <LayoutDensityControl />
-        <ProjectViewControl />
-        <PersonalityControl />
+        <ThemeControl />
+        <SoundControl />
       </div>
 
       <button
