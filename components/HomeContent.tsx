@@ -1656,11 +1656,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         variants={{
           closed: {
             borderRadius: 999,
-            boxShadow: '0 2px 5px rgb(15 23 42 / 2%), 0 0 0 0.5px rgb(0 0 0 / 10%)',
+            boxShadow: '0 1px 2px rgb(15 23 42 / 1%), 0 0 0 0.5px rgb(0 0 0 / 8%)',
           },
           open: {
             borderRadius: 26,
-            boxShadow: '0 5px 14px rgb(15 23 42 / 3.6%), 0 0 0 0.5px rgb(0 0 0 / 10%)',
+            boxShadow: '0 2px 5px rgb(15 23 42 / 1.2%), 0 0 0 0.5px rgb(0 0 0 / 8%)',
           },
         }}
         transition={contactMorphSpring}
