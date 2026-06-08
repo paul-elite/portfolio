@@ -71,10 +71,6 @@ function AvatarImage({
   );
 }
 
-const contactCardBorderStyle = {
-  boxShadow: '0 0 0 0.5px rgb(0 0 0 / 10%)',
-};
-
 const contactMorphSpring = {
   type: 'spring' as const,
   stiffness: 420,
@@ -1656,18 +1652,18 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         variants={{
           closed: {
             borderRadius: 999,
-            boxShadow: '0 0 0 0.5px rgb(0 0 0 / 8%)',
+            boxShadow: 'none',
           },
           open: {
             borderRadius: 26,
-            boxShadow: '0 0 0 0.5px rgb(0 0 0 / 8%)',
+            boxShadow: 'none',
           },
         }}
         transition={contactMorphSpring}
         className={`fixed bottom-4 right-4 z-[9999] overflow-hidden bg-white/80 text-gray-900 backdrop-blur-2xl supports-[backdrop-filter]:bg-white/70 md:bottom-6 md:right-6 ${
           contactVisible ? 'w-[304px]' : 'h-12 w-12 md:w-[132px]'
         }`}
-        style={{ ...contactCardBorderStyle, transformOrigin: '100% 100%' }}
+        style={{ transformOrigin: '100% 100%' }}
       >
         <motion.button
           layout
