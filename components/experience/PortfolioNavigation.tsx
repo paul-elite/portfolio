@@ -51,15 +51,12 @@ export default function PortfolioNavigation({ items, activeTab, onChange, radial
             key={item.id}
             type="button"
             onClick={() => onChange(item.key)}
-            className={`inline-flex items-center gap-1.5 font-normal transition-all ${
+            className={`font-normal transition-all ${
               activeTab === item.key
                 ? 'text-[var(--experience-text)]'
                 : 'text-[var(--experience-muted)] hover:text-[var(--experience-text)]'
             }`}
           >
-            <span className="grid h-4 w-4 place-items-center [&_img]:h-4 [&_img]:w-4 [&_svg]:h-4 [&_svg]:w-4">
-              {item.icon}
-            </span>
             {item.label}
           </button>
         ))}
@@ -149,15 +146,12 @@ export default function PortfolioNavigation({ items, activeTab, onChange, radial
           key={item.id}
           type="button"
           onClick={() => onChange(item.key)}
-          className={`inline-flex items-center gap-1.5 font-normal transition-all ${
+          className={`font-normal transition-all ${
             activeTab === item.key
               ? 'text-[var(--experience-text)]'
               : 'text-[var(--experience-muted)] hover:text-[var(--experience-text)]'
           }`}
         >
-          <span className="grid h-4 w-4 place-items-center [&_img]:h-4 [&_img]:w-4 [&_svg]:h-4 [&_svg]:w-4">
-            {item.icon}
-          </span>
           {item.label}
         </button>
       ))}
