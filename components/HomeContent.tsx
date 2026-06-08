@@ -75,6 +75,13 @@ const contactCardBorderStyle = {
   boxShadow: '0 0 0 0.5px rgb(0 0 0 / 10%)',
 };
 
+const contactMorphSpring = {
+  type: 'spring' as const,
+  stiffness: 420,
+  damping: 34,
+  mass: 0.9,
+};
+
 const detailTransition = {
   duration: 0.22,
   ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
@@ -707,37 +714,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       document.documentElement.style.overflow = htmlOverflow;
     };
   }, [hasDetailContent]);
-  const contactLinks = (
-    <>
-      {contactItems.map((item) => (
-        <a
-          key={item.name}
-          href={item.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => {
-            setContactOpen(false);
-            setContactHovered(false);
-          }}
-          className="flex items-center gap-3 border-b border-gray-200 py-3 text-base font-normal text-gray-800 transition-colors last:border-b-0 hover:text-gray-950"
-        >
-          <ContactIcon name={item.name} />
-          <span>{item.label}</span>
-        </a>
-      ))}
-      <a
-        href={`mailto:${siteConfig.social.email}`}
-        onClick={() => {
-          setContactOpen(false);
-          setContactHovered(false);
-        }}
-        className="mt-2 flex items-center justify-center gap-3 rounded-full bg-black px-4 py-3 text-base font-normal text-white transition-colors hover:bg-gray-800"
-      >
-        <ContactIcon name="email" />
-        <span>send me an email</span>
-      </a>
-    </>
-  );
   const selectedDetailContent = selectedProject ? (
     <div key={contentAnimationKey} className="w-full max-w-[572px]">
       <div className="hidden md:sticky md:top-0 md:z-20 md:-mx-1 md:mb-6 md:block md:bg-background md:px-1 md:py-3">
@@ -1673,43 +1649,146 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       />
 
       {/* Floating Contact */}
-      <div
-        className="fixed bottom-4 right-4 z-[9999] md:bottom-6 md:right-6"
-        onMouseEnter={() => setContactHovered(true)}
-        onMouseLeave={() => setContactHovered(false)}
+      <motion.div
+        layout
+        initial={false}
+        animate={contactVisible ? 'open' : 'closed'}
+        variants={{
+          closed: {
+            borderRadius: 999,
+            boxShadow: '0 8px 24px rgb(15 23 42 / 10%), 0 0 0 0.5px rgb(0 0 0 / 10%)',
+          },
+          open: {
+            borderRadius: 26,
+            boxShadow: '0 24px 70px rgb(15 23 42 / 18%), 0 0 0 0.5px rgb(0 0 0 / 10%)',
+          },
+        }}
+        transition={contactMorphSpring}
+        className={`fixed bottom-4 right-4 z-[9999] overflow-hidden bg-white/80 text-gray-900 backdrop-blur-2xl supports-[backdrop-filter]:bg-white/70 md:bottom-6 md:right-6 ${
+          contactVisible ? 'w-[304px]' : 'h-12 w-12 md:w-[132px]'
+        }`}
+        style={{ ...contactCardBorderStyle, transformOrigin: '100% 100%' }}
       >
-        <div
-          style={contactCardBorderStyle}
-          className={`absolute bottom-full right-0 mb-3 w-72 rounded-[20px] bg-white p-5 transition-all duration-150 ${
-            contactVisible
-              ? 'translate-y-0 scale-100 opacity-100 pointer-events-auto'
-              : 'translate-y-2 scale-95 opacity-0 pointer-events-none'
-          }`}
-        >
-          <div className="flex flex-col">
-            {contactLinks}
-          </div>
-        </div>
-        <button
+        <motion.button
+          layout
           type="button"
           onClick={() => setContactOpen((open) => !open)}
           aria-expanded={contactVisible}
-          aria-label="Open contact links"
-          style={contactCardBorderStyle}
-          className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/95 p-1.5 text-gray-900 backdrop-blur transition-colors hover:bg-gray-50"
+          aria-label={contactVisible ? 'Close contact card' : 'Open contact card'}
+          className={`flex w-full items-center gap-3 text-left outline-none ${
+            contactVisible ? 'px-4 pb-3 pt-4' : 'h-12 justify-center px-1.5 md:justify-start md:px-3'
+          }`}
+          transition={contactMorphSpring}
         >
-          <span className="relative block h-6 w-6 overflow-hidden rounded-full bg-gray-100">
+          <motion.span
+            layout
+            className={`relative block flex-shrink-0 overflow-hidden rounded-full bg-gray-100 ${
+              contactVisible ? 'h-12 w-12' : 'h-6 w-6'
+            }`}
+            transition={contactMorphSpring}
+          >
             <Image
               src="/chat-icon.jpg"
               alt=""
               fill
-              sizes="24px"
+              sizes={contactVisible ? '48px' : '24px'}
               className="object-cover"
               priority
             />
-          </span>
-        </button>
-      </div>
+          </motion.span>
+          <motion.span layout className={`${contactVisible ? 'block' : 'hidden md:block'} min-w-0`} transition={contactMorphSpring}>
+            <motion.span layout className="block truncate text-sm font-semibold leading-5 text-gray-950">
+              {contactVisible ? siteConfig.name : 'Contact'}
+            </motion.span>
+            {contactVisible && (
+              <motion.span
+                className="block truncate text-sm leading-5 text-gray-500"
+                initial={{ opacity: 0, y: -2 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -2 }}
+                transition={{ ...contactMorphSpring, delay: 0.04 }}
+              >
+                {siteConfig.title || 'Available for selected projects'}
+              </motion.span>
+            )}
+          </motion.span>
+        </motion.button>
+
+        <AnimatePresence initial={false}>
+          {contactVisible && (
+            <motion.div
+              className="px-4 pb-4"
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ ...contactMorphSpring, delay: 0.06 }}
+            >
+              <div className="mb-3 rounded-2xl bg-white/60 px-3 py-2.5 shadow-[inset_0_0_0_0.5px_rgb(0_0_0_/_8%)]">
+                <p className="text-xs font-medium uppercase tracking-[0.12em] text-gray-400">Email</p>
+                <a
+                  href={`mailto:${siteConfig.social.email}`}
+                  onClick={() => {
+                    setContactOpen(false);
+                    setContactHovered(false);
+                  }}
+                  className="mt-0.5 block truncate text-sm font-medium text-gray-900"
+                >
+                  {siteConfig.social.email}
+                </a>
+              </div>
+
+              <div className="mb-3 flex gap-2">
+                <a
+                  href={`mailto:${siteConfig.social.email}`}
+                  onClick={() => {
+                    setContactOpen(false);
+                    setContactHovered(false);
+                  }}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-full bg-gray-950 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+                >
+                  <ContactIcon name="email" />
+                  Email
+                </a>
+                <a
+                  href={siteConfig.social.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => {
+                    setContactOpen(false);
+                    setContactHovered(false);
+                  }}
+                  className="grid h-10 w-10 place-items-center rounded-full bg-white/70 text-gray-700 shadow-[inset_0_0_0_0.5px_rgb(0_0_0_/_10%)] transition-colors hover:text-gray-950"
+                  aria-label="Open LinkedIn"
+                >
+                  <ContactIcon name="linkedin" />
+                </a>
+              </div>
+
+              <div className="flex items-center justify-between gap-2 border-t border-gray-200/70 pt-3">
+                <p className="text-xs text-gray-400">Available for collaborations</p>
+                <div className="flex items-center gap-1.5">
+                  {contactItems.map((item) => (
+                    <a
+                      key={item.name}
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => {
+                        setContactOpen(false);
+                        setContactHovered(false);
+                      }}
+                      className="grid h-7 w-7 place-items-center rounded-full bg-white/60 text-gray-500 transition-colors hover:text-gray-950"
+                      aria-label={item.label}
+                    >
+                      <ContactIcon name={item.name} />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
 
       {/* Hover Preview - Centered on screen */}
       {hoveredProject && projectImages.length > 0 && !selectedProject && (
