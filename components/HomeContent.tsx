@@ -1656,11 +1656,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         variants={{
           closed: {
             borderRadius: 999,
-            boxShadow: '0 8px 24px rgb(15 23 42 / 10%), 0 0 0 0.5px rgb(0 0 0 / 10%)',
+            boxShadow: '0 2px 5px rgb(15 23 42 / 2%), 0 0 0 0.5px rgb(0 0 0 / 10%)',
           },
           open: {
             borderRadius: 26,
-            boxShadow: '0 24px 70px rgb(15 23 42 / 18%), 0 0 0 0.5px rgb(0 0 0 / 10%)',
+            boxShadow: '0 5px 14px rgb(15 23 42 / 3.6%), 0 0 0 0.5px rgb(0 0 0 / 10%)',
           },
         }}
         transition={contactMorphSpring}
@@ -1698,92 +1698,48 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </motion.span>
           <motion.span layout className={`${contactVisible ? 'block' : 'hidden md:block'} min-w-0`} transition={contactMorphSpring}>
             <motion.span layout className="block truncate text-sm font-semibold leading-5 text-gray-950">
-              {contactVisible ? siteConfig.name : 'Contact'}
+              Contact
             </motion.span>
-            {contactVisible && (
-              <motion.span
-                className="block truncate text-sm leading-5 text-gray-500"
-                initial={{ opacity: 0, y: -2 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -2 }}
-                transition={{ ...contactMorphSpring, delay: 0.04 }}
-              >
-                {siteConfig.title || 'Available for selected projects'}
-              </motion.span>
-            )}
           </motion.span>
         </motion.button>
 
         <AnimatePresence initial={false}>
           {contactVisible && (
             <motion.div
-              className="px-4 pb-4"
+              className="px-5 pb-5"
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ ...contactMorphSpring, delay: 0.06 }}
             >
-              <div className="mb-3 rounded-2xl bg-white/60 px-3 py-2.5 shadow-[inset_0_0_0_0.5px_rgb(0_0_0_/_8%)]">
-                <p className="text-xs font-medium uppercase tracking-[0.12em] text-gray-400">Email</p>
+              <div className="flex flex-col">
+                {contactItems.map((item) => (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => {
+                      setContactOpen(false);
+                      setContactHovered(false);
+                    }}
+                    className="flex items-center gap-3 border-b border-gray-200 py-3 text-base font-normal text-gray-800 transition-colors last:border-b-0 hover:text-gray-950"
+                  >
+                    <ContactIcon name={item.name} />
+                    <span>{item.label}</span>
+                  </a>
+                ))}
                 <a
                   href={`mailto:${siteConfig.social.email}`}
                   onClick={() => {
                     setContactOpen(false);
                     setContactHovered(false);
                   }}
-                  className="mt-0.5 block truncate text-sm font-medium text-gray-900"
-                >
-                  {siteConfig.social.email}
-                </a>
-              </div>
-
-              <div className="mb-3 flex gap-2">
-                <a
-                  href={`mailto:${siteConfig.social.email}`}
-                  onClick={() => {
-                    setContactOpen(false);
-                    setContactHovered(false);
-                  }}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-full bg-gray-950 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+                  className="mt-2 flex items-center justify-center gap-3 rounded-full bg-black px-4 py-3 text-base font-normal text-white transition-colors hover:bg-gray-800"
                 >
                   <ContactIcon name="email" />
-                  Email
+                  <span>send me an email</span>
                 </a>
-                <a
-                  href={siteConfig.social.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => {
-                    setContactOpen(false);
-                    setContactHovered(false);
-                  }}
-                  className="grid h-10 w-10 place-items-center rounded-full bg-white/70 text-gray-700 shadow-[inset_0_0_0_0.5px_rgb(0_0_0_/_10%)] transition-colors hover:text-gray-950"
-                  aria-label="Open LinkedIn"
-                >
-                  <ContactIcon name="linkedin" />
-                </a>
-              </div>
-
-              <div className="flex items-center justify-between gap-2 border-t border-gray-200/70 pt-3">
-                <p className="text-xs text-gray-400">Available for collaborations</p>
-                <div className="flex items-center gap-1.5">
-                  {contactItems.map((item) => (
-                    <a
-                      key={item.name}
-                      href={item.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => {
-                        setContactOpen(false);
-                        setContactHovered(false);
-                      }}
-                      className="grid h-7 w-7 place-items-center rounded-full bg-white/60 text-gray-500 transition-colors hover:text-gray-950"
-                      aria-label={item.label}
-                    >
-                      <ContactIcon name={item.name} />
-                    </a>
-                  ))}
-                </div>
               </div>
             </motion.div>
           )}
