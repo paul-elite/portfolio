@@ -78,6 +78,12 @@ const contactMorphSpring = {
   mass: 0.9,
 };
 
+const contactMorphShadow = [
+  '0px 1px 1px -1px rgba(0, 0, 0, 0.1)',
+  '0px 2px 2px -2px rgba(0, 0, 0, 0.08)',
+  '0px 4px 4px -2px rgba(0, 0, 0, 0.04)',
+].join(', ');
+
 const detailTransition = {
   duration: 0.22,
   ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
@@ -1652,11 +1658,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         variants={{
           closed: {
             borderRadius: 999,
-            boxShadow: 'none',
+            boxShadow: contactMorphShadow,
           },
           open: {
             borderRadius: 26,
-            boxShadow: 'none',
+            boxShadow: contactMorphShadow,
           },
         }}
         transition={contactMorphSpring}
