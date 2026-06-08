@@ -1645,8 +1645,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           setContactOpen(false);
           setContactHovered(false);
         }}
-        className={`fixed inset-0 z-[9998] bg-[#a3a3a3]/[0.33] backdrop-blur-[4px] transition-opacity duration-150 md:hidden ${
-          contactVisible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
+        className={`fixed inset-0 z-[9998] bg-[#a3a3a3]/[0.33] backdrop-blur-[4px] transition-opacity duration-150 md:bg-transparent md:backdrop-blur-0 ${
+          contactOpen ? 'pointer-events-auto opacity-100 md:opacity-0' : 'pointer-events-none opacity-0'
         }`}
       />
 
@@ -1670,11 +1670,13 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           contactVisible ? 'w-[304px]' : 'h-12 w-12 md:w-[132px]'
         }`}
         style={{ transformOrigin: '100% 100%' }}
+        onMouseEnter={() => setContactHovered(true)}
+        onMouseLeave={() => setContactHovered(false)}
       >
         <motion.button
           layout
           type="button"
-          onClick={() => setContactOpen((open) => !open)}
+          onClick={() => setContactOpen(true)}
           aria-expanded={contactVisible}
           aria-label={contactVisible ? 'Close contact card' : 'Open contact card'}
           className={`flex w-full items-center gap-3 text-left outline-none ${
@@ -1685,7 +1687,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           <motion.span
             layout
             className={`relative block flex-shrink-0 overflow-hidden rounded-full bg-gray-100 ${
-              contactVisible ? 'h-12 w-12' : 'h-6 w-6'
+              contactVisible ? 'h-12 w-12' : 'h-[18px] w-[18px] md:h-6 md:w-6'
             }`}
             transition={contactMorphSpring}
           >
@@ -1694,7 +1696,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               alt=""
               fill
               sizes={contactVisible ? '48px' : '24px'}
-              className="object-cover"
+              className={`rounded-full object-cover ${contactVisible ? 'scale-[0.8]' : ''}`}
               priority
             />
           </motion.span>
