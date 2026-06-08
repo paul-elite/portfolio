@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import type { PortfolioNavigationItem } from './content-model';
 
 export const hasSupabaseConfig = Boolean(
   process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -18,6 +19,7 @@ export interface Settings {
   settingsIcon?: string;
   settingsIconSelected?: string;
   settingsIconDeselected?: string;
+  navigationItems?: PortfolioNavigationItem[];
   metaImage: string;
   twitter: string;
   github: string;
@@ -41,6 +43,7 @@ export const defaultSettings: Settings = {
   settingsIcon: '',
   settingsIconSelected: '',
   settingsIconDeselected: '',
+  navigationItems: [],
   metaImage: '',
   twitter: '',
   github: '',

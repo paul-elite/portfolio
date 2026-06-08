@@ -4,10 +4,10 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import BlockEditor, { Block } from '@/components/BlockEditor';
 import { ToastContainer, toast } from '@/components/Toast';
-import { ILLUSTRATION_CATEGORIES } from '@/lib/portfolio-options';
+import { DEFAULT_PORTFOLIO_NAVIGATION_ITEMS, ILLUSTRATION_CATEGORIES, type PortfolioTab } from '@/lib/portfolio-options';
 
 type ContentType = 'projects' | 'illustrations' | 'writings' | 'interactions';
-type TabType = ContentType | 'profile' | 'contact';
+type TabType = ContentType | 'profile' | 'contact' | 'navigation';
 
 interface Project {
   id: string;
@@ -58,6 +58,7 @@ interface Settings {
   settingsIcon: string;
   settingsIconSelected: string;
   settingsIconDeselected: string;
+  navigationItems: NavigationItem[];
   metaImage: string;
   twitter: string;
   github: string;
@@ -70,6 +71,15 @@ interface Settings {
   behanceImage: string;
   instagramImage: string;
   emailImage: string;
+}
+
+interface NavigationItem {
+  id: string;
+  label: string;
+  target: PortfolioTab;
+  icon?: string;
+  enabled?: boolean;
+  order?: number;
 }
 
 interface ContentStore {
@@ -354,6 +364,7 @@ export default function AdminPage() {
     settingsIcon: '',
     settingsIconSelected: '',
     settingsIconDeselected: '',
+    navigationItems: DEFAULT_PORTFOLIO_NAVIGATION_ITEMS,
     metaImage: '',
     twitter: '',
     github: '',
@@ -377,6 +388,13 @@ export default function AdminPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showSaveModal, setShowSaveModal] = useState(false);
 
+  const normalizeSettings = (nextSettings: Settings): Settings => ({
+    ...nextSettings,
+    navigationItems: nextSettings.navigationItems && nextSettings.navigationItems.length > 0
+      ? nextSettings.navigationItems
+      : DEFAULT_PORTFOLIO_NAVIGATION_ITEMS,
+  });
+
   const fetchContent = async () => {
     try {
       const res = await fetch('/api/admin/content', {
@@ -386,7 +404,7 @@ export default function AdminPage() {
         const data = await res.json();
         setContent(data);
         if (data.settings) {
-          setSettings(data.settings);
+          setSettings(normalizeSettings(data.settings));
         }
       }
     } catch {
@@ -408,7 +426,7 @@ export default function AdminPage() {
         const data = await res.json();
         setContent(data);
         if (data.settings) {
-          setSettings(data.settings);
+          setSettings(normalizeSettings(data.settings));
         }
         localStorage.setItem('admin_password', password);
         toast.update(loadingToast, 'Welcome back!', 'success');
@@ -646,6 +664,58 @@ export default function AdminPage() {
     setLoading(false);
   };
 
+  const updateNavigationItem = (id: string, updates: Partial<NavigationItem>) => {
+    setSettings((prev) => ({
+      ...prev,
+      navigationItems: prev.navigationItems.map((item) => (
+        item.id === id ? { ...item, ...updates } : item
+      )),
+    }));
+  };
+
+  const addNavigationItem = () => {
+    setSettings((prev) => ({
+      ...prev,
+      navigationItems: [
+        ...prev.navigationItems,
+        {
+          id: crypto.randomUUID(),
+          label: 'New item',
+          target: 'projects',
+          icon: '',
+          enabled: true,
+          order: prev.navigationItems.length,
+        },
+      ],
+    }));
+  };
+
+  const removeNavigationItem = (id: string) => {
+    setSettings((prev) => ({
+      ...prev,
+      navigationItems: prev.navigationItems
+        .filter((item) => item.id !== id)
+        .map((item, index) => ({ ...item, order: index })),
+    }));
+  };
+
+  const moveNavigationItem = (id: string, direction: -1 | 1) => {
+    setSettings((prev) => {
+      const nextItems = [...prev.navigationItems].sort((a, b) => (a.order || 0) - (b.order || 0));
+      const index = nextItems.findIndex((item) => item.id === id);
+      const nextIndex = index + direction;
+      if (index < 0 || nextIndex < 0 || nextIndex >= nextItems.length) return prev;
+
+      const [item] = nextItems.splice(index, 1);
+      nextItems.splice(nextIndex, 0, item);
+
+      return {
+        ...prev,
+        navigationItems: nextItems.map((navItem, order) => ({ ...navItem, order })),
+      };
+    });
+  };
+
   const handleDelete = async (type: ContentType, id: string, title: string) => {
     if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
 
@@ -684,7 +754,7 @@ export default function AdminPage() {
           res.json().then((data) => {
             setContent(data);
             if (data.settings) {
-              setSettings(data.settings);
+              setSettings(normalizeSettings(data.settings));
             }
           });
         }
@@ -744,6 +814,11 @@ export default function AdminPage() {
       key: 'contact',
       label: 'Contact',
       icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
+    },
+    {
+      key: 'navigation',
+      label: 'Navigation',
+      icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" /></svg>
     },
     {
       key: 'projects',
@@ -1138,6 +1213,121 @@ export default function AdminPage() {
 
               <Button type="submit" loading={loading}>
                 Save Contact Info
+              </Button>
+            </form>
+          )}
+
+          {/* Navigation Tab */}
+          {activeTab === 'navigation' && (
+            <form onSubmit={handleSaveSettings} className="space-y-6">
+              <Section title="Homepage Navigation">
+                <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <p className="text-sm text-gray-500">
+                    Add, remove, reorder, relabel, and upload icons for the homepage navigation.
+                  </p>
+                  <Button type="button" variant="secondary" onClick={addNavigationItem}>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    Add Item
+                  </Button>
+                </div>
+
+                <div className="space-y-4">
+                  {[...settings.navigationItems]
+                    .sort((a, b) => (a.order || 0) - (b.order || 0))
+                    .map((item, index, items) => (
+                      <div key={item.id} className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                        <div className="grid gap-4 lg:grid-cols-[120px_1fr_auto] lg:items-start">
+                          <FileUpload
+                            label="Icon"
+                            accept="image/svg+xml,image/*"
+                            preview={item.icon}
+                            uploading={uploadingFields.has(`navigationIcon-${item.id}`)}
+                            aspectRatio="square"
+                            helpText="SVG or image"
+                            onUpload={async (file) => {
+                              const path = await handleFileUpload(file, 'navigation', `navigationIcon-${item.id}`);
+                              if (path) {
+                                updateNavigationItem(item.id, { icon: path });
+                              }
+                            }}
+                          />
+
+                          <div className="grid gap-4 md:grid-cols-2">
+                            <Input
+                              label="Label"
+                              placeholder="Projects"
+                              value={item.label}
+                              onChange={(value) => updateNavigationItem(item.id, { label: value })}
+                              required
+                            />
+                            <div className="space-y-1.5">
+                              <label className="block text-sm font-medium text-gray-700">Opens Section</label>
+                              <select
+                                value={item.target}
+                                onChange={(event) => updateNavigationItem(item.id, { target: event.target.value as PortfolioTab })}
+                                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                              >
+                                <option value="projects">Projects</option>
+                                <option value="illustration">Illustration</option>
+                                <option value="writings">Writings</option>
+                                <option value="interaction">Interaction</option>
+                              </select>
+                            </div>
+                            <label className="flex items-center gap-3 rounded-xl bg-white px-4 py-3 text-sm font-medium text-gray-700 md:col-span-2">
+                              <input
+                                type="checkbox"
+                                checked={item.enabled !== false}
+                                onChange={(event) => updateNavigationItem(item.id, { enabled: event.target.checked })}
+                                className="h-4 w-4 rounded border-gray-300"
+                              />
+                              Show this item on the homepage
+                            </label>
+                          </div>
+
+                          <div className="flex items-center gap-2 lg:justify-end">
+                            <button
+                              type="button"
+                              onClick={() => moveNavigationItem(item.id, -1)}
+                              disabled={index === 0}
+                              aria-label="Move item up"
+                              className="grid h-9 w-9 place-items-center rounded-xl bg-white text-gray-500 transition-colors hover:text-gray-900 disabled:opacity-40"
+                            >
+                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75L12 8.25l7.5 7.5" />
+                              </svg>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => moveNavigationItem(item.id, 1)}
+                              disabled={index === items.length - 1}
+                              aria-label="Move item down"
+                              className="grid h-9 w-9 place-items-center rounded-xl bg-white text-gray-500 transition-colors hover:text-gray-900 disabled:opacity-40"
+                            >
+                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25L12 15.75l-7.5-7.5" />
+                              </svg>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => removeNavigationItem(item.id)}
+                              aria-label="Remove navigation item"
+                              className="grid h-9 w-9 place-items-center rounded-xl bg-white text-red-500 transition-colors hover:bg-red-50 hover:text-red-600"
+                            >
+                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </Section>
+
+              <Button type="submit" loading={loading}>
+                Save Navigation
               </Button>
             </form>
           )}

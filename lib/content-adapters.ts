@@ -1,6 +1,7 @@
 import { siteConfig as staticConfig } from './data';
 import { defaultSettings, Settings } from './supabase';
-import type { Illustration, Interaction, PortfolioContent, Project, SiteConfig, Writing } from './content-model';
+import type { Illustration, Interaction, PortfolioContent, PortfolioNavigationItem, Project, SiteConfig, Writing } from './content-model';
+import { DEFAULT_PORTFOLIO_NAVIGATION_ITEMS } from './portfolio-options';
 
 type RecordLike = Record<string, unknown>;
 
@@ -10,6 +11,28 @@ function asString(value: unknown, fallback = ''): string {
 
 function asArray<T>(value: unknown, fallback: T[] = []): T[] {
   return Array.isArray(value) ? value as T[] : fallback;
+}
+
+function normalizeNavigationItems(value: unknown): PortfolioNavigationItem[] {
+  const rows = asArray<RecordLike>(value);
+
+  const items = rows
+    .map((item, index): PortfolioNavigationItem | null => {
+      const target = asString(item.target);
+      if (!['projects', 'interaction', 'illustration', 'writings'].includes(target)) return null;
+
+      return {
+        id: asString(item.id, `${target}-${index}`),
+        label: asString(item.label, target),
+        target: target as PortfolioNavigationItem['target'],
+        icon: asString(item.icon),
+        enabled: item.enabled !== false,
+        order: typeof item.order === 'number' ? item.order : index,
+      };
+    })
+    .filter((item): item is PortfolioNavigationItem => item !== null);
+
+  return items.sort((a, b) => (a.order || 0) - (b.order || 0));
 }
 
 function versionedAssetUrl(url: string, version?: string): string {
@@ -99,6 +122,7 @@ export function mapSettings(row?: Partial<Settings> & RecordLike | null): Settin
     settingsIcon: asString(row.settings_icon || row.settingsIcon),
     settingsIconSelected: asString(row.settings_icon_selected || row.settingsIconSelected),
     settingsIconDeselected: asString(row.settings_icon_deselected || row.settingsIconDeselected),
+    navigationItems: normalizeNavigationItems(row.navigation_items || row.navigationItems),
     metaImage: asString(row.meta_image || row.metaImage),
     twitterImage: asString(row.twitter_image || row.twitterImage),
     linkedinImage: asString(row.linkedin_image || row.linkedinImage),
@@ -115,6 +139,9 @@ export function settingsToSiteConfig(settings?: Partial<Settings> | null): SiteC
   const settingsIcon = normalized.settingsIcon || '';
   const settingsIconSelected = normalized.settingsIconSelected || '';
   const settingsIconDeselected = normalized.settingsIconDeselected || '';
+  const navigationItems = normalized.navigationItems && normalized.navigationItems.length > 0
+    ? normalized.navigationItems
+    : DEFAULT_PORTFOLIO_NAVIGATION_ITEMS;
 
   return {
     name: normalized.name || staticConfig.name,
@@ -124,6 +151,10 @@ export function settingsToSiteConfig(settings?: Partial<Settings> | null): SiteC
     settingsIcon: versionedAssetUrl(settingsIcon, assetUrlVersion(settingsIcon)),
     settingsIconSelected: versionedAssetUrl(settingsIconSelected, assetUrlVersion(settingsIconSelected)),
     settingsIconDeselected: versionedAssetUrl(settingsIconDeselected, assetUrlVersion(settingsIconDeselected)),
+    navigationItems: navigationItems.map((item) => ({
+      ...item,
+      icon: versionedAssetUrl(item.icon || '', assetUrlVersion(item.icon || '')),
+    })),
     bio: staticConfig.bio,
     social: {
       twitter: normalized.twitter || staticConfig.social.twitter,

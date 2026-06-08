@@ -8,9 +8,8 @@ import OptimizedImage from './OptimizedImage';
 import ContentBlocks from './content/ContentBlocks';
 import type { Illustration, IllustrationCategory, Interaction, PortfolioContent, Project, SiteConfig, Writing } from '@/lib/content-model';
 import {
+  DEFAULT_PORTFOLIO_NAVIGATION_ITEMS,
   ILLUSTRATION_CATEGORIES,
-  MAIN_PORTFOLIO_TABS,
-  SECONDARY_PORTFOLIO_TABS,
   type PortfolioTab,
 } from '@/lib/portfolio-options';
 import { useNowPlaying, NowPlayingContent, NowPlayingImage } from './NowPlaying';
@@ -129,6 +128,29 @@ function RadialTabIcon({ icon }: { icon: 'grid' | 'spark' | 'write' | 'chat' }) 
       <path d="M8 9h6M8 12h4" />
     </svg>
   );
+}
+
+const defaultNavIconByTarget: Record<PortfolioTab, 'grid' | 'spark' | 'write' | 'chat'> = {
+  projects: 'grid',
+  illustration: 'spark',
+  writings: 'write',
+  interaction: 'chat',
+};
+
+function NavigationIcon({ item }: { item: { label: string; target: PortfolioTab; icon?: string } }) {
+  if (item.icon) {
+    return (
+      <AvatarImage
+        src={item.icon}
+        alt=""
+        width={22}
+        height={22}
+        className="h-5 w-5 object-contain"
+      />
+    );
+  }
+
+  return <RadialTabIcon icon={defaultNavIconByTarget[item.target]} />;
 }
 
 function ContactIcon({ name }: { name: ContactIconName }) {
@@ -600,7 +622,17 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     return () => contentList.removeEventListener('scroll', handleScroll);
   }, [contentListReady]);
 
-  const mainTabs = MAIN_PORTFOLIO_TABS;
+  const enabledNavigationItems = useMemo(() => {
+    const configuredItems = siteConfig.navigationItems && siteConfig.navigationItems.length > 0
+      ? siteConfig.navigationItems
+      : DEFAULT_PORTFOLIO_NAVIGATION_ITEMS;
+
+    const enabledItems = configuredItems
+      .filter((item) => item.enabled !== false)
+      .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+    return enabledItems.length > 0 ? enabledItems : DEFAULT_PORTFOLIO_NAVIGATION_ITEMS;
+  }, [siteConfig.navigationItems]);
 
   // Track if anything is selected to fade other elements
   const hasSelection = selectedProject !== null || selectedWriting !== null || selectedInteraction !== null || selectedCategory !== null;
@@ -618,14 +650,13 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     ? 'Customize'
     : selectedProject?.title || selectedWriting?.title || selectedInteraction?.title || ILLUSTRATION_CATEGORIES.find((category) => category.key === selectedCategory)?.label || 'Details';
 
-  const moreTabs = SECONDARY_PORTFOLIO_TABS;
-  const radialTabs = [...mainTabs, ...moreTabs];
-  const navigationItems = radialTabs.map((tab) => {
-    const meta = radialTabMeta[tab.key];
+  const navigationItems = enabledNavigationItems.map((item) => {
+    const target = item.target as PortfolioTab;
     return {
-      key: tab.key,
-      label: tab.label,
-      icon: <RadialTabIcon icon={meta.icon} />,
+      id: item.id,
+      key: target,
+      label: item.label,
+      icon: <NavigationIcon item={{ label: item.label, target, icon: item.icon }} />,
     };
   });
   const activeNavigationItem = navigationItems.find((item) => item.key === activeTab) || navigationItems[0];
@@ -639,16 +670,16 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       </span>
     </div>
   );
-  const radialMenuItems: RadialToolkitItem[] = radialTabs.map((tab) => {
-    const meta = radialTabMeta[tab.key];
+  const radialMenuItems: RadialToolkitItem[] = navigationItems.map((item) => {
+    const meta = radialTabMeta[item.key];
 
     return {
-      id: tab.key,
-      label: tab.label,
+      id: item.id,
+      label: item.label,
       shortcut: meta.shortcut,
-      icon: <RadialTabIcon icon={meta.icon} />,
-      active: activeTab === tab.key,
-      onSelect: () => handleTabChange(tab.key),
+      icon: item.icon,
+      active: activeTab === item.key,
+      onSelect: () => handleTabChange(item.key),
     };
   });
   const contactItems: { name: ContactIconName; label: string; href: string }[] = [

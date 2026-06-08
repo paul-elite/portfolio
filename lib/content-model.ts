@@ -45,6 +45,16 @@ export interface Writing {
 }
 
 export type IllustrationCategory = 'app-icons' | 'characters' | 'assets';
+export type PortfolioNavTarget = 'projects' | 'interaction' | 'illustration' | 'writings';
+
+export interface PortfolioNavigationItem {
+  id: string;
+  label: string;
+  target: PortfolioNavTarget;
+  icon?: string;
+  enabled?: boolean;
+  order?: number;
+}
 
 export interface Illustration {
   id: string;
@@ -91,6 +101,7 @@ export interface SiteConfig {
   settingsIcon?: string;
   settingsIconSelected?: string;
   settingsIconDeselected?: string;
+  navigationItems?: PortfolioNavigationItem[];
   bio: string;
   social: SocialLinks;
   socialImages?: SocialImages;

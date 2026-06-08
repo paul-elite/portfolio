@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { supabase } from './supabase';
+import { hasSupabaseConfig, supabase } from './supabase';
 import {
   illustrations as staticIllustrations,
   interactions as staticInteractions,
@@ -13,6 +13,10 @@ import type { NavItem, PortfolioContent, Project, SiteConfig, Writing } from './
 import { withSettingsIconFallbacks } from './settings-icon-assets';
 
 export async function getSettings() {
+  if (!hasSupabaseConfig) {
+    return withSettingsIconFallbacks(mapSettings(null));
+  }
+
   try {
     const { data, error } = await supabase
       .from('settings')
@@ -40,6 +44,15 @@ export async function getSiteConfig(): Promise<SiteConfig> {
 }
 
 export async function getPortfolioContent(): Promise<PortfolioContent> {
+  if (!hasSupabaseConfig) {
+    return {
+      projects: staticProjects,
+      writings: staticWritings,
+      illustrations: staticIllustrations,
+      interactions: staticInteractions,
+    };
+  }
+
   try {
     const [projectsRes, writingsRes, illustrationsRes, interactionsRes] = await Promise.all([
       supabase.from('projects').select('*').order('created_at', { ascending: false }),
@@ -74,6 +87,10 @@ export async function getHomeData() {
 }
 
 export async function getProjectNavigation(): Promise<NavItem[]> {
+  if (!hasSupabaseConfig) {
+    return staticProjects.map(({ slug, title }) => ({ slug, title }));
+  }
+
   try {
     const { data, error } = await supabase
       .from('projects')
@@ -91,6 +108,10 @@ export async function getProjectNavigation(): Promise<NavItem[]> {
 }
 
 export async function getWritingNavigation(): Promise<NavItem[]> {
+  if (!hasSupabaseConfig) {
+    return staticWritings.map(({ slug, title }) => ({ slug, title }));
+  }
+
   try {
     const { data, error } = await supabase
       .from('writings')
@@ -108,6 +129,10 @@ export async function getWritingNavigation(): Promise<NavItem[]> {
 }
 
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
+  if (!hasSupabaseConfig) {
+    return staticProjects.find((project) => project.slug === slug) || null;
+  }
+
   try {
     const { data, error } = await supabase
       .from('projects')
@@ -123,6 +148,11 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
 }
 
 export async function getWritingBySlug(slug: string): Promise<Writing | null> {
+  if (!hasSupabaseConfig) {
+    const writing = staticWritings.find((item) => item.slug === slug);
+    return writing ? { ...writing, blocks: [] } : null;
+  }
+
   try {
     const { data, error } = await supabase
       .from('writings')

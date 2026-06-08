@@ -6,6 +6,7 @@ import type { PortfolioTab } from '@/lib/portfolio-options';
 import { usePreferences } from './PreferenceProvider';
 
 interface NavigationItem {
+  id: string;
   key: PortfolioTab;
   label: string;
   icon: ReactNode;
@@ -47,15 +48,18 @@ export default function PortfolioNavigation({ items, activeTab, onChange, radial
       <nav className="portfolio-tabs relative z-40 ml-[52px] mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm md:ml-0 md:gap-x-4" aria-label="Portfolio sections">
         {items.map((item) => (
           <button
-            key={item.key}
+            key={item.id}
             type="button"
             onClick={() => onChange(item.key)}
-            className={`font-normal transition-all ${
+            className={`inline-flex items-center gap-1.5 font-normal transition-all ${
               activeTab === item.key
                 ? 'text-[var(--experience-text)]'
                 : 'text-[var(--experience-muted)] hover:text-[var(--experience-text)]'
             }`}
           >
+            <span className="grid h-4 w-4 place-items-center [&_img]:h-4 [&_img]:w-4 [&_svg]:h-4 [&_svg]:w-4">
+              {item.icon}
+            </span>
             {item.label}
           </button>
         ))}
@@ -114,7 +118,7 @@ export default function PortfolioNavigation({ items, activeTab, onChange, radial
                 <div className="space-y-1">
                   {filteredItems.map((item) => (
                     <button
-                      key={item.key}
+                      key={item.id}
                       type="button"
                       onClick={() => {
                         onChange(item.key);
@@ -142,15 +146,18 @@ export default function PortfolioNavigation({ items, activeTab, onChange, radial
     <nav className="portfolio-tabs relative z-40 ml-[52px] mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm md:ml-0 md:gap-x-4" aria-label="Portfolio radial navigation">
       {items.slice(0, 3).map((item) => (
         <button
-          key={item.key}
+          key={item.id}
           type="button"
           onClick={() => onChange(item.key)}
-          className={`font-normal transition-all ${
+          className={`inline-flex items-center gap-1.5 font-normal transition-all ${
             activeTab === item.key
               ? 'text-[var(--experience-text)]'
               : 'text-[var(--experience-muted)] hover:text-[var(--experience-text)]'
           }`}
         >
+          <span className="grid h-4 w-4 place-items-center [&_img]:h-4 [&_img]:w-4 [&_svg]:h-4 [&_svg]:w-4">
+            {item.icon}
+          </span>
           {item.label}
         </button>
       ))}
