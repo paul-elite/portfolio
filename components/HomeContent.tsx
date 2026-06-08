@@ -1687,7 +1687,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           <motion.span
             layout
             className={`relative block flex-shrink-0 overflow-hidden rounded-full bg-gray-100 ${
-              contactVisible ? 'h-12 w-12' : 'h-[18px] w-[18px] md:h-6 md:w-6'
+              contactVisible ? 'h-10 w-10' : 'h-6 w-6'
             }`}
             transition={contactMorphSpring}
           >
@@ -1695,8 +1695,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               src="/chat-icon.jpg"
               alt=""
               fill
-              sizes={contactVisible ? '48px' : '24px'}
-              className={`rounded-full object-cover ${contactVisible ? 'scale-[0.8]' : ''}`}
+              sizes={contactVisible ? '40px' : '24px'}
+              className="rounded-full object-cover"
               priority
             />
           </motion.span>
