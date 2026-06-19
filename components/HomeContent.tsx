@@ -615,15 +615,16 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const activeNavigationItem = navigationItems.find((item) => item.key === activeTab) || navigationItems[0];
   const sectionNavigationAvatar = (
     <div
-      className="section-navigation-avatar grid h-10 w-10 place-items-center rounded-full bg-white text-[var(--experience-accent)] transition-opacity duration-[var(--experience-motion)]"
+      className="section-navigation-avatar grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-white text-[var(--experience-accent)] transition-opacity duration-[var(--experience-motion)]"
       aria-hidden="true"
     >
-      <span className="grid h-5 w-5 place-items-center [&_svg]:h-5 [&_svg]:w-5">
+      <span className={`grid place-items-center ${activeNavigationItem?.iconSrc ? 'h-full w-full' : 'h-5 w-5 [&_svg]:h-5 [&_svg]:w-5'}`}>
         {activeNavigationItem ? (
           <PortfolioNavigationIcon
             target={activeNavigationItem.key}
             src={activeNavigationItem.iconSrc}
-            className="h-5 w-5"
+            className={activeNavigationItem.iconSrc ? 'h-full w-full' : 'h-5 w-5'}
+            imageFit="cover"
           />
         ) : null}
       </span>

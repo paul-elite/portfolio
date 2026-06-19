@@ -11,11 +11,6 @@ const fallbackIconByTarget: Record<PortfolioTab, FallbackIconName> = {
   interaction: 'chat',
 };
 
-function isSvgImage(src: string) {
-  const [path] = src.toLowerCase().split('?');
-  return path.endsWith('.svg') || src.startsWith('data:image/svg+xml');
-}
-
 function FallbackNavigationIcon({ icon, className }: { icon: FallbackIconName; className?: string }) {
   if (icon === 'grid') {
     return (
@@ -54,19 +49,17 @@ export default function PortfolioNavigationIcon({
   target,
   src,
   className = 'h-5 w-5',
+  imageFit = 'contain',
 }: {
   target: PortfolioTab;
   src?: string;
   className?: string;
+  imageFit?: 'contain' | 'cover';
 }) {
   if (src) {
-    if (isSvgImage(src)) {
-      // eslint-disable-next-line @next/next/no-img-element
-      return <img src={src} alt="" className={`${className} object-contain`} />;
-    }
-
+    const objectFitClass = imageFit === 'cover' ? 'object-cover' : 'object-contain';
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={src} alt="" className={`${className} object-cover`} />;
+    return <img src={src} alt="" className={`${className} ${objectFitClass}`} />;
   }
 
   return <FallbackNavigationIcon icon={fallbackIconByTarget[target]} className={className} />;
