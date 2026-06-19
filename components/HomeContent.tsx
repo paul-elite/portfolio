@@ -590,13 +590,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   // Track if anything is selected to fade other elements
   const hasSelection = selectedProject !== null || selectedWriting !== null || selectedInteraction !== null || selectedCategory !== null;
   const hasDetailContent = hasSelection || showSettingsDetail;
-  const defaultProject = activeTab === 'projects' && !hasDetailContent
-    ? content.projects[0] || null
-    : null;
-  const defaultProjectIntro = defaultProject?.blocks?.find((block) => block.type === 'text')?.content
-    || defaultProject?.caseStudy?.overview
-    || defaultProject?.description
-    || '';
   const activeAvatar = hasDetailContent && avatarFocused ? avatarFocused : avatar;
   const contactVisible = contactOpen || contactHovered;
   const mobileDetailTitle = showSettingsDetail
@@ -1455,48 +1448,6 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   })}
               </div>
             </motion.div>
-          ) : defaultProject ? (
-            <div className="w-full max-w-[572px] animate-fadeIn">
-              <div className="mb-7">
-                <p className="mb-3 text-xs font-medium uppercase tracking-[0.16em] text-[var(--experience-muted)]">
-                  Featured project
-                </p>
-                <button
-                  type="button"
-                  onClick={() => handleSelectProject(defaultProject)}
-                  className="group block text-left"
-                >
-                  <h2 className="mb-2 text-[1.375rem] font-semibold leading-7 text-[var(--experience-text)] transition-colors group-hover:text-[var(--experience-accent)]">
-                    {defaultProject.title}
-                  </h2>
-                  <span className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--experience-muted)]">
-                    {defaultProject.year && <span>{defaultProject.year}</span>}
-                    {defaultProject.description && <span>{defaultProject.description}</span>}
-                  </span>
-                </button>
-              </div>
-
-              {defaultProjectIntro && (
-                <p className="max-w-[34rem] text-sm leading-relaxed text-[var(--experience-text)]">
-                  {defaultProjectIntro}
-                </p>
-              )}
-
-              {defaultProject.role && (
-                <p className="mt-5 text-xs font-medium uppercase tracking-[0.14em] text-[var(--experience-muted)]">
-                  {defaultProject.role}
-                </p>
-              )}
-
-              <button
-                type="button"
-                onClick={() => handleSelectProject(defaultProject)}
-                className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-[var(--experience-text)] transition-colors hover:text-[var(--experience-accent)]"
-              >
-                Open case study
-                <span aria-hidden="true">→</span>
-              </button>
-            </div>
           ) : null}
           </AnimatePresence>
           </CustomScrollbar>
