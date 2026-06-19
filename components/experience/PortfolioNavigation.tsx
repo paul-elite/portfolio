@@ -4,12 +4,13 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { PortfolioTab } from '@/lib/portfolio-options';
 import { usePreferences } from './PreferenceProvider';
+import PortfolioNavigationIcon from './PortfolioNavigationIcon';
 
 interface NavigationItem {
   id: string;
   key: PortfolioTab;
   label: string;
-  icon: ReactNode;
+  iconSrc?: string;
 }
 
 interface PortfolioNavigationProps {
@@ -17,6 +18,20 @@ interface PortfolioNavigationProps {
   activeTab: PortfolioTab;
   onChange: (tab: PortfolioTab) => void;
   radialTrigger: ReactNode;
+}
+
+function NavigationItemContent({ item }: { item: NavigationItem }) {
+  return (
+    <>
+      <span
+        aria-hidden="true"
+        className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[var(--experience-card)] text-[var(--experience-accent)] [&_img]:h-4 [&_img]:w-4 [&_svg]:h-4 [&_svg]:w-4"
+      >
+        <PortfolioNavigationIcon target={item.key} src={item.iconSrc} className="h-4 w-4" />
+      </span>
+      <span className="min-w-0 truncate">{item.label}</span>
+    </>
+  );
 }
 
 export default function PortfolioNavigation({ items, activeTab, onChange, radialTrigger }: PortfolioNavigationProps) {
@@ -50,14 +65,15 @@ export default function PortfolioNavigation({ items, activeTab, onChange, radial
           <button
             key={item.id}
             type="button"
+            aria-current={activeTab === item.key ? 'page' : undefined}
             onClick={() => onChange(item.key)}
-            className={`font-normal transition-all ${
+            className={`inline-flex max-w-full items-center gap-1.5 rounded-full px-1.5 py-1 font-normal transition-all ${
               activeTab === item.key
-                ? 'text-[var(--experience-text)]'
-                : 'text-[var(--experience-muted)] hover:text-[var(--experience-text)]'
+                ? 'bg-[var(--experience-accent-soft)] text-[var(--experience-text)]'
+                : 'text-[var(--experience-muted)] hover:bg-[var(--experience-surface)] hover:text-[var(--experience-text)]'
             }`}
           >
-            {item.label}
+            <NavigationItemContent item={item} />
           </button>
         ))}
       </nav>
@@ -117,6 +133,7 @@ export default function PortfolioNavigation({ items, activeTab, onChange, radial
                     <button
                       key={item.id}
                       type="button"
+                      aria-current={activeTab === item.key ? 'page' : undefined}
                       onClick={() => {
                         onChange(item.key);
                         setCommandOpen(false);
@@ -125,7 +142,7 @@ export default function PortfolioNavigation({ items, activeTab, onChange, radial
                       className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-left text-sm hover:bg-[var(--experience-accent-soft)]"
                     >
                       <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--experience-surface)] text-[var(--experience-accent)]">
-                        {item.icon}
+                        <PortfolioNavigationIcon target={item.key} src={item.iconSrc} className="h-5 w-5" />
                       </span>
                       <span>{item.label}</span>
                     </button>
@@ -145,14 +162,15 @@ export default function PortfolioNavigation({ items, activeTab, onChange, radial
         <button
           key={item.id}
           type="button"
+          aria-current={activeTab === item.key ? 'page' : undefined}
           onClick={() => onChange(item.key)}
-          className={`font-normal transition-all ${
+          className={`inline-flex max-w-full items-center gap-1.5 rounded-full px-1.5 py-1 font-normal transition-all ${
             activeTab === item.key
-              ? 'text-[var(--experience-text)]'
-              : 'text-[var(--experience-muted)] hover:text-[var(--experience-text)]'
+              ? 'bg-[var(--experience-accent-soft)] text-[var(--experience-text)]'
+              : 'text-[var(--experience-muted)] hover:bg-[var(--experience-surface)] hover:text-[var(--experience-text)]'
           }`}
         >
-          {item.label}
+          <NavigationItemContent item={item} />
         </button>
       ))}
       {radialTrigger}

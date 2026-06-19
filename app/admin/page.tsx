@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import BlockEditor, { Block } from '@/components/BlockEditor';
 import { ToastContainer, toast } from '@/components/Toast';
@@ -378,6 +378,7 @@ export default function AdminPage() {
     instagramImage: '',
     emailImage: '',
   });
+  const settingsRef = useRef(settings);
   const [avatarPreview, setAvatarPreview] = useState<string>('');
   const [avatarFocusedPreview, setAvatarFocusedPreview] = useState<string>('');
   const [settingsIconSelectedPreview, setSettingsIconSelectedPreview] = useState<string>('');
@@ -388,12 +389,23 @@ export default function AdminPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showSaveModal, setShowSaveModal] = useState(false);
 
-  const normalizeSettings = (nextSettings: Settings): Settings => ({
+  const normalizeSettings = useCallback((nextSettings: Settings): Settings => ({
     ...nextSettings,
     navigationItems: nextSettings.navigationItems && nextSettings.navigationItems.length > 0
       ? nextSettings.navigationItems
       : DEFAULT_PORTFOLIO_NAVIGATION_ITEMS,
-  });
+  }), []);
+
+  const updateSettingsState = useCallback((nextSettings: Settings) => {
+    const normalized = normalizeSettings(nextSettings);
+    settingsRef.current = normalized;
+    setSettings(normalized);
+    return normalized;
+  }, [normalizeSettings]);
+
+  useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
 
   const fetchContent = async () => {
     try {
@@ -404,7 +416,7 @@ export default function AdminPage() {
         const data = await res.json();
         setContent(data);
         if (data.settings) {
-          setSettings(normalizeSettings(data.settings));
+          updateSettingsState(data.settings);
         }
       }
     } catch {
@@ -426,7 +438,7 @@ export default function AdminPage() {
         const data = await res.json();
         setContent(data);
         if (data.settings) {
-          setSettings(normalizeSettings(data.settings));
+          updateSettingsState(data.settings);
         }
         localStorage.setItem('admin_password', password);
         toast.update(loadingToast, 'Welcome back!', 'success');
@@ -644,6 +656,10 @@ export default function AdminPage() {
       });
 
       if (res.ok) {
+        const result = await res.json();
+        if (result.settings) {
+          updateSettingsState(result.settings);
+        }
         toast.update(loadingToast, successMessage, 'success');
         fetchContent();
         return true;
@@ -754,13 +770,13 @@ export default function AdminPage() {
           res.json().then((data) => {
             setContent(data);
             if (data.settings) {
-              setSettings(normalizeSettings(data.settings));
+              updateSettingsState(data.settings);
             }
           });
         }
       });
     }
-  }, []);
+  }, [updateSettingsState]);
 
   if (!isAuthenticated) {
     return (
@@ -1249,7 +1265,15 @@ export default function AdminPage() {
                             onUpload={async (file) => {
                               const path = await handleFileUpload(file, 'navigation', `navigationIcon-${item.id}`);
                               if (path) {
-                                updateNavigationItem(item.id, { icon: path });
+                                const currentSettings = settingsRef.current;
+                                const nextSettings = {
+                                  ...currentSettings,
+                                  navigationItems: currentSettings.navigationItems.map((navItem) => (
+                                    navItem.id === item.id ? { ...navItem, icon: path } : navItem
+                                  )),
+                                };
+                                updateSettingsState(nextSettings);
+                                await saveSettingsData(nextSettings, 'Navigation icon saved!');
                               }
                             }}
                           />

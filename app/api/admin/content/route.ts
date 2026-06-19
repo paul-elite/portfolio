@@ -54,6 +54,10 @@ async function saveSettings(settings: Settings): Promise<Settings> {
     .select('*')
     .single();
   const existingColumns = existing ? new Set(Object.keys(existing)) : null;
+  if (existingColumns && !existingColumns.has('navigation_items') && settings.navigationItems) {
+    throw new Error('The settings.navigation_items column is missing. Run the latest Supabase schema migration before saving navigation icons.');
+  }
+
   const writableSettings = existingColumns
     ? Object.fromEntries(Object.entries(dbSettings).filter(([key]) => existingColumns.has(key)))
     : dbSettings;
@@ -265,7 +269,10 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: true, item: updatedItem });
   } catch (error) {
     console.error('PUT error:', error);
-    return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
+    return NextResponse.json({
+      error: 'Failed to update',
+      details: error instanceof Error ? error.message : undefined,
+    }, { status: 500 });
   }
 }
 

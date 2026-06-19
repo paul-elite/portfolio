@@ -17,6 +17,7 @@ import CustomScrollbar from './CustomScrollbar';
 import RadialToolkit, { type RadialToolkitItem } from './RadialToolkit';
 import { usePreferences } from './experience/PreferenceProvider';
 import PortfolioNavigation from './experience/PortfolioNavigation';
+import PortfolioNavigationIcon from './experience/PortfolioNavigationIcon';
 import ProjectBrowser from './experience/ProjectBrowsers';
 import { CustomizeExperienceContent } from './experience/CustomizeExperiencePanel';
 import SettingsTrigger from './experience/SettingsTrigger';
@@ -98,69 +99,12 @@ const desktopDetailMotion = {
 
 type ContactIconName = 'twitter' | 'github' | 'linkedin' | 'behance' | 'instagram' | 'email';
 
-const radialTabMeta: Record<PortfolioTab, { shortcut: string; icon: 'grid' | 'spark' | 'write' | 'chat' }> = {
-  projects: { shortcut: 'P', icon: 'grid' },
-  illustration: { shortcut: 'I', icon: 'spark' },
-  writings: { shortcut: 'W', icon: 'write' },
-  interaction: { shortcut: 'N', icon: 'chat' },
+const radialTabMeta: Record<PortfolioTab, { shortcut: string }> = {
+  projects: { shortcut: 'P' },
+  illustration: { shortcut: 'I' },
+  writings: { shortcut: 'W' },
+  interaction: { shortcut: 'N' },
 };
-
-function RadialTabIcon({ icon }: { icon: 'grid' | 'spark' | 'write' | 'chat' }) {
-  if (icon === 'grid') {
-    return (
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-        <path d="M4 4h5v5H4zM13 4h5v5h-5zM4 13h5v5H4zM13 13h5v5h-5z" />
-      </svg>
-    );
-  }
-
-  if (icon === 'spark') {
-    return (
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M11 3l1.8 5.2L18 10l-5.2 1.8L11 17l-1.8-5.2L4 10l5.2-1.8z" />
-      </svg>
-    );
-  }
-
-  if (icon === 'write') {
-    return (
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M5 17h12" />
-        <path d="M6 14l8.6-8.6 2 2L8 16H6z" />
-      </svg>
-    );
-  }
-
-  return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 6h12v8H8l-3 3z" />
-      <path d="M8 9h6M8 12h4" />
-    </svg>
-  );
-}
-
-const defaultNavIconByTarget: Record<PortfolioTab, 'grid' | 'spark' | 'write' | 'chat'> = {
-  projects: 'grid',
-  illustration: 'spark',
-  writings: 'write',
-  interaction: 'chat',
-};
-
-function NavigationIcon({ item }: { item: { label: string; target: PortfolioTab; icon?: string } }) {
-  if (item.icon) {
-    return (
-      <AvatarImage
-        src={item.icon}
-        alt=""
-        width={22}
-        height={22}
-        className="h-5 w-5 object-contain"
-      />
-    );
-  }
-
-  return <RadialTabIcon icon={defaultNavIconByTarget[item.target]} />;
-}
 
 function ContactIcon({ name }: { name: ContactIconName }) {
   const iconClassName = name === 'email' ? 'h-4 w-4 text-white' : 'h-4 w-4 text-gray-700';
@@ -665,7 +609,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       id: item.id,
       key: target,
       label: item.label,
-      icon: <NavigationIcon item={{ label: item.label, target, icon: item.icon }} />,
+      iconSrc: item.icon || '',
     };
   });
   const activeNavigationItem = navigationItems.find((item) => item.key === activeTab) || navigationItems[0];
@@ -675,7 +619,13 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       aria-hidden="true"
     >
       <span className="grid h-5 w-5 place-items-center [&_svg]:h-5 [&_svg]:w-5">
-        {activeNavigationItem?.icon}
+        {activeNavigationItem ? (
+          <PortfolioNavigationIcon
+            target={activeNavigationItem.key}
+            src={activeNavigationItem.iconSrc}
+            className="h-5 w-5"
+          />
+        ) : null}
       </span>
     </div>
   );
@@ -686,7 +636,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       id: item.id,
       label: item.label,
       shortcut: meta.shortcut,
-      icon: item.icon,
+      icon: <PortfolioNavigationIcon target={item.key} src={item.iconSrc} className="h-5 w-5" />,
       active: activeTab === item.key,
       onSelect: () => handleTabChange(item.key),
     };
