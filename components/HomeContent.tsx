@@ -630,7 +630,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       id: item.id,
       label: item.label,
       shortcut: meta.shortcut,
-      icon: <span className="text-sm font-semibold">{meta.shortcut}</span>,
+      icon: <PortfolioNavigationIcon target={item.key} src={item.iconSrc} className="h-5 w-5" />,
       active: activeTab === item.key,
       onSelect: () => handleTabChange(item.key),
     };
