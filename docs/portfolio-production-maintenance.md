@@ -25,6 +25,7 @@ If the Vercel CLI times out after the build, check the deployment by ID before r
 - The radial menu uses uploaded navigation icons, not letter initials.
 - Desktop landing mode is plain. Do not show a default featured project before user selection.
 - User avatar and detail back/close controls should not show purple hover/focus outline rings.
+- Admin has separate image slots for favicon and OG image. Favicon drives browser/app icons; OG image drives social preview cards.
 
 ## Navigation Icon Data
 
@@ -33,6 +34,7 @@ Admin-managed navigation items live in `settings.navigationItems` and persist to
 Relevant files:
 - `app/admin/page.tsx`: admin navigation item editor and icon upload save flow.
 - `app/api/admin/content/route.ts`: settings persistence.
+- `app/layout.tsx`: favicon, Open Graph, and Twitter metadata.
 - `components/HomeContent.tsx`: nav item assembly, active icon, radial menu items.
 - `components/experience/PortfolioNavigation.tsx`: visible nav labels.
 - `components/experience/PortfolioNavigationIcon.tsx`: uploaded/fallback icon rendering.
@@ -43,7 +45,8 @@ If admin says a schema needs to run, the live database is likely missing:
 
 ```sql
 ALTER TABLE IF EXISTS settings
-  ADD COLUMN IF NOT EXISTS navigation_items JSONB DEFAULT '[]'::jsonb;
+  ADD COLUMN IF NOT EXISTS navigation_items JSONB DEFAULT '[]'::jsonb,
+  ADD COLUMN IF NOT EXISTS favicon_image TEXT DEFAULT '';
 ```
 
 ## Deployment Context

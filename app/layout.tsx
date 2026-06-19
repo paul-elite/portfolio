@@ -30,6 +30,14 @@ export async function generateMetadata(): Promise<Metadata> {
     description: settings.title || "Personal portfolio",
   };
 
+  if (settings.faviconImage) {
+    metadata.icons = {
+      icon: settings.faviconImage,
+      shortcut: settings.faviconImage,
+      apple: settings.faviconImage,
+    };
+  }
+
   if (settings.metaImage) {
     metadata.openGraph = {
       images: [settings.metaImage],

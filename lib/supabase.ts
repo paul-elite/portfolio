@@ -20,6 +20,7 @@ export interface Settings {
   settingsIconSelected?: string;
   settingsIconDeselected?: string;
   navigationItems?: PortfolioNavigationItem[];
+  faviconImage?: string;
   metaImage: string;
   twitter: string;
   github: string;
@@ -44,6 +45,7 @@ export const defaultSettings: Settings = {
   settingsIconSelected: '',
   settingsIconDeselected: '',
   navigationItems: [],
+  faviconImage: '',
   metaImage: '',
   twitter: '',
   github: '',

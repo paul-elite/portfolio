@@ -59,6 +59,7 @@ interface Settings {
   settingsIconSelected: string;
   settingsIconDeselected: string;
   navigationItems: NavigationItem[];
+  faviconImage: string;
   metaImage: string;
   twitter: string;
   github: string;
@@ -365,6 +366,7 @@ export default function AdminPage() {
     settingsIconSelected: '',
     settingsIconDeselected: '',
     navigationItems: DEFAULT_PORTFOLIO_NAVIGATION_ITEMS,
+    faviconImage: '',
     metaImage: '',
     twitter: '',
     github: '',
@@ -383,6 +385,7 @@ export default function AdminPage() {
   const [avatarFocusedPreview, setAvatarFocusedPreview] = useState<string>('');
   const [settingsIconSelectedPreview, setSettingsIconSelectedPreview] = useState<string>('');
   const [settingsIconDeselectedPreview, setSettingsIconDeselectedPreview] = useState<string>('');
+  const [faviconImagePreview, setFaviconImagePreview] = useState<string>('');
   const [metaImagePreview, setMetaImagePreview] = useState<string>('');
   const [previewImages, setPreviewImages] = useState<Record<string, string>>({});
   const [homepageImages, setHomepageImages] = useState<string[]>([]);
@@ -1006,24 +1009,46 @@ export default function AdminPage() {
                 </div>
               </Section>
 
-              <Section title="Social Share Image">
-                <p className="text-sm text-gray-500 mb-4">This image appears when your site is shared on social media.</p>
-                <FileUpload
-                  label=""
-                  accept="image/png,image/svg+xml,image/jpeg"
-                  preview={metaImagePreview || settings.metaImage}
-                  uploading={uploadingFields.has('metaImage')}
-                  aspectRatio="wide"
-                  helpText="Recommended: 1200x630px"
-                  onUpload={async (file) => {
-                    const previewUrl = URL.createObjectURL(file);
-                    setMetaImagePreview(previewUrl);
-                    const path = await handleFileUpload(file, 'meta', 'metaImage');
-                    if (path) {
-                      setSettings((prev) => ({ ...prev, metaImage: path }));
-                    }
-                  }}
-                />
+              <Section title="Browser & Social Images">
+                <p className="text-sm text-gray-500 mb-4">Upload the favicon for browser tabs and the OG image used when your site is shared.</p>
+                <div className="grid gap-5 md:grid-cols-2">
+                  <FileUpload
+                    label="Favicon"
+                    accept="image/png,image/svg+xml,image/jpeg,image/x-icon"
+                    preview={faviconImagePreview || settings.faviconImage}
+                    uploading={uploadingFields.has('faviconImage')}
+                    aspectRatio="square"
+                    helpText="Square icon"
+                    onUpload={async (file) => {
+                      const previewUrl = URL.createObjectURL(file);
+                      setFaviconImagePreview(previewUrl);
+                      const path = await handleFileUpload(file, 'meta/favicon', 'faviconImage');
+                      if (path) {
+                        const nextSettings = { ...settingsRef.current, faviconImage: path };
+                        updateSettingsState(nextSettings);
+                        await saveSettingsData(nextSettings, 'Favicon saved!');
+                      }
+                    }}
+                  />
+                  <FileUpload
+                    label="OG image"
+                    accept="image/png,image/svg+xml,image/jpeg"
+                    preview={metaImagePreview || settings.metaImage}
+                    uploading={uploadingFields.has('metaImage')}
+                    aspectRatio="wide"
+                    helpText="Recommended: 1200x630px"
+                    onUpload={async (file) => {
+                      const previewUrl = URL.createObjectURL(file);
+                      setMetaImagePreview(previewUrl);
+                      const path = await handleFileUpload(file, 'meta/og', 'metaImage');
+                      if (path) {
+                        const nextSettings = { ...settingsRef.current, metaImage: path };
+                        updateSettingsState(nextSettings);
+                        await saveSettingsData(nextSettings, 'OG image saved!');
+                      }
+                    }}
+                  />
+                </div>
               </Section>
 
               <Section title="Profile Info">

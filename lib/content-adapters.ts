@@ -123,6 +123,7 @@ export function mapSettings(row?: Partial<Settings> & RecordLike | null): Settin
     settingsIconSelected: asString(row.settings_icon_selected || row.settingsIconSelected),
     settingsIconDeselected: asString(row.settings_icon_deselected || row.settingsIconDeselected),
     navigationItems: normalizeNavigationItems(row.navigation_items || row.navigationItems),
+    faviconImage: asString(row.favicon_image || row.faviconImage),
     metaImage: asString(row.meta_image || row.metaImage),
     twitterImage: asString(row.twitter_image || row.twitterImage),
     linkedinImage: asString(row.linkedin_image || row.linkedinImage),

@@ -34,6 +34,7 @@ async function saveSettings(settings: Settings): Promise<Settings> {
     settings_icon_selected: settings.settingsIconSelected || '',
     settings_icon_deselected: settings.settingsIconDeselected || '',
     navigation_items: settings.navigationItems || [],
+    favicon_image: settings.faviconImage || '',
     meta_image: settings.metaImage,
     twitter: settings.twitter,
     github: settings.github,
@@ -56,6 +57,9 @@ async function saveSettings(settings: Settings): Promise<Settings> {
   const existingColumns = existing ? new Set(Object.keys(existing)) : null;
   if (existingColumns && !existingColumns.has('navigation_items') && settings.navigationItems) {
     throw new Error('The settings.navigation_items column is missing. Run the latest Supabase schema migration before saving navigation icons.');
+  }
+  if (existingColumns && !existingColumns.has('favicon_image') && settings.faviconImage) {
+    throw new Error('The settings.favicon_image column is missing. Run the latest Supabase schema migration before saving the favicon.');
   }
 
   const writableSettings = existingColumns
