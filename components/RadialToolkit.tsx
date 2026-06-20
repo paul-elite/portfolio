@@ -16,7 +16,7 @@ export interface RadialToolkitItem {
 }
 
 interface RadialToolkitProps {
-  anchor: { x: number; y: number } | null;
+  anchor: { x: number; y: number; width?: number; height?: number } | null;
   items: RadialToolkitItem[];
   open: boolean;
   onClose: () => void;
@@ -427,10 +427,23 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
   const accentIconSrc = accentItem?.iconSrc || '';
   const accentAngle = layouts[accentIndex]?.angle ?? layouts[activeIndex]?.angle ?? -90;
   const activeArcLength = Math.max(24, Math.min(54, (360 / Math.max(1, items.length) - 18) * activeArcScale));
+  const sourceWidth = Math.max(20, anchor?.width ?? 24);
+  const sourceHeight = Math.max(20, anchor?.height ?? 24);
+  const sourceSize = Math.max(sourceWidth, sourceHeight);
+  const outerSize = orbitRadius * 1.5;
+  const stripSize = orbitRadius * 1.28;
+  const plateSize = orbitRadius * 0.96;
+  const centerSize = 58;
 
   const transition = reduceMotion
     ? { duration: 0 }
-    : { type: 'spring' as const, stiffness: 520, damping: 31, mass: 0.78 };
+    : { type: 'spring' as const, stiffness: 430, damping: 36, mass: 0.82 };
+  const materialTransition = reduceMotion
+    ? { duration: 0 }
+    : { type: 'spring' as const, stiffness: 360, damping: 34, mass: 0.9 };
+  const itemTransition = reduceMotion
+    ? { duration: 0 }
+    : { type: 'spring' as const, stiffness: 500, damping: 34, mass: 0.72 };
 
   useEffect(() => {
     let cancelled = false;
@@ -474,7 +487,7 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.16 }}
+            transition={{ duration: reduceMotion ? 0 : 0.22, ease: [0.22, 1, 0.36, 1] }}
             onClick={onClose}
             style={{
               backgroundColor: 'rgba(255, 255, 255, 0.66)',
@@ -492,60 +505,141 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
             onMouseLeave={onMouseLeave}
           >
             <motion.div
-              className="absolute left-1/2 top-1/2 rounded-full bg-[#f7f7f7]/95 backdrop-blur-sm"
-              initial={{ scale: 0.5, opacity: 0, rotate: -32 }}
-              animate={{ scale: 1, opacity: 1, rotate: 0 }}
-              exit={{ scale: 0.78, opacity: 0, rotate: -20 }}
-              transition={transition}
-              style={{
-                width: orbitRadius * 1.5,
-                height: orbitRadius * 1.5,
-                marginLeft: orbitRadius * -0.75,
-                marginTop: orbitRadius * -0.75,
+              className="absolute left-1/2 top-1/2 bg-[#f7f7f7]/95 backdrop-blur-sm"
+              initial={{
+                width: sourceWidth,
+                height: sourceHeight,
+                marginLeft: sourceWidth / -2,
+                marginTop: sourceHeight / -2,
+                borderRadius: sourceSize / 2,
+                scale: 1,
+                y: 0,
+                boxShadow: '0 1px 2px rgb(0 0 0 / 8%)',
+              }}
+              animate={{
+                width: outerSize,
+                height: outerSize,
+                marginLeft: outerSize / -2,
+                marginTop: outerSize / -2,
+                borderRadius: outerSize / 2,
+                scale: 1.01,
+                y: -1,
                 boxShadow: savedBorderShadow,
               }}
-            />
-            <motion.div
-              className="absolute left-1/2 top-1/2 rounded-full"
-              initial={{ scale: 0.35, opacity: 0, rotate: -82 }}
-              animate={{ scale: 1, opacity: 1, rotate: getConicAngle(accentAngle) - activeArcLength / 2 }}
-              exit={{ scale: 0.55, opacity: 0, rotate: -55 }}
-              transition={transition}
-              style={{
-                width: orbitRadius * 1.28,
-                height: orbitRadius * 1.28,
-                marginLeft: orbitRadius * -0.64,
-                marginTop: orbitRadius * -0.64,
-                background: `conic-gradient(${activeAccentColor} 0deg ${activeArcLength}deg, transparent ${activeArcLength}deg 360deg)`,
+              exit={{
+                width: sourceWidth,
+                height: sourceHeight,
+                marginLeft: sourceWidth / -2,
+                marginTop: sourceHeight / -2,
+                borderRadius: sourceSize / 2,
+                scale: 0.99,
+                y: 0,
+                boxShadow: '0 1px 2px rgb(0 0 0 / 8%)',
               }}
+              transition={materialTransition}
             />
             <motion.div
-              className="absolute left-1/2 top-1/2 rounded-full bg-white"
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.7, opacity: 0 }}
-              transition={transition}
-              style={{
-                width: orbitRadius * 0.96,
-                height: orbitRadius * 0.96,
-                marginLeft: orbitRadius * -0.48,
-                marginTop: orbitRadius * -0.48,
+              className="absolute left-1/2 top-1/2"
+              initial={{
+                width: sourceSize * 0.88,
+                height: sourceSize * 0.88,
+                marginLeft: sourceSize * -0.44,
+                marginTop: sourceSize * -0.44,
+                borderRadius: sourceSize / 2,
+                rotate: getConicAngle(accentAngle) - activeArcLength / 2,
+                scale: 0.92,
+                opacity: 0.72,
+              }}
+              animate={{
+                width: stripSize,
+                height: stripSize,
+                marginLeft: stripSize / -2,
+                marginTop: stripSize / -2,
+                borderRadius: stripSize / 2,
+                rotate: getConicAngle(accentAngle) - activeArcLength / 2,
+                scale: 1,
+                opacity: 1,
+              }}
+              exit={{
+                width: sourceSize * 0.88,
+                height: sourceSize * 0.88,
+                marginLeft: sourceSize * -0.44,
+                marginTop: sourceSize * -0.44,
+                borderRadius: sourceSize / 2,
+                scale: 0.92,
+                opacity: 0.72,
+              }}
+              transition={materialTransition}
+              style={{ background: `conic-gradient(${activeAccentColor} 0deg ${activeArcLength}deg, transparent ${activeArcLength}deg 360deg)` }}
+            />
+            <motion.div
+              className="absolute left-1/2 top-1/2 bg-white"
+              initial={{
+                width: sourceSize * 0.74,
+                height: sourceSize * 0.74,
+                marginLeft: sourceSize * -0.37,
+                marginTop: sourceSize * -0.37,
+                borderRadius: sourceSize / 2,
+                scale: 0.96,
+                boxShadow: '0 1px 2px rgb(0 0 0 / 8%)',
+              }}
+              animate={{
+                width: plateSize,
+                height: plateSize,
+                marginLeft: plateSize / -2,
+                marginTop: plateSize / -2,
+                borderRadius: plateSize / 2,
+                scale: 1,
                 boxShadow: savedBorderShadow,
               }}
+              exit={{
+                width: sourceSize * 0.74,
+                height: sourceSize * 0.74,
+                marginLeft: sourceSize * -0.37,
+                marginTop: sourceSize * -0.37,
+                borderRadius: sourceSize / 2,
+                scale: 0.96,
+                boxShadow: '0 1px 2px rgb(0 0 0 / 8%)',
+              }}
+              transition={materialTransition}
             />
 
             <motion.button
               type="button"
               aria-label="Close radial toolkit"
-              className="absolute left-1/2 top-1/2 z-[173] flex h-[58px] w-[58px] items-center justify-center rounded-full border-[3px] bg-white"
+              className="absolute left-1/2 top-1/2 z-[173] flex items-center justify-center rounded-full bg-white"
               onClick={onClose}
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.55, opacity: 0 }}
+              initial={{
+                width: sourceWidth,
+                height: sourceHeight,
+                marginLeft: sourceWidth / -2,
+                marginTop: sourceHeight / -2,
+                borderWidth: 1,
+                scale: 1,
+                y: 0,
+              }}
+              animate={{
+                width: centerSize,
+                height: centerSize,
+                marginLeft: centerSize / -2,
+                marginTop: centerSize / -2,
+                borderWidth: 3,
+                scale: 1,
+                y: -1,
+              }}
+              exit={{
+                width: sourceWidth,
+                height: sourceHeight,
+                marginLeft: sourceWidth / -2,
+                marginTop: sourceHeight / -2,
+                borderWidth: 1,
+                scale: 0.98,
+                y: 0,
+              }}
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
-              transition={transition}
-              style={{ marginLeft: -29, marginTop: -29, borderColor: activeAccentColor, color: activeAccentColor }}
+              transition={materialTransition}
+              style={{ borderStyle: 'solid', borderColor: activeAccentColor, color: activeAccentColor }}
             >
               <span className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
                 {accentItem?.icon}
@@ -564,11 +658,11 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
                 <motion.div
                   key={item.id}
                   className="group absolute left-0 top-0 flex items-center justify-center"
-                  initial={{ x: 0, y: 0, scale: 0.42, opacity: 0 }}
-                  animate={{ x: orbitPoint.x, y: orbitPoint.y, scale: 1, opacity: 1 }}
-                  exit={{ x: 0, y: 0, scale: 0.45, opacity: 0 }}
-                  style={{ zIndex: 174 }}
-                  transition={{ ...transition, delay: reduceMotion ? 0 : index * 0.035 }}
+                  initial={{ x: 0, y: 0, scale: 0.68, opacity: 0, filter: 'blur(2px)' }}
+                  animate={{ x: orbitPoint.x, y: orbitPoint.y, scale: 1, opacity: 1, filter: 'blur(0px)' }}
+                  exit={{ x: 0, y: 0, scale: 0.72, opacity: 0, filter: 'blur(1px)' }}
+                  style={{ zIndex: 174, transformOrigin: '50% 50%' }}
+                  transition={{ ...itemTransition, delay: reduceMotion ? 0 : 0.045 + index * 0.022 }}
                 >
                   <motion.button
                     type="button"

@@ -184,7 +184,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const [activeVideo, setActiveVideo] = useState<Illustration | null>(null);
   const [showMoreTabs, setShowMoreTabs] = useState(false);
   const [radialPinned, setRadialPinned] = useState(false);
-  const [radialAnchor, setRadialAnchor] = useState<{ x: number; y: number } | null>(null);
+  const [radialAnchor, setRadialAnchor] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const [contactOpen, setContactOpen] = useState(false);
   const [contactHovered, setContactHovered] = useState(false);
   const [musicOpen, setMusicOpen] = useState(false);
@@ -492,6 +492,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       setRadialAnchor({
         x: rect.left + rect.width / 2,
         y: rect.top + rect.height / 2,
+        width: rect.width,
+        height: rect.height,
       });
     }
   }, []);
