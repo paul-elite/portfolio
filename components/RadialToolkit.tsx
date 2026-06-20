@@ -479,7 +479,7 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
                       </span>
                     )}
                     <span className={`min-w-0 flex-1 truncate transition-colors ${
-                      active ? 'font-semibold text-gray-950' : 'font-normal text-gray-400'
+                      active ? 'font-semibold text-gray-950' : 'font-normal text-gray-400 group-hover:text-gray-950'
                     } ${iconOnRight ? 'text-right' : 'text-left'}`}>
                       {item.label}
                     </span>
