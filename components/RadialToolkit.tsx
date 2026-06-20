@@ -362,6 +362,7 @@ function getLaneLayouts(
 export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnter, onMouseLeave }: RadialToolkitProps) {
   const reduceMotion = useReducedMotion();
   const [viewport, setViewport] = useState(getViewportSize);
+  const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -380,6 +381,11 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [onClose, open]);
+
+  useEffect(() => {
+    if (open) return;
+    setHoveredItemId(null);
+  }, [open]);
 
   const center = useMemo(() => {
     const fallback = {
@@ -401,8 +407,10 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
   }, [center, items, orbitRadius, viewport]);
   const activeIndex = Math.max(0, items.findIndex((item) => item.active));
   const activeItem = items[activeIndex];
+  const hoveredItem = items.find((item) => item.id === hoveredItemId);
+  const accentItem = hoveredItem || activeItem;
   const [activeAccentColor, setActiveAccentColor] = useState(fallbackAccentColor);
-  const activeIconSrc = activeItem?.iconSrc || '';
+  const accentIconSrc = accentItem?.iconSrc || '';
   const activeAngle = layouts[activeIndex]?.angle ?? -90;
   const activeArcLength = Math.max(24, Math.min(54, (360 / Math.max(1, items.length) - 18) * activeArcScale));
 
@@ -414,13 +422,13 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
     let cancelled = false;
 
     async function updateAccentColor() {
-      if (!activeIconSrc || !isSvgSource(activeIconSrc)) {
+      if (!accentIconSrc || !isSvgSource(accentIconSrc)) {
         setActiveAccentColor(fallbackAccentColor);
         return;
       }
 
       try {
-        const response = await fetch(activeIconSrc);
+        const response = await fetch(accentIconSrc);
         if (!response.ok) throw new Error('Unable to load SVG icon');
         const svgText = await response.text();
         if (!cancelled) setActiveAccentColor(getSvgMainColor(svgText));
@@ -434,7 +442,7 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
     return () => {
       cancelled = true;
     };
-  }, [activeIconSrc]);
+  }, [accentIconSrc]);
 
   return (
     <AnimatePresence>
@@ -530,6 +538,7 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
               const orbitPoint = layout.point;
               const iconOnRight = layout.iconOnRight;
               const active = Boolean(item.active);
+              const accented = active || hoveredItemId === item.id;
               const itemWidth = getItemWidth(item.label);
 
               return (
@@ -547,6 +556,10 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
                     role="menuitem"
                     aria-label={item.label}
                     onClick={item.onSelect}
+                    onHoverStart={() => setHoveredItemId(item.id)}
+                    onHoverEnd={() => setHoveredItemId((current) => (current === item.id ? null : current))}
+                    onFocus={() => setHoveredItemId(item.id)}
+                    onBlur={() => setHoveredItemId((current) => (current === item.id ? null : current))}
                     className="absolute left-0 top-0 flex h-[42px] items-center justify-between gap-2 whitespace-nowrap rounded-full bg-[#f7f7f7]/95 text-sm outline-none transition-colors hover:bg-[#f7f7f7] focus-visible:ring-2"
                     style={{
                       width: itemWidth,
@@ -563,8 +576,8 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
                   >
                     {!iconOnRight && (
                       <span
-                        className={`flex h-[34px] w-[34px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ${active ? '' : 'text-gray-700'}`}
-                        style={active ? { color: activeAccentColor } : undefined}
+                        className={`flex h-[34px] w-[34px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ${accented ? '' : 'text-gray-700'}`}
+                        style={accented ? { color: activeAccentColor } : undefined}
                       >
                         {item.icon}
                       </span>
@@ -576,8 +589,8 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
                     </span>
                     {iconOnRight && (
                       <span
-                        className={`flex h-[34px] w-[34px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ${active ? '' : 'text-gray-700'}`}
-                        style={active ? { color: activeAccentColor } : undefined}
+                        className={`flex h-[34px] w-[34px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ${accented ? '' : 'text-gray-700'}`}
+                        style={accented ? { color: activeAccentColor } : undefined}
                       >
                         {item.icon}
                       </span>
