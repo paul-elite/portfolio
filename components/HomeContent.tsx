@@ -644,7 +644,14 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       id: item.id,
       label: item.label,
       shortcut: meta.shortcut,
-      icon: <PortfolioNavigationIcon target={item.key} src={item.iconSrc} className="h-5 w-5" />,
+      icon: (
+        <PortfolioNavigationIcon
+          target={item.key}
+          src={item.iconSrc}
+          className={item.iconSrc ? 'h-full w-full' : 'h-5 w-5'}
+          imageFit="cover"
+        />
+      ),
       active: activeTab === item.key,
       onSelect: () => handleTabChange(item.key),
     };

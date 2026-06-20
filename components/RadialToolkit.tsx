@@ -433,7 +433,7 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
               transition={transition}
               style={{ marginLeft: -29, marginTop: -29 }}
             >
-              <span className="flex h-7 w-7 items-center justify-center">
+              <span className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
                 {activeItem?.icon}
               </span>
             </motion.button>
@@ -474,7 +474,7 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
                     transition={transition}
                   >
                     {!iconOnRight && (
-                      <span className={`flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full bg-white ${active ? 'text-[#2388e8]' : 'text-gray-700'}`}>
+                      <span className={`flex h-[34px] w-[34px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ${active ? 'text-[#2388e8]' : 'text-gray-700'}`}>
                         {item.icon}
                       </span>
                     )}
@@ -482,7 +482,7 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
                       {item.label}
                     </span>
                     {iconOnRight && (
-                      <span className={`flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full bg-white ${active ? 'text-[#2388e8]' : 'text-gray-700'}`}>
+                      <span className={`flex h-[34px] w-[34px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ${active ? 'text-[#2388e8]' : 'text-gray-700'}`}>
                         {item.icon}
                       </span>
                     )}
