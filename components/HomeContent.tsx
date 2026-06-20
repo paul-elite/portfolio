@@ -652,6 +652,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           imageFit="cover"
         />
       ),
+      iconSrc: item.iconSrc,
       active: activeTab === item.key,
       onSelect: () => handleTabChange(item.key),
     };

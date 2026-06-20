@@ -1,13 +1,14 @@
 'use client';
 
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 
 export interface RadialToolkitItem {
   id: string;
   label: string;
   shortcut?: string;
   icon: ReactNode;
+  iconSrc?: string;
   href?: string;
   active?: boolean;
   onSelect: () => void;
@@ -32,6 +33,7 @@ const iconAnchorInset = 21;
 const activeArcScale = 0.75;
 const preferredLaneGap = 58;
 const savedBorderShadow = '0 0 0 0.5px rgb(0 0 0 / 10%)';
+const fallbackAccentColor = '#2388e8';
 
 type RadialLayout = {
   angle: number;
@@ -258,6 +260,63 @@ function getConicAngle(angle: number) {
   return angle + 90;
 }
 
+function isSvgSource(src: string) {
+  const [path] = src.split('?');
+  return path.endsWith('.svg') || src.startsWith('data:image/svg+xml');
+}
+
+function normalizeSvgAccentColor(rawColor: string) {
+  const color = rawColor.trim().replace(/&quot;/g, '').replace(/['"]/g, '');
+  const lowerColor = color.toLowerCase();
+  const ignoredColors = new Set(['none', 'transparent', 'currentcolor', 'inherit']);
+
+  if (ignoredColors.has(lowerColor) || lowerColor.startsWith('url(') || lowerColor.startsWith('var(')) {
+    return null;
+  }
+
+  if (
+    /^#[0-9a-f]{3,8}$/i.test(color) ||
+    /^rgba?\(/i.test(color) ||
+    /^hsla?\(/i.test(color) ||
+    /^[a-z]+$/i.test(color)
+  ) {
+    return color;
+  }
+
+  return null;
+}
+
+function isNeutralSvgColor(color: string) {
+  const lowerColor = color.toLowerCase();
+  return ['#fff', '#ffffff', '#ffff', '#ffffffff', 'white', '#000', '#000000', '#000f', '#000000ff', 'black'].includes(lowerColor);
+}
+
+function getSvgMainColor(svgText: string) {
+  const colorCounts = new Map<string, number>();
+  const addColor = (rawColor: string) => {
+    const color = normalizeSvgAccentColor(rawColor);
+    if (!color) return;
+
+    colorCounts.set(color, (colorCounts.get(color) || 0) + 1);
+  };
+  const attributePattern = /\b(?:fill|stroke)=["']([^"']+)["']/gi;
+  const stylePattern = /\b(?:fill|stroke)\s*:\s*([^;"']+)/gi;
+  let match: RegExpExecArray | null;
+
+  while ((match = attributePattern.exec(svgText)) !== null) {
+    addColor(match[1]);
+  }
+
+  while ((match = stylePattern.exec(svgText)) !== null) {
+    addColor(match[1]);
+  }
+
+  const colors = Array.from(colorCounts.entries()).sort((a, b) => b[1] - a[1]);
+  const nonNeutralColor = colors.find(([color]) => !isNeutralSvgColor(color));
+
+  return nonNeutralColor?.[0] || colors[0]?.[0] || fallbackAccentColor;
+}
+
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
@@ -342,12 +401,40 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
   }, [center, items, orbitRadius, viewport]);
   const activeIndex = Math.max(0, items.findIndex((item) => item.active));
   const activeItem = items[activeIndex];
+  const [activeAccentColor, setActiveAccentColor] = useState(fallbackAccentColor);
+  const activeIconSrc = activeItem?.iconSrc || '';
   const activeAngle = layouts[activeIndex]?.angle ?? -90;
   const activeArcLength = Math.max(24, Math.min(54, (360 / Math.max(1, items.length) - 18) * activeArcScale));
 
   const transition = reduceMotion
     ? { duration: 0 }
     : { type: 'spring' as const, stiffness: 520, damping: 31, mass: 0.78 };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function updateAccentColor() {
+      if (!activeIconSrc || !isSvgSource(activeIconSrc)) {
+        setActiveAccentColor(fallbackAccentColor);
+        return;
+      }
+
+      try {
+        const response = await fetch(activeIconSrc);
+        if (!response.ok) throw new Error('Unable to load SVG icon');
+        const svgText = await response.text();
+        if (!cancelled) setActiveAccentColor(getSvgMainColor(svgText));
+      } catch {
+        if (!cancelled) setActiveAccentColor(fallbackAccentColor);
+      }
+    }
+
+    updateAccentColor();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeIconSrc]);
 
   return (
     <AnimatePresence>
@@ -402,7 +489,7 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
                 height: orbitRadius * 1.28,
                 marginLeft: orbitRadius * -0.64,
                 marginTop: orbitRadius * -0.64,
-                background: `conic-gradient(#2388e8 0deg ${activeArcLength}deg, transparent ${activeArcLength}deg 360deg)`,
+                background: `conic-gradient(${activeAccentColor} 0deg ${activeArcLength}deg, transparent ${activeArcLength}deg 360deg)`,
               }}
             />
             <motion.div
@@ -423,7 +510,7 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
             <motion.button
               type="button"
               aria-label="Close radial toolkit"
-              className="absolute left-1/2 top-1/2 z-[173] flex h-[58px] w-[58px] items-center justify-center rounded-full border-[3px] border-[#2388e8] bg-white text-[#2388e8]"
+              className="absolute left-1/2 top-1/2 z-[173] flex h-[58px] w-[58px] items-center justify-center rounded-full border-[3px] bg-white"
               onClick={onClose}
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -431,7 +518,7 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
               transition={transition}
-              style={{ marginLeft: -29, marginTop: -29 }}
+              style={{ marginLeft: -29, marginTop: -29, borderColor: activeAccentColor, color: activeAccentColor }}
             >
               <span className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
                 {activeItem?.icon}
@@ -460,7 +547,7 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
                     role="menuitem"
                     aria-label={item.label}
                     onClick={item.onSelect}
-                    className="absolute left-0 top-0 flex h-[42px] items-center justify-between gap-2 whitespace-nowrap rounded-full bg-[#f7f7f7]/95 text-sm outline-none transition-colors hover:bg-[#f7f7f7] focus-visible:ring-2 focus-visible:ring-[#2388e8]/40"
+                    className="absolute left-0 top-0 flex h-[42px] items-center justify-between gap-2 whitespace-nowrap rounded-full bg-[#f7f7f7]/95 text-sm outline-none transition-colors hover:bg-[#f7f7f7] focus-visible:ring-2"
                     style={{
                       width: itemWidth,
                       marginLeft: iconOnRight ? -itemWidth + iconAnchorInset : -iconAnchorInset,
@@ -468,13 +555,17 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
                       paddingLeft: iconOnRight ? 8 : 4,
                       paddingRight: iconOnRight ? 4 : 8,
                       boxShadow: savedBorderShadow,
-                    }}
+                      '--tw-ring-color': `${activeAccentColor}66`,
+                    } as CSSProperties}
                     whileHover={{ scale: 1.065, y: -2, boxShadow: savedBorderShadow }}
                     whileTap={{ scale: 0.94 }}
                     transition={transition}
                   >
                     {!iconOnRight && (
-                      <span className={`flex h-[34px] w-[34px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ${active ? 'text-[#2388e8]' : 'text-gray-700'}`}>
+                      <span
+                        className={`flex h-[34px] w-[34px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ${active ? '' : 'text-gray-700'}`}
+                        style={active ? { color: activeAccentColor } : undefined}
+                      >
                         {item.icon}
                       </span>
                     )}
@@ -484,7 +575,10 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
                       {item.label}
                     </span>
                     {iconOnRight && (
-                      <span className={`flex h-[34px] w-[34px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ${active ? 'text-[#2388e8]' : 'text-gray-700'}`}>
+                      <span
+                        className={`flex h-[34px] w-[34px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ${active ? '' : 'text-gray-700'}`}
+                        style={active ? { color: activeAccentColor } : undefined}
+                      >
                         {item.icon}
                       </span>
                     )}
