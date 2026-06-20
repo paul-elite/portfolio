@@ -187,6 +187,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const [radialAnchor, setRadialAnchor] = useState<{ x: number; y: number } | null>(null);
   const [contactOpen, setContactOpen] = useState(false);
   const [contactHovered, setContactHovered] = useState(false);
+  const [musicOpen, setMusicOpen] = useState(false);
   const [showSettingsDetail, setShowSettingsDetail] = useState(false);
   const [previewImageIndex, setPreviewImageIndex] = useState(0);
   const [contentAnimationKey, setContentAnimationKey] = useState<string | null>(null);
@@ -395,6 +396,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   // Wrapper functions to update selection and URL together
   const handleSelectProject = useCallback((project: Project | null) => {
     setShowSettingsDetail(false);
+    setMusicOpen(false);
     setSelectedProject(project);
     setSelectedWriting(null);
     setSelectedInteraction(null);
@@ -406,6 +408,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
   const handleSelectWriting = useCallback((writing: Writing | null) => {
     setShowSettingsDetail(false);
+    setMusicOpen(false);
     setSelectedWriting(writing);
     setSelectedProject(null);
     setSelectedInteraction(null);
@@ -418,6 +421,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
   const handleSelectInteraction = useCallback((interaction: Interaction | null) => {
     setShowSettingsDetail(false);
+    setMusicOpen(false);
     setSelectedInteraction(interaction);
     setSelectedProject(null);
     setSelectedWriting(null);
@@ -430,6 +434,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
   const handleSelectCategory = useCallback((category: IllustrationCategory | null) => {
     setShowSettingsDetail(false);
+    setMusicOpen(false);
     setSelectedCategory(category);
     setSelectedProject(null);
     setSelectedWriting(null);
@@ -440,6 +445,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
   const handleClearSelection = useCallback(() => {
     setShowSettingsDetail(false);
+    setMusicOpen(false);
     setSelectedProject(null);
     setSelectedWriting(null);
     setSelectedInteraction(null);
@@ -450,6 +456,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
 
   const handleTabChange = useCallback((tab: PortfolioTab) => {
     setShowSettingsDetail(false);
+    setMusicOpen(false);
     setActiveTab(tab);
     setSelectedProject(null);
     setSelectedWriting(null);
@@ -464,6 +471,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   }, [updateURL]);
 
   const openSettings = useCallback(() => {
+    setMusicOpen(false);
     setSelectedProject(null);
     setSelectedWriting(null);
     setSelectedInteraction(null);
@@ -504,6 +512,12 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     setRadialPinned(false);
     setShowMoreTabs(false);
   }, [clearRadialCloseTimer]);
+
+  const openMusicPopover = useCallback(() => {
+    setContactOpen(false);
+    setContactHovered(false);
+    setMusicOpen(true);
+  }, []);
 
   const scheduleRadialClose = useCallback(() => {
     if (!isDesktopHoverPointer() || radialPinned) return;
@@ -1498,9 +1512,15 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             {settingsTrigger}
           </div>
           <div className="flex h-10 items-center gap-3">
-            <div className="h-10 w-10 flex-shrink-0">
+            <button
+              type="button"
+              onClick={openMusicPopover}
+              aria-expanded={musicOpen}
+              aria-label="Open music details"
+              className="h-10 w-10 flex-shrink-0 rounded-full outline-none focus-visible:outline-none focus-visible:ring-0"
+            >
               <NowPlayingImage data={nowPlayingData} useAlbumArt />
-            </div>
+            </button>
             <div className={`min-w-0 transition-opacity duration-150 ${hasDetailContent ? 'pointer-events-none opacity-0' : 'opacity-100'}`}>
               {!hasDetailContent && (
                 <>
@@ -1527,6 +1547,83 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           </div>
         </div>
       </div>
+
+      <button
+        type="button"
+        aria-label="Close music details"
+        onClick={() => setMusicOpen(false)}
+        className={`fixed inset-0 z-[9998] bg-[#a3a3a3]/[0.33] backdrop-blur-[4px] transition-opacity duration-150 md:hidden ${
+          musicOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
+        }`}
+      />
+
+      <AnimatePresence initial={false}>
+        {musicOpen && (
+          <motion.div
+            className="fixed bottom-4 left-2 right-4 z-[9999] overflow-hidden bg-white/80 text-gray-900 backdrop-blur-2xl supports-[backdrop-filter]:bg-white/70 md:hidden"
+            initial={{ opacity: 0, y: 16, scale: 0.98, borderRadius: 26, boxShadow: contactMorphShadow }}
+            animate={{ opacity: 1, y: 0, scale: 1, borderRadius: 26, boxShadow: contactMorphShadow }}
+            exit={{ opacity: 0, y: 10, scale: 0.98 }}
+            transition={contactMorphSpring}
+            style={{ transformOrigin: '0% 100%' }}
+          >
+            <div className="flex items-start gap-4 px-5 pb-5 pt-4">
+              <div className="h-10 w-10 flex-shrink-0">
+                <NowPlayingImage data={nowPlayingData} useAlbumArt />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-medium uppercase tracking-[0.14em] text-gray-400">
+                  Music
+                </p>
+                {nowPlayingData?.isPlaying ? (
+                  <>
+                    {nowPlayingData.songUrl ? (
+                      <a
+                        href={nowPlayingData.songUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-1 block truncate text-base font-semibold leading-6 text-gray-950 transition-colors hover:text-gray-700"
+                      >
+                        {nowPlayingData.title}
+                      </a>
+                    ) : (
+                      <p className="mt-1 truncate text-base font-semibold leading-6 text-gray-950">
+                        {nowPlayingData.title}
+                      </p>
+                    )}
+                    <p className="truncate text-sm text-gray-500">{nowPlayingData.artist}</p>
+                    {nowPlayingData.album && (
+                      <p className="mt-2 truncate text-sm text-gray-400">{nowPlayingData.album}</p>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <p className="mt-1 text-base font-semibold leading-6 text-gray-950">Not listening right now</p>
+                    {nowPlayingData?.lastPlayed ? (
+                      <>
+                        <p className="truncate text-sm text-gray-500">{nowPlayingData.lastPlayed.title}</p>
+                        <p className="truncate text-sm text-gray-400">{nowPlayingData.lastPlayed.artist}</p>
+                      </>
+                    ) : (
+                      <p className="text-sm text-gray-400">check again shortly</p>
+                    )}
+                  </>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => setMusicOpen(false)}
+                aria-label="Close music details"
+                className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-full text-gray-400 outline-none transition-colors hover:text-gray-700 focus-visible:outline-none focus-visible:ring-0"
+              >
+                <svg width="14" height="14" viewBox="0 0 16 16" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true">
+                  <path d="M4 4l8 8M12 4l-8 8" />
+                </svg>
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <RadialToolkit
         anchor={radialAnchor}
@@ -1575,7 +1672,10 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         <motion.button
           layout
           type="button"
-          onClick={() => setContactOpen(true)}
+          onClick={() => {
+            setMusicOpen(false);
+            setContactOpen(true);
+          }}
           aria-expanded={contactVisible}
           aria-label={contactVisible ? 'Close contact card' : 'Open contact card'}
           className={`flex w-full items-center gap-3 text-left outline-none ${
