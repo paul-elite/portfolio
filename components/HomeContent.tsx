@@ -1164,12 +1164,12 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                     key={item.id}
                     type="button"
                     onClick={() => handleSelectInteraction(isSelected ? null : item)}
-                    className={`group block w-full py-3 text-left transition-opacity ${hasSelection && !isSelected ? 'opacity-30' : ''}`}
+                    className={`project-avatar-row group relative block w-full py-[var(--experience-row-padding)] text-left transition-all duration-[var(--experience-motion)] outline-none focus-visible:ring-1 focus-visible:ring-[var(--experience-accent)] ${hasSelection && !isSelected ? 'opacity-30' : ''}`}
                   >
-                    <h3 className="text-base font-medium text-gray-900 mb-0.5">
+                    <h3 className="mb-0.5 block text-sm font-normal text-[var(--experience-text)] transition-colors group-hover:text-[var(--experience-accent)]">
                       {item.title}
                     </h3>
-                    <p className="text-sm text-gray-400">
+                    <p className="block text-sm text-[var(--experience-muted)]">
                       {item.description}
                     </p>
                   </button>
@@ -1187,16 +1187,12 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                     <button
                       key={cat.key}
                       onClick={() => handleSelectCategory(isSelected ? null : cat.key)}
-                      className={`group block py-3 w-full text-left transition-opacity ${hasSelection && !isSelected ? 'opacity-30' : ''}`}
+                      className={`project-avatar-row group relative block w-full py-[var(--experience-row-padding)] text-left transition-all duration-[var(--experience-motion)] outline-none focus-visible:ring-1 focus-visible:ring-[var(--experience-accent)] ${hasSelection && !isSelected ? 'opacity-30' : ''}`}
                     >
-                      <h2 className={`text-base font-normal mb-0.5 transition-colors ${
-                        isSelected
-                          ? 'text-gray-900'
-                          : 'text-gray-900 group-hover:text-gray-600'
-                      }`}>
+                      <h2 className="mb-0.5 block text-sm font-normal text-[var(--experience-text)] transition-colors group-hover:text-[var(--experience-accent)]">
                         {cat.label}
                       </h2>
-                      <p className="text-sm text-gray-400">
+                      <p className="block text-sm text-[var(--experience-muted)]">
                         {count} {count === 1 ? 'item' : 'items'}
                       </p>
                     </button>
@@ -1224,35 +1220,36 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               };
 
               return (
-                <div className="space-y-2">
+                <div>
                   {sortedYears.map((year) => (
                     <div key={year}>
-                      {writingsByYear[year].map((item, index) => {
+                      {writingsByYear[year].map((item) => {
                         const isSelected = selectedWriting?.id === item.id;
 
                         return (
                           <button
                             key={item.id}
                             onClick={() => handleSelectWriting(isSelected ? null : item)}
-                            className={`group flex w-full flex-col sm:flex-row sm:items-baseline py-3 border-b border-gray-100 last:border-0 gap-1 sm:gap-0 text-left transition-opacity ${hasSelection && !isSelected ? 'opacity-30' : ''}`}
+                            className={`project-avatar-row group relative block w-full py-[var(--experience-row-padding)] text-left transition-all duration-[var(--experience-motion)] outline-none focus-visible:ring-1 focus-visible:ring-[var(--experience-accent)] ${hasSelection && !isSelected ? 'opacity-30' : ''}`}
                           >
-                            <span className="w-16 text-sm text-gray-300 flex-shrink-0 hidden sm:block">
-                              {index === 0 ? year : ''}
-                            </span>
-                            <div className="flex-1 flex items-center gap-2">
-                              <h3 className={`text-base font-medium transition-colors ${
-                                isSelected
-                                  ? 'text-gray-900'
-                                  : 'text-gray-900 group-hover:text-gray-600'
-                              }`}>
-                                {item.title}
-                              </h3>
-                              {isNew(item.date) && (
-                                <span className="text-xs text-pink-500 border border-pink-300 rounded-full px-2 py-0.5">New</span>
-                              )}
-                            </div>
-                            <span className="text-sm text-gray-300 flex-shrink-0 sm:ml-8">
-                              {item.date ? new Date(item.date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }).replace('/', '/') : ''}
+                            <span className="block min-w-0">
+                              <span className="mb-0.5 flex items-center gap-2">
+                                <h3 className="block text-sm font-normal text-[var(--experience-text)] transition-colors group-hover:text-[var(--experience-accent)]">
+                                  {item.title}
+                                </h3>
+                                {isNew(item.date) && (
+                                  <span className="rounded-full border border-[var(--experience-border)] px-2 py-0.5 text-xs text-[var(--experience-muted)]">New</span>
+                                )}
+                              </span>
+                              <span className="block text-sm text-[var(--experience-muted)]">
+                                {year}
+                                {item.date ? (
+                                  <>
+                                    <span className="mx-1">·</span>
+                                    {new Date(item.date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }).replace('/', '/')}
+                                  </>
+                                ) : null}
+                              </span>
                             </span>
                           </button>
                         );
