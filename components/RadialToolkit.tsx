@@ -529,7 +529,7 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
               style={{ marginLeft: -29, marginTop: -29, borderColor: activeAccentColor, color: activeAccentColor }}
             >
               <span className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
-                {activeItem?.icon}
+                {accentItem?.icon}
               </span>
             </motion.button>
 
