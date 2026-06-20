@@ -13,6 +13,16 @@ function asArray<T>(value: unknown, fallback: T[] = []): T[] {
   return Array.isArray(value) ? value as T[] : fallback;
 }
 
+function normalizeHexColor(value: unknown): string {
+  if (typeof value !== 'string') return '';
+
+  const color = value.trim();
+  if (!color) return '';
+
+  const prefixedColor = color.startsWith('#') ? color : `#${color}`;
+  return /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(prefixedColor) ? prefixedColor : '';
+}
+
 function normalizeNavigationItems(value: unknown): PortfolioNavigationItem[] {
   const rows = asArray<RecordLike>(value);
 
@@ -26,6 +36,7 @@ function normalizeNavigationItems(value: unknown): PortfolioNavigationItem[] {
         label: asString(item.label, target),
         target: target as PortfolioNavigationItem['target'],
         icon: asString(item.icon),
+        accentColor: normalizeHexColor(item.accentColor || item.accent_color),
         enabled: item.enabled !== false,
         order: typeof item.order === 'number' ? item.order : index,
       };

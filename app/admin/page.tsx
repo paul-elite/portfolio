@@ -79,6 +79,7 @@ interface NavigationItem {
   label: string;
   target: PortfolioTab;
   icon?: string;
+  accentColor?: string;
   enabled?: boolean;
   order?: number;
 }
@@ -702,6 +703,7 @@ export default function AdminPage() {
           label: 'New item',
           target: 'projects',
           icon: '',
+          accentColor: '#2388e8',
           enabled: true,
           order: prev.navigationItems.length,
         },
@@ -1311,6 +1313,23 @@ export default function AdminPage() {
                               onChange={(value) => updateNavigationItem(item.id, { label: value })}
                               required
                             />
+                            <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+                              <Input
+                                label="Radial Color Hex"
+                                placeholder="#2388e8"
+                                value={item.accentColor || ''}
+                                onChange={(value) => updateNavigationItem(item.id, { accentColor: value })}
+                                helpText="Used for the radial strip, ring, and hover accent."
+                              />
+                              <div className="flex h-[42px] items-center gap-2 rounded-xl bg-white px-3 text-sm text-gray-500">
+                                <span
+                                  className="h-5 w-5 rounded-full border border-gray-200"
+                                  style={{ backgroundColor: /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(item.accentColor || '') ? item.accentColor : '#e5e7eb' }}
+                                  aria-hidden="true"
+                                />
+                                Preview
+                              </div>
+                            </div>
                             <div className="space-y-1.5">
                               <label className="block text-sm font-medium text-gray-700">Opens Section</label>
                               <select

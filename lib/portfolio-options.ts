@@ -13,10 +13,10 @@ export const SECONDARY_PORTFOLIO_TABS: { key: PortfolioTab; label: string }[] = 
 ];
 
 export const DEFAULT_PORTFOLIO_NAVIGATION_ITEMS: PortfolioNavigationItem[] = [
-  { id: 'projects', label: 'Projects', target: 'projects', enabled: true, order: 0 },
-  { id: 'illustration', label: 'Illustration', target: 'illustration', enabled: true, order: 1 },
-  { id: 'writings', label: 'Writings', target: 'writings', enabled: true, order: 2 },
-  { id: 'interaction', label: 'Interaction', target: 'interaction', enabled: true, order: 3 },
+  { id: 'projects', label: 'Projects', target: 'projects', accentColor: '#2388e8', enabled: true, order: 0 },
+  { id: 'illustration', label: 'Illustration', target: 'illustration', accentColor: '#f97316', enabled: true, order: 1 },
+  { id: 'writings', label: 'Writings', target: 'writings', accentColor: '#8b5cf6', enabled: true, order: 2 },
+  { id: 'interaction', label: 'Interaction', target: 'interaction', accentColor: '#16a34a', enabled: true, order: 3 },
 ];
 
 export const ILLUSTRATION_CATEGORIES: { key: IllustrationCategory; label: string; symbol: string }[] = [

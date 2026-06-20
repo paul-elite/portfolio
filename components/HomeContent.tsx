@@ -617,6 +617,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       key: target,
       label: item.label,
       iconSrc: item.icon || '',
+      accentColor: item.accentColor || '',
     };
   });
   const activeNavigationItem = navigationItems.find((item) => item.key === activeTab) || navigationItems[0];
@@ -653,6 +654,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
         />
       ),
       iconSrc: item.iconSrc,
+      accentColor: item.accentColor,
       active: activeTab === item.key,
       onSelect: () => handleTabChange(item.key),
     };

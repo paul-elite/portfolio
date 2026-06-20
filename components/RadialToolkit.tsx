@@ -9,6 +9,7 @@ export interface RadialToolkitItem {
   shortcut?: string;
   icon: ReactNode;
   iconSrc?: string;
+  accentColor?: string;
   href?: string;
   active?: boolean;
   onSelect: () => void;
@@ -265,6 +266,16 @@ function isSvgSource(src: string) {
   return path.endsWith('.svg') || src.startsWith('data:image/svg+xml');
 }
 
+function normalizeHexAccentColor(color?: string) {
+  if (!color) return '';
+
+  const cleanColor = color.trim();
+  if (!cleanColor) return '';
+
+  const prefixedColor = cleanColor.startsWith('#') ? cleanColor : `#${cleanColor}`;
+  return /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(prefixedColor) ? prefixedColor : '';
+}
+
 function normalizeSvgAccentColor(rawColor: string) {
   const color = rawColor.trim().replace(/&quot;/g, '').replace(/['"]/g, '');
   const lowerColor = color.toLowerCase();
@@ -408,10 +419,13 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
   const activeIndex = Math.max(0, items.findIndex((item) => item.active));
   const activeItem = items[activeIndex];
   const hoveredItem = items.find((item) => item.id === hoveredItemId);
+  const hoveredIndex = hoveredItem ? items.findIndex((item) => item.id === hoveredItem.id) : -1;
+  const accentIndex = hoveredIndex >= 0 ? hoveredIndex : activeIndex;
   const accentItem = hoveredItem || activeItem;
   const [activeAccentColor, setActiveAccentColor] = useState(fallbackAccentColor);
+  const configuredAccentColor = normalizeHexAccentColor(accentItem?.accentColor);
   const accentIconSrc = accentItem?.iconSrc || '';
-  const activeAngle = layouts[activeIndex]?.angle ?? -90;
+  const accentAngle = layouts[accentIndex]?.angle ?? layouts[activeIndex]?.angle ?? -90;
   const activeArcLength = Math.max(24, Math.min(54, (360 / Math.max(1, items.length) - 18) * activeArcScale));
 
   const transition = reduceMotion
@@ -422,6 +436,11 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
     let cancelled = false;
 
     async function updateAccentColor() {
+      if (configuredAccentColor) {
+        setActiveAccentColor(configuredAccentColor);
+        return;
+      }
+
       if (!accentIconSrc || !isSvgSource(accentIconSrc)) {
         setActiveAccentColor(fallbackAccentColor);
         return;
@@ -442,7 +461,7 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
     return () => {
       cancelled = true;
     };
-  }, [accentIconSrc]);
+  }, [accentIconSrc, configuredAccentColor]);
 
   return (
     <AnimatePresence>
@@ -489,7 +508,7 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
             <motion.div
               className="absolute left-1/2 top-1/2 rounded-full"
               initial={{ scale: 0.35, opacity: 0, rotate: -82 }}
-              animate={{ scale: 1, opacity: 1, rotate: getConicAngle(activeAngle) - activeArcLength / 2 }}
+              animate={{ scale: 1, opacity: 1, rotate: getConicAngle(accentAngle) - activeArcLength / 2 }}
               exit={{ scale: 0.55, opacity: 0, rotate: -55 }}
               transition={transition}
               style={{

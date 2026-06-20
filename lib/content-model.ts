@@ -52,6 +52,7 @@ export interface PortfolioNavigationItem {
   label: string;
   target: PortfolioNavTarget;
   icon?: string;
+  accentColor?: string;
   enabled?: boolean;
   order?: number;
 }
