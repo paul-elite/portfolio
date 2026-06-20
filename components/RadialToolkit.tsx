@@ -460,7 +460,7 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
                     role="menuitem"
                     aria-label={item.label}
                     onClick={item.onSelect}
-                    className="absolute left-0 top-0 flex h-[42px] items-center justify-between gap-2 whitespace-nowrap rounded-full bg-[#f7f7f7]/95 text-sm font-normal text-gray-800 outline-none transition-colors hover:bg-[#f7f7f7] hover:text-gray-950 focus-visible:ring-2 focus-visible:ring-[#2388e8]/40"
+                    className="absolute left-0 top-0 flex h-[42px] items-center justify-between gap-2 whitespace-nowrap rounded-full bg-[#f7f7f7]/95 text-sm outline-none transition-colors hover:bg-[#f7f7f7] focus-visible:ring-2 focus-visible:ring-[#2388e8]/40"
                     style={{
                       width: itemWidth,
                       marginLeft: iconOnRight ? -itemWidth + iconAnchorInset : -iconAnchorInset,
@@ -478,7 +478,9 @@ export default function RadialToolkit({ anchor, items, open, onClose, onMouseEnt
                         {item.icon}
                       </span>
                     )}
-                    <span className={`min-w-0 flex-1 truncate ${iconOnRight ? 'text-right' : 'text-left'}`}>
+                    <span className={`min-w-0 flex-1 truncate transition-colors ${
+                      active ? 'font-semibold text-gray-950' : 'font-normal text-gray-400'
+                    } ${iconOnRight ? 'text-right' : 'text-left'}`}>
                       {item.label}
                     </span>
                     {iconOnRight && (
