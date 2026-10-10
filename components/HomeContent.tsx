@@ -80,9 +80,9 @@ const contactMorphSpring = {
 };
 
 const contactMorphShadow = [
-  '0px 1px 1px -1px rgba(0, 0, 0, 0.1)',
-  '0px 2px 2px -2px rgba(0, 0, 0, 0.08)',
-  '0px 4px 4px -2px rgba(0, 0, 0, 0.04)',
+  '0px 0px 0px 0.5px rgba(15, 18, 26, 0.08)',
+  '0px 1px 2px 0px rgba(15, 18, 26, 0.06)',
+  '0px 12px 32px -10px rgba(15, 18, 26, 0.14)',
 ].join(', ');
 
 const detailTransition = {
@@ -703,19 +703,19 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
       ) : selectedProject.caseStudy ? (
         <div className="space-y-8">
           <section>
-            <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Overview</h3>
+            <h3 className="detail-label mb-1.5">Overview</h3>
             <p className="text-sm text-gray-600 leading-relaxed">{selectedProject.caseStudy.overview}</p>
           </section>
           <section>
-            <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Challenge</h3>
+            <h3 className="detail-label mb-1.5">Challenge</h3>
             <p className="text-sm text-gray-600 leading-relaxed">{selectedProject.caseStudy.challenge}</p>
           </section>
           <section>
-            <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Approach</h3>
+            <h3 className="detail-label mb-1.5">Approach</h3>
             <p className="text-sm text-gray-600 leading-relaxed">{selectedProject.caseStudy.approach}</p>
           </section>
           <section>
-            <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Outcome</h3>
+            <h3 className="detail-label mb-1.5">Outcome</h3>
             <p className="text-sm text-gray-600 leading-relaxed">{selectedProject.caseStudy.outcome}</p>
           </section>
         </div>
@@ -728,7 +728,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           href={selectedProject.link}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm text-gray-400 hover:text-gray-900 transition-colors mt-8 inline-block"
+          className="detail-link mt-8 inline-flex"
         >
           View Project →
         </a>
@@ -777,7 +777,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           href={selectedWriting.link}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm text-gray-400 hover:text-gray-900 transition-colors mt-8 inline-block"
+          className="detail-link mt-8 inline-flex"
         >
           Read More →
         </a>
@@ -796,7 +796,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           href={selectedInteraction.link}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm text-gray-400 hover:text-gray-900 transition-colors mt-8 inline-block"
+          className="detail-link mt-8 inline-flex"
         >
           View Interaction →
         </a>
@@ -1328,19 +1328,19 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               ) : selectedProject.caseStudy ? (
                 <div className="space-y-8">
                   <section>
-                    <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Overview</h3>
+                    <h3 className="detail-label mb-1.5">Overview</h3>
                     <p className="text-sm text-gray-600 leading-relaxed">{selectedProject.caseStudy.overview}</p>
                   </section>
                   <section>
-                    <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Challenge</h3>
+                    <h3 className="detail-label mb-1.5">Challenge</h3>
                     <p className="text-sm text-gray-600 leading-relaxed">{selectedProject.caseStudy.challenge}</p>
                   </section>
                   <section>
-                    <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Approach</h3>
+                    <h3 className="detail-label mb-1.5">Approach</h3>
                     <p className="text-sm text-gray-600 leading-relaxed">{selectedProject.caseStudy.approach}</p>
                   </section>
                   <section>
-                    <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Outcome</h3>
+                    <h3 className="detail-label mb-1.5">Outcome</h3>
                     <p className="text-sm text-gray-600 leading-relaxed">{selectedProject.caseStudy.outcome}</p>
                   </section>
                 </div>
@@ -1354,7 +1354,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   href={selectedProject.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-gray-400 hover:text-gray-900 transition-colors mt-8 inline-block"
+                  className="detail-link mt-8 inline-flex"
                 >
                   View Project →
                 </a>
@@ -1402,7 +1402,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   href={selectedWriting.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-gray-400 hover:text-gray-900 transition-colors mt-8 inline-block"
+                  className="detail-link mt-8 inline-flex"
                 >
                   Read More →
                 </a>
@@ -1418,7 +1418,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   href={selectedInteraction.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-gray-400 hover:text-gray-900 transition-colors mt-8 inline-block"
+                  className="detail-link mt-8 inline-flex"
                 >
                   View Interaction →
                 </a>
@@ -1584,7 +1584,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                 <NowPlayingImage data={nowPlayingData} useAlbumArt />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium uppercase tracking-[0.14em] text-gray-400">
+                <p className="text-sm font-medium text-gray-400">
                   Music
                 </p>
                 {nowPlayingData?.isPlaying ? (
@@ -1738,7 +1738,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                       setContactOpen(false);
                       setContactHovered(false);
                     }}
-                    className="flex items-center gap-3 border-b border-gray-200 py-3 text-base font-normal text-gray-800 transition-colors last:border-b-0 hover:text-gray-950"
+                    className="contact-row flex items-center gap-3 border-b py-3 text-base font-normal transition-colors last:border-b-0"
                   >
                     <ContactIcon name={item.name} />
                     <span>{item.label}</span>
@@ -1750,7 +1750,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                     setContactOpen(false);
                     setContactHovered(false);
                   }}
-                  className="mt-2 flex items-center justify-center gap-3 rounded-full bg-black px-4 py-3 text-base font-normal text-white transition-colors hover:bg-gray-800"
+                  className="contact-email mt-3 flex items-center justify-center gap-2.5 rounded-full px-4 py-3 text-base font-medium transition-colors"
                 >
                   <ContactIcon name="email" />
                   <span>send me an email</span>
