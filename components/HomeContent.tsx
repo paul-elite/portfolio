@@ -175,7 +175,11 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   const router = useRouter();
   const searchParams = useSearchParams();
   const { preferences } = usePreferences();
-  const [activeTab, setActiveTab] = useState<PortfolioTab>('projects');
+  // ?view= opens a section directly, used by links from the home reel
+  const [activeTab, setActiveTab] = useState<PortfolioTab>(() => {
+    const view = searchParams.get('view');
+    return view === 'writings' || view === 'illustration' || view === 'interaction' ? view : 'projects';
+  });
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedWriting, setSelectedWriting] = useState<Writing | null>(null);
@@ -389,7 +393,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
     if (nextSearch === currentSearch) return;
 
     pendingLocalSearchRef.current = nextSearch;
-    const newURL = nextSearch ? `?${nextSearch}` : '/';
+    // Stay on whichever page hosts this view (/explore), rather than jumping home
+    const newURL = nextSearch ? `?${nextSearch}` : window.location.pathname;
     router.replace(newURL, { scroll: false });
   }, [router, searchParams]);
 
