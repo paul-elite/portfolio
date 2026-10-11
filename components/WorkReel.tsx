@@ -16,6 +16,11 @@ interface WorkReelProps {
 const COLUMN = 625;
 const GUTTER = `max(1.5rem, calc((100vw - ${COLUMN}px) / 2))`;
 
+// Stand-ins for the empty reel: no images, so each device shows its placeholder screen artwork
+const PLACEHOLDER_PROJECTS: Project[] = Array.from({ length: 6 }, (_, i) => ({
+  id: `placeholder-${i}`, slug: `placeholder-${i}`, title: '', description: '',
+}));
+
 const projectImage = (p: Project) => p.preview || p.previewImages?.[0] || p.avatar || '';
 
 // Ayomide-style inline link: same size and colour as the text, dotted underline
@@ -191,6 +196,22 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
           </div>
         </div>
       </header>
+
+      {projects.length === 0 && (
+        // Before any work exists, show the placeholder devices (decorative, not linked)
+        <section aria-hidden="true" className="flex-1 md:min-h-0 flex items-end pt-8 pb-10 md:pb-14">
+          <div
+            className="w-full h-[min(360px,52vw)] md:h-[min(460px,36vw)] md:max-h-full flex items-end gap-14 md:gap-20 overflow-x-auto overflow-y-hidden snap-x snap-mandatory md:snap-none scrollbar-none overscroll-x-contain select-none"
+            style={{ paddingInline: GUTTER, scrollPaddingInline: GUTTER }}
+          >
+            {PLACEHOLDER_PROJECTS.map((p, i) => (
+              <div key={p.slug} className="shrink-0 h-full snap-start flex items-end">
+                <DeviceMock project={p} index={i} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {projects.length > 0 && (
         <section aria-label="Work" className="flex-1 md:min-h-0 flex items-end pt-8 pb-10 md:pb-14">
