@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import OptimizedImage from '@/components/OptimizedImage';
+import { placeholderScreen } from '@/lib/mockups';
 import ContentBlocks from '@/components/content/ContentBlocks';
 import DetailPageTransition from '@/components/experience/DetailPageTransition';
 import type { NavItem, Project } from '@/lib/content-model';
@@ -62,13 +63,14 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
               </div>
             </div>
 
-            {/* Mobile Mockup - only show if preview exists */}
-            {project.preview && (
+            {/* Mobile Mockup - the project's preview, or a placeholder screen */}
+            {(
               <div className="mb-8 md:mb-16 mt-6 md:mt-0">
                 <div className="relative w-full max-w-[266px] mx-auto md:mx-0 aspect-[266/560] bg-gray-900 rounded-[48px] p-3 shadow-xl">
                   <div className="w-full h-full bg-gray-100 rounded-[38px] overflow-hidden flex items-center justify-center relative">
                     <OptimizedImage
-                      src={project.preview}
+                      src={project.preview || placeholderScreen(project.slug || project.id)}
+                      unoptimized={!project.preview}
                       alt={project.title}
                       fill
                       className="object-cover"

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import type { Project, SiteConfig } from '@/lib/content-model';
+import { reelPlaceholder } from '@/lib/mockups';
 
 interface WorkReelProps {
   config: SiteConfig;
@@ -14,8 +15,6 @@ interface WorkReelProps {
 // Text column width and its left edge; the reel starts on the same edge
 const COLUMN = 625;
 const GUTTER = `max(1.5rem, calc((100vw - ${COLUMN}px) / 2))`;
-// Screen tints for projects without an image yet, so a device never shows a blank screen
-const TINTS = ['#e8eefc', '#fdeee4', '#e6f6ef', '#f3e9fb', '#fdf3d8', '#e4f3f8'];
 
 const projectImage = (p: Project) => p.preview || p.previewImages?.[0] || p.avatar || '';
 
@@ -233,7 +232,7 @@ function DeviceMock({ project, index }: { project: Project; index: number }) {
   const [aspect, setAspect] = useState<number | null>(null);
   const device: Device = aspect ? (aspect < 0.85 ? 'phone' : 'laptop') : index % 2 === 0 ? 'laptop' : 'phone';
   const lift = 'transition-transform duration-500 ease-out group-hover:-translate-y-2 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0';
-  const screen = <Screen src={src} title={project.title} index={index} device={device} onAspect={setAspect} />;
+  const screen = <Screen src={src} index={index} device={device} onAspect={setAspect} />;
 
   if (device === 'phone') {
     return (
@@ -261,16 +260,16 @@ function DeviceMock({ project, index }: { project: Project; index: number }) {
   );
 }
 
-// The device screen: the project image when it loads, otherwise a quiet placeholder UI
-function Screen({ src, title, index, device, onAspect }: {
-  src: string; title: string; index: number; device: Device; onAspect: (a: number) => void;
+// The device screen: the project image when it loads, otherwise placeholder screen artwork
+function Screen({ src, index, device, onAspect }: {
+  src: string; index: number; device: Device; onAspect: (a: number) => void;
 }) {
   const [state, setState] = useState<'loading' | 'loaded' | 'failed'>(src ? 'loading' : 'failed');
   const wrapRef = useRef<HTMLDivElement>(null);
   // Images can finish before hydration, when onLoad/onError aren't attached yet
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
-      const img = wrapRef.current?.querySelector('img');
+      const img = wrapRef.current?.querySelector<HTMLImageElement>('img[data-project-image]');
       if (!img?.complete) return;
       if (img.naturalWidth > 0) {
         setState('loaded');
@@ -285,25 +284,21 @@ function Screen({ src, title, index, device, onAspect }: {
   return (
     <div ref={wrapRef} className="absolute inset-0">
       {state !== 'loaded' && (
-        <div className="absolute inset-0 flex flex-col" style={{ background: TINTS[index % TINTS.length] }}>
-          {device === 'laptop' ? (
-            <div className="h-[7%] min-h-[14px] flex items-center gap-[1%] px-[2.4%] bg-white/55" aria-hidden="true">
-              <span className="w-[1.1%] aspect-square rounded-full bg-[#ff5f57]" />
-              <span className="w-[1.1%] aspect-square rounded-full bg-[#febc2e]" />
-              <span className="w-[1.1%] aspect-square rounded-full bg-[#28c840]" />
-            </div>
-          ) : (
-            <div className="h-[9%]" aria-hidden="true" />
-          )}
-          <div className="flex-1 min-w-0 grid place-items-center p-[8%] text-center">
-            <span className={`font-medium text-[#2a2a2a]/70 tracking-[-0.01em] ${device === 'laptop' ? 'text-[clamp(13px,1.9vh,18px)]' : 'text-[clamp(9px,1.5vh,15px)] leading-tight break-words'}`}>{title}</span>
-          </div>
-        </div>
+        // Placeholder screen artwork until the project has an image of its own
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={reelPlaceholder(device, index)}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          className="absolute inset-0 w-full h-full object-cover object-top"
+        />
       )}
       {state !== 'failed' && src && (
         <Image
           src={src}
           alt=""
+          data-project-image
           fill
           sizes={device === 'laptop' ? '(max-width: 768px) 80vw, 720px' : '(max-width: 768px) 40vw, 260px'}
           priority={index < 2}

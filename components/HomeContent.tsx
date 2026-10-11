@@ -29,6 +29,7 @@ import {
   PortfolioHomeFrame,
   PortfolioSidebar,
 } from './experience/PortfolioLayout';
+import { placeholderMockups, projectImageList } from '@/lib/mockups';
 
 function getYouTubeId(url: string) {
   const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
@@ -38,6 +39,16 @@ function getYouTubeId(url: string) {
 function isSvgImage(src: string) {
   const [path] = src.toLowerCase().split('?');
   return path.endsWith('.svg') || src.startsWith('data:image/svg+xml');
+}
+
+function ProjectMockupHero({ project }: { project: Project }) {
+  const [laptop, phone] = placeholderMockups(project.slug || project.id);
+  return (
+    <figure className="project-mockup-hero mb-8" aria-hidden="true">
+      <Image src={laptop} alt="" width={1200} height={760} unoptimized className="project-mockup-hero__laptop" />
+      <Image src={phone} alt="" width={420} height={760} unoptimized className="project-mockup-hero__phone" />
+    </figure>
+  );
 }
 
 function AvatarImage({
@@ -559,15 +570,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
   // Get preview images from the hovered project
   const projectImages = useMemo(() => {
     if (!hoveredProject) return [];
-    if (hoveredProject.previewImages && hoveredProject.previewImages.length > 0) {
-      return hoveredProject.previewImages;
-    }
-    if (hoveredProject.blocks) {
-      return hoveredProject.blocks
-        .filter((block) => block.type === 'image')
-        .map((block) => block.content);
-    }
-    return [];
+    const own = projectImageList(hoveredProject);
+    return own.length > 0 ? own : placeholderMockups(hoveredProject.slug || hoveredProject.id);
   }, [hoveredProject]);
 
   // Cycle through project images when hovering (not when selected)
@@ -700,6 +704,8 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
           {selectedProject.role && <span>{selectedProject.role}</span>}
         </div>
       </div>
+
+      {projectImageList(selectedProject).length === 0 && <ProjectMockupHero project={selectedProject} />}
 
       {selectedProject.blocks && selectedProject.blocks.length > 0 ? (
         <div className="prose prose-gray max-w-none">
@@ -1326,6 +1332,10 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               </div>
 
               {/* Project Content */}
+              {projectImageList(selectedProject).length === 0 && (
+                <ProjectMockupHero project={selectedProject} />
+              )}
+
               {selectedProject.blocks && selectedProject.blocks.length > 0 ? (
                 <div className="prose prose-gray max-w-none">
                   <ContentBlocks blocks={selectedProject.blocks} />
@@ -1774,6 +1784,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               key={projectImages[previewImageIndex]}
               src={projectImages[previewImageIndex % projectImages.length]}
               alt={hoveredProject.title}
+              unoptimized={isSvgImage(projectImages[previewImageIndex % projectImages.length])}
               fill
               className="object-contain"
               sizes="72vw"

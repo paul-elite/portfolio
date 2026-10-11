@@ -714,3 +714,31 @@ body {
 .portfolio-home .prose figcaption {
   color: var(--experience-muted) !important;
 }
+
+/* Placeholder device mockups for projects without their own images */
+.project-mockup-hero {
+  position: relative;
+  aspect-ratio: 1200 / 820;
+  border-radius: 18px;
+  background:
+    radial-gradient(120% 90% at 30% 0%, var(--experience-card) 0%, transparent 60%),
+    var(--experience-surface);
+  box-shadow: inset 0 0 0 0.5px var(--experience-border);
+  overflow: hidden;
+}
+
+.project-mockup-hero__laptop {
+  position: absolute;
+  left: -2%;
+  top: 6%;
+  width: 92%;
+  height: auto;
+}
+
+.project-mockup-hero__phone {
+  position: absolute;
+  right: 3%;
+  bottom: -2%;
+  width: 30%;
+  height: auto;
+}
