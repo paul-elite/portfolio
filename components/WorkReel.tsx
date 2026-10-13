@@ -57,6 +57,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
   const [tab, setTab] = useState(0);
   const [tabFade, setTabFade] = useState(false);
   const [tabbed, setTabbed] = useState(false);
+  const [more, setMore] = useState(false);
   const section = sections[tab] ?? sections[0];
   const projects = section.items;
   const hasItems = projects.length > 0;
@@ -96,14 +97,18 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
   const measure = useCallback(() => {
     const reel = reelRef.current;
     if (!reel || projects.length === 0) return;
-    const anchorX = (columnRef.current?.getBoundingClientRect().left ?? 0) + 80;
-    const atEnd = reel.scrollLeft + reel.clientWidth >= reel.scrollWidth - 4;
+    // Narrow screens centre the project in focus; wider ones line it up with the text column
+    const centred = window.matchMedia('(max-width: 767px)').matches;
+    const reelBox = reel.getBoundingClientRect();
+    const anchorX = centred ? reelBox.left + reelBox.width / 2 : (columnRef.current?.getBoundingClientRect().left ?? 0) + 80;
+    const atEnd = !centred && reel.scrollLeft + reel.clientWidth >= reel.scrollWidth - 4;
     let best = 0;
     let bestDistance = Infinity;
     itemRefs.current.forEach((el, i) => {
       if (!el) return;
       const r = el.getBoundingClientRect();
-      const distance = atEnd && i === projects.length - 1 ? -1 : Math.abs(r.left + Math.min(r.width, 200) / 2 - anchorX);
+      const distance = atEnd && i === projects.length - 1 ? -1
+        : Math.abs((centred ? r.left + r.width / 2 : r.left + Math.min(r.width, 200) / 2) - anchorX);
       if (distance < bestDistance) {
         bestDistance = distance;
         best = i;
@@ -125,27 +130,74 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
       thumbLeft.set(`${max > 0 ? (reel.scrollLeft / max) * (100 - share) : 0}%`);
       return max > 0;
     };
+    // On narrow screens the reel's ends pad out so the first and last projects can sit in the middle
+    const placePadding = () => {
+      const items = itemRefs.current.filter(Boolean) as HTMLElement[];
+      if (!window.matchMedia('(max-width: 767px)').matches || items.length === 0) {
+        reel.style.paddingLeft = '';
+        reel.style.paddingRight = '';
+        return;
+      }
+      reel.style.paddingLeft = `${Math.max(24, (reel.clientWidth - items[0].offsetWidth) / 2)}px`;
+      reel.style.paddingRight = `${Math.max(24, (reel.clientWidth - items[items.length - 1].offsetWidth) / 2)}px`;
+    };
+    placePadding();
     const onResize = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(measure);
+      placePadding();
       placeThumb();
+    };
+    // Soft snapping on narrow screens: once a swipe's momentum ends, glide the nearest project to the middle
+    let settle: ReturnType<typeof setTimeout> | undefined;
+    let glide: { stop: () => void } | undefined;
+    let touching = false;
+    const snapToNearest = () => {
+      if (touching || !window.matchMedia('(max-width: 767px)').matches) return;
+      const box = reel.getBoundingClientRect();
+      const middle = box.left + box.width / 2;
+      const max = reel.scrollWidth - reel.clientWidth;
+      let target = reel.scrollLeft;
+      let best = Infinity;
+      itemRefs.current.forEach(el => {
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        const to = Math.min(max, Math.max(0, reel.scrollLeft + r.left + r.width / 2 - middle));
+        if (Math.abs(to - reel.scrollLeft) < best) { best = Math.abs(to - reel.scrollLeft); target = to; }
+      });
+      if (best < 1) return;
+      glide = animate(reel.scrollLeft, target, {
+        type: 'spring', visualDuration: 0.55, bounce: 0,
+        onUpdate: v => { reel.scrollLeft = v; },
+      });
     };
     const onScroll = () => {
       onResize();
+      clearTimeout(settle);
+      settle = setTimeout(snapToNearest, 120);
       if (!placeThumb()) return;
       animate(barOpacity, 1, { duration: 0.15 });
       clearTimeout(hide);
       hide = setTimeout(() => animate(barOpacity, 0, { duration: 0.4 }), 700);
     };
+    const onTouchStart = () => { touching = true; glide?.stop(); clearTimeout(settle); };
+    const onTouchEnd = () => { touching = false; clearTimeout(settle); settle = setTimeout(snapToNearest, 120); };
     reel.addEventListener('scroll', onScroll, { passive: true });
+    reel.addEventListener('touchstart', onTouchStart, { passive: true });
+    reel.addEventListener('touchend', onTouchEnd, { passive: true });
     window.addEventListener('resize', onResize);
     return () => {
       cancelAnimationFrame(frame);
       clearTimeout(hide);
+      clearTimeout(settle);
+      glide?.stop();
       reel.removeEventListener('scroll', onScroll);
+      reel.removeEventListener('touchstart', onTouchStart);
+      reel.removeEventListener('touchend', onTouchEnd);
       window.removeEventListener('resize', onResize);
     };
-  }, [measure, thumbLeft, thumbWidth, barOpacity]);
+    // Re-run per tab: the items, and so the end padding, change
+  }, [measure, thumbLeft, thumbWidth, barOpacity, section.id]);
 
   // On desktop, an ordinary vertical wheel or trackpad swipe moves the reel sideways
   useEffect(() => {
@@ -169,8 +221,12 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
     const el = itemRefs.current[i];
     const reel = reelRef.current;
     if (!el || !reel) return;
-    const edge = columnRef.current?.getBoundingClientRect().left ?? 0;
-    reel.scrollTo({ left: reel.scrollLeft + el.getBoundingClientRect().left - edge, behavior: reduceMotion ? 'auto' : 'smooth' });
+    const r = el.getBoundingClientRect();
+    const box = reel.getBoundingClientRect();
+    const offset = window.matchMedia('(max-width: 767px)').matches
+      ? r.left + r.width / 2 - (box.left + box.width / 2)
+      : r.left - (columnRef.current?.getBoundingClientRect().left ?? 0);
+    reel.scrollTo({ left: reel.scrollLeft + offset, behavior: reduceMotion ? 'auto' : 'smooth' });
   };
 
   // Zoom a device out of the reel, from exactly where it sits
@@ -244,18 +300,13 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
   ].filter(Boolean) as { label: string; href: string }[];
   const bio = config.bio || config.title;
 
-  // Title swap and counter roll; `d` is the direction the reel moved
+  // Title swap; `d` is the direction the reel moved
   const swap = {
     enter: (d: number) => (reduceMotion ? { opacity: 0 } : { opacity: 0, y: d * 8, filter: 'blur(3px)' }),
     center: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.38, ease: EASE_OUT } },
     exit: (d: number) => (reduceMotion
       ? { opacity: 0, transition: { duration: 0.15 } }
       : { opacity: 0, y: d * -8, filter: 'blur(3px)', transition: { duration: 0.2, ease: EASE_OUT } }),
-  };
-  const roll = {
-    enter: (d: number) => ({ opacity: 0, y: reduceMotion ? 0 : d * 10 }),
-    center: { opacity: 1, y: 0, transition: { duration: 0.3, ease: EASE_OUT } },
-    exit: (d: number) => ({ opacity: 0, y: reduceMotion ? 0 : d * -10, transition: { duration: 0.2, ease: EASE_OUT } }),
   };
 
   return (
@@ -267,17 +318,37 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
       transition={{ duration: DEPART_MS / 1000, ease: EASE_OUT }}
     >
       <motion.header
-        className="w-full max-w-[625px] mx-auto px-6 md:px-0 pt-12 md:pt-[72px]"
+        className="w-full max-w-[625px] mx-auto px-6 md:px-0 pt-20 md:pt-28"
         animate={reduceMotion ? { opacity: dimmed ? 0 : 1 } : { opacity: dimmed ? 0 : 1, scale: dimmed ? 0.985 : 1 }}
         transition={{ duration: dimmed ? 0.25 : 0.45, delay: dimmed ? 0 : 0.08, ease: EASE_OUT }}
         aria-hidden={zoom ? true : undefined}
         inert={zoom !== null}
       >
         <div ref={columnRef} className="grid gap-6 page-in">
-          {/* The name above a single paragraph: bio, then where to find more */}
-          <div className="grid gap-3">
-            <h1 className="text-[22px] leading-7 font-semibold tracking-[-0.025em] text-[#1a1a1a]">{config.name}</h1>
-            <p>
+          {/* The name at the top left; More, at the other end, opens the intro paragraph */}
+          <div>
+            <div className="flex items-baseline justify-between gap-4">
+              <h1 className="text-[22px] leading-7 font-semibold tracking-[-0.025em] text-[#1a1a1a]">{config.name}</h1>
+              <button
+                type="button"
+                onClick={() => setMore(m => !m)}
+                aria-expanded={more}
+                aria-controls="intro-more"
+                className="font-medium text-[#8d8d8d] hover:text-[#2a2a2a] focus-visible:outline-none focus-visible:text-[#2a2a2a] transition-colors"
+              >
+                {more ? 'Less' : 'More'}
+              </button>
+            </div>
+            <AnimatePresence initial={false}>
+              {more && (
+                <motion.div
+                  id="intro-more"
+                  className="overflow-hidden"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1, transition: { height: { type: 'spring', visualDuration: 0.4, bounce: 0 }, opacity: { duration: 0.3, delay: 0.05 } } }}
+                  exit={{ height: 0, opacity: 0, transition: { height: { type: 'spring', visualDuration: 0.3, bounce: 0 }, opacity: { duration: 0.15 } } }}
+                >
+            <p className="pt-3">
               {bio ? `${bio} ` : ''}You can browse my{' '}
               <Link href="/explore?view=writings" className={inlineLink}>writing</Link>,{' '}
               <Link href="/explore?view=illustration" className={inlineLink}>illustration</Link> and{' '}
@@ -301,6 +372,9 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
               )}
               .
             </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* The project at the column edge; announced politely as the reel moves */}
@@ -327,25 +401,6 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                   </button>
                 ))}
               </div>
-              {projects.length > 1 && (
-                <p className="relative text-[13px] font-[450] text-[#8d8d8d] tabular-nums" aria-hidden="true">
-                  {/* The number rolls the way the reel moved */}
-                  <AnimatePresence mode="popLayout" initial={false} custom={dir}>
-                    <motion.span
-                      key={active}
-                      custom={dir}
-                      className="inline-block"
-                      variants={roll}
-                      initial="enter"
-                      animate="center"
-                      exit="exit"
-                    >
-                      {active + 1}
-                    </motion.span>
-                  </AnimatePresence>
-                  {' '}/ {projects.length}
-                </p>
-              )}
             </div>
             {/* Old and new titles cross over instead of taking turns */}
             <div className="relative mt-4 min-h-6" aria-live="polite" aria-atomic="true">
@@ -379,11 +434,11 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
         // Before any work exists, show the placeholder devices (decorative, not linked)
         <section aria-hidden="true" className="flex-1 md:min-h-0 flex items-end pt-8 pb-10 md:pb-14">
           <div
-            className="w-full h-[min(540px,78vw)] md:h-[min(460px,36vw)] md:max-h-full flex items-end gap-4 md:gap-20 overflow-x-auto overflow-y-hidden snap-x snap-mandatory md:snap-none hide-scrollbar overscroll-x-contain select-none"
+            className="w-full h-[min(700px,92vw)] md:h-[min(460px,36vw)] md:max-h-full flex items-end gap-12 overflow-x-auto overflow-y-hidden hide-scrollbar overscroll-x-contain select-none"
             style={{ paddingInline: GUTTER, scrollPaddingInline: GUTTER }}
           >
             {PLACEHOLDER_PROJECTS.map((p, i) => (
-              <div key={p.slug} className="shrink-0 h-full w-[calc(100vw-72px)] md:w-auto snap-start flex items-end">
+              <div key={p.slug} className="shrink-0 h-full snap-start flex items-end">
                 <DeviceMock project={p} index={i} />
               </div>
             ))}
@@ -407,7 +462,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
             tabIndex={0}
             aria-label="Projects. Use the left and right arrow keys to move through them."
             onKeyDown={onReelKey}
-            className="page-in page-in-late w-full h-[min(540px,78vw)] md:h-[min(460px,36vw)] md:max-h-full flex items-end gap-4 md:gap-20 overflow-x-auto overflow-y-hidden snap-x snap-mandatory md:snap-none hide-scrollbar overscroll-x-contain focus-visible:outline-none"
+            className="page-in page-in-late w-full h-[min(700px,92vw)] md:h-[min(460px,36vw)] md:max-h-full flex items-end gap-12 overflow-x-auto overflow-y-hidden hide-scrollbar overscroll-x-contain focus-visible:outline-none"
             // Same left edge as the text column, for layout and for snap points
             style={{ paddingInline: GUTTER, scrollPaddingInline: GUTTER }}
           >
@@ -427,7 +482,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                   e.preventDefault();
                   openAt(i);
                 }}
-                className={`${tabbed ? 'page-in ' : ''}shrink-0 h-full w-[calc(100vw-72px)] md:w-auto snap-start flex items-end cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[#2a2a2a] rounded-lg ${zoom?.index === i ? 'opacity-0' : ''}`}
+                className={`${tabbed ? 'page-in ' : ''}shrink-0 h-full snap-start flex items-end cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[#2a2a2a] rounded-lg ${zoom?.index === i ? 'opacity-0' : ''}`}
               >
                 <DeviceMock project={p} index={i} onAspect={recordAspect} />
               </Link>
@@ -744,7 +799,7 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
     // Vector newspaper (components/Newspaper.tsx, 640×500), with the project's title as its front page;
     // drawn at 0.75× the device size
     return (
-      <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-[min(75%,51vw)] md:h-[min(75%,32.8vw)]' : 'h-[75%]'} aspect-[640/500]`}>
+      <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-[min(75%,51vw)] md:h-[min(75%,32.8vw)]' : 'h-[min(440px,58.5vw)] md:h-[75%]'} aspect-[640/500]`}>
         <Newspaper project={project} />
       </motion.div>
     );
@@ -754,7 +809,7 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
     // iPhone 16 Pro Max frame (public/mockups/iphone-16-pro-max.png, 772×1600) with a see-through
     // screen; the shot sits underneath, inset and rounded to match the screen's opening.
     return (
-      <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-full' : 'h-[96%]'} aspect-[772/1600]`}>
+      <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-full' : 'h-[min(684px,90vw)] md:h-[96%]'} aspect-[772/1600]`}>
         <div className="absolute inset-x-[3.83%] inset-y-[1.52%] rounded-[15.4%/7.07%] overflow-hidden bg-white">{screen}</div>
         <Image src="/mockups/iphone-16-pro-max.png" alt="" aria-hidden="true" draggable={false} fill sizes="(max-width: 768px) 50vw, 340px" priority={index < 2} className="pointer-events-none select-none" />
       </motion.div>
@@ -764,7 +819,7 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
   return (
     // MacBook Pro frame (public/mockups/macbook-pro.svg, viewBox 520×290) with a see-through 16:10
     // screen; the shot sits underneath, inset to the opening, and the notch draws over it.
-    <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-[min(100%,48.8vw)] md:h-[min(100%,31.2vw)]' : 'w-full md:w-auto md:h-full'} aspect-[520/290]`}>
+    <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-[min(100%,48.8vw)] md:h-[min(100%,31.2vw)]' : 'w-[calc(100vw-72px)] md:w-auto md:h-full'} aspect-[520/290]`}>
       <div className="absolute inset-x-[10.385%] top-[2.069%] bottom-[9.138%] overflow-hidden bg-white [border-radius:1.21%_1.21%_0.36%_0.36%/1.94%_1.94%_0.58%_0.58%]">{screen}</div>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/mockups/macbook-pro.svg" alt="" aria-hidden="true" draggable={false} className="absolute inset-0 w-full h-full pointer-events-none select-none" />
