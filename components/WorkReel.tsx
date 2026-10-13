@@ -7,8 +7,9 @@ import { useRouter } from 'next/navigation';
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, type MotionValue } from 'framer-motion';
 import type { SiteConfig } from '@/lib/content-model';
 import { isExternal, type ReelItem, type ReelSection } from '@/lib/reel';
-import { reelPlaceholder } from '@/lib/mockups';
 import CaseStudyBook from './CaseStudyBook';
+import AnimatedScreen from './AnimatedScreen';
+import { ANIMATED_SCREENS, type AnimatedScreen as AnimatedScreenSpec } from '@/lib/screen-animations';
 
 interface WorkReelProps {
   config: SiteConfig;
@@ -19,12 +20,8 @@ interface WorkReelProps {
 const COLUMN = 625;
 const GUTTER = `max(1.5rem, calc((100vw - ${COLUMN}px) / 2))`;
 
-// Stand-ins for the empty reel: no images, so each device shows its placeholder screen artwork
-const PLACEHOLDER_PROJECTS: ReelItem[] = Array.from({ length: 6 }, (_, i) => ({
-  id: `placeholder-${i}`, slug: `placeholder-${i}`, title: '', description: '', href: '', cta: '', category: '',
-}));
 
-const projectImage = (p: ReelItem) => p.preview || p.previewImages?.[0] || p.avatar || '';
+const projectImage = (p: ReelItem) => p.preview || p.previewImages?.[0] || '';
 // Opens outside links in a new tab
 const linkTarget = (href: string) => (isExternal(href) ? { target: '_blank', rel: 'noopener noreferrer' } : {});
 
@@ -330,7 +327,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
   return (
     // Opacity only on the root: a transform here would move the fixed project view
     <motion.div
-      className="relative min-h-dvh md:h-dvh flex flex-col bg-white text-[14px] leading-6 text-[#2a2a2a] font-sans"
+      className="relative h-dvh overflow-hidden flex flex-col bg-white text-[14px] leading-6 text-[#2a2a2a] font-sans"
       initial={false}
       animate={{ opacity: departing ? 0 : 1 }}
       transition={{ duration: DEPART_MS / 1000, ease: EASE_OUT }}
@@ -393,33 +390,10 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
         inert={zoom !== null}
       >
         <div ref={columnRef} className="grid gap-6 page-in">
-          {/* The name at the top left, over the intro paragraph */}
+          {/* The name at the top left, over the bio */}
           <div className="grid gap-3">
             <h1 className="text-[22px] leading-7 font-semibold tracking-[-0.025em] text-[#1a1a1a]">{config.name}</h1>
-            <p>
-              {bio ? `${bio} ` : ''}You can browse my{' '}
-              <Link href="/explore?view=writings" className={inlineLink}>writing</Link>,{' '}
-              <Link href="/explore?view=illustration" className={inlineLink}>illustration</Link> and{' '}
-              <Link href="/explore?view=interaction" className={inlineLink}>interaction</Link> work
-              {socials.length > 0 && (
-                <>
-                  , or find me on{' '}
-                  {socials.map((s, i) => (
-                    <span key={s.label}>
-                      <a href={s.href} target="_blank" rel="noopener noreferrer" className={inlineLink}>{s.label}</a>
-                      {i < socials.length - 2 ? ', ' : i === socials.length - 2 ? (email ? ', ' : ' and ') : ''}
-                    </span>
-                  ))}
-                </>
-              )}
-              {email && (
-                <>
-                  {socials.length > 0 ? ' or send me an ' : ', or send me an '}
-                  <a href={email} className={inlineLink}>Email</a>
-                </>
-              )}
-              .
-            </p>
+            {bio && <p>{bio}</p>}
           </div>
 
           {/* The project at the column edge; announced politely as the reel moves */}
@@ -436,13 +410,6 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                     className={`relative font-medium transition-colors focus-visible:outline-none focus-visible:text-[#2a2a2a] ${i === tab ? 'text-[#2a2a2a]' : 'text-[#b2b2b2] hover:text-[#8d8d8d]'}`}
                   >
                     {s.label}
-                    {i === tab && (
-                      <motion.span
-                        layoutId="reel-tab"
-                        className="absolute left-0 right-0 -bottom-1 h-px bg-[#2a2a2a]"
-                        transition={reduceMotion ? { duration: 0 } : { type: 'spring', visualDuration: 0.35, bounce: 0.1 }}
-                      />
-                    )}
                   </button>
                 ))}
               </div>
@@ -462,7 +429,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                   {current ? (
                     // Name at the start of the line, category at the other end
                     <div className="flex items-baseline justify-between gap-4">
-                      <Link href={current.href} {...linkTarget(current.href)} onClick={e => leaveFor(e, current.href)} className={`font-medium truncate ${inlineLink}`}>{current.title}</Link>
+                      <Link href={current.href} {...linkTarget(current.href)} onClick={e => leaveFor(e, current.href)} className="font-medium truncate hover:text-[#000] transition-colors">{current.title}</Link>
                       {current.category && <span className="shrink-0 text-[#8d8d8d]">{current.category}</span>}
                     </div>
                   ) : (
@@ -475,26 +442,11 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
         </div>
       </motion.header>
 
-      {projects.length === 0 && (
-        // Before any work exists, show the placeholder devices (decorative, not linked)
-        <section aria-hidden="true" className="flex-1 md:min-h-0 flex items-end pt-8 pb-10 md:pb-14">
-          <div
-            className="w-full h-[min(700px,92vw)] md:h-[min(460px,36vw)] md:max-h-full flex items-end gap-12 overflow-x-auto overflow-y-hidden hide-scrollbar overscroll-x-contain select-none"
-            style={{ paddingInline: GUTTER, scrollPaddingInline: GUTTER }}
-          >
-            {PLACEHOLDER_PROJECTS.map((p, i) => (
-              <div key={p.slug} className="shrink-0 h-full snap-start flex items-end">
-                <DeviceMock project={p} index={i} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
       {projects.length > 0 && (
         <motion.section
           aria-label="Work"
-          className="relative flex-1 md:min-h-0 flex items-end pt-8 pb-10 md:pb-14"
+          className="relative flex-1 min-h-0 flex items-end pt-8 pb-10 md:pb-14"
           // Opacity only: the reel mustn't move, so a closing project can fly back to its slot
           animate={{ opacity: dimmed || tabFade ? 0 : 1 }}
           transition={{ duration: tabFade ? 0.16 : dimmed ? 0.25 : 0.45, delay: dimmed || tabFade ? 0 : 0.08, ease: EASE_OUT }}
@@ -507,7 +459,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
             tabIndex={0}
             aria-label="Projects. Use the left and right arrow keys to move through them."
             onKeyDown={onReelKey}
-            className="page-in page-in-late w-full h-[min(700px,92vw)] md:h-[min(460px,36vw)] md:max-h-full flex items-end gap-12 overflow-x-auto overflow-y-hidden hide-scrollbar overscroll-x-contain focus-visible:outline-none"
+            className="page-in page-in-late w-full h-[min(700px,92vw)] max-h-full md:h-[min(460px,36vw)] flex items-end gap-12 overflow-x-auto overflow-y-hidden hide-scrollbar overscroll-x-contain focus-visible:outline-none"
             // Same left edge as the text column, for layout and for snap points
             style={{ paddingInline: GUTTER, scrollPaddingInline: GUTTER }}
           >
@@ -838,14 +790,13 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
     setAspect(a);
     onAspect?.(slug, a);
   }, [onAspect, slug]);
-  // The project's other screens, played in turn after the base one
-  const screens = (project.previewImages ?? []).filter(u => u && u !== src);
-  const screen = <Screen src={src} screens={screens} index={index} device={device} ready={initialAspect !== undefined} onAspect={reportAspect} />;
+  const animated = ANIMATED_SCREENS[project.slug];
+  const screen = <Screen src={src} animated={animated} index={index} device={device} ready={initialAspect !== undefined} onAspect={reportAspect} />;
 
   if (project.book) {
     // Case study book (components/CaseStudyBook.tsx, 116×132), with the project's title on its cover
     return (
-      <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-[min(100%,99vw)] md:h-[90%]' : 'h-[min(560px,76vw)] md:h-[85%]'} aspect-[116/132]`}>
+      <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-[min(100%,99vw)] md:h-[90%]' : 'h-[min(560px,76vw)] max-h-[85%] md:h-[85%]'} aspect-[116/132]`}>
         <CaseStudyBook title={project.title} />
       </motion.div>
     );
@@ -855,7 +806,7 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
     // iPhone 16 Pro Max frame (public/mockups/iphone-16-pro-max.png, 772×1600) with a see-through
     // screen; the shot sits underneath, inset and rounded to match the screen's opening.
     return (
-      <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-full' : 'h-[min(684px,90vw)] md:h-[96%]'} aspect-[772/1600]`}>
+      <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-full' : 'h-[min(684px,90vw)] max-h-[96%] md:h-[96%]'} aspect-[772/1600]`}>
         <div className="absolute inset-x-[3.83%] inset-y-[1.52%] rounded-[15.4%/7.07%] overflow-hidden bg-white">{screen}</div>
         <Image src="/mockups/iphone-16-pro-max.png" alt="" aria-hidden="true" draggable={false} fill sizes="(max-width: 768px) 50vw, 340px" priority={index < 2} className="pointer-events-none select-none" />
       </motion.div>
@@ -874,20 +825,18 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
 }
 
 // The device screen: the project image when it loads, otherwise placeholder screen artwork
-// How long each screen stays up when a project plays through its screens
-const SCREEN_MS = 2800;
-
-function Screen({ src, screens = [], index, device, ready = false, onAspect }: {
-  src: string; screens?: string[]; index: number; device: Device; ready?: boolean; onAspect: (a: number) => void;
+function Screen({ src, animated, index, device, ready = false, onAspect }: {
+  src: string; animated?: AnimatedScreenSpec; index: number; device: Device; ready?: boolean; onAspect: (a: number) => void;
 }) {
-  const reduceMotion = useReducedMotion();
-  // 0 is the base screen; 1… are the others, each pushed in from the right, then back to the base
-  const [shown, setShown] = useState(0);
   // `ready`: the image already loaded in the reel, so the project view shows it straight away
-  const [state, setState] = useState<'loading' | 'loaded' | 'failed'>(src ? (ready ? 'loaded' : 'loading') : 'failed');
+  const [state, setState] = useState<'loading' | 'loaded' | 'failed'>(src || animated ? (ready || animated ? 'loaded' : 'loading') : 'failed');
   const wrapRef = useRef<HTMLDivElement>(null);
   // Images can finish before hydration, when onLoad/onError aren't attached yet
   useEffect(() => {
+    if (animated) {
+      onAspect(animated.width / animated.height);
+      return;
+    }
     const frame = requestAnimationFrame(() => {
       const img = wrapRef.current?.querySelector<HTMLImageElement>('img[data-project-image]');
       if (!img?.complete) return;
@@ -899,45 +848,22 @@ function Screen({ src, screens = [], index, device, ready = false, onAspect }: {
       }
     });
     return () => cancelAnimationFrame(frame);
-  }, [onAspect]);
-
-  useEffect(() => {
-    if (reduceMotion || screens.length === 0 || state !== 'loaded') return;
-    const timer = setInterval(() => {
-      if (!document.hidden) setShown(i => (i + 1) % (screens.length + 1));
-    }, SCREEN_MS);
-    return () => clearInterval(timer);
-  }, [reduceMotion, screens.length, state]);
+  }, [onAspect, animated]);
 
   const sizes = device === 'laptop' ? '(max-width: 768px) 80vw, 720px' : '(max-width: 768px) 40vw, 260px';
-  // An outgoing screen slides a little left under the next one, or, on the way back to the base, off to the right
-  const toBase = shown === 0;
-  const push = {
-    enter: { x: '100%' },
-    center: { x: '0%', filter: 'brightness(1)' },
-    exit: (back: boolean) => (back ? { x: '100%' } : { x: '-30%', filter: 'brightness(0.85)' }),
-  };
+
+  // A project with an animated screen plays its interface instead of showing a still
+  if (animated) return <div ref={wrapRef} className="absolute inset-0"><AnimatedScreen screen={animated} sizes={sizes} /></div>;
 
   return (
-    <div ref={wrapRef} className="absolute inset-0 overflow-hidden">
-      {state !== 'loaded' && (
-        // Placeholder screen artwork until the project has an image of its own
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={reelPlaceholder(device, index)}
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-          className="absolute inset-0 w-full h-full object-cover object-top"
-        />
-      )}
+    <div ref={wrapRef} className="absolute inset-0">
       {state !== 'failed' && src && (
         <Image
           src={src}
           alt=""
           data-project-image
           fill
-          sizes={device === 'laptop' ? '(max-width: 768px) 80vw, 720px' : '(max-width: 768px) 40vw, 260px'}
+          sizes={sizes}
           priority={index < 2}
           onLoad={e => {
             const img = e.currentTarget;
@@ -947,30 +873,6 @@ function Screen({ src, screens = [], index, device, ready = false, onAspect }: {
           onError={() => setState('failed')}
           className={`object-cover object-top transition-opacity duration-300 ${state === 'loaded' ? 'opacity-100' : 'opacity-0'}`}
         />
-      )}
-      {state === 'loaded' && screens.length > 0 && (
-        <>
-          {/* Load the other screens up front, out of sight, so each slides in ready */}
-          <div className="absolute inset-0 opacity-0 pointer-events-none" aria-hidden="true">
-            {screens.map(u => <Image key={u} src={u} alt="" fill sizes={sizes} className="object-cover object-top" />)}
-          </div>
-          <AnimatePresence initial={false} custom={toBase}>
-            {shown > 0 && (
-              <motion.div
-                key={shown}
-                className="absolute inset-0 bg-white shadow-[-8px_0_24px_rgba(0,0,0,0.12)]"
-                custom={toBase}
-                variants={push}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ type: 'spring', visualDuration: 0.55, bounce: 0 }}
-              >
-                <Image src={screens[shown - 1]} alt="" fill sizes={sizes} className="object-cover object-top" />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </>
       )}
     </div>
   );

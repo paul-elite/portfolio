@@ -1,4 +1,5 @@
 import type { PortfolioContent, PortfolioNavigationItem, PortfolioNavTarget, Project } from './content-model';
+import { ANIMATED_SCREENS } from './screen-animations';
 
 // The home reel's sections (the tabs on the Work line) and the items each one shows. Everything
 // becomes a project-shaped item, so the reel, zoom and mockups treat all four the same way.
@@ -83,8 +84,14 @@ export function buildReelSections(content: PortfolioContent, navigation: Portfol
       })),
     },
   ];
-  // Work always shows; the others follow the settings' navigation switches
-  return sections.filter(s => s.id === 'work' || navigation.find(n => n.target === TARGETS[s.id])?.enabled !== false);
+  // Only items with something real to show: a screen of their own, an animated screen, or the book.
+  // No placeholder screens. Work always shows; other tabs need items and their navigation switch on.
+  return sections
+    .map(s => ({ ...s, items: s.items.filter(hasArtwork) }))
+    .filter(s => s.id === 'work' || (s.items.length > 0 && navigation.find(n => n.target === TARGETS[s.id])?.enabled !== false));
 }
+
+const hasArtwork = (item: ReelItem) =>
+  !!item.book || !!item.preview || (item.previewImages?.length ?? 0) > 0 || item.slug in ANIMATED_SCREENS;
 
 export const isExternal = (href: string) => /^https?:\/\//.test(href);
