@@ -807,7 +807,9 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
     // screen; the shot sits underneath, inset and rounded to match the screen's opening.
     return (
       <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-full' : 'h-[min(684px,90vw)] max-h-[96%] md:h-[96%]'} aspect-[772/1600]`}>
-        <div className="absolute inset-x-[3.83%] inset-y-[1.52%] rounded-[15.4%/7.07%] overflow-hidden bg-white">{screen}</div>
+        {/* clip-path as well as the rounded overflow: some mobile browsers skip the rounded clip for
+            animated (GPU-composited) layers, letting the screen's square corners show past the bezel */}
+        <div className="absolute inset-x-[3.83%] inset-y-[1.52%] rounded-[15.4%/7.07%] overflow-hidden isolate [clip-path:inset(0_round_15.4%/7.07%)] bg-white">{screen}</div>
         <Image src="/mockups/iphone-16-pro-max.png" alt="" aria-hidden="true" draggable={false} fill sizes="(max-width: 768px) 50vw, 340px" priority={index < 2} className="pointer-events-none select-none" />
       </motion.div>
     );
@@ -817,7 +819,7 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
     // MacBook Pro frame (public/mockups/macbook-pro.svg, viewBox 520×290) with a see-through 16:10
     // screen; the shot sits underneath, inset to the opening, and the notch draws over it.
     <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-[min(100%,48.8vw)] md:h-[min(100%,31.2vw)]' : 'w-[calc(100vw-72px)] md:w-auto md:h-full'} aspect-[520/290]`}>
-      <div className="absolute inset-x-[10.385%] top-[2.069%] bottom-[9.138%] overflow-hidden bg-white [border-radius:1.21%_1.21%_0.36%_0.36%/1.94%_1.94%_0.58%_0.58%]">{screen}</div>
+      <div className="absolute inset-x-[10.385%] top-[2.069%] bottom-[9.138%] overflow-hidden isolate bg-white [border-radius:1.21%_1.21%_0.36%_0.36%/1.94%_1.94%_0.58%_0.58%] [clip-path:inset(0_round_1.21%_1.21%_0.36%_0.36%/1.94%_1.94%_0.58%_0.58%)]">{screen}</div>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/mockups/macbook-pro.svg" alt="" aria-hidden="true" draggable={false} className="absolute inset-0 w-full h-full pointer-events-none select-none" />
     </motion.div>
