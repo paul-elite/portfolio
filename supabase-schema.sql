@@ -59,3 +59,34 @@ ALTER TABLE IF EXISTS illustrations
 
 ALTER TABLE IF EXISTS interactions
   ADD COLUMN IF NOT EXISTS avatar TEXT DEFAULT '';
+
+-- Persistent website analytics events
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE TABLE IF NOT EXISTS analytics_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  path TEXT NOT NULL DEFAULT '/',
+  page_title TEXT NOT NULL DEFAULT '',
+  country TEXT NOT NULL DEFAULT 'Unknown',
+  city TEXT NOT NULL DEFAULT 'Unknown',
+  user_agent TEXT NOT NULL DEFAULT 'Unknown',
+  visitor_id TEXT NOT NULL,
+  session_id TEXT NOT NULL,
+  is_repeat BOOLEAN NOT NULL DEFAULT false,
+  referrer TEXT NOT NULL DEFAULT '',
+  source TEXT NOT NULL DEFAULT 'Direct',
+  screen TEXT NOT NULL DEFAULT 'Unknown'
+);
+
+CREATE INDEX IF NOT EXISTS analytics_events_created_at_idx ON analytics_events (created_at DESC);
+CREATE INDEX IF NOT EXISTS analytics_events_visitor_id_idx ON analytics_events (visitor_id);
+CREATE INDEX IF NOT EXISTS analytics_events_session_id_idx ON analytics_events (session_id);
+CREATE INDEX IF NOT EXISTS analytics_events_path_idx ON analytics_events (path);
+CREATE INDEX IF NOT EXISTS analytics_events_source_idx ON analytics_events (source);
+
+ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
+
+-- No policies on purpose: only the server (service role key) reads and writes visits, and it
+-- bypasses RLS. A policy like FOR ALL USING (true) would let the public key read and delete them.
+DROP POLICY IF EXISTS "Allow service role analytics access" ON analytics_events;

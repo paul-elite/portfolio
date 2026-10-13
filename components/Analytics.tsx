@@ -14,6 +14,17 @@ function getVisitorId() {
   return visitorId;
 }
 
+function getSessionId() {
+  if (typeof window === 'undefined') return '';
+
+  let sessionId = sessionStorage.getItem('session_id');
+  if (!sessionId) {
+    sessionId = crypto.randomUUID();
+    sessionStorage.setItem('session_id', sessionId);
+  }
+  return sessionId;
+}
+
 export default function Analytics() {
   const pathname = usePathname();
 
@@ -26,6 +37,10 @@ export default function Analytics() {
           body: JSON.stringify({
             path: pathname,
             visitorId: getVisitorId(),
+            sessionId: getSessionId(),
+            referrer: document.referrer,
+            pageTitle: document.title,
+            screen: `${window.screen.width}x${window.screen.height}`,
           }),
         });
       } catch {
