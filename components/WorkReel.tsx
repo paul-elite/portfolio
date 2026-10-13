@@ -817,10 +817,10 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
     // screen; the shot sits underneath, inset and rounded to match the screen's opening.
     return (
       <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-full' : 'h-[min(684px,90vw)] max-h-[96%] md:h-[96%]'} aspect-[772/1600]`}>
-        {/* The screen is masked to the phone's own silhouette, so nothing can show past the bezel even
-            where a mobile browser skips the rounded clip for animated (GPU-composited) layers */}
+        {/* A square screen under the frame: the frame is opaque outside its screen opening, so it shapes
+            the corners and the opening is always filled. Masked to the phone's outline as a safeguard. */}
         <div className="absolute inset-0" style={PHONE_MASK}>
-          <div className="absolute inset-x-[3.83%] inset-y-[1.52%] rounded-[17%/7.8%] overflow-hidden isolate [clip-path:inset(0_round_17%/7.8%)] bg-white">{screen}</div>
+          <div className="absolute inset-x-[3.83%] inset-y-[1.52%] overflow-hidden bg-white">{screen}</div>
         </div>
         <Image src="/mockups/iphone-16-pro-max.png" alt="" aria-hidden="true" draggable={false} fill sizes="(max-width: 768px) 50vw, 340px" priority={index < 2} className="pointer-events-none select-none" />
       </motion.div>
