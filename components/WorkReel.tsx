@@ -819,7 +819,7 @@ function ProjectZoom({ projects, start, reduceMotion, onIndex, slotFor, onLeave,
 
 /* ---------- Device mockups ---------- */
 
-// Laptops for wide screenshots, phones for tall ones; without an image, alternate the two.
+// Laptops for wide screenshots, phones for tall ones; without an image, a phone.
 // In the project view (`zoomed`) the device fills its frame and follows the flight transform.
 function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, rootRef, flight }: {
   project: ReelItem;
@@ -832,7 +832,7 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
 }) {
   const src = projectImage(project);
   const [aspect, setAspect] = useState<number | null>(initialAspect ?? null);
-  const device: Device = aspect ? (aspect < 0.85 ? 'phone' : 'laptop') : index % 2 === 0 ? 'laptop' : 'phone';
+  const device: Device = aspect ? (aspect < 0.85 ? 'phone' : 'laptop') : 'phone';
   const { slug } = project;
   const reportAspect = useCallback((a: number) => {
     setAspect(a);
