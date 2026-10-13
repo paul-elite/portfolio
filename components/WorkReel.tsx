@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, type MotionValue } from 'framer-motion';
 import type { Project, SiteConfig } from '@/lib/content-model';
 import { reelPlaceholder } from '@/lib/mockups';
+import Newspaper from './Newspaper';
 
 interface WorkReelProps {
   config: SiteConfig;
@@ -23,6 +24,8 @@ const PLACEHOLDER_PROJECTS: Project[] = Array.from({ length: 6 }, (_, i) => ({
 }));
 
 const projectImage = (p: Project) => p.preview || p.previewImages?.[0] || p.avatar || '';
+// Projects tagged `case-study` show as a folded newspaper instead of a device
+const isNewspaper = (p: Project) => p.tags?.includes('case-study') ?? false;
 
 // Ayomide-style inline link: same size and colour as the text, dotted underline
 const inlineLink = 'underline decoration-dotted decoration-[#b2b2b2] decoration-1 underline-offset-4 hover:decoration-[#2a2a2a] transition-colors';
@@ -667,6 +670,15 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
     onAspect?.(slug, a);
   }, [onAspect, slug]);
   const screen = <Screen src={src} index={index} device={device} ready={initialAspect !== undefined} onAspect={reportAspect} />;
+
+  if (isNewspaper(project)) {
+    // Vector newspaper (components/Newspaper.tsx, 640×500), with the project as its front page
+    return (
+      <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-[min(100%,68vw)] md:h-[min(100%,43.8vw)]' : 'h-full'} aspect-[640/500]`}>
+        <Newspaper project={project} image={src} />
+      </motion.div>
+    );
+  }
 
   if (device === 'phone') {
     // iPhone 16 Pro Max frame (public/mockups/iphone-16-pro-max.png, 772×1600) with a see-through
