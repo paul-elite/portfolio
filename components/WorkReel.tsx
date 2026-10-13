@@ -57,7 +57,9 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
   const [tab, setTab] = useState(0);
   const [tabFade, setTabFade] = useState(false);
   const [tabbed, setTabbed] = useState(false);
-  const [more, setMore] = useState(false);
+  // The ⋯ menu in the top-right corner
+  const [menu, setMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const section = sections[tab] ?? sections[0];
   const projects = section.items;
   const hasItems = projects.length > 0;
@@ -91,6 +93,14 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
     quietFocus.current = false;
     returnFocus.current = null;
   }, [zoom]);
+  useEffect(() => {
+    if (!menu) return;
+    const onDown = (e: PointerEvent) => { if (!menuRef.current?.contains(e.target as Node)) setMenu(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenu(false); };
+    window.addEventListener('pointerdown', onDown);
+    window.addEventListener('keydown', onKey);
+    return () => { window.removeEventListener('pointerdown', onDown); window.removeEventListener('keydown', onKey); };
+  }, [menu]);
   const recordAspect = useCallback((slug: string, a: number) => { aspects.current.set(slug, a); }, []);
 
   // The project nearest the column's left edge is the one "in view"
@@ -299,6 +309,14 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
     config.social.linkedin && { label: 'LinkedIn', href: config.social.linkedin },
   ].filter(Boolean) as { label: string; href: string }[];
   const bio = config.bio || config.title;
+  const menuGroups = [
+    [
+      { label: 'Writing', href: '/explore?view=writings' },
+      { label: 'Illustration', href: '/explore?view=illustration' },
+      { label: 'Interaction', href: '/explore?view=interaction' },
+    ],
+    [...socials, ...(email ? [{ label: 'Email', href: email }] : [])],
+  ].filter(g => g.length > 0);
 
   // Title swap; `d` is the direction the reel moved
   const swap = {
@@ -312,11 +330,61 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
   return (
     // Opacity only on the root: a transform here would move the fixed project view
     <motion.div
-      className="min-h-dvh md:h-dvh flex flex-col bg-white text-[14px] leading-6 text-[#2a2a2a] font-sans"
+      className="relative min-h-dvh md:h-dvh flex flex-col bg-white text-[14px] leading-6 text-[#2a2a2a] font-sans"
       initial={false}
       animate={{ opacity: departing ? 0 : 1 }}
       transition={{ duration: DEPART_MS / 1000, ease: EASE_OUT }}
     >
+      {/* More: the ⋯ button in the corner, opening the explore pages and contact links */}
+      <motion.div
+        ref={menuRef}
+        className="absolute z-20 top-4 right-3 md:top-6 md:right-6"
+        animate={{ opacity: dimmed ? 0 : 1 }}
+        transition={{ duration: dimmed ? 0.25 : 0.45, ease: EASE_OUT }}
+        inert={zoom !== null}
+      >
+        <button
+          type="button"
+          onClick={() => setMenu(m => !m)}
+          aria-label="More"
+          aria-haspopup="menu"
+          aria-expanded={menu}
+          className="h-11 w-11 grid place-items-center rounded-full text-[#8d8d8d] hover:text-[#2a2a2a] hover:bg-neutral-100 focus-visible:outline-none focus-visible:bg-neutral-100 focus-visible:text-[#2a2a2a] transition-colors"
+        >
+          <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor" aria-hidden="true">
+            <circle cx="5.5" cy="12" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="18.5" cy="12" r="1.6" />
+          </svg>
+        </button>
+        <AnimatePresence>
+          {menu && (
+            <motion.div
+              role="menu"
+              className="absolute right-0 top-12 w-52 origin-top-right rounded-xl bg-white py-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.08)] ring-1 ring-black/5"
+              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: -4 }}
+              animate={{ opacity: 1, scale: 1, y: 0, transition: { type: 'spring', visualDuration: 0.25, bounce: 0 } }}
+              exit={{ opacity: 0, scale: reduceMotion ? 1 : 0.97, transition: { duration: 0.12 } }}
+            >
+              {menuGroups.map((group, g) => (
+                <div key={g} className={g > 0 ? 'mt-1.5 pt-1.5 border-t border-black/5' : ''}>
+                  {group.map(item => (
+                    <a
+                      key={item.label}
+                      role="menuitem"
+                      href={item.href}
+                      {...(isExternal(item.href) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                      onClick={() => setMenu(false)}
+                      className="block px-3.5 py-1.5 text-[#2a2a2a] hover:bg-neutral-50 focus-visible:outline-none focus-visible:bg-neutral-50"
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
       <motion.header
         className="w-full max-w-[625px] mx-auto px-6 md:px-0 pt-20 md:pt-28"
         animate={reduceMotion ? { opacity: dimmed ? 0 : 1 } : { opacity: dimmed ? 0 : 1, scale: dimmed ? 0.985 : 1 }}
@@ -325,30 +393,10 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
         inert={zoom !== null}
       >
         <div ref={columnRef} className="grid gap-6 page-in">
-          {/* The name at the top left; More, at the other end, opens the intro paragraph */}
-          <div>
-            <div className="flex items-baseline justify-between gap-4">
-              <h1 className="text-[22px] leading-7 font-semibold tracking-[-0.025em] text-[#1a1a1a]">{config.name}</h1>
-              <button
-                type="button"
-                onClick={() => setMore(m => !m)}
-                aria-expanded={more}
-                aria-controls="intro-more"
-                className="font-medium text-[#8d8d8d] hover:text-[#2a2a2a] focus-visible:outline-none focus-visible:text-[#2a2a2a] transition-colors"
-              >
-                {more ? 'Less' : 'More'}
-              </button>
-            </div>
-            <AnimatePresence initial={false}>
-              {more && (
-                <motion.div
-                  id="intro-more"
-                  className="overflow-hidden"
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1, transition: { height: { type: 'spring', visualDuration: 0.4, bounce: 0 }, opacity: { duration: 0.3, delay: 0.05 } } }}
-                  exit={{ height: 0, opacity: 0, transition: { height: { type: 'spring', visualDuration: 0.3, bounce: 0 }, opacity: { duration: 0.15 } } }}
-                >
-            <p className="pt-3">
+          {/* The name at the top left, over the intro paragraph */}
+          <div className="grid gap-3">
+            <h1 className="text-[22px] leading-7 font-semibold tracking-[-0.025em] text-[#1a1a1a]">{config.name}</h1>
+            <p>
               {bio ? `${bio} ` : ''}You can browse my{' '}
               <Link href="/explore?view=writings" className={inlineLink}>writing</Link>,{' '}
               <Link href="/explore?view=illustration" className={inlineLink}>illustration</Link> and{' '}
@@ -372,9 +420,6 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
               )}
               .
             </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
 
           {/* The project at the column edge; announced politely as the reel moves */}
