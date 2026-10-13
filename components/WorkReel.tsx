@@ -60,16 +60,20 @@ interface Zoom { index: number; origin: DOMRect; aspects: Map<string, number> }
  * neighbouring projects page in sideways, and closing springs it back into its slot.
  */
 export default function WorkReel({ config, sections }: WorkReelProps) {
-  // The tab on the Work line; the reel shows its items
-  const [tab, setTab] = useState(0);
-  const [tabFade, setTabFade] = useState(false);
-  const [tabbed, setTabbed] = useState(false);
+  // The section the reel shows (Work); the projects in it make the row above the reel
+  const tab = 0;
   // The ⋯ menu in the top-right corner
   const [menu, setMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const section = sections[tab] ?? sections[0];
   const projects = section.items;
   const hasItems = projects.length > 0;
+  // One entry per project (its extra screens share it), pointing at its first item in the reel
+  const projectRow = projects.reduce<{ slug: string; title: string; first: number }[]>((row, p, i) => {
+    const slug = p.slug.split('~')[0];
+    if (!row.some(r => r.slug === slug)) row.push({ slug, title: p.title, first: i });
+    return row;
+  }, []);
   const thumbLeft = useMotionValue('0%');
   const thumbWidth = useMotionValue('100%');
   const barOpacity = useMotionValue(0);
@@ -89,6 +93,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
   const returnFocus = useRef<number | null>(null);
   const reduceMotion = useReducedMotion();
   const current = projects[active];
+  const currentProject = current?.slug.split('~')[0];
   const dimmed = zoom !== null && !leaving;
 
   useEffect(() => {
@@ -165,52 +170,19 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
       placePadding();
       placeThumb();
     };
-    // Soft snapping on narrow screens: once a swipe's momentum ends, glide the nearest project to the middle
-    let settle: ReturnType<typeof setTimeout> | undefined;
-    let glide: { stop: () => void } | undefined;
-    let touching = false;
-    const snapToNearest = () => {
-      if (touching || !window.matchMedia('(max-width: 767px)').matches) return;
-      const box = reel.getBoundingClientRect();
-      const middle = box.left + box.width / 2;
-      const max = reel.scrollWidth - reel.clientWidth;
-      let target = reel.scrollLeft;
-      let best = Infinity;
-      itemRefs.current.forEach(el => {
-        if (!el) return;
-        const r = el.getBoundingClientRect();
-        const to = Math.min(max, Math.max(0, reel.scrollLeft + r.left + r.width / 2 - middle));
-        if (Math.abs(to - reel.scrollLeft) < best) { best = Math.abs(to - reel.scrollLeft); target = to; }
-      });
-      if (best < 1) return;
-      glide = animate(reel.scrollLeft, target, {
-        type: 'spring', visualDuration: 0.55, bounce: 0,
-        onUpdate: v => { reel.scrollLeft = v; },
-      });
-    };
     const onScroll = () => {
       onResize();
-      clearTimeout(settle);
-      settle = setTimeout(snapToNearest, 120);
       if (!placeThumb()) return;
       animate(barOpacity, 1, { duration: 0.15 });
       clearTimeout(hide);
       hide = setTimeout(() => animate(barOpacity, 0, { duration: 0.4 }), 700);
     };
-    const onTouchStart = () => { touching = true; glide?.stop(); clearTimeout(settle); };
-    const onTouchEnd = () => { touching = false; clearTimeout(settle); settle = setTimeout(snapToNearest, 120); };
     reel.addEventListener('scroll', onScroll, { passive: true });
-    reel.addEventListener('touchstart', onTouchStart, { passive: true });
-    reel.addEventListener('touchend', onTouchEnd, { passive: true });
     window.addEventListener('resize', onResize);
     return () => {
       cancelAnimationFrame(frame);
       clearTimeout(hide);
-      clearTimeout(settle);
-      glide?.stop();
       reel.removeEventListener('scroll', onScroll);
-      reel.removeEventListener('touchstart', onTouchStart);
-      reel.removeEventListener('touchend', onTouchEnd);
       window.removeEventListener('resize', onResize);
     };
     // Re-run per tab: the items, and so the end padding, change
@@ -274,22 +246,6 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
     if (reduceMotion) { router.push(href); return; }
     setDeparting(true);
     setTimeout(() => router.push(href), DEPART_MS);
-  };
-
-  // Switch tabs: fade the reel out, swap its items, and bring them back from the start
-  const switchTab = (i: number) => {
-    if (i === tab || tabFade || zoom) return;
-    const d = i > tab ? 1 : -1;
-    const apply = () => {
-      setTab(i);
-      setTabbed(true);
-      setView({ active: 0, dir: d });
-      if (reelRef.current) reelRef.current.scrollLeft = 0;
-      setTabFade(false);
-    };
-    if (reduceMotion) { apply(); return; }
-    setTabFade(true);
-    setTimeout(apply, 160);
   };
 
   const onZoomClosed = (i: number) => {
@@ -406,48 +362,31 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
             {bio && <p>{bio}</p>}
           </div>
 
-          {/* The project at the column edge; announced politely as the reel moves */}
+          {/* The projects in a row: the one in view is dark, its category at the other end */}
           <div className="mt-6 md:mt-10">
             <div className="flex items-baseline justify-between gap-4">
-              <div role="tablist" aria-label="Sections" className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
-                {sections.map((s, i) => (
+              <nav aria-label="Projects" className="flex min-w-0 flex-wrap items-baseline gap-x-5 gap-y-1">
+                {projectRow.map(p => (
                   <button
-                    key={s.id}
+                    key={p.slug}
                     type="button"
-                    role="tab"
-                    aria-selected={i === tab}
-                    onClick={() => switchTab(i)}
-                    className={`relative font-medium transition-colors focus-visible:outline-none focus-visible:text-[#2a2a2a] ${i === tab ? 'text-[#2a2a2a]' : 'text-[#b2b2b2] hover:text-[#8d8d8d]'}`}
+                    onClick={() => scrollToItem(p.first)}
+                    aria-current={p.slug === currentProject ? 'true' : undefined}
+                    className={`font-medium transition-colors duration-300 focus-visible:outline-none focus-visible:text-[#2a2a2a] ${p.slug === currentProject ? 'text-[#2a2a2a]' : 'text-[#b2b2b2] hover:text-[#8d8d8d]'}`}
                   >
-                    {s.label}
+                    {p.title}
                   </button>
                 ))}
+              </nav>
+              <div className="relative shrink-0 text-[#8d8d8d]" aria-live="polite" aria-atomic="true">
+                <AnimatePresence mode="popLayout" initial={false} custom={dir}>
+                  <motion.span key={currentProject ?? 'none'} custom={dir} variants={swap} initial="enter" animate="center" exit="exit" className="block">
+                    {current?.category}
+                  </motion.span>
+                </AnimatePresence>
               </div>
             </div>
-            {/* Old and new titles cross over instead of taking turns */}
-            <div className="relative mt-4 min-h-6" aria-live="polite" aria-atomic="true">
-              <AnimatePresence mode="popLayout" initial={false} custom={dir}>
-                <motion.div
-                  key={current?.slug ?? 'empty'}
-                  custom={dir}
-                  variants={swap}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  className="w-full"
-                >
-                  {current ? (
-                    // Name at the start of the line, category at the other end
-                    <div className="flex items-baseline justify-between gap-4">
-                      <Link href={current.href} {...linkTarget(current.href)} onClick={e => leaveFor(e, current.href)} className="font-medium truncate hover:text-[#000] transition-colors">{current.title}</Link>
-                      {current.category && <span className="shrink-0 text-[#8d8d8d]">{current.category}</span>}
-                    </div>
-                  ) : (
-                    <p className="text-[#8d8d8d]">{section.empty}</p>
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            </div>
+            {!current && <p className="mt-4 text-[#8d8d8d]">{section.empty}</p>}
           </div>
         </div>
       </motion.header>
@@ -458,8 +397,8 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
           aria-label="Work"
           className="relative flex-1 min-h-0 flex items-end pt-8 pb-10 md:pb-14"
           // Opacity only: the reel mustn't move, so a closing project can fly back to its slot
-          animate={{ opacity: dimmed || tabFade ? 0 : 1 }}
-          transition={{ duration: tabFade ? 0.16 : dimmed ? 0.25 : 0.45, delay: dimmed || tabFade ? 0 : 0.08, ease: EASE_OUT }}
+          animate={{ opacity: dimmed ? 0 : 1 }}
+          transition={{ duration: dimmed ? 0.25 : 0.45, delay: dimmed ? 0 : 0.08, ease: EASE_OUT }}
           aria-hidden={zoom ? true : undefined}
           inert={zoom !== null}
         >
@@ -470,7 +409,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
             aria-label="Projects. Use the left and right arrow keys to move through them."
             onKeyDown={onReelKey}
             className="page-in page-in-late w-full h-[min(700px,92vw)] max-h-full md:h-[min(460px,36vw)] flex items-end gap-12 overflow-x-auto overflow-y-hidden hide-scrollbar overscroll-x-contain focus-visible:outline-none"
-            // Same left edge as the text column, for layout and for snap points
+            // Same left edge as the text column
             style={{ paddingInline: GUTTER, scrollPaddingInline: GUTTER }}
           >
             {projects.map((p, i) => (
@@ -479,8 +418,6 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                 role="listitem"
                 ref={el => { itemRefs.current[i] = el; }}
                 href={p.href}
-                // After a tab switch, the new items rise in one after another
-                style={tabbed ? { animationDelay: `${i * 60}ms` } : undefined}
                 aria-label={`${p.title}${p.description ? `, ${p.description}` : ''}`}
                 onFocus={() => { if (!quietFocus.current) scrollToItem(i); }}
                 onClick={e => {
@@ -489,7 +426,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                   e.preventDefault();
                   openAt(i);
                 }}
-                className={`${tabbed ? 'page-in ' : ''}shrink-0 h-full snap-start flex items-end cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[#2a2a2a] rounded-lg ${zoom?.index === i ? 'opacity-0' : ''}`}
+                className={`shrink-0 h-full flex items-end cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[#2a2a2a] rounded-lg ${zoom?.index === i ? 'opacity-0' : ''}`}
               >
                 <DeviceMock project={p} index={i} onAspect={recordAspect} />
               </Link>
