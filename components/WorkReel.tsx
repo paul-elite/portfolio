@@ -598,12 +598,12 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
   const screen = <Screen src={src} index={index} device={device} ready={initialAspect !== undefined} onAspect={reportAspect} />;
 
   if (device === 'phone') {
+    // iPhone 16 Pro Max frame (public/mockups/iphone-16-pro-max.png, 772×1600) with a see-through
+    // screen; the shot sits underneath, inset and rounded to match the screen's opening.
     return (
-      <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-full' : 'h-[82%]'} aspect-[9/19.5] rounded-[clamp(22px,3.6vh,40px)] bg-[#111113] p-[clamp(5px,0.75vh,8px)] shadow-[0_24px_40px_-24px_rgba(0,0,0,0.45)] ring-1 ring-black/5 ${lift}`}>
-        <div className="relative w-full h-full rounded-[clamp(17px,2.9vh,32px)] overflow-hidden bg-white">
-          {screen}
-          <span className="absolute top-[1.6%] left-1/2 -translate-x-1/2 w-[30%] h-[3.2%] rounded-full bg-black" aria-hidden="true" />
-        </div>
+      <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-full' : 'h-[82%]'} aspect-[772/1600] ${lift}`}>
+        <div className="absolute inset-x-[3.83%] inset-y-[1.52%] rounded-[15.4%/7.07%] overflow-hidden bg-white">{screen}</div>
+        <Image src="/mockups/iphone-16-pro-max.png" alt="" aria-hidden="true" draggable={false} fill sizes="(max-width: 768px) 50vw, 340px" priority={index < 2} className="pointer-events-none select-none" />
       </motion.div>
     );
   }
