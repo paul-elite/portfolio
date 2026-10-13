@@ -1,9 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, type MotionValue } from 'framer-motion';
 import type { Project, SiteConfig } from '@/lib/content-model';
 import { reelPlaceholder } from '@/lib/mockups';
 
@@ -28,18 +28,45 @@ const inlineLink = 'underline decoration-dotted decoration-[#b2b2b2] decoration-
 
 type Device = 'laptop' | 'phone';
 
+// Springs from mikematas.com: the zoom (tension 300, friction 35) and paging between projects (450, 50)
+const ZOOM_SPRING = { type: 'spring', stiffness: 300, damping: 35, restDelta: 0.001, restSpeed: 0.01 } as const;
+const PAGE_SPRING = { type: 'spring', stiffness: 450, damping: 50 } as const;
+
+// `aspects`: each project's screenshot shape, from the reel, so the view picks the same device
+interface Zoom { index: number; origin: DOMRect; aspects: Map<string, number> }
+
 /**
  * Home: a short introduction set in small, even type (after dahnizzy.com), with the work
  * shown on device mockups in one sideways reel (after mikematas.com). The "Work" line names
- * whichever project sits at the column edge, and every device opens its case study.
+ * whichever project sits at the column edge. Clicking a device zooms it into a project view
+ * (after mikematas.com): it springs out of the reel, the project's details fade in beside it,
+ * neighbouring projects page in sideways, and closing springs it back into its slot.
  */
 export default function WorkReel({ config, projects }: WorkReelProps) {
   const reelRef = useRef<HTMLDivElement>(null);
   const columnRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const [active, setActive] = useState(0);
+  const [zoom, setZoom] = useState<Zoom | null>(null);
+  const [leaving, setLeaving] = useState(false);
+  const zoomRef = useRef<Zoom | null>(null);
+  const aspects = useRef(new Map<string, number>());
+  const quietFocus = useRef(false);
+  const returnFocus = useRef<number | null>(null);
   const reduceMotion = useReducedMotion();
   const current = projects[active];
+  const dimmed = zoom !== null && !leaving;
+
+  useEffect(() => {
+    zoomRef.current = zoom;
+    // Back to the project that was showing, once the reel is interactive again
+    if (zoom || returnFocus.current === null) return;
+    quietFocus.current = true;
+    itemRefs.current[returnFocus.current]?.focus({ preventScroll: true });
+    quietFocus.current = false;
+    returnFocus.current = null;
+  }, [zoom]);
+  const recordAspect = useCallback((slug: string, a: number) => { aspects.current.set(slug, a); }, []);
 
   // The project nearest the column's left edge is the one "in view"
   const measure = useCallback(() => {
@@ -83,6 +110,7 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
     const reel = reelRef.current;
     if (!reel) return;
     const onWheel = (e: WheelEvent) => {
+      if (zoomRef.current) return; // the project view pages on its own
       if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
       if (reel.scrollWidth <= reel.clientWidth) return;
       // Let the page scroll normally on narrow screens, where the layout stacks
@@ -100,6 +128,32 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
     if (!el || !reel) return;
     const edge = columnRef.current?.getBoundingClientRect().left ?? 0;
     reel.scrollTo({ left: reel.scrollLeft + el.getBoundingClientRect().left - edge, behavior: reduceMotion ? 'auto' : 'smooth' });
+  };
+
+  // Zoom a device out of the reel, from exactly where it sits
+  const openAt = (i: number) => {
+    const device = itemRefs.current[i]?.firstElementChild;
+    if (!device) return;
+    setLeaving(false);
+    setZoom({ index: i, origin: device.getBoundingClientRect(), aspects: new Map(aspects.current) });
+  };
+
+  // Where project i's device sits in the reel, for the flight home; brought into view first if needed
+  const slotFor = (i: number) => {
+    const reel = reelRef.current;
+    const el = itemRefs.current[i];
+    if (!reel || !el) return null;
+    const r = el.getBoundingClientRect();
+    if (r.left < 0 || r.right > window.innerWidth) {
+      reel.scrollLeft += r.left - (columnRef.current?.getBoundingClientRect().left ?? 0);
+    }
+    return el.firstElementChild?.getBoundingClientRect() ?? null;
+  };
+
+  const onZoomClosed = (i: number) => {
+    returnFocus.current = i;
+    setZoom(null);
+    setLeaving(false);
   };
 
   const onReelKey = (e: React.KeyboardEvent) => {
@@ -123,7 +177,13 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
 
   return (
     <div className="min-h-dvh md:h-dvh flex flex-col bg-white text-[14px] leading-6 text-[#2a2a2a] font-sans">
-      <header className="w-full max-w-[625px] mx-auto px-6 md:px-0 pt-12 md:pt-[72px]">
+      <motion.header
+        className="w-full max-w-[625px] mx-auto px-6 md:px-0 pt-12 md:pt-[72px]"
+        animate={reduceMotion ? { opacity: dimmed ? 0 : 1 } : { opacity: dimmed ? 0 : 1, scale: dimmed ? 0.985 : 1 }}
+        transition={{ duration: dimmed ? 0.25 : 0.4, ease: [0.22, 1, 0.36, 1] }}
+        aria-hidden={zoom ? true : undefined}
+        inert={zoom !== null}
+      >
         <div ref={columnRef} className="grid gap-6">
           {config.avatar ? (
             <Image src={config.avatar} alt="" width={48} height={48} className="w-12 h-12 rounded-full object-cover bg-neutral-100" priority />
@@ -195,7 +255,7 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
             </div>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {projects.length === 0 && (
         // Before any work exists, show the placeholder devices (decorative, not linked)
@@ -214,7 +274,15 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
       )}
 
       {projects.length > 0 && (
-        <section aria-label="Work" className="flex-1 md:min-h-0 flex items-end pt-8 pb-10 md:pb-14">
+        <motion.section
+          aria-label="Work"
+          className="flex-1 md:min-h-0 flex items-end pt-8 pb-10 md:pb-14"
+          // Opacity only: the reel mustn't move, so a closing project can fly back to its slot
+          animate={{ opacity: dimmed ? 0 : 1 }}
+          transition={{ duration: dimmed ? 0.25 : 0.4, ease: [0.22, 1, 0.36, 1] }}
+          aria-hidden={zoom ? true : undefined}
+          inert={zoom !== null}
+        >
           <div
             ref={reelRef}
             role="list"
@@ -231,43 +299,317 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
                 role="listitem"
                 ref={el => { itemRefs.current[i] = el; }}
                 href={`/project/${p.slug}`}
-                aria-label={`${p.title}${p.description ? `, ${p.description}` : ''}. Open case study`}
-                onFocus={() => scrollToItem(i)}
-                className="group shrink-0 h-full snap-start flex items-end focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[#2a2a2a] rounded-lg"
+                aria-label={`${p.title}${p.description ? `, ${p.description}` : ''}`}
+                onFocus={() => { if (!quietFocus.current) scrollToItem(i); }}
+                onClick={e => {
+                  // Modified clicks still open the case study in a new tab or window
+                  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                  e.preventDefault();
+                  openAt(i);
+                }}
+                className={`group shrink-0 h-full snap-start flex items-end focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[#2a2a2a] rounded-lg ${zoom?.index === i ? 'opacity-0' : ''}`}
               >
-                <DeviceMock project={p} index={i} />
+                <DeviceMock project={p} index={i} onAspect={recordAspect} />
               </Link>
             ))}
           </div>
-        </section>
+        </motion.section>
+      )}
+
+      {zoom && (
+        <ProjectZoom
+          projects={projects}
+          start={zoom}
+          reduceMotion={!!reduceMotion}
+          onIndex={i => setZoom(z => (z ? { ...z, index: i } : z))}
+          slotFor={slotFor}
+          onLeave={() => setLeaving(true)}
+          onClosed={onZoomClosed}
+        />
       )}
     </div>
   );
 }
 
+/* ---------- Project view ---------- */
+
+function ProjectZoom({ projects, start, reduceMotion, onIndex, slotFor, onLeave, onClosed }: {
+  projects: Project[];
+  start: Zoom;
+  reduceMotion: boolean;
+  onIndex: (i: number) => void;
+  slotFor: (i: number) => DOMRect | null;
+  onLeave: () => void;
+  onClosed: (i: number) => void;
+}) {
+  const index = start.index;
+  const project = projects[index];
+  const rootRef = useRef<HTMLDivElement>(null);
+  const backRef = useRef<HTMLButtonElement>(null);
+  const devices = useRef(new Map<string, HTMLDivElement>());
+  const [closing, setClosing] = useState(false);
+  const [direction, setDirection] = useState(0);
+  // The flight between the reel and the view, applied to whichever device is showing
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const scale = useMotionValue(1);
+  const fade = useMotionValue(reduceMotion ? 0 : 1);
+
+  // Open: start the device exactly over its reel slot and spring it into place
+  useLayoutEffect(() => {
+    const el = devices.current.get(projects[start.index].slug);
+    if (reduceMotion || !el) {
+      animate(fade, 1, { duration: 0.2 });
+      return;
+    }
+    const to = el.getBoundingClientRect();
+    const from = start.origin;
+    x.set(from.left + from.width / 2 - (to.left + to.width / 2));
+    y.set(from.top + from.height / 2 - (to.top + to.height / 2));
+    scale.set(from.height / to.height);
+    const flights = [animate(x, 0, ZOOM_SPRING), animate(y, 0, ZOOM_SPRING), animate(scale, 1, ZOOM_SPRING)];
+    return () => flights.forEach(f => f.stop());
+    // Runs once, on open; paging doesn't fly
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const close = useCallback(() => {
+    if (closing) return;
+    setClosing(true);
+    onLeave();
+    const el = devices.current.get(project.slug);
+    const slot = slotFor(index);
+    if (reduceMotion || !el || !slot) {
+      animate(fade, 0, { duration: 0.2 }).then(() => onClosed(index));
+      return;
+    }
+    // Where the device would sit untransformed, then the flight from there back to its slot
+    const now = el.getBoundingClientRect();
+    const s = scale.get();
+    const cx = now.left + now.width / 2 - x.get();
+    const cy = now.top + now.height / 2 - y.get();
+    const height = now.height / s;
+    animate(x, slot.left + slot.width / 2 - cx, ZOOM_SPRING);
+    animate(y, slot.top + slot.height / 2 - cy, ZOOM_SPRING);
+    animate(scale, slot.height / height, ZOOM_SPRING).then(() => onClosed(index));
+  }, [closing, onLeave, project.slug, slotFor, index, reduceMotion, fade, scale, x, y, onClosed]);
+
+  const go = useCallback((step: number) => {
+    const next = index + step;
+    if (closing || next < 0 || next >= projects.length) return;
+    setDirection(step);
+    onIndex(next);
+  }, [closing, index, projects.length, onIndex]);
+
+  // Keys: Escape closes, arrows page, Tab stays inside the view
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { e.preventDefault(); close(); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+      else if (e.key === 'Tab' && rootRef.current) {
+        const items = [...rootRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')];
+        if (items.length === 0) return;
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [close, go]);
+
+  // A wheel or trackpad swipe pages once per gesture
+  useEffect(() => {
+    let sum = 0;
+    let lastPage = 0;
+    let idle: ReturnType<typeof setTimeout> | undefined;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      sum += Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      clearTimeout(idle);
+      idle = setTimeout(() => { sum = 0; }, 180);
+      if (Math.abs(sum) > 60 && performance.now() - lastPage > 550) {
+        go(Math.sign(sum));
+        lastPage = performance.now();
+        sum = 0;
+      }
+    };
+    window.addEventListener('wheel', onWheel, { passive: false });
+    return () => { window.removeEventListener('wheel', onWheel); clearTimeout(idle); };
+  }, [go]);
+
+  // The page behind doesn't scroll while the view is open
+  useEffect(() => {
+    const html = document.documentElement;
+    const before = html.style.overflow;
+    html.style.overflow = 'hidden';
+    backRef.current?.focus({ preventScroll: true });
+    return () => { html.style.overflow = before; };
+  }, []);
+
+  // Touch: swipe sideways to page, down to close
+  const touch = useRef<{ x: number; y: number } | null>(null);
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (e.pointerType !== 'mouse') touch.current = { x: e.clientX, y: e.clientY };
+  };
+  const onPointerUp = (e: React.PointerEvent) => {
+    const t = touch.current;
+    touch.current = null;
+    if (!t) return;
+    const dx = e.clientX - t.x;
+    const dy = e.clientY - t.y;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? 1 : -1);
+    else if (dy > 90 && dy > Math.abs(dx) * 1.5) close();
+  };
+
+  const slide = {
+    enter: (d: number) => ({ x: `${d * 45}vw`, opacity: d === 0 ? 1 : 0 }),
+    center: { x: 0, opacity: 1 },
+    // The outgoing device fades quickly so it doesn't pass over the details
+    exit: (d: number) => ({ x: `${d * -45}vw`, opacity: 0, transition: { x: PAGE_SPRING, opacity: { duration: 0.16 } } }),
+  };
+  const textIn = { duration: 0.3, ease: [0.22, 1, 0.36, 1] as const };
+  const details = [project.role, project.year].filter(Boolean) as string[];
+
+  return (
+    <motion.div
+      ref={rootRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={project.title}
+      className="fixed inset-0 z-50 overflow-hidden text-[14px] leading-6 text-[#2a2a2a] touch-pan-y"
+      style={{ opacity: fade }}
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
+      onPointerCancel={() => { touch.current = null; }}
+      onClick={e => { if ((e.target as HTMLElement).dataset.backdrop !== undefined) close(); }}
+      data-backdrop
+    >
+      <motion.button
+        ref={backRef}
+        type="button"
+        onClick={close}
+        aria-label="Back to all work"
+        className="absolute z-10 left-3 top-3 md:left-7 md:top-7 h-11 w-11 grid place-items-center rounded-full text-[#8d8d8d] hover:text-[#2a2a2a] hover:bg-neutral-100 focus-visible:outline-none focus-visible:bg-neutral-100 focus-visible:text-[#2a2a2a] transition-colors"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: closing ? 0 : 1 }}
+        transition={{ duration: 0.2, delay: closing ? 0 : 0.15 }}
+      >
+        <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 4l-8 8 8 8" /></svg>
+      </motion.button>
+
+      <div data-backdrop className="h-full w-full flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 px-6 pt-20 pb-8 md:px-12 md:py-12">
+        {/* The device; projects page sideways through this frame */}
+        <div data-backdrop className="relative md:order-2 shrink-0 w-full md:w-[min(56vw,1040px)] h-[min(56vh,120vw)] md:h-[min(72vh,640px)] flex items-center justify-center">
+          <AnimatePresence initial={false} custom={direction} mode="popLayout">
+            <motion.div
+              key={project.slug}
+              custom={direction}
+              variants={slide}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={reduceMotion ? { duration: 0 } : PAGE_SPRING}
+              data-backdrop
+              className="h-full w-full flex items-center justify-center"
+            >
+              <Link href={`/project/${project.slug}`} aria-label={`Open the ${project.title} case study`} className="h-full flex items-center justify-center focus-visible:outline-none" tabIndex={-1} draggable={false}>
+                <DeviceMock
+                  project={project}
+                  index={index}
+                  zoomed
+                  initialAspect={start.aspects.get(project.slug)}
+                  rootRef={el => { if (el) devices.current.set(project.slug, el); }}
+                  flight={{ x, y, scale }}
+                />
+              </Link>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* The project's details, after the device lands */}
+        <motion.div
+          className="md:order-1 w-full max-w-[400px] md:w-[220px] shrink-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: closing ? 0 : 1 }}
+          transition={{ duration: closing ? 0.15 : 0.35, delay: closing ? 0 : 0.18 }}
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={project.slug}
+              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: direction * 12 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: direction * -12 }}
+              transition={textIn}
+            >
+              <h2 className="font-medium">{project.title}</h2>
+              {details.map(d => <p key={d} className="text-[#8d8d8d]">{d}</p>)}
+              {project.description && <p className="mt-4">{project.description}</p>}
+              <p className="mt-6 flex flex-wrap gap-x-5 gap-y-1">
+                <Link href={`/project/${project.slug}`} className={inlineLink}>View case study</Link>
+                {project.link && <a href={project.link} target="_blank" rel="noopener noreferrer" className={inlineLink}>Visit site</a>}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+
+          {projects.length > 1 && (
+            <div className="mt-8 flex items-center gap-1 text-[#8d8d8d]">
+              <button type="button" onClick={() => go(-1)} disabled={index === 0} aria-label="Previous project"
+                className="h-9 w-9 -ml-2 grid place-items-center rounded-full hover:bg-neutral-100 hover:text-[#2a2a2a] disabled:opacity-30 disabled:hover:bg-transparent focus-visible:outline-none focus-visible:bg-neutral-100 transition-colors">
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+              </button>
+              <span className="text-[13px] font-[450] tabular-nums min-w-[3.5ch] text-center" aria-live="polite">{index + 1} / {projects.length}</span>
+              <button type="button" onClick={() => go(1)} disabled={index === projects.length - 1} aria-label="Next project"
+                className="h-9 w-9 grid place-items-center rounded-full hover:bg-neutral-100 hover:text-[#2a2a2a] disabled:opacity-30 disabled:hover:bg-transparent focus-visible:outline-none focus-visible:bg-neutral-100 transition-colors">
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+              </button>
+            </div>
+          )}
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+}
+
 /* ---------- Device mockups ---------- */
 
-// Laptops for wide screenshots, phones for tall ones; without an image, alternate the two
-function DeviceMock({ project, index }: { project: Project; index: number }) {
+// Laptops for wide screenshots, phones for tall ones; without an image, alternate the two.
+// In the project view (`zoomed`) the device fills its frame and follows the flight transform.
+function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, rootRef, flight }: {
+  project: Project;
+  index: number;
+  zoomed?: boolean;
+  initialAspect?: number;
+  onAspect?: (slug: string, aspect: number) => void;
+  rootRef?: (el: HTMLDivElement | null) => void;
+  flight?: { x: MotionValue<number>; y: MotionValue<number>; scale: MotionValue<number> };
+}) {
   const src = projectImage(project);
-  const [aspect, setAspect] = useState<number | null>(null);
+  const [aspect, setAspect] = useState<number | null>(initialAspect ?? null);
   const device: Device = aspect ? (aspect < 0.85 ? 'phone' : 'laptop') : index % 2 === 0 ? 'laptop' : 'phone';
-  const lift = 'transition-transform duration-500 ease-out group-hover:-translate-y-2 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0';
-  const screen = <Screen src={src} index={index} device={device} onAspect={setAspect} />;
+  const lift = zoomed ? '' : 'transition-transform duration-500 ease-out group-hover:-translate-y-2 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0';
+  const { slug } = project;
+  const reportAspect = useCallback((a: number) => {
+    setAspect(a);
+    onAspect?.(slug, a);
+  }, [onAspect, slug]);
+  const screen = <Screen src={src} index={index} device={device} ready={initialAspect !== undefined} onAspect={reportAspect} />;
 
   if (device === 'phone') {
     return (
-      <div className={`relative h-[82%] aspect-[9/19.5] rounded-[clamp(22px,3.6vh,40px)] bg-[#111113] p-[clamp(5px,0.75vh,8px)] shadow-[0_24px_40px_-24px_rgba(0,0,0,0.45)] ring-1 ring-black/5 ${lift}`}>
+      <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-full' : 'h-[82%]'} aspect-[9/19.5] rounded-[clamp(22px,3.6vh,40px)] bg-[#111113] p-[clamp(5px,0.75vh,8px)] shadow-[0_24px_40px_-24px_rgba(0,0,0,0.45)] ring-1 ring-black/5 ${lift}`}>
         <div className="relative w-full h-full rounded-[clamp(17px,2.9vh,32px)] overflow-hidden bg-white">
           {screen}
           <span className="absolute top-[1.6%] left-1/2 -translate-x-1/2 w-[30%] h-[3.2%] rounded-full bg-black" aria-hidden="true" />
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className={`relative h-full aspect-[1.62] ${lift}`}>
+    <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-[min(100%,54vw)] md:h-[min(100%,34.5vw)]' : 'h-full'} aspect-[1.62] ${lift}`}>
       {/* Lid */}
       <div className="absolute left-[7%] right-[7%] top-0 bottom-[4.2%] rounded-t-[clamp(10px,1.8vh,18px)] bg-[#111113] p-[1.3%] pb-[2.4%] ring-1 ring-black/5">
         <span className="absolute top-[0.7%] left-1/2 -translate-x-1/2 w-[0.7%] aspect-square rounded-full bg-[#2a2a2d]" aria-hidden="true" />
@@ -277,15 +619,16 @@ function DeviceMock({ project, index }: { project: Project; index: number }) {
       <div className="absolute inset-x-0 bottom-0 h-[4.2%] rounded-b-[50%_100%] bg-gradient-to-b from-[#e2e3e6] to-[#a9abb0] shadow-[0_18px_28px_-18px_rgba(0,0,0,0.5)]" aria-hidden="true">
         <span className="absolute top-0 left-1/2 -translate-x-1/2 w-[14%] h-[38%] rounded-b-md bg-[#c4c6ca]" />
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 // The device screen: the project image when it loads, otherwise placeholder screen artwork
-function Screen({ src, index, device, onAspect }: {
-  src: string; index: number; device: Device; onAspect: (a: number) => void;
+function Screen({ src, index, device, ready = false, onAspect }: {
+  src: string; index: number; device: Device; ready?: boolean; onAspect: (a: number) => void;
 }) {
-  const [state, setState] = useState<'loading' | 'loaded' | 'failed'>(src ? 'loading' : 'failed');
+  // `ready`: the image already loaded in the reel, so the project view shows it straight away
+  const [state, setState] = useState<'loading' | 'loaded' | 'failed'>(src ? (ready ? 'loaded' : 'loading') : 'failed');
   const wrapRef = useRef<HTMLDivElement>(null);
   // Images can finish before hydration, when onLoad/onError aren't attached yet
   useEffect(() => {
