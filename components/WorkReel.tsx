@@ -46,6 +46,11 @@ const OPEN_SPRING = { type: 'spring', visualDuration: 0.5, bounce: 0.14 } as con
 const CLOSE_SPRING = { type: 'spring', visualDuration: 0.42, bounce: 0, restDelta: 0.002, restSpeed: 0.02 } as const;
 const PAGE_SPRING = { type: 'spring', visualDuration: 0.5, bounce: 0.08 } as const;
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
+// Phones slide in from the right as they come into view: a long, decelerating glide with no
+// overshoot (Material 3 emphasized decelerate), fading in over its first half, a beat apart
+const SLIDE_IN = { x: { duration: 0.9, ease: [0.05, 0.7, 0.1, 1] as const }, opacity: { duration: 0.45, ease: 'easeOut' as const } };
+const SLIDE_FROM = 120;
+const SLIDE_STAGGER_MS = 120;
 // How long the page takes to fade before navigating to a case study
 const DEPART_MS = 200;
 
@@ -68,6 +73,9 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
   const section = sections[tab] ?? sections[0];
   const projects = section.items;
   const hasItems = projects.length > 0;
+  // Items that have slid into view (each enters once)
+  const [revealed, setRevealed] = useState<Set<string>>(() => new Set());
+  const itemKey = (p: ReelItem) => `${section.id}:${p.slug}`;
   // One entry per project (its extra screens share it), pointing at its first item in the reel
   const projectRow = projects.reduce<{ slug: string; title: string; first: number }[]>((row, p, i) => {
     const slug = p.slug.split('~')[0];
@@ -188,6 +196,29 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
     // Re-run per tab: the items, and so the end padding, change
   }, [measure, thumbLeft, thumbWidth, barOpacity, section.id]);
 
+  // Reveal phones as they come into view, left to right, a beat apart
+  useEffect(() => {
+    if (reduceMotion) return;
+    let next = 0;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const io = new IntersectionObserver(entries => {
+      const now = performance.now();
+      entries
+        .filter(e => e.isIntersecting)
+        .sort((a, b) => a.boundingClientRect.left - b.boundingClientRect.left)
+        .forEach(e => {
+          io.unobserve(e.target);
+          const key = (e.target as HTMLElement).dataset.reelKey;
+          if (!key) return;
+          const start = Math.max(now, next);
+          next = start + SLIDE_STAGGER_MS;
+          timers.push(setTimeout(() => setRevealed(r => new Set(r).add(key)), start - now));
+        });
+    }, { threshold: 0.2 });
+    itemRefs.current.forEach(el => { if (el) io.observe(el); });
+    return () => { io.disconnect(); timers.forEach(clearTimeout); };
+  }, [projects, reduceMotion]);
+
   // On desktop, an ordinary vertical wheel or trackpad swipe moves the reel sideways
   useEffect(() => {
     const reel = reelRef.current;
@@ -220,7 +251,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
 
   // Zoom a device out of the reel, from exactly where it sits
   const openAt = (i: number) => {
-    const device = itemRefs.current[i]?.firstElementChild;
+    const device = itemRefs.current[i]?.firstElementChild?.firstElementChild;
     if (!device) return;
     setLeaving(false);
     setZoom({ index: i, origin: device.getBoundingClientRect(), aspects: new Map(aspects.current) });
@@ -235,7 +266,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
     if (r.left < 0 || r.right > window.innerWidth) {
       reel.scrollLeft += r.left - (columnRef.current?.getBoundingClientRect().left ?? 0);
     }
-    return el.firstElementChild?.getBoundingClientRect() ?? null;
+    return el.firstElementChild?.firstElementChild?.getBoundingClientRect() ?? null;
   };
 
   // Leave for a case study: fade the page out, then navigate, so the case study rises in after it.
@@ -408,13 +439,14 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
             tabIndex={0}
             aria-label="Projects. Use the left and right arrow keys to move through them."
             onKeyDown={onReelKey}
-            className="page-in page-in-late w-full h-[min(700px,92vw)] max-h-full md:h-[min(460px,36vw)] flex items-end gap-12 overflow-x-auto overflow-y-hidden hide-scrollbar overscroll-x-contain focus-visible:outline-none"
+            className="w-full h-[min(700px,92vw)] max-h-full md:h-[min(460px,36vw)] flex items-end gap-12 overflow-x-auto overflow-y-hidden hide-scrollbar overscroll-x-contain focus-visible:outline-none"
             // Same left edge as the text column
             style={{ paddingInline: GUTTER, scrollPaddingInline: GUTTER }}
           >
             {projects.map((p, i) => (
               <Link
-                key={`${section.id}:${p.slug}`}
+                key={itemKey(p)}
+                data-reel-key={itemKey(p)}
                 role="listitem"
                 ref={el => { itemRefs.current[i] = el; }}
                 href={p.href}
@@ -428,7 +460,15 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                 }}
                 className={`shrink-0 h-full flex items-end cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[#2a2a2a] rounded-lg ${zoom?.index === i ? 'opacity-0' : ''}`}
               >
-                <DeviceMock project={p} index={i} onAspect={recordAspect} />
+                {/* The entrance: slides in from the right, once, as it comes into view */}
+                <motion.div
+                  className="h-full flex items-end"
+                  initial={false}
+                  animate={reduceMotion || revealed.has(itemKey(p)) ? { x: 0, opacity: 1 } : { x: SLIDE_FROM, opacity: 0 }}
+                  transition={revealed.has(itemKey(p)) ? SLIDE_IN : { duration: 0 }}
+                >
+                  <DeviceMock project={p} index={i} onAspect={recordAspect} revealed={!!reduceMotion || revealed.has(itemKey(p))} />
+                </motion.div>
               </Link>
             ))}
           </div>
@@ -720,10 +760,12 @@ function ProjectZoom({ projects, start, reduceMotion, onIndex, slotFor, onLeave,
 
 // Laptops for wide screenshots, phones for tall ones; without an image, a phone.
 // In the project view (`zoomed`) the device fills its frame and follows the flight transform.
-function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, rootRef, flight }: {
+function DeviceMock({ project, index, zoomed = false, revealed = true, initialAspect, onAspect, rootRef, flight }: {
   project: ReelItem;
   index: number;
   zoomed?: boolean;
+  /** Whether it has entered; its screen content settles and its interface plays once it has */
+  revealed?: boolean;
   initialAspect?: number;
   onAspect?: (slug: string, aspect: number) => void;
   rootRef?: (el: HTMLDivElement | null) => void;
@@ -738,7 +780,18 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
     onAspect?.(slug, a);
   }, [onAspect, slug]);
   const animated = ANIMATED_SCREENS[project.slug];
-  const screen = <Screen src={src} animated={animated} index={index} device={device} ready={initialAspect !== undefined} onAspect={reportAspect} />;
+  // Counter-motion: as the phone glides in, its screen content settles from slightly larger,
+  // a touch behind the frame, for depth
+  const screen = (
+    <motion.div
+      className="absolute inset-0"
+      initial={false}
+      animate={{ scale: revealed ? 1 : 1.06 }}
+      transition={revealed ? { duration: 1.1, ease: [0.05, 0.7, 0.1, 1] } : { duration: 0 }}
+    >
+      <Screen src={src} animated={animated} active={revealed} index={index} device={device} ready={initialAspect !== undefined} onAspect={reportAspect} />
+    </motion.div>
+  );
 
   if (project.book) {
     // Case study book (components/CaseStudyBook.tsx, 116×132), with the project's title on its cover
@@ -777,8 +830,8 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
 }
 
 // The device screen: the project image when it loads, otherwise placeholder screen artwork
-function Screen({ src, animated, index, device, ready = false, onAspect }: {
-  src: string; animated?: AnimatedScreenSpec; index: number; device: Device; ready?: boolean; onAspect: (a: number) => void;
+function Screen({ src, animated, active = true, index, device, ready = false, onAspect }: {
+  src: string; animated?: AnimatedScreenSpec; active?: boolean; index: number; device: Device; ready?: boolean; onAspect: (a: number) => void;
 }) {
   // `ready`: the image already loaded in the reel, so the project view shows it straight away
   const [state, setState] = useState<'loading' | 'loaded' | 'failed'>(src || animated ? (ready || animated ? 'loaded' : 'loading') : 'failed');
@@ -805,7 +858,7 @@ function Screen({ src, animated, index, device, ready = false, onAspect }: {
   const sizes = device === 'laptop' ? '(max-width: 768px) 80vw, 720px' : '(max-width: 768px) 40vw, 260px';
 
   // A project with an animated screen plays its interface instead of showing a still
-  if (animated) return <div ref={wrapRef} className="absolute inset-0"><AnimatedScreen screen={animated} sizes={sizes} /></div>;
+  if (animated) return <div ref={wrapRef} className="absolute inset-0"><AnimatedScreen screen={animated} sizes={sizes} active={active} /></div>;
 
   return (
     <div ref={wrapRef} className="absolute inset-0">
