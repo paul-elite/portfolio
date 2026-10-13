@@ -609,16 +609,12 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
   }
 
   return (
-    <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-[min(100%,54vw)] md:h-[min(100%,34.5vw)]' : 'h-full'} aspect-[1.62] ${lift}`}>
-      {/* Lid */}
-      <div className="absolute left-[7%] right-[7%] top-0 bottom-[4.2%] rounded-t-[clamp(10px,1.8vh,18px)] bg-[#111113] p-[1.3%] pb-[2.4%] ring-1 ring-black/5">
-        <span className="absolute top-[0.7%] left-1/2 -translate-x-1/2 w-[0.7%] aspect-square rounded-full bg-[#2a2a2d]" aria-hidden="true" />
-        <div className="relative w-full h-full overflow-hidden rounded-[3px] bg-white">{screen}</div>
-      </div>
-      {/* Base */}
-      <div className="absolute inset-x-0 bottom-0 h-[4.2%] rounded-b-[50%_100%] bg-gradient-to-b from-[#e2e3e6] to-[#a9abb0] shadow-[0_18px_28px_-18px_rgba(0,0,0,0.5)]" aria-hidden="true">
-        <span className="absolute top-0 left-1/2 -translate-x-1/2 w-[14%] h-[38%] rounded-b-md bg-[#c4c6ca]" />
-      </div>
+    // MacBook Pro frame (public/mockups/macbook-pro.svg, viewBox 520×290) with a see-through 16:10
+    // screen; the shot sits underneath, inset to the opening, and the notch draws over it.
+    <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-[min(100%,48.8vw)] md:h-[min(100%,31.2vw)]' : 'h-full'} aspect-[520/290] ${lift}`}>
+      <div className="absolute inset-x-[10.385%] top-[2.069%] bottom-[9.138%] overflow-hidden bg-white [border-radius:1.21%_1.21%_0.36%_0.36%/1.94%_1.94%_0.58%_0.58%]">{screen}</div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/mockups/macbook-pro.svg" alt="" aria-hidden="true" draggable={false} className="absolute inset-0 w-full h-full pointer-events-none select-none" />
     </motion.div>
   );
 }
