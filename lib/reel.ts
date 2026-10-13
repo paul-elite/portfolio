@@ -38,13 +38,19 @@ export function buildReelSections(content: PortfolioContent, navigation: Portfol
       id: 'work',
       label: 'Work',
       empty: 'New work is on its way.',
-      items: content.projects.map(p => ({
-        ...p,
-        href: `/project/${p.slug}`,
-        cta: 'View case study',
-        category: projectCategory(p),
-        book: p.tags?.includes('case-study'),
-      })),
+      // A project's other screens follow its main one, each on a phone of its own
+      items: content.projects.flatMap(p => {
+        const item: ReelItem = {
+          ...p,
+          href: `/project/${p.slug}`,
+          cta: 'View case study',
+          category: projectCategory(p),
+          book: p.tags?.includes('case-study'),
+        };
+        if (item.book) return [item];
+        const extra = (p.previewImages ?? []).filter(src => src && src !== p.preview);
+        return [item, ...extra.map((src, k) => ({ ...item, id: `${p.id}-${k + 2}`, slug: `${p.slug}~${k + 2}`, preview: src, previewImages: [] }))];
+      }),
     },
     {
       id: 'writing',
