@@ -838,7 +838,9 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
     setAspect(a);
     onAspect?.(slug, a);
   }, [onAspect, slug]);
-  const screen = <Screen src={src} index={index} device={device} ready={initialAspect !== undefined} onAspect={reportAspect} />;
+  // The project's other screens, played in turn after the base one
+  const screens = (project.previewImages ?? []).filter(u => u && u !== src);
+  const screen = <Screen src={src} screens={screens} index={index} device={device} ready={initialAspect !== undefined} onAspect={reportAspect} />;
 
   if (project.book) {
     // Case study book (components/CaseStudyBook.tsx, 116×132), with the project's title on its cover
@@ -872,9 +874,15 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
 }
 
 // The device screen: the project image when it loads, otherwise placeholder screen artwork
-function Screen({ src, index, device, ready = false, onAspect }: {
-  src: string; index: number; device: Device; ready?: boolean; onAspect: (a: number) => void;
+// How long each screen stays up when a project plays through its screens
+const SCREEN_MS = 2800;
+
+function Screen({ src, screens = [], index, device, ready = false, onAspect }: {
+  src: string; screens?: string[]; index: number; device: Device; ready?: boolean; onAspect: (a: number) => void;
 }) {
+  const reduceMotion = useReducedMotion();
+  // 0 is the base screen; 1… are the others, each pushed in from the right, then back to the base
+  const [shown, setShown] = useState(0);
   // `ready`: the image already loaded in the reel, so the project view shows it straight away
   const [state, setState] = useState<'loading' | 'loaded' | 'failed'>(src ? (ready ? 'loaded' : 'loading') : 'failed');
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -893,8 +901,25 @@ function Screen({ src, index, device, ready = false, onAspect }: {
     return () => cancelAnimationFrame(frame);
   }, [onAspect]);
 
+  useEffect(() => {
+    if (reduceMotion || screens.length === 0 || state !== 'loaded') return;
+    const timer = setInterval(() => {
+      if (!document.hidden) setShown(i => (i + 1) % (screens.length + 1));
+    }, SCREEN_MS);
+    return () => clearInterval(timer);
+  }, [reduceMotion, screens.length, state]);
+
+  const sizes = device === 'laptop' ? '(max-width: 768px) 80vw, 720px' : '(max-width: 768px) 40vw, 260px';
+  // An outgoing screen slides a little left under the next one, or, on the way back to the base, off to the right
+  const toBase = shown === 0;
+  const push = {
+    enter: { x: '100%' },
+    center: { x: '0%', filter: 'brightness(1)' },
+    exit: (back: boolean) => (back ? { x: '100%' } : { x: '-30%', filter: 'brightness(0.85)' }),
+  };
+
   return (
-    <div ref={wrapRef} className="absolute inset-0">
+    <div ref={wrapRef} className="absolute inset-0 overflow-hidden">
       {state !== 'loaded' && (
         // Placeholder screen artwork until the project has an image of its own
         // eslint-disable-next-line @next/next/no-img-element
@@ -922,6 +947,30 @@ function Screen({ src, index, device, ready = false, onAspect }: {
           onError={() => setState('failed')}
           className={`object-cover object-top transition-opacity duration-300 ${state === 'loaded' ? 'opacity-100' : 'opacity-0'}`}
         />
+      )}
+      {state === 'loaded' && screens.length > 0 && (
+        <>
+          {/* Load the other screens up front, out of sight, so each slides in ready */}
+          <div className="absolute inset-0 opacity-0 pointer-events-none" aria-hidden="true">
+            {screens.map(u => <Image key={u} src={u} alt="" fill sizes={sizes} className="object-cover object-top" />)}
+          </div>
+          <AnimatePresence initial={false} custom={toBase}>
+            {shown > 0 && (
+              <motion.div
+                key={shown}
+                className="absolute inset-0 bg-white shadow-[-8px_0_24px_rgba(0,0,0,0.12)]"
+                custom={toBase}
+                variants={push}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ type: 'spring', visualDuration: 0.55, bounce: 0 }}
+              >
+                <Image src={screens[shown - 1]} alt="" fill sizes={sizes} className="object-cover object-top" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </>
       )}
     </div>
   );

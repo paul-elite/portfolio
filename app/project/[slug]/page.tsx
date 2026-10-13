@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation';
-import { projects } from '@/lib/data';
 import { getProjectBySlug, getProjectNavigation, getSiblingItems } from '@/lib/content-service';
 import ProjectContent from './ProjectContent';
 
@@ -10,11 +9,9 @@ interface PageProps {
 // Allow dynamic params for database projects
 export const dynamicParams = true;
 
-// Generate static params for known static projects
+// Projects come from the database and render on demand
 export async function generateStaticParams() {
-  return projects.map((project) => ({
-    slug: project.slug,
-  }));
+  return [];
 }
 
 export default async function ProjectPage({ params }: PageProps) {

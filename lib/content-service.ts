@@ -4,7 +4,6 @@ import { hasSupabaseConfig, supabase } from './supabase';
 import {
   illustrations as staticIllustrations,
   interactions as staticInteractions,
-  projects as staticProjects,
   siteConfig as staticConfig,
   writings as staticWritings,
 } from './data';
@@ -43,10 +42,11 @@ export async function getSiteConfig(): Promise<SiteConfig> {
   }
 }
 
+// Projects only ever come from the database: no sample projects, even when it can't be reached
 export async function getPortfolioContent(): Promise<PortfolioContent> {
   if (!hasSupabaseConfig) {
     return {
-      projects: staticProjects,
+      projects: [],
       writings: staticWritings,
       illustrations: staticIllustrations,
       interactions: staticInteractions,
@@ -69,7 +69,7 @@ export async function getPortfolioContent(): Promise<PortfolioContent> {
     });
   } catch {
     return {
-      projects: staticProjects,
+      projects: [],
       writings: staticWritings,
       illustrations: staticIllustrations,
       interactions: staticInteractions,
@@ -88,7 +88,7 @@ export async function getHomeData() {
 
 export async function getProjectNavigation(): Promise<NavItem[]> {
   if (!hasSupabaseConfig) {
-    return staticProjects.map(({ slug, title }) => ({ slug, title }));
+    return [];
   }
 
   try {
@@ -98,12 +98,12 @@ export async function getProjectNavigation(): Promise<NavItem[]> {
       .order('created_at', { ascending: false });
 
     if (error || !data || data.length === 0) {
-      return staticProjects.map(({ slug, title }) => ({ slug, title }));
+      return [];
     }
 
     return data;
   } catch {
-    return staticProjects.map(({ slug, title }) => ({ slug, title }));
+    return [];
   }
 }
 
@@ -130,7 +130,7 @@ export async function getWritingNavigation(): Promise<NavItem[]> {
 
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
   if (!hasSupabaseConfig) {
-    return staticProjects.find((project) => project.slug === slug) || null;
+    return null;
   }
 
   try {
@@ -140,10 +140,10 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
       .eq('slug', slug)
       .single();
 
-    if (error || !data) return staticProjects.find((project) => project.slug === slug) || null;
+    if (error || !data) return null;
     return mapProject(data);
   } catch {
-    return staticProjects.find((project) => project.slug === slug) || null;
+    return null;
   }
 }
 
