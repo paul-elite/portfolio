@@ -27,18 +27,22 @@ function lines(chars: number, count: number, start = 0, lead = ''): string[] {
   return out;
 }
 
+// A paragraph's last line, cut short so it ends partway across the column
+const shorten = (t: string, max: number) => t.split(' ').reduce((acc, w) => ((acc + ' ' + w).trim().length <= max ? (acc + ' ' + w).trim() : acc), '');
+
 // One justified column of body copy, the last line of each paragraph left ragged
 function Column({ x, y, width, count, start, lead, size = 5.4, gap = 7 }: {
   x: number; y: number; width: number; count: number; start: number; lead?: string; size?: number; gap?: number;
 }) {
-  const text = lines(Math.floor(width / (size * 0.41)), count, start, lead);
+  const chars = Math.floor(width / (size * 0.41));
+  const text = lines(chars, count, start, lead);
   return (
     <g fontFamily={SERIF} fontSize={size} fill="#3a3a3a">
       {text.map((t, i) => {
         const ragged = i === text.length - 1 || (i + 1) % 9 === 0;
         return (
           <text key={i} x={x} y={y + i * gap} {...(ragged ? {} : { textLength: width, lengthAdjust: 'spacing' as const })}>
-            {ragged ? `${t}.` : t}
+            {ragged ? `${shorten(t, Math.floor(chars * 0.6))}.` : t}
           </text>
         );
       })}
@@ -91,48 +95,84 @@ function FrontPage({ project, image, ids }: { project: Project; image: string; i
   );
 }
 
-// Paper outline: a sheet with a gentle curl along its right and bottom edges
-const SHEET = 'M0 0 H500 C503 110 505 240 499 352 C330 361 160 366 0 360 Z';
+// Paper outline: a sheet with a slightly bowed left edge and a gentle curl along its right and bottom
+const SHEET = 'M0 0 H500 C503 110 505 240 499 352 C330 361 160 366 0 360 C-2.5 240 1.5 120 0 0 Z';
+// Pages folded underneath, each peeking out a little further at the bottom and right
+const STACK = [4, 3, 2, 1];
 
 export default function Newspaper({ project, image }: { project: Project; image: string }) {
   const uid = useId().replace(/:/g, '');
   const id = (k: string) => `${k}-${uid}`;
+  const url = (k: string) => `url(#${id(k)})`;
   return (
     <svg viewBox="0 0 640 500" className="absolute inset-0 w-full h-full" role="img" aria-label={`${project.title} case study`}>
       <defs>
-        <filter id={id('shadow')} x="-10%" y="-10%" width="120%" height="130%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="7" />
-          <feOffset dx="2" dy="9" />
-          <feComponentTransfer><feFuncA type="linear" slope="0.22" /></feComponentTransfer>
-          <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
+        {/* Two shadows: a tight one where the paper meets the table, and a soft one further out */}
+        <filter id={id('shadow')} x="-15%" y="-15%" width="135%" height="150%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="1.6" result="b1" />
+          <feOffset in="b1" dx="0.6" dy="1.6" result="o1" />
+          <feComponentTransfer in="o1" result="s1"><feFuncA type="linear" slope="0.3" /></feComponentTransfer>
+          <feGaussianBlur in="SourceAlpha" stdDeviation="12" result="b2" />
+          <feOffset in="b2" dx="5" dy="16" result="o2" />
+          <feComponentTransfer in="o2" result="s2"><feFuncA type="linear" slope="0.17" /></feComponentTransfer>
+          <feMerge><feMergeNode in="s2" /><feMergeNode in="s1" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+        {/* Paper grain */}
+        <filter id={id('grain')} x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" />
+          <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 0" />
         </filter>
         <clipPath id={id('sheet')}><path d={SHEET} /></clipPath>
-        {/* Light falling across the paper, darker where it curls under */}
-        <linearGradient id={id('shade')} x1="0" y1="0" x2="0.15" y2="1">
-          <stop offset="0" stopColor="#fff" stopOpacity="0" />
-          <stop offset="0.7" stopColor="#000" stopOpacity="0.02" />
-          <stop offset="1" stopColor="#000" stopOpacity="0.1" />
+        {/* Key light from the top right, falling off towards the lower left */}
+        <radialGradient id={id('key')} cx="0.78" cy="0.08" r="0.95">
+          <stop offset="0" stopColor="#fff" stopOpacity="0.3" />
+          <stop offset="0.45" stopColor="#fff" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id={id('falloff')} cx="0" cy="1" r="0.85">
+          <stop offset="0" stopColor="#000" stopOpacity="0.09" />
+          <stop offset="1" stopColor="#000" stopOpacity="0" />
+        </radialGradient>
+        {/* The bottom curling under: darker into the bend, then a thin rim of light on the edge */}
+        <linearGradient id={id('curl')} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0.74" stopColor="#000" stopOpacity="0" />
+          <stop offset="0.9" stopColor="#000" stopOpacity="0.05" />
+          <stop offset="0.975" stopColor="#000" stopOpacity="0.13" />
+          <stop offset="0.99" stopColor="#fff" stopOpacity="0.5" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0.8" />
         </linearGradient>
-        <linearGradient id={id('edge')} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0.8" stopColor="#000" stopOpacity="0" />
-          <stop offset="1" stopColor="#000" stopOpacity="0.08" />
+        <linearGradient id={id('side')} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#000" stopOpacity="0.05" />
+          <stop offset="0.06" stopColor="#000" stopOpacity="0" />
+          <stop offset="0.9" stopColor="#000" stopOpacity="0" />
+          <stop offset="1" stopColor="#000" stopOpacity="0.09" />
+        </linearGradient>
+        <linearGradient id={id('stack')} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#f2f2f0" />
+          <stop offset="1" stopColor="#dcdcda" />
         </linearGradient>
       </defs>
 
       {[
-        { key: 'back', transform: 'translate(38 112) rotate(-9)' },
-        { key: 'front', transform: 'translate(84 82) rotate(-3.2)' },
-      ].map(({ key, transform }) => (
-        <g key={key} transform={transform} filter={`url(#${id('shadow')})`}>
-          {/* The folded pages underneath, showing at the edges */}
-          <path d={SHEET} transform="translate(5 7)" fill="#dedede" />
-          <path d={SHEET} transform="translate(2.5 3.5)" fill="#ececec" />
-          <path d={SHEET} fill="#fbfbfa" />
-          <g clipPath={`url(#${id('sheet')})`}>
+        { key: 'back', transform: 'translate(38 112) rotate(-9)', dim: 0.05 },
+        { key: 'front', transform: 'translate(84 82) rotate(-3.2)', dim: 0 },
+      ].map(({ key, transform, dim }) => (
+        <g key={key} transform={transform} filter={url('shadow')}>
+          {STACK.map(n => (
+            <path key={n} d={SHEET} transform={`translate(${n * 1.3} ${n * 1.9})`} fill={url('stack')} stroke="#c9c9c6" strokeWidth={0.35} />
+          ))}
+          <path d={SHEET} fill="#fcfcfa" />
+          <g clipPath={url('sheet')}>
             <FrontPage project={project} image={image} ids={{ photo: id(`photo-${key}`) }} />
-            <rect x={0} y={0} width={510} height={370} fill={`url(#${id('shade')})`} />
-            <rect x={0} y={0} width={510} height={370} fill={`url(#${id('edge')})`} />
+            <rect x={-5} y={-5} width={515} height={375} filter={url('grain')} opacity={0.05} />
+            <rect x={-5} y={-5} width={515} height={375} fill={url('falloff')} />
+            <rect x={-5} y={-5} width={515} height={375} fill={url('key')} />
+            <rect x={0} y={0} width={505} height={366} fill={url('side')} />
+            <rect x={0} y={0} width={505} height={366} fill={url('curl')} />
+            {dim > 0 && <rect x={-5} y={-5} width={515} height={375} fill="#000" opacity={dim} />}
           </g>
+          {/* Crisp outline, and light catching the top edge */}
+          <path d={SHEET} fill="none" stroke="#000" strokeOpacity={0.09} strokeWidth={0.5} />
+          <path d="M1 0.6 H499" stroke="#fff" strokeWidth={0.9} strokeOpacity={0.9} />
         </g>
       ))}
     </svg>

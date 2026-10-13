@@ -672,9 +672,10 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
   const screen = <Screen src={src} index={index} device={device} ready={initialAspect !== undefined} onAspect={reportAspect} />;
 
   if (isNewspaper(project)) {
-    // Vector newspaper (components/Newspaper.tsx, 640×500), with the project as its front page
+    // Vector newspaper (components/Newspaper.tsx, 640×500), with the project as its front page;
+    // drawn at 0.75× the device size
     return (
-      <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-[min(100%,68vw)] md:h-[min(100%,43.8vw)]' : 'h-full'} aspect-[640/500]`}>
+      <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-[min(75%,51vw)] md:h-[min(75%,32.8vw)]' : 'h-[75%]'} aspect-[640/500]`}>
         <Newspaper project={project} image={src} />
       </motion.div>
     );
