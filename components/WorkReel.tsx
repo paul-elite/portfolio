@@ -30,6 +30,16 @@ const inlineLink = 'underline decoration-dotted decoration-[#b2b2b2] decoration-
 
 type Device = 'laptop' | 'phone';
 
+// The phone's outline (public/mockups/iphone-16-pro-max-mask.png, same size as the frame), used to mask its screen
+const PHONE_MASK = {
+  maskImage: 'url(/mockups/iphone-16-pro-max-mask.png)',
+  WebkitMaskImage: 'url(/mockups/iphone-16-pro-max-mask.png)',
+  maskSize: '100% 100%',
+  WebkitMaskSize: '100% 100%',
+  maskRepeat: 'no-repeat',
+  WebkitMaskRepeat: 'no-repeat',
+} as const;
+
 // Springs after mikematas.com, tuned by feel: the device eases out of the reel with a hint of
 // bounce and settles back into its slot without overshooting; paging glides with a little give
 const OPEN_SPRING = { type: 'spring', visualDuration: 0.5, bounce: 0.14 } as const;
@@ -807,9 +817,11 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
     // screen; the shot sits underneath, inset and rounded to match the screen's opening.
     return (
       <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-full' : 'h-[min(684px,90vw)] max-h-[96%] md:h-[96%]'} aspect-[772/1600]`}>
-        {/* clip-path as well as the rounded overflow: some mobile browsers skip the rounded clip for
-            animated (GPU-composited) layers, letting the screen's square corners show past the bezel */}
-        <div className="absolute inset-x-[3.83%] inset-y-[1.52%] rounded-[15.4%/7.07%] overflow-hidden isolate [clip-path:inset(0_round_15.4%/7.07%)] bg-white">{screen}</div>
+        {/* The screen is masked to the phone's own silhouette, so nothing can show past the bezel even
+            where a mobile browser skips the rounded clip for animated (GPU-composited) layers */}
+        <div className="absolute inset-0" style={PHONE_MASK}>
+          <div className="absolute inset-x-[3.83%] inset-y-[1.52%] rounded-[17%/7.8%] overflow-hidden isolate [clip-path:inset(0_round_17%/7.8%)] bg-white">{screen}</div>
+        </div>
         <Image src="/mockups/iphone-16-pro-max.png" alt="" aria-hidden="true" draggable={false} fill sizes="(max-width: 768px) 50vw, 340px" priority={index < 2} className="pointer-events-none select-none" />
       </motion.div>
     );
