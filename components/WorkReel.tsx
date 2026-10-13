@@ -818,8 +818,9 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
     return (
       <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-full' : 'h-[min(684px,90vw)] max-h-[96%] md:h-[96%]'} aspect-[772/1600]`}>
         {/* A square screen under the frame: the frame is opaque outside its screen opening, so it shapes
-            the corners and the opening is always filled. Masked to the phone's outline as a safeguard. */}
-        <div className="absolute inset-0" style={PHONE_MASK}>
+            the corners and the opening is always filled. Masked to the phone's outline as a safeguard, over
+            a black backing so any sub-pixel sliver between screen and frame reads as bezel, not page. */}
+        <div className="absolute inset-0 bg-black" style={PHONE_MASK}>
           <div className="absolute inset-x-[3.83%] inset-y-[1.52%] overflow-hidden bg-white">{screen}</div>
         </div>
         <Image src="/mockups/iphone-16-pro-max.png" alt="" aria-hidden="true" draggable={false} fill sizes="(max-width: 768px) 50vw, 340px" priority={index < 2} className="pointer-events-none select-none" />
