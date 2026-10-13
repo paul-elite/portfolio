@@ -12,8 +12,8 @@ export interface ReelItem extends Project {
   cta: string;
   /** Shown at the end of the item's line on the home page */
   category: string;
-  /** Show as a newspaper (the title on a folded paper) instead of a device */
-  paper?: boolean;
+  /** Show as a book (the title on its cover) instead of a device */
+  book?: boolean;
 }
 
 export interface ReelSection { id: ReelSectionId; label: string; items: ReelItem[]; empty: string }
@@ -42,7 +42,7 @@ export function buildReelSections(content: PortfolioContent, navigation: Portfol
         href: `/project/${p.slug}`,
         cta: 'View case study',
         category: projectCategory(p),
-        paper: p.tags?.includes('case-study'),
+        book: p.tags?.includes('case-study'),
       })),
     },
     {
@@ -55,7 +55,7 @@ export function buildReelSections(content: PortfolioContent, navigation: Portfol
         href: w.link || `/writing/${w.slug}`,
         cta: 'Read the essay',
         category: 'Essay',
-        paper: true,
+        book: true,
       })),
     },
     {

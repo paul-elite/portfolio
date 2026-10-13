@@ -8,7 +8,7 @@ import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, typ
 import type { SiteConfig } from '@/lib/content-model';
 import { isExternal, type ReelItem, type ReelSection } from '@/lib/reel';
 import { reelPlaceholder } from '@/lib/mockups';
-import Newspaper from './Newspaper';
+import CaseStudyBook from './CaseStudyBook';
 
 interface WorkReelProps {
   config: SiteConfig;
@@ -840,12 +840,11 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
   }, [onAspect, slug]);
   const screen = <Screen src={src} index={index} device={device} ready={initialAspect !== undefined} onAspect={reportAspect} />;
 
-  if (project.paper) {
-    // Vector newspaper (components/Newspaper.tsx, 640×500), with the project's title as its front page;
-    // drawn at 0.75× the device size
+  if (project.book) {
+    // Case study book (components/CaseStudyBook.tsx, 116×132), with the project's title on its cover
     return (
-      <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-[min(75%,51vw)] md:h-[min(75%,32.8vw)]' : 'h-[min(440px,58.5vw)] md:h-[75%]'} aspect-[640/500]`}>
-        <Newspaper project={project} />
+      <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-[min(100%,99vw)] md:h-[90%]' : 'h-[min(560px,76vw)] md:h-[85%]'} aspect-[116/132]`}>
+        <CaseStudyBook title={project.title} />
       </motion.div>
     );
   }
