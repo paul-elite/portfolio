@@ -1,6 +1,7 @@
 import { getHomeData } from '@/lib/content-service';
 import { projects as sampleProjects } from '@/lib/data';
 import WorkReel from '@/components/WorkReel';
+import { buildReelSections } from '@/lib/reel';
 
 export const revalidate = 60; // Revalidate every 60 seconds
 
@@ -12,9 +13,11 @@ export default async function Home() {
     ? sampleProjects
     : content.projects;
 
+  const sections = buildReelSections({ ...content, projects }, config.navigationItems);
+
   return (
     <main>
-      <WorkReel config={config} projects={projects} />
+      <WorkReel config={config} sections={sections} />
     </main>
   );
 }

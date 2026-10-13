@@ -507,7 +507,8 @@ export async function POST(request: NextRequest) {
       screen,
     };
 
-    if (hasSupabaseConfig && await persistVisit(visit)) {
+    // Local development shares the production database, so only production records visits there
+    if (hasSupabaseConfig && process.env.NODE_ENV === 'production' && await persistVisit(visit)) {
       return NextResponse.json({ success: true, storage: 'supabase' });
     }
 

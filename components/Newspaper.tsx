@@ -3,95 +3,47 @@
 import { useId } from 'react';
 import type { Project } from '@/lib/content-model';
 
-// A folded newspaper for case studies, drawn as vector: two papers, the front one carrying the
-// project as its front page (title as the headline, role and year in the band, preview image as
-// the photo, description leading the copy). Viewbox 640×500, room for the curl and shadows.
+// A folded newspaper for case studies, drawn as vector: two papers, the front one carrying only the
+// project's title, bold and flush left. Viewbox 640×500, room for the curl and shadows.
 
-const SERIF = 'Georgia, "Times New Roman", Times, serif';
-const SANS = '"Helvetica Neue", Arial, sans-serif';
 const INK = '#141414';
-const RED = '#c3161c';
-const BLUE = '#28409a';
+const GEIST = 'var(--font-geist), ui-sans-serif, system-ui, sans-serif';
 
-const LOREM = 'Lorem ipsum dolor sit amet consectetur adipiscing elit duis iaculis lacinia odio a feugiat fusce quis laoreet nisl id consectetur tortor vivamus malesuada libero non congue iaculis in tempus nulla iaculis ante pellentesque porttitor maecenas at lacus et eros tristique condimentum sed mollis consequat est vitae maximus purus suspendisse at feugiat tellus nec placerat arcu nullam sed ligula luctus cursus ligula nec varius nisl pellentesque ut lorem a urna aliquet eros eu congue ut vitae tellus et enim viverra imperdiet donec ornare ante turpis in fermentum ante facilisis in fusce eget aliquam dui in tincidunt sapien'.split(' ');
+// Page area for the title: inside a 32-unit margin on the 500×360 sheet
+const MARGIN = 32;
+const AREA_W = 500 - MARGIN * 2;
+const AREA_H = 360 - MARGIN * 2;
 
-// Break text into lines of about `chars` characters; the words wrap on from `start` so columns differ
-function lines(chars: number, count: number, start = 0, lead = ''): string[] {
-  const words = [...lead.split(/\s+/).filter(Boolean), ...LOREM.slice(start % LOREM.length), ...LOREM, ...LOREM, ...LOREM];
-  const out: string[] = [];
-  let line = '';
-  for (const w of words) {
-    if (out.length === count) break;
-    if ((line + ' ' + w).trim().length > chars) { out.push(line.trim()); line = w; } else line += ' ' + w;
+// Wrap the title into lines, at the largest size (up to 76) that fits the page in four lines or fewer.
+// Widths are estimated for Geist Bold with tight tracking (about 0.5em a character).
+function setTitle(title: string): { size: number; lines: string[] } {
+  const words = title.split(/\s+/).filter(Boolean);
+  for (let size = 76; size >= 22; size -= 2) {
+    const perLine = Math.floor(AREA_W / (size * 0.5));
+    if (words.some(w => w.length > perLine)) continue;
+    const lines: string[] = [];
+    let line = '';
+    for (const w of words) {
+      if (line && (line + ' ' + w).length > perLine) { lines.push(line); line = w; } else line = line ? line + ' ' + w : w;
+    }
+    if (line) lines.push(line);
+    if (lines.length <= 4 && lines.length * size * 1.02 <= AREA_H) return { size, lines };
   }
-  return out;
+  return { size: 22, lines: words.length ? [title] : [] };
 }
 
-// A paragraph's last line, cut short so it ends partway across the column
-const shorten = (t: string, max: number) => t.split(' ').reduce((acc, w) => ((acc + ' ' + w).trim().length <= max ? (acc + ' ' + w).trim() : acc), '');
-
-// One justified column of body copy, the last line of each paragraph left ragged
-function Column({ x, y, width, count, start, lead, size = 5.4, gap = 7 }: {
-  x: number; y: number; width: number; count: number; start: number; lead?: string; size?: number; gap?: number;
-}) {
-  const chars = Math.floor(width / (size * 0.41));
-  const text = lines(chars, count, start, lead);
+// The front page: just the title
+function TitlePage({ title }: { title: string }) {
+  const { size, lines } = setTitle(title || 'Case study');
   return (
-    <g fontFamily={SERIF} fontSize={size} fill="#3a3a3a">
-      {text.map((t, i) => {
-        const ragged = i === text.length - 1 || (i + 1) % 9 === 0;
-        return (
-          <text key={i} x={x} y={y + i * gap} {...(ragged ? {} : { textLength: width, lengthAdjust: 'spacing' as const })}>
-            {ragged ? `${shorten(t, Math.floor(chars * 0.6))}.` : t}
-          </text>
-        );
-      })}
-    </g>
-  );
-}
-
-function Subhead({ x, y, children }: { x: number; y: number; children: string }) {
-  return <text x={x} y={y} fontFamily={SERIF} fontSize={6.4} fontWeight={700} fill={INK}>{children}</text>;
-}
-
-// The front page, 500 wide; shared by both papers
-function FrontPage({ project, image, ids }: { project: Project; image: string; ids: { photo: string } }) {
-  const title = (project.title || 'Case study').toUpperCase();
-  const band = [project.role, project.year, project.title].filter(Boolean).join('  ·  ') || 'Design  ·  Research  ·  Prototype';
-  const lead = project.description || '';
-  const sub = lead ? lead.split(/\s+/).slice(0, 4).join(' ') : 'Lorem ipsum dolor';
-  return (
-    <g>
-      <line x1={18} x2={482} y1={14} y2={14} stroke={INK} strokeWidth={0.8} />
-      <text x={18} y={10} fontFamily={SANS} fontSize={4.6} fill="#555" letterSpacing={0.4}>VOL. XII · NO. 214</text>
-      <text x={482} y={10} fontFamily={SANS} fontSize={4.6} fill="#555" textAnchor="end" letterSpacing={0.4}>CASE STUDY EDITION</text>
-      {/* Masthead */}
-      <text x={20} y={66} fontFamily={SERIF} fontSize={54} fill={INK} letterSpacing={-1}>
-        The Daily <tspan fill={RED}>Case</tspan>
-      </text>
-      <line x1={18} x2={482} y1={75} y2={75} stroke={INK} strokeWidth={0.6} />
-      {/* Band */}
-      <rect x={18} y={78} width={464} height={15} fill={BLUE} />
-      <text x={250} y={89} fontFamily={SERIF} fontSize={9.5} fill="#fff" textAnchor="middle" letterSpacing={0.6}>{band}</text>
-      {/* Photo, with its label */}
-      <clipPath id={ids.photo}><rect x={18} y={100} width={208} height={98} /></clipPath>
-      <rect x={18} y={100} width={208} height={98} fill="#bdbdbd" />
-      {image && <image href={image} x={18} y={100} width={208} height={98} preserveAspectRatio="xMidYMid slice" clipPath={`url(#${ids.photo})`} />}
-      <rect x={24} y={176} width={92} height={16} fill={BLUE} />
-      <text x={70} y={187.5} fontFamily={SERIF} fontSize={10} fill="#fff" textAnchor="middle" letterSpacing={0.4}>CASE STUDY</text>
-      {/* Headline */}
-      <text x={236} y={117} fontFamily={SERIF} fontSize={25} fill={INK} textLength={246} lengthAdjust="spacingAndGlyphs">{title}</text>
-      {/* Copy: two columns beside the photo, two under it, and one more on the right */}
-      <Subhead x={236} y={131}>{sub}</Subhead>
-      <Column x={236} y={139} width={116} count={16} start={0} lead={lead} />
-      <Column x={364} y={131} width={118} count={9} start={23} />
-      <Subhead x={364} y={199}>Lorem ipsum dolor</Subhead>
-      <Column x={364} y={207} width={118} count={19} start={57} />
-      <text x={18} y={210} fontFamily={SERIF} fontSize={6} fontStyle="italic" fill="#333" textLength={208} lengthAdjust="spacingAndGlyphs">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis iaculis.</text>
-      <Column x={18} y={221} width={98} count={18} start={11} />
-      <Column x={128} y={221} width={98} count={18} start={40} />
-      <Column x={236} y={256} width={116} count={13} start={75} />
-    </g>
+    <text
+      x={MARGIN}
+      y={MARGIN + size * 0.82}
+      fill={INK}
+      style={{ fontFamily: GEIST, fontWeight: 700, fontSize: size, letterSpacing: '-0.045em' }}
+    >
+      {lines.map((l, i) => <tspan key={i} x={MARGIN} dy={i === 0 ? 0 : size * 1.0}>{l}</tspan>)}
+    </text>
   );
 }
 
@@ -100,7 +52,7 @@ const SHEET = 'M0 0 H500 C503 110 505 240 499 352 C330 361 160 366 0 360 C-2.5 2
 // Pages folded underneath, each peeking out a little further at the bottom and right
 const STACK = [4, 3, 2, 1];
 
-export default function Newspaper({ project, image }: { project: Project; image: string }) {
+export default function Newspaper({ project }: { project: Project }) {
   const uid = useId().replace(/:/g, '');
   const id = (k: string) => `${k}-${uid}`;
   const url = (k: string) => `url(#${id(k)})`;
@@ -162,7 +114,7 @@ export default function Newspaper({ project, image }: { project: Project; image:
           ))}
           <path d={SHEET} fill="#fcfcfa" />
           <g clipPath={url('sheet')}>
-            <FrontPage project={project} image={image} ids={{ photo: id(`photo-${key}`) }} />
+            <TitlePage title={project.title} />
             <rect x={-5} y={-5} width={515} height={375} filter={url('grain')} opacity={0.05} />
             <rect x={-5} y={-5} width={515} height={375} fill={url('falloff')} />
             <rect x={-5} y={-5} width={515} height={375} fill={url('key')} />

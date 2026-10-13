@@ -5,13 +5,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, type MotionValue } from 'framer-motion';
-import type { Project, SiteConfig } from '@/lib/content-model';
+import type { SiteConfig } from '@/lib/content-model';
+import { isExternal, type ReelItem, type ReelSection } from '@/lib/reel';
 import { reelPlaceholder } from '@/lib/mockups';
 import Newspaper from './Newspaper';
 
 interface WorkReelProps {
   config: SiteConfig;
-  projects: Project[];
+  sections: ReelSection[];
 }
 
 // Text column width and its left edge; the reel starts on the same edge
@@ -19,13 +20,13 @@ const COLUMN = 625;
 const GUTTER = `max(1.5rem, calc((100vw - ${COLUMN}px) / 2))`;
 
 // Stand-ins for the empty reel: no images, so each device shows its placeholder screen artwork
-const PLACEHOLDER_PROJECTS: Project[] = Array.from({ length: 6 }, (_, i) => ({
-  id: `placeholder-${i}`, slug: `placeholder-${i}`, title: '', description: '',
+const PLACEHOLDER_PROJECTS: ReelItem[] = Array.from({ length: 6 }, (_, i) => ({
+  id: `placeholder-${i}`, slug: `placeholder-${i}`, title: '', description: '', href: '', cta: '', category: '',
 }));
 
-const projectImage = (p: Project) => p.preview || p.previewImages?.[0] || p.avatar || '';
-// Projects tagged `case-study` show as a folded newspaper instead of a device
-const isNewspaper = (p: Project) => p.tags?.includes('case-study') ?? false;
+const projectImage = (p: ReelItem) => p.preview || p.previewImages?.[0] || p.avatar || '';
+// Opens outside links in a new tab
+const linkTarget = (href: string) => (isExternal(href) ? { target: '_blank', rel: 'noopener noreferrer' } : {});
 
 // Ayomide-style inline link: same size and colour as the text, dotted underline
 const inlineLink = 'underline decoration-dotted decoration-[#b2b2b2] decoration-1 underline-offset-4 hover:decoration-[#2a2a2a] transition-colors';
@@ -51,7 +52,17 @@ interface Zoom { index: number; origin: DOMRect; aspects: Map<string, number> }
  * (after mikematas.com): it springs out of the reel, the project's details fade in beside it,
  * neighbouring projects page in sideways, and closing springs it back into its slot.
  */
-export default function WorkReel({ config, projects }: WorkReelProps) {
+export default function WorkReel({ config, sections }: WorkReelProps) {
+  // The tab on the Work line; the reel shows its items
+  const [tab, setTab] = useState(0);
+  const [tabFade, setTabFade] = useState(false);
+  const [tabbed, setTabbed] = useState(false);
+  const section = sections[tab] ?? sections[0];
+  const projects = section.items;
+  const hasItems = projects.length > 0;
+  const thumbLeft = useMotionValue('0%');
+  const thumbWidth = useMotionValue('100%');
+  const barOpacity = useMotionValue(0);
   const reelRef = useRef<HTMLDivElement>(null);
   const columnRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
@@ -105,18 +116,36 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
     const reel = reelRef.current;
     if (!reel) return;
     let frame = requestAnimationFrame(measure);
-    const onScroll = () => {
+    let hide: ReturnType<typeof setTimeout> | undefined;
+    // The scroll indicator: thumb sized to the visible share of the reel, shown only while it scrolls
+    const placeThumb = () => {
+      const max = reel.scrollWidth - reel.clientWidth;
+      const share = Math.max(18, (reel.clientWidth / reel.scrollWidth) * 100);
+      thumbWidth.set(`${share}%`);
+      thumbLeft.set(`${max > 0 ? (reel.scrollLeft / max) * (100 - share) : 0}%`);
+      return max > 0;
+    };
+    const onResize = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(measure);
+      placeThumb();
+    };
+    const onScroll = () => {
+      onResize();
+      if (!placeThumb()) return;
+      animate(barOpacity, 1, { duration: 0.15 });
+      clearTimeout(hide);
+      hide = setTimeout(() => animate(barOpacity, 0, { duration: 0.4 }), 700);
     };
     reel.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
+    window.addEventListener('resize', onResize);
     return () => {
       cancelAnimationFrame(frame);
+      clearTimeout(hide);
       reel.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
+      window.removeEventListener('resize', onResize);
     };
-  }, [measure]);
+  }, [measure, thumbLeft, thumbWidth, barOpacity]);
 
   // On desktop, an ordinary vertical wheel or trackpad swipe moves the reel sideways
   useEffect(() => {
@@ -133,7 +162,8 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
     };
     window.addEventListener('wheel', onWheel, { passive: false });
     return () => window.removeEventListener('wheel', onWheel);
-  }, []);
+    // Re-attach when an empty tab's placeholder reel gives way to the real one
+  }, [hasItems]);
 
   const scrollToItem = (i: number) => {
     const el = itemRefs.current[i];
@@ -166,11 +196,27 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
   // Leave for a case study: fade the page out, then navigate, so the case study rises in after it.
   // Modified clicks still open it in a new tab or window.
   const leaveFor = (e: React.MouseEvent, href: string) => {
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0 || isExternal(href)) return;
     e.preventDefault();
     if (reduceMotion) { router.push(href); return; }
     setDeparting(true);
     setTimeout(() => router.push(href), DEPART_MS);
+  };
+
+  // Switch tabs: fade the reel out, swap its items, and bring them back from the start
+  const switchTab = (i: number) => {
+    if (i === tab || tabFade || zoom) return;
+    const d = i > tab ? 1 : -1;
+    const apply = () => {
+      setTab(i);
+      setTabbed(true);
+      setView({ active: 0, dir: d });
+      if (reelRef.current) reelRef.current.scrollLeft = 0;
+      setTabFade(false);
+    };
+    if (reduceMotion) { apply(); return; }
+    setTabFade(true);
+    setTimeout(apply, 160);
   };
 
   const onZoomClosed = (i: number) => {
@@ -228,20 +274,11 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
         inert={zoom !== null}
       >
         <div ref={columnRef} className="grid gap-6 page-in">
-          {config.avatar ? (
-            <Image src={config.avatar} alt="" width={48} height={48} className="w-12 h-12 rounded-full object-cover bg-neutral-100" priority />
-          ) : (
-            <span className="w-12 h-12 rounded-full bg-gradient-to-br from-fuchsia-400 to-violet-500 text-white grid place-items-center text-[15px] font-medium" aria-hidden="true">
-              {(config.name || '?').slice(0, 1)}
-            </span>
-          )}
-
-          <div className="grid gap-6">
-            <h1 className="font-normal">
-              Hey, I&apos;m {config.name}.{bio ? <span> {bio}</span> : null}
-            </h1>
+          {/* The name above a single paragraph: bio, then where to find more */}
+          <div className="grid gap-3">
+            <h1 className="text-[22px] leading-7 font-semibold tracking-[-0.025em] text-[#1a1a1a]">{config.name}</h1>
             <p>
-              You can browse my{' '}
+              {bio ? `${bio} ` : ''}You can browse my{' '}
               <Link href="/explore?view=writings" className={inlineLink}>writing</Link>,{' '}
               <Link href="/explore?view=illustration" className={inlineLink}>illustration</Link> and{' '}
               <Link href="/explore?view=interaction" className={inlineLink}>interaction</Link> work
@@ -269,7 +306,27 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
           {/* The project at the column edge; announced politely as the reel moves */}
           <div className="mt-6 md:mt-10">
             <div className="flex items-baseline justify-between gap-4">
-              <p className="font-medium text-[#8d8d8d]">Work</p>
+              <div role="tablist" aria-label="Sections" className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+                {sections.map((s, i) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={i === tab}
+                    onClick={() => switchTab(i)}
+                    className={`relative font-medium transition-colors focus-visible:outline-none focus-visible:text-[#2a2a2a] ${i === tab ? 'text-[#2a2a2a]' : 'text-[#b2b2b2] hover:text-[#8d8d8d]'}`}
+                  >
+                    {s.label}
+                    {i === tab && (
+                      <motion.span
+                        layoutId="reel-tab"
+                        className="absolute left-0 right-0 -bottom-1 h-px bg-[#2a2a2a]"
+                        transition={reduceMotion ? { duration: 0 } : { type: 'spring', visualDuration: 0.35, bounce: 0.1 }}
+                      />
+                    )}
+                  </button>
+                ))}
+              </div>
               {projects.length > 1 && (
                 <p className="relative text-[13px] font-[450] text-[#8d8d8d] tabular-nums" aria-hidden="true">
                   {/* The number rolls the way the reel moved */}
@@ -291,7 +348,7 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
               )}
             </div>
             {/* Old and new titles cross over instead of taking turns */}
-            <div className="relative mt-4 min-h-[48px]" aria-live="polite" aria-atomic="true">
+            <div className="relative mt-4 min-h-6" aria-live="polite" aria-atomic="true">
               <AnimatePresence mode="popLayout" initial={false} custom={dir}>
                 <motion.div
                   key={current?.slug ?? 'empty'}
@@ -300,14 +357,16 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
                   initial="enter"
                   animate="center"
                   exit="exit"
+                  className="w-full"
                 >
                   {current ? (
-                    <>
-                      <Link href={`/project/${current.slug}`} onClick={e => leaveFor(e, `/project/${current.slug}`)} className={`font-medium ${inlineLink}`}>{current.title}</Link>
-                      {current.description && <p className="mt-1">{current.description}</p>}
-                    </>
+                    // Name at the start of the line, category at the other end
+                    <div className="flex items-baseline justify-between gap-4">
+                      <Link href={current.href} {...linkTarget(current.href)} onClick={e => leaveFor(e, current.href)} className={`font-medium truncate ${inlineLink}`}>{current.title}</Link>
+                      {current.category && <span className="shrink-0 text-[#8d8d8d]">{current.category}</span>}
+                    </div>
                   ) : (
-                    <p className="text-[#8d8d8d]">New work is on its way.</p>
+                    <p className="text-[#8d8d8d]">{section.empty}</p>
                   )}
                 </motion.div>
               </AnimatePresence>
@@ -320,11 +379,11 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
         // Before any work exists, show the placeholder devices (decorative, not linked)
         <section aria-hidden="true" className="flex-1 md:min-h-0 flex items-end pt-8 pb-10 md:pb-14">
           <div
-            className="w-full h-[min(360px,52vw)] md:h-[min(460px,36vw)] md:max-h-full flex items-end gap-14 md:gap-20 overflow-x-auto overflow-y-hidden snap-x snap-mandatory md:snap-none scrollbar-none overscroll-x-contain select-none"
+            className="w-full h-[min(540px,78vw)] md:h-[min(460px,36vw)] md:max-h-full flex items-end gap-4 md:gap-20 overflow-x-auto overflow-y-hidden snap-x snap-mandatory md:snap-none hide-scrollbar overscroll-x-contain select-none"
             style={{ paddingInline: GUTTER, scrollPaddingInline: GUTTER }}
           >
             {PLACEHOLDER_PROJECTS.map((p, i) => (
-              <div key={p.slug} className="shrink-0 h-full snap-start flex items-end">
+              <div key={p.slug} className="shrink-0 h-full w-[calc(100vw-72px)] md:w-auto snap-start flex items-end">
                 <DeviceMock project={p} index={i} />
               </div>
             ))}
@@ -335,10 +394,10 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
       {projects.length > 0 && (
         <motion.section
           aria-label="Work"
-          className="flex-1 md:min-h-0 flex items-end pt-8 pb-10 md:pb-14"
+          className="relative flex-1 md:min-h-0 flex items-end pt-8 pb-10 md:pb-14"
           // Opacity only: the reel mustn't move, so a closing project can fly back to its slot
-          animate={{ opacity: dimmed ? 0 : 1 }}
-          transition={{ duration: dimmed ? 0.25 : 0.45, delay: dimmed ? 0 : 0.08, ease: EASE_OUT }}
+          animate={{ opacity: dimmed || tabFade ? 0 : 1 }}
+          transition={{ duration: tabFade ? 0.16 : dimmed ? 0.25 : 0.45, delay: dimmed || tabFade ? 0 : 0.08, ease: EASE_OUT }}
           aria-hidden={zoom ? true : undefined}
           inert={zoom !== null}
         >
@@ -348,16 +407,18 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
             tabIndex={0}
             aria-label="Projects. Use the left and right arrow keys to move through them."
             onKeyDown={onReelKey}
-            className="page-in page-in-late w-full h-[min(360px,52vw)] md:h-[min(460px,36vw)] md:max-h-full flex items-end gap-14 md:gap-20 overflow-x-auto overflow-y-hidden snap-x snap-mandatory md:snap-none scrollbar-none overscroll-x-contain focus-visible:outline-none"
+            className="page-in page-in-late w-full h-[min(540px,78vw)] md:h-[min(460px,36vw)] md:max-h-full flex items-end gap-4 md:gap-20 overflow-x-auto overflow-y-hidden snap-x snap-mandatory md:snap-none hide-scrollbar overscroll-x-contain focus-visible:outline-none"
             // Same left edge as the text column, for layout and for snap points
             style={{ paddingInline: GUTTER, scrollPaddingInline: GUTTER }}
           >
             {projects.map((p, i) => (
               <Link
-                key={p.slug}
+                key={`${section.id}:${p.slug}`}
                 role="listitem"
                 ref={el => { itemRefs.current[i] = el; }}
-                href={`/project/${p.slug}`}
+                href={p.href}
+                // After a tab switch, the new items rise in one after another
+                style={tabbed ? { animationDelay: `${i * 60}ms` } : undefined}
                 aria-label={`${p.title}${p.description ? `, ${p.description}` : ''}`}
                 onFocus={() => { if (!quietFocus.current) scrollToItem(i); }}
                 onClick={e => {
@@ -366,12 +427,20 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
                   e.preventDefault();
                   openAt(i);
                 }}
-                className={`shrink-0 h-full snap-start flex items-end cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[#2a2a2a] rounded-lg ${zoom?.index === i ? 'opacity-0' : ''}`}
+                className={`${tabbed ? 'page-in ' : ''}shrink-0 h-full w-[calc(100vw-72px)] md:w-auto snap-start flex items-end cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[#2a2a2a] rounded-lg ${zoom?.index === i ? 'opacity-0' : ''}`}
               >
                 <DeviceMock project={p} index={i} onAspect={recordAspect} />
               </Link>
             ))}
           </div>
+          {/* Small rounded scroll indicator, on the column's left edge, only while the reel scrolls */}
+          <motion.div
+            aria-hidden="true"
+            className="absolute bottom-4 md:bottom-6 h-[3px] w-14 rounded-full bg-[#f0f0f0] pointer-events-none"
+            style={{ left: GUTTER, opacity: barOpacity }}
+          >
+            <motion.div className="absolute inset-y-0 rounded-full bg-[#d4d4d4]" style={{ left: thumbLeft, width: thumbWidth }} />
+          </motion.div>
         </motion.section>
       )}
 
@@ -394,7 +463,7 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
 /* ---------- Project view ---------- */
 
 function ProjectZoom({ projects, start, reduceMotion, onIndex, slotFor, onLeave, onClosed, onCaseStudy }: {
-  projects: Project[];
+  projects: ReelItem[];
   start: Zoom;
   reduceMotion: boolean;
   onIndex: (i: number) => void;
@@ -587,7 +656,7 @@ function ProjectZoom({ projects, start, reduceMotion, onIndex, slotFor, onLeave,
               data-backdrop
               className="h-full w-full flex items-center justify-center"
             >
-              <Link href={`/project/${project.slug}`} onClick={e => onCaseStudy(e, `/project/${project.slug}`)} aria-label={`Open the ${project.title} case study`} className="h-full flex items-center justify-center focus-visible:outline-none" tabIndex={-1} draggable={false}>
+              <Link href={project.href} {...linkTarget(project.href)} onClick={e => onCaseStudy(e, project.href)} aria-label={`${project.cta}: ${project.title}`} className="h-full flex items-center justify-center focus-visible:outline-none" tabIndex={-1} draggable={false}>
                 <DeviceMock
                   project={project}
                   index={index}
@@ -622,7 +691,7 @@ function ProjectZoom({ projects, start, reduceMotion, onIndex, slotFor, onLeave,
               {details.map(d => <p key={d} className="text-[#8d8d8d]">{d}</p>)}
               {project.description && <p className="mt-4">{project.description}</p>}
               <p className="mt-6 flex flex-wrap gap-x-5 gap-y-1">
-                <Link href={`/project/${project.slug}`} onClick={e => onCaseStudy(e, `/project/${project.slug}`)} className={inlineLink}>View case study</Link>
+                <Link href={project.href} {...linkTarget(project.href)} onClick={e => onCaseStudy(e, project.href)} className={inlineLink}>{project.cta}</Link>
                 {project.link && <a href={project.link} target="_blank" rel="noopener noreferrer" className={inlineLink}>Visit site</a>}
               </p>
             </motion.div>
@@ -653,7 +722,7 @@ function ProjectZoom({ projects, start, reduceMotion, onIndex, slotFor, onLeave,
 // Laptops for wide screenshots, phones for tall ones; without an image, alternate the two.
 // In the project view (`zoomed`) the device fills its frame and follows the flight transform.
 function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, rootRef, flight }: {
-  project: Project;
+  project: ReelItem;
   index: number;
   zoomed?: boolean;
   initialAspect?: number;
@@ -671,12 +740,12 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
   }, [onAspect, slug]);
   const screen = <Screen src={src} index={index} device={device} ready={initialAspect !== undefined} onAspect={reportAspect} />;
 
-  if (isNewspaper(project)) {
-    // Vector newspaper (components/Newspaper.tsx, 640×500), with the project as its front page;
+  if (project.paper) {
+    // Vector newspaper (components/Newspaper.tsx, 640×500), with the project's title as its front page;
     // drawn at 0.75× the device size
     return (
       <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-[min(75%,51vw)] md:h-[min(75%,32.8vw)]' : 'h-[75%]'} aspect-[640/500]`}>
-        <Newspaper project={project} image={src} />
+        <Newspaper project={project} />
       </motion.div>
     );
   }
@@ -695,7 +764,7 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
   return (
     // MacBook Pro frame (public/mockups/macbook-pro.svg, viewBox 520×290) with a see-through 16:10
     // screen; the shot sits underneath, inset to the opening, and the notch draws over it.
-    <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-[min(100%,48.8vw)] md:h-[min(100%,31.2vw)]' : 'h-full'} aspect-[520/290]`}>
+    <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-[min(100%,48.8vw)] md:h-[min(100%,31.2vw)]' : 'w-full md:w-auto md:h-full'} aspect-[520/290]`}>
       <div className="absolute inset-x-[10.385%] top-[2.069%] bottom-[9.138%] overflow-hidden bg-white [border-radius:1.21%_1.21%_0.36%_0.36%/1.94%_1.94%_0.58%_0.58%]">{screen}</div>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/mockups/macbook-pro.svg" alt="" aria-hidden="true" draggable={false} className="absolute inset-0 w-full h-full pointer-events-none select-none" />
