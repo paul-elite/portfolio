@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, type MotionValue } from 'framer-motion';
 import type { Project, SiteConfig } from '@/lib/content-model';
 import { reelPlaceholder } from '@/lib/mockups';
@@ -28,9 +29,14 @@ const inlineLink = 'underline decoration-dotted decoration-[#b2b2b2] decoration-
 
 type Device = 'laptop' | 'phone';
 
-// Springs from mikematas.com: the zoom (tension 300, friction 35) and paging between projects (450, 50)
-const ZOOM_SPRING = { type: 'spring', stiffness: 300, damping: 35, restDelta: 0.001, restSpeed: 0.01 } as const;
-const PAGE_SPRING = { type: 'spring', stiffness: 450, damping: 50 } as const;
+// Springs after mikematas.com, tuned by feel: the device eases out of the reel with a hint of
+// bounce and settles back into its slot without overshooting; paging glides with a little give
+const OPEN_SPRING = { type: 'spring', visualDuration: 0.5, bounce: 0.14 } as const;
+const CLOSE_SPRING = { type: 'spring', visualDuration: 0.42, bounce: 0, restDelta: 0.002, restSpeed: 0.02 } as const;
+const PAGE_SPRING = { type: 'spring', visualDuration: 0.5, bounce: 0.08 } as const;
+const EASE_OUT = [0.22, 1, 0.36, 1] as const;
+// How long the page takes to fade before navigating to a case study
+const DEPART_MS = 200;
 
 // `aspects`: each project's screenshot shape, from the reel, so the view picks the same device
 interface Zoom { index: number; origin: DOMRect; aspects: Map<string, number> }
@@ -46,7 +52,11 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
   const reelRef = useRef<HTMLDivElement>(null);
   const columnRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-  const [active, setActive] = useState(0);
+  // The project in view, and which way the reel last moved (for the title swap)
+  const [view, setView] = useState({ active: 0, dir: 1 });
+  const { active, dir } = view;
+  const [departing, setDeparting] = useState(false);
+  const router = useRouter();
   const [zoom, setZoom] = useState<Zoom | null>(null);
   const [leaving, setLeaving] = useState(false);
   const zoomRef = useRef<Zoom | null>(null);
@@ -85,7 +95,7 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
         best = i;
       }
     });
-    setActive(best);
+    setView(v => (v.active === best ? v : { active: best, dir: best > v.active ? 1 : -1 }));
   }, [projects.length]);
 
   useEffect(() => {
@@ -150,6 +160,16 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
     return el.firstElementChild?.getBoundingClientRect() ?? null;
   };
 
+  // Leave for a case study: fade the page out, then navigate, so the case study rises in after it.
+  // Modified clicks still open it in a new tab or window.
+  const leaveFor = (e: React.MouseEvent, href: string) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    if (reduceMotion) { router.push(href); return; }
+    setDeparting(true);
+    setTimeout(() => router.push(href), DEPART_MS);
+  };
+
   const onZoomClosed = (i: number) => {
     returnFocus.current = i;
     setZoom(null);
@@ -175,16 +195,36 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
   ].filter(Boolean) as { label: string; href: string }[];
   const bio = config.bio || config.title;
 
+  // Title swap and counter roll; `d` is the direction the reel moved
+  const swap = {
+    enter: (d: number) => (reduceMotion ? { opacity: 0 } : { opacity: 0, y: d * 8, filter: 'blur(3px)' }),
+    center: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.38, ease: EASE_OUT } },
+    exit: (d: number) => (reduceMotion
+      ? { opacity: 0, transition: { duration: 0.15 } }
+      : { opacity: 0, y: d * -8, filter: 'blur(3px)', transition: { duration: 0.2, ease: EASE_OUT } }),
+  };
+  const roll = {
+    enter: (d: number) => ({ opacity: 0, y: reduceMotion ? 0 : d * 10 }),
+    center: { opacity: 1, y: 0, transition: { duration: 0.3, ease: EASE_OUT } },
+    exit: (d: number) => ({ opacity: 0, y: reduceMotion ? 0 : d * -10, transition: { duration: 0.2, ease: EASE_OUT } }),
+  };
+
   return (
-    <div className="min-h-dvh md:h-dvh flex flex-col bg-white text-[14px] leading-6 text-[#2a2a2a] font-sans">
+    // Opacity only on the root: a transform here would move the fixed project view
+    <motion.div
+      className="min-h-dvh md:h-dvh flex flex-col bg-white text-[14px] leading-6 text-[#2a2a2a] font-sans"
+      initial={false}
+      animate={{ opacity: departing ? 0 : 1 }}
+      transition={{ duration: DEPART_MS / 1000, ease: EASE_OUT }}
+    >
       <motion.header
         className="w-full max-w-[625px] mx-auto px-6 md:px-0 pt-12 md:pt-[72px]"
         animate={reduceMotion ? { opacity: dimmed ? 0 : 1 } : { opacity: dimmed ? 0 : 1, scale: dimmed ? 0.985 : 1 }}
-        transition={{ duration: dimmed ? 0.25 : 0.4, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: dimmed ? 0.25 : 0.45, delay: dimmed ? 0 : 0.08, ease: EASE_OUT }}
         aria-hidden={zoom ? true : undefined}
         inert={zoom !== null}
       >
-        <div ref={columnRef} className="grid gap-6">
+        <div ref={columnRef} className="grid gap-6 page-in">
           {config.avatar ? (
             <Image src={config.avatar} alt="" width={48} height={48} className="w-12 h-12 rounded-full object-cover bg-neutral-100" priority />
           ) : (
@@ -228,23 +268,39 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
             <div className="flex items-baseline justify-between gap-4">
               <p className="font-medium text-[#8d8d8d]">Work</p>
               {projects.length > 1 && (
-                <p className="text-[13px] font-[450] text-[#8d8d8d] tabular-nums" aria-hidden="true">
-                  {active + 1} / {projects.length}
+                <p className="relative text-[13px] font-[450] text-[#8d8d8d] tabular-nums" aria-hidden="true">
+                  {/* The number rolls the way the reel moved */}
+                  <AnimatePresence mode="popLayout" initial={false} custom={dir}>
+                    <motion.span
+                      key={active}
+                      custom={dir}
+                      className="inline-block"
+                      variants={roll}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                    >
+                      {active + 1}
+                    </motion.span>
+                  </AnimatePresence>
+                  {' '}/ {projects.length}
                 </p>
               )}
             </div>
-            <div className="mt-4 min-h-[48px]" aria-live="polite" aria-atomic="true">
-              <AnimatePresence mode="wait" initial={false}>
+            {/* Old and new titles cross over instead of taking turns */}
+            <div className="relative mt-4 min-h-[48px]" aria-live="polite" aria-atomic="true">
+              <AnimatePresence mode="popLayout" initial={false} custom={dir}>
                 <motion.div
                   key={current?.slug ?? 'empty'}
-                  initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -6 }}
-                  transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                  custom={dir}
+                  variants={swap}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
                 >
                   {current ? (
                     <>
-                      <Link href={`/project/${current.slug}`} className={`font-medium ${inlineLink}`}>{current.title}</Link>
+                      <Link href={`/project/${current.slug}`} onClick={e => leaveFor(e, `/project/${current.slug}`)} className={`font-medium ${inlineLink}`}>{current.title}</Link>
                       {current.description && <p className="mt-1">{current.description}</p>}
                     </>
                   ) : (
@@ -279,7 +335,7 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
           className="flex-1 md:min-h-0 flex items-end pt-8 pb-10 md:pb-14"
           // Opacity only: the reel mustn't move, so a closing project can fly back to its slot
           animate={{ opacity: dimmed ? 0 : 1 }}
-          transition={{ duration: dimmed ? 0.25 : 0.4, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: dimmed ? 0.25 : 0.45, delay: dimmed ? 0 : 0.08, ease: EASE_OUT }}
           aria-hidden={zoom ? true : undefined}
           inert={zoom !== null}
         >
@@ -289,7 +345,7 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
             tabIndex={0}
             aria-label="Projects. Use the left and right arrow keys to move through them."
             onKeyDown={onReelKey}
-            className="w-full h-[min(360px,52vw)] md:h-[min(460px,36vw)] md:max-h-full flex items-end gap-14 md:gap-20 overflow-x-auto overflow-y-hidden snap-x snap-mandatory md:snap-none scrollbar-none overscroll-x-contain focus-visible:outline-none"
+            className="page-in page-in-late w-full h-[min(360px,52vw)] md:h-[min(460px,36vw)] md:max-h-full flex items-end gap-14 md:gap-20 overflow-x-auto overflow-y-hidden snap-x snap-mandatory md:snap-none scrollbar-none overscroll-x-contain focus-visible:outline-none"
             // Same left edge as the text column, for layout and for snap points
             style={{ paddingInline: GUTTER, scrollPaddingInline: GUTTER }}
           >
@@ -307,7 +363,7 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
                   e.preventDefault();
                   openAt(i);
                 }}
-                className={`group shrink-0 h-full snap-start flex items-end focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[#2a2a2a] rounded-lg ${zoom?.index === i ? 'opacity-0' : ''}`}
+                className={`shrink-0 h-full snap-start flex items-end cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[#2a2a2a] rounded-lg ${zoom?.index === i ? 'opacity-0' : ''}`}
               >
                 <DeviceMock project={p} index={i} onAspect={recordAspect} />
               </Link>
@@ -325,15 +381,16 @@ export default function WorkReel({ config, projects }: WorkReelProps) {
           slotFor={slotFor}
           onLeave={() => setLeaving(true)}
           onClosed={onZoomClosed}
+          onCaseStudy={leaveFor}
         />
       )}
-    </div>
+    </motion.div>
   );
 }
 
 /* ---------- Project view ---------- */
 
-function ProjectZoom({ projects, start, reduceMotion, onIndex, slotFor, onLeave, onClosed }: {
+function ProjectZoom({ projects, start, reduceMotion, onIndex, slotFor, onLeave, onClosed, onCaseStudy }: {
   projects: Project[];
   start: Zoom;
   reduceMotion: boolean;
@@ -341,6 +398,7 @@ function ProjectZoom({ projects, start, reduceMotion, onIndex, slotFor, onLeave,
   slotFor: (i: number) => DOMRect | null;
   onLeave: () => void;
   onClosed: (i: number) => void;
+  onCaseStudy: (e: React.MouseEvent, href: string) => void;
 }) {
   const index = start.index;
   const project = projects[index];
@@ -348,6 +406,8 @@ function ProjectZoom({ projects, start, reduceMotion, onIndex, slotFor, onLeave,
   const backRef = useRef<HTMLButtonElement>(null);
   const devices = useRef(new Map<string, HTMLDivElement>());
   const [closing, setClosing] = useState(false);
+  // Once the device has landed, its frame clips paging so projects slide through a window
+  const [landed, setLanded] = useState(false);
   const [direction, setDirection] = useState(0);
   // The flight between the reel and the view, applied to whichever device is showing
   const x = useMotionValue(0);
@@ -359,7 +419,7 @@ function ProjectZoom({ projects, start, reduceMotion, onIndex, slotFor, onLeave,
   useLayoutEffect(() => {
     const el = devices.current.get(projects[start.index].slug);
     if (reduceMotion || !el) {
-      animate(fade, 1, { duration: 0.2 });
+      animate(fade, 1, { duration: 0.2 }).then(() => setLanded(true));
       return;
     }
     const to = el.getBoundingClientRect();
@@ -367,7 +427,8 @@ function ProjectZoom({ projects, start, reduceMotion, onIndex, slotFor, onLeave,
     x.set(from.left + from.width / 2 - (to.left + to.width / 2));
     y.set(from.top + from.height / 2 - (to.top + to.height / 2));
     scale.set(from.height / to.height);
-    const flights = [animate(x, 0, ZOOM_SPRING), animate(y, 0, ZOOM_SPRING), animate(scale, 1, ZOOM_SPRING)];
+    const flights = [animate(x, 0, OPEN_SPRING), animate(y, 0, OPEN_SPRING), animate(scale, 1, OPEN_SPRING)];
+    flights[2].then(() => setLanded(true));
     return () => flights.forEach(f => f.stop());
     // Runs once, on open; paging doesn't fly
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -389,9 +450,9 @@ function ProjectZoom({ projects, start, reduceMotion, onIndex, slotFor, onLeave,
     const cx = now.left + now.width / 2 - x.get();
     const cy = now.top + now.height / 2 - y.get();
     const height = now.height / s;
-    animate(x, slot.left + slot.width / 2 - cx, ZOOM_SPRING);
-    animate(y, slot.top + slot.height / 2 - cy, ZOOM_SPRING);
-    animate(scale, slot.height / height, ZOOM_SPRING).then(() => onClosed(index));
+    animate(x, slot.left + slot.width / 2 - cx, CLOSE_SPRING);
+    animate(y, slot.top + slot.height / 2 - cy, CLOSE_SPRING);
+    animate(scale, slot.height / height, CLOSE_SPRING).then(() => onClosed(index));
   }, [closing, onLeave, project.slug, slotFor, index, reduceMotion, fade, scale, x, y, onClosed]);
 
   const go = useCallback((step: number) => {
@@ -464,13 +525,22 @@ function ProjectZoom({ projects, start, reduceMotion, onIndex, slotFor, onLeave,
     else if (dy > 90 && dy > Math.abs(dx) * 1.5) close();
   };
 
-  const slide = {
-    enter: (d: number) => ({ x: `${d * 45}vw`, opacity: d === 0 ? 1 : 0 }),
-    center: { x: 0, opacity: 1 },
-    // The outgoing device fades quickly so it doesn't pass over the details
-    exit: (d: number) => ({ x: `${d * -45}vw`, opacity: 0, transition: { x: PAGE_SPRING, opacity: { duration: 0.16 } } }),
+  // Outgoing and incoming devices travel together, shrinking slightly as they pass
+  const slide = reduceMotion ? {
+    enter: { opacity: 0 },
+    center: { opacity: 1, transition: { duration: 0.2 } },
+    exit: { opacity: 0, transition: { duration: 0.15 } },
+  } : {
+    enter: (d: number) => ({ x: `${d * 60}%`, scale: d === 0 ? 1 : 0.94, opacity: d === 0 ? 1 : 0 }),
+    center: { x: 0, scale: 1, opacity: 1, transition: { x: PAGE_SPRING, scale: PAGE_SPRING, opacity: { duration: 0.3, ease: EASE_OUT } } },
+    exit: (d: number) => ({ x: `${d * -60}%`, scale: 0.94, opacity: 0, transition: { x: PAGE_SPRING, scale: PAGE_SPRING, opacity: { duration: 0.28, ease: EASE_OUT } } }),
   };
-  const textIn = { duration: 0.3, ease: [0.22, 1, 0.36, 1] as const };
+  // The details cross over the same way, a beat behind the device
+  const text = {
+    enter: (d: number) => ({ opacity: 0, x: reduceMotion ? 0 : d * 14 }),
+    center: { opacity: 1, x: 0, transition: { duration: 0.4, delay: 0.06, ease: EASE_OUT } },
+    exit: (d: number) => ({ opacity: 0, x: reduceMotion ? 0 : d * -14, transition: { duration: 0.18, ease: EASE_OUT } }),
+  };
   const details = [project.role, project.year].filter(Boolean) as string[];
 
   return (
@@ -502,7 +572,7 @@ function ProjectZoom({ projects, start, reduceMotion, onIndex, slotFor, onLeave,
 
       <div data-backdrop className="h-full w-full flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 px-6 pt-20 pb-8 md:px-12 md:py-12">
         {/* The device; projects page sideways through this frame */}
-        <div data-backdrop className="relative md:order-2 shrink-0 w-full md:w-[min(56vw,1040px)] h-[min(56vh,120vw)] md:h-[min(72vh,640px)] flex items-center justify-center">
+        <div data-backdrop className={`relative md:order-2 shrink-0 w-full md:w-[min(56vw,1040px)] h-[min(56vh,120vw)] md:h-[min(72vh,640px)] flex items-center justify-center ${landed && !closing ? 'overflow-hidden' : ''}`}>
           <AnimatePresence initial={false} custom={direction} mode="popLayout">
             <motion.div
               key={project.slug}
@@ -511,11 +581,10 @@ function ProjectZoom({ projects, start, reduceMotion, onIndex, slotFor, onLeave,
               initial="enter"
               animate="center"
               exit="exit"
-              transition={reduceMotion ? { duration: 0 } : PAGE_SPRING}
               data-backdrop
               className="h-full w-full flex items-center justify-center"
             >
-              <Link href={`/project/${project.slug}`} aria-label={`Open the ${project.title} case study`} className="h-full flex items-center justify-center focus-visible:outline-none" tabIndex={-1} draggable={false}>
+              <Link href={`/project/${project.slug}`} onClick={e => onCaseStudy(e, `/project/${project.slug}`)} aria-label={`Open the ${project.title} case study`} className="h-full flex items-center justify-center focus-visible:outline-none" tabIndex={-1} draggable={false}>
                 <DeviceMock
                   project={project}
                   index={index}
@@ -532,27 +601,30 @@ function ProjectZoom({ projects, start, reduceMotion, onIndex, slotFor, onLeave,
         {/* The project's details, after the device lands */}
         <motion.div
           className="md:order-1 w-full max-w-[400px] md:w-[220px] shrink-0"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: closing ? 0 : 1 }}
-          transition={{ duration: closing ? 0.15 : 0.35, delay: closing ? 0 : 0.18 }}
+          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
+          animate={{ opacity: closing ? 0 : 1, y: 0 }}
+          transition={closing ? { duration: 0.15 } : { duration: 0.45, delay: 0.2, ease: EASE_OUT }}
         >
-          <AnimatePresence mode="wait" initial={false}>
+          <div className="relative">
+          <AnimatePresence mode="popLayout" initial={false} custom={direction}>
             <motion.div
               key={project.slug}
-              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: direction * 12 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: direction * -12 }}
-              transition={textIn}
+              custom={direction}
+              variants={text}
+              initial="enter"
+              animate="center"
+              exit="exit"
             >
               <h2 className="font-medium">{project.title}</h2>
               {details.map(d => <p key={d} className="text-[#8d8d8d]">{d}</p>)}
               {project.description && <p className="mt-4">{project.description}</p>}
               <p className="mt-6 flex flex-wrap gap-x-5 gap-y-1">
-                <Link href={`/project/${project.slug}`} className={inlineLink}>View case study</Link>
+                <Link href={`/project/${project.slug}`} onClick={e => onCaseStudy(e, `/project/${project.slug}`)} className={inlineLink}>View case study</Link>
                 {project.link && <a href={project.link} target="_blank" rel="noopener noreferrer" className={inlineLink}>Visit site</a>}
               </p>
             </motion.div>
           </AnimatePresence>
+          </div>
 
           {projects.length > 1 && (
             <div className="mt-8 flex items-center gap-1 text-[#8d8d8d]">
@@ -589,7 +661,6 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
   const src = projectImage(project);
   const [aspect, setAspect] = useState<number | null>(initialAspect ?? null);
   const device: Device = aspect ? (aspect < 0.85 ? 'phone' : 'laptop') : index % 2 === 0 ? 'laptop' : 'phone';
-  const lift = zoomed ? '' : 'transition-transform duration-500 ease-out group-hover:-translate-y-2 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0';
   const { slug } = project;
   const reportAspect = useCallback((a: number) => {
     setAspect(a);
@@ -601,7 +672,7 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
     // iPhone 16 Pro Max frame (public/mockups/iphone-16-pro-max.png, 772×1600) with a see-through
     // screen; the shot sits underneath, inset and rounded to match the screen's opening.
     return (
-      <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-full' : 'h-[96%]'} aspect-[772/1600] ${lift}`}>
+      <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-full' : 'h-[96%]'} aspect-[772/1600]`}>
         <div className="absolute inset-x-[3.83%] inset-y-[1.52%] rounded-[15.4%/7.07%] overflow-hidden bg-white">{screen}</div>
         <Image src="/mockups/iphone-16-pro-max.png" alt="" aria-hidden="true" draggable={false} fill sizes="(max-width: 768px) 50vw, 340px" priority={index < 2} className="pointer-events-none select-none" />
       </motion.div>
@@ -611,7 +682,7 @@ function DeviceMock({ project, index, zoomed = false, initialAspect, onAspect, r
   return (
     // MacBook Pro frame (public/mockups/macbook-pro.svg, viewBox 520×290) with a see-through 16:10
     // screen; the shot sits underneath, inset to the opening, and the notch draws over it.
-    <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-[min(100%,48.8vw)] md:h-[min(100%,31.2vw)]' : 'h-full'} aspect-[520/290] ${lift}`}>
+    <motion.div ref={rootRef} style={flight} className={`relative ${zoomed ? 'h-[min(100%,48.8vw)] md:h-[min(100%,31.2vw)]' : 'h-full'} aspect-[520/290]`}>
       <div className="absolute inset-x-[10.385%] top-[2.069%] bottom-[9.138%] overflow-hidden bg-white [border-radius:1.21%_1.21%_0.36%_0.36%/1.94%_1.94%_0.58%_0.58%]">{screen}</div>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/mockups/macbook-pro.svg" alt="" aria-hidden="true" draggable={false} className="absolute inset-0 w-full h-full pointer-events-none select-none" />

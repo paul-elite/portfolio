@@ -2,16 +2,17 @@
 
 import { MouseEvent, ReactNode, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
-const transition = {
-  duration: 0.22,
-  ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
-};
+const ease = [0.22, 1, 0.36, 1] as [number, number, number, number];
+// Rise in on arrival; leave quicker, so the next page isn't kept waiting
+const enter = { duration: 0.5, ease };
+const exit = { duration: 0.2, ease };
 
 export default function DetailPageTransition({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [exiting, setExiting] = useState(false);
+  const reduceMotion = useReducedMotion();
   const exitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -38,15 +39,15 @@ export default function DetailPageTransition({ children }: { children: ReactNode
     setExiting(true);
     exitTimerRef.current = setTimeout(() => {
       router.push(href);
-    }, transition.duration * 1000);
+    }, exit.duration * 1000);
   };
 
   return (
     <motion.main
       className="min-h-screen bg-white"
-      initial={{ opacity: 0, x: 18 }}
-      animate={exiting ? { opacity: 0, x: -18 } : { opacity: 1, x: 0 }}
-      transition={transition}
+      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 14 }}
+      animate={exiting ? { opacity: 0, y: reduceMotion ? 0 : -6 } : { opacity: 1, y: 0 }}
+      transition={exiting ? exit : enter}
       onClick={handleClick}
     >
       {children}
