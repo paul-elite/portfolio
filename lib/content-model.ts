@@ -8,6 +8,8 @@ export interface ContentBlock {
     caption?: string;
     language?: string;
     size?: 'small' | 'medium' | 'large' | 'full';
+    /** Headings only: false leaves it out of the table of contents */
+    toc?: boolean;
   };
 }
 

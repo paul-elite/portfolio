@@ -2,6 +2,7 @@
 
 import OptimizedImage from '@/components/OptimizedImage';
 import type { ContentBlock } from '@/lib/content-model';
+import { headingId } from '@/lib/toc';
 import InteractiveBlock from '@/components/content/interactive/InteractiveBlock';
 
 interface ContentBlocksProps {
@@ -43,7 +44,7 @@ function ContentBlockView({ block, type }: { block: ContentBlock; type: (typeof 
   switch (block.type) {
     case 'heading':
       return (
-        <h2 className={type.heading}>
+        <h2 id={headingId(block.content)} className={`${type.heading} scroll-mt-24`}>
           {block.content}
         </h2>
       );

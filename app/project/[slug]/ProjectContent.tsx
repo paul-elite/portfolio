@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import OptimizedImage from '@/components/OptimizedImage';
 import CaseStudyBook from '@/components/CaseStudyBook';
+import TableOfContents from '@/components/content/TableOfContents';
+import { tocFromBlocks } from '@/lib/toc';
 import ContentBlocks from '@/components/content/ContentBlocks';
 import DetailPageTransition from '@/components/experience/DetailPageTransition';
 import type { NavItem, Project } from '@/lib/content-model';
@@ -16,13 +18,20 @@ interface ProjectContentProps {
 export default function ProjectContent({ project, prevProject, nextProject }: ProjectContentProps) {
   const hasBlocks = project.blocks && project.blocks.length > 0;
   const isCaseStudy = !!project.tags?.includes('case-study');
+  const toc = isCaseStudy ? tocFromBlocks(project.blocks) : [];
 
   return (
     <DetailPageTransition>
       <div className="w-full pl-2 pr-3 md:px-6">
         {/* Main Content */}
         <div className="pt-24 md:pt-48 pb-16 flex md:grid md:grid-cols-12 gap-4 md:gap-6">
-          <div className="hidden md:block md:col-span-3" />
+          <div className="hidden md:block md:col-span-3">
+            {isCaseStudy && toc.length > 1 && (
+              <div className="hidden lg:block h-full pl-4 xl:pl-10">
+                <TableOfContents items={toc} />
+              </div>
+            )}
+          </div>
 
           {/* Back Button */}
           <div className="flex-shrink-0 md:col-span-1 md:flex md:justify-end md:items-start">
