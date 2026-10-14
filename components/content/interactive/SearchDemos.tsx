@@ -236,6 +236,72 @@ export function TypeaheadDemo() {
   );
 }
 
+// ———————————————————————————————————————————————————————————————— 3b. Live results: every keystroke vs a pause
+
+const CATALOGUE = ['Office chair', 'Office chair, mesh back', 'Office desk', 'Oak dining chair', 'Ottoman', 'Outdoor chair', 'Floor lamp', 'Coffee table', 'Offset bookshelf', 'Office task stool'];
+const TYPED = 'office chair';
+const matches = (q: string) => CATALOGUE.filter(c => c.toLowerCase().includes(q.toLowerCase()));
+
+export function LiveResultsDemo() {
+  const [mode, setMode] = useState<'every' | 'pause'>('every');
+  const [typed, setTyped] = useState('');
+  const [shown, setShown] = useState<{ q: string; items: string[] }>({ q: '', items: [] });
+  const [pending, setPending] = useState(false);
+  const [changes, setChanges] = useState(0);
+  const [stale, setStale] = useState(false);
+  const [running, setRunning] = useState(false);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const reduce = useReducedMotion();
+
+  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+
+  const play = (m = mode) => {
+    timers.current.forEach(clearTimeout); timers.current = [];
+    setTyped(''); setShown({ q: '', items: [] }); setChanges(0); setStale(false); setPending(false); setRunning(true);
+    const at = (ms: number, fn: () => void) => timers.current.push(setTimeout(fn, ms));
+    const step = 110;
+    for (let i = 1; i <= TYPED.length; i++) {
+      const q = TYPED.slice(0, i);
+      at(i * step, () => {
+        setTyped(q);
+        if (m === 'every') {
+          // Each keystroke replaces the list as soon as its answer arrives
+          at(60, () => { setShown({ q, items: matches(q) }); setChanges(c => c + 1); });
+        } else setPending(true);
+      });
+    }
+    const end = TYPED.length * step;
+    if (m === 'every') {
+      // A slow answer for an early keystroke lands last and overwrites the right results
+      at(end + 260, () => { setShown({ q: 'of', items: matches('of') }); setChanges(c => c + 1); setStale(true); });
+      at(end + 1300, () => { setShown({ q: TYPED, items: matches(TYPED) }); setChanges(c => c + 1); setStale(false); setRunning(false); });
+    } else {
+      at(end + 320, () => { setShown({ q: TYPED, items: matches(TYPED) }); setPending(false); setChanges(1); setRunning(false); });
+    }
+  };
+
+  return (
+    <DemoFrame label="Try it · Results that jump vs results that settle" caption="Updating on every keystroke reshuffles the list a dozen times, and a slow answer can briefly put the wrong results back. Waiting for a short pause keeps the last results steady, then updates once.">
+      <Segmented name="When results update" value={mode} onChange={m => { setMode(m); play(m); }} options={[{ value: 'every', label: 'Every keystroke' }, { value: 'pause', label: 'After a pause' }]} />
+      <div className="mt-3 flex items-center gap-2">
+        <div className="flex-1"><Field><span className="text-sm text-gray-900">{typed}<span className={`ml-px inline-block h-4 w-px align-middle bg-gray-900 ${running ? 'animate-pulse' : 'opacity-0'}`} /></span></Field></div>
+        <button type="button" onClick={() => play()} disabled={running} className="shrink-0 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700 hover:border-gray-300 disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gray-400">{changes ? 'Replay' : 'Play'}</button>
+      </div>
+      <div className="mt-3 flex items-center justify-between text-[11px]">
+        <span className={stale ? 'text-rose-600' : 'text-gray-400'}>{stale ? 'Late results for “of” replaced the list' : pending ? 'Waiting for a pause…' : shown.q ? `Results for “${shown.q}”` : 'Press Play to type “office chair”'}</span>
+        <span className="text-gray-400">List changed <span className="font-medium text-gray-900 tabular-nums">{changes}</span>×</span>
+      </div>
+      <ul className={`mt-1.5 h-[172px] overflow-hidden rounded-xl border border-gray-200 divide-y divide-gray-100 transition-opacity ${pending ? 'opacity-50' : ''}`}>
+        {shown.items.slice(0, 5).map(item => (
+          <motion.li key={shown.q + item} initial={reduce ? false : { opacity: 0, y: -3 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.12 }} className="flex items-center gap-2 px-3 py-2 text-xs text-gray-900">
+            <ChairThumb size={20} shape={/desk|table|shelf|lamp/i.test(item) ? 'dining' : 'office'} tone="#e5ddd2" /><span className="truncate"><Highlight text={item} query={shown.q} /></span>
+          </motion.li>
+        ))}
+      </ul>
+    </DemoFrame>
+  );
+}
+
 // ———————————————————————————————————————————————————————————————— 4. Recognition
 
 const DOCS = [
@@ -536,6 +602,7 @@ export const SEARCH_DEMOS = {
   'search-intent': SearchIntentDemo,
   'search-scope': SearchScopeDemo,
   'search-typeahead': TypeaheadDemo,
+  'search-live-results': LiveResultsDemo,
   'search-recognition': RecognitionDemo,
   'search-filters': FiltersDemo,
   'search-empty-states': EmptyStatesDemo,
