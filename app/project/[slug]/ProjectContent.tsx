@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import OptimizedImage from '@/components/OptimizedImage';
-import { placeholderScreen } from '@/lib/mockups';
+import CaseStudyBook from '@/components/CaseStudyBook';
 import ContentBlocks from '@/components/content/ContentBlocks';
 import DetailPageTransition from '@/components/experience/DetailPageTransition';
 import type { NavItem, Project } from '@/lib/content-model';
@@ -15,6 +15,7 @@ interface ProjectContentProps {
 
 export default function ProjectContent({ project, prevProject, nextProject }: ProjectContentProps) {
   const hasBlocks = project.blocks && project.blocks.length > 0;
+  const isCaseStudy = !!project.tags?.includes('case-study');
 
   return (
     <DetailPageTransition>
@@ -63,14 +64,19 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
               </div>
             </div>
 
-            {/* Mobile Mockup - the project's preview, or a placeholder screen */}
-            {(
+            {/* Artwork: a case study's book, else the project's own screen; nothing when it has neither */}
+            {isCaseStudy ? (
+              <div className="mb-8 md:mb-16 mt-6 md:mt-0">
+                <div className="relative w-full max-w-[266px] mx-auto md:mx-0 aspect-[116/132]">
+                  <CaseStudyBook title={project.title} />
+                </div>
+              </div>
+            ) : project.preview ? (
               <div className="mb-8 md:mb-16 mt-6 md:mt-0">
                 <div className="relative w-full max-w-[266px] mx-auto md:mx-0 aspect-[266/560] bg-gray-900 rounded-[48px] p-3 shadow-xl">
                   <div className="w-full h-full bg-gray-100 rounded-[38px] overflow-hidden flex items-center justify-center relative">
                     <OptimizedImage
-                      src={project.preview || placeholderScreen(project.slug || project.id)}
-                      unoptimized={!project.preview}
+                      src={project.preview}
                       alt={project.title}
                       fill
                       className="object-cover"
@@ -80,7 +86,7 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
                   <div className="absolute top-5 left-1/2 -translate-x-1/2 w-20 h-6 bg-gray-900 rounded-full" />
                 </div>
               </div>
-            )}
+            ) : null}
 
             {/* Block Content - for projects with blocks */}
             {hasBlocks && (
