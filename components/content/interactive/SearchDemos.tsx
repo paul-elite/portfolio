@@ -23,7 +23,7 @@ export function SearchIntentDemo() {
   const f = useFade();
   const query = { known: 'Eames lounge chair', fragment: 'wooden chair with a curved back', explore: 'something comfortable for my reading corner' }[intent];
   return (
-    <DemoFrame label="Try it · Same search box, three needs" caption="The results change shape with what the person already knows: confirm a known item, recognise a half-remembered one, or explore options.">
+    <DemoFrame label="Try it · Same search box, three needs" caption="Same box, three result layouts: one confirmed match, images with the remembered details, or categories to explore.">
       <Segmented name="Kind of search" value={intent} onChange={setIntent} options={[{ value: 'known', label: 'Knows the item' }, { value: 'fragment', label: 'Remembers a detail' }, { value: 'explore', label: 'Exploring' }]} />
       <div className="mt-3"><Field><span className="text-sm text-gray-900 truncate">{query}</span></Field></div>
       <div className="mt-3 min-h-[188px]">
@@ -102,7 +102,7 @@ export function SearchScopeDemo() {
   const globalRows = EVERYTHING.filter(r => r.title.toLowerCase().includes(q.toLowerCase()));
   const groups = (['Person', 'Document', 'Project'] as const).map(t => [t, globalRows.filter(r => r.type === t)] as const).filter(([, rs]) => rs.length);
   return (
-    <DemoFrame label="Try it · Where the field sits sets expectations" caption="The same query means different things in a table and in the top bar. The placeholder, a scope tag and labelled result types make the difference visible.">
+    <DemoFrame label="Try it · Where the field sits sets expectations" caption="The table field narrows only the table. The top-bar field searches everything and labels each result type.">
       <Segmented name="Search placement" value={where} onChange={setWhere} options={[{ value: 'table', label: 'Field above the customers table' }, { value: 'global', label: 'Field in the top bar' }]} />
       <div className="mt-3 rounded-xl border border-gray-200 bg-gray-50 p-2.5">
         <div className="flex items-center gap-2">
@@ -186,7 +186,7 @@ export function TypeaheadDemo() {
   const verb = (o: Option) => (o.kind === 'product' ? 'Open' : 'Search');
   let idx = -1;
   return (
-    <DemoFrame label="Try it · Suggestions that say what they’ll do" caption="Recent searches, suggested queries and direct results are grouped and look different. Each row says whether it runs a search or opens a page. Use ↑ ↓ and Enter, or Esc to close.">
+    <DemoFrame label="Try it · Suggestions that say what they’ll do" caption="Suggested searches end in “Search”, products end in “Open”. ↑ ↓ to move, Enter to pick, Esc to close.">
       <div className="min-h-[300px]">
       <div className="relative">
         <Field>
@@ -281,7 +281,7 @@ export function LiveResultsDemo() {
   };
 
   return (
-    <DemoFrame label="Try it · Results that jump vs results that settle" caption="Updating on every keystroke reshuffles the list a dozen times, and a slow answer can briefly put the wrong results back. Waiting for a short pause keeps the last results steady, then updates once.">
+    <DemoFrame label="Try it · Results that jump vs results that settle" caption="Watch the counter: about a dozen list changes and a wrong flash, against a single update after the pause.">
       <Segmented name="When results update" value={mode} onChange={m => { setMode(m); play(m); }} options={[{ value: 'every', label: 'Every keystroke' }, { value: 'pause', label: 'After a pause' }]} />
       <div className="mt-3 flex items-center gap-2">
         <div className="flex-1"><Field><span className="text-sm text-gray-900">{typed}<span className={`ml-px inline-block h-4 w-px align-middle bg-gray-900 ${running ? 'animate-pulse' : 'opacity-0'}`} /></span></Field></div>
@@ -316,7 +316,7 @@ export function RecognitionDemo() {
   const f = useFade();
   const pick = DOCS.find(d => d.id === picked);
   return (
-    <DemoFrame label="Try it · Find the current pricing proposal" caption="With titles only, two results are identical and the third looks unrelated. Owner, date, type and the matching sentence let you choose without opening anything.">
+    <DemoFrame label="Try it · Find the current pricing proposal" caption="Owner, date, type and the matching sentence turn three look-alike titles into an easy choice.">
       <Segmented name="Result detail" value={mode} onChange={v => { setMode(v); setPicked(null); }} options={[{ value: 'bare', label: 'Title only' }, { value: 'context', label: 'With context' }]} />
       <div className="mt-3"><Field><span className="text-sm text-gray-900">pricing</span></Field></div>
       <ul className="mt-2 space-y-1.5">
@@ -379,7 +379,7 @@ export function FiltersDemo() {
     ...(beds ? [{ label: beds === 3 ? '3+ bedrooms' : `${beds} bedroom${beds > 1 ? 's' : ''}`, clear: () => setBeds(0) }] : []),
   ];
   return (
-    <DemoFrame label="Try it · Monthly rent in Lagos" caption="Filters change which apartments qualify; the count moves. Sorting only changes their order; the count stays the same. Active filters stay visible and each can be removed on its own.">
+    <DemoFrame label="Try it · Monthly rent in Lagos" caption="Filters change which apartments qualify; sorting changes their order. Only filters move the count.">
       <div className="space-y-2">
         <div className="flex flex-wrap items-center gap-1.5"><span className="w-16 text-[11px] text-gray-400">Area</span>{(['Yaba', 'Surulere', 'Lekki', 'Ikeja'] as Area[]).map(a => <Chip key={a} active={areas.includes(a)} onClick={() => setAreas(areas.includes(a) ? areas.filter(x => x !== a) : [...areas, a])}>{a}</Chip>)}</div>
         <div className="flex flex-wrap items-center gap-1.5"><span className="w-16 text-[11px] text-gray-400">Budget</span>{([100000, 250000] as const).map(b => <Chip key={b} active={budget === b} onClick={() => setBudget(budget === b ? 0 : b)}>Under {naira(b)}</Chip>)}</div>
@@ -433,7 +433,7 @@ export function EmptyStatesDemo() {
   useEffect(() => { if (!loading) return; const t = setTimeout(() => { setLoading(false); setFixed(true); }, 900); return () => clearTimeout(t); }, [loading]);
   const query = { none: 'hammock chair', typo: 'armchiar', filters: 'sofa', access: 'board minutes', error: 'reading lamp' }[kind];
   return (
-    <DemoFrame label="Try it · Five reasons for “no results”" caption="Each situation gets its own explanation and a next step that actually works. The query is never thrown away.">
+    <DemoFrame label="Try it · Five reasons for “no results”" caption="The query stays put in every case; only the explanation and the next step change.">
       <Segmented name="Situation" value={kind} onChange={k => { setKind(k); setFixed(false); setLoading(false); }} options={[{ value: 'typo', label: 'Typo' }, { value: 'filters', label: 'Filters' }, { value: 'none', label: 'No match' }, { value: 'access', label: 'Access' }, { value: 'error', label: 'Failure' }]} />
       <div className="mt-3"><Field scope={kind === 'filters' && !fixed ? '2 filters' : undefined}><span className="text-sm text-gray-900">{query}</span></Field></div>
       <div className="mt-2 min-h-[132px] rounded-xl border border-dashed border-gray-200 p-3" aria-live="polite">
@@ -463,9 +463,10 @@ export function EmptyStatesDemo() {
             )}
             {kind === 'access' && (
               <div>
-                <p className="flex items-center gap-1.5 text-sm font-medium text-gray-900"><LockIcon className="text-gray-400" />2 matches in Finance, which you can’t open</p>
-                <p className="mt-0.5 text-xs text-gray-500">Nothing in the spaces you can see. We won’t show the titles, but you can ask for access.</p>
-                <div className="mt-2"><Chip active={fixed} onClick={() => setFixed(true)}>{fixed ? 'Request sent to Kemi ✓' : 'Request access'}</Chip></div>
+                <p className="flex items-center gap-1.5 text-sm font-medium text-gray-900"><LockIcon className="text-gray-400" />Nothing you have access to matches</p>
+                <p className="mt-0.5 text-xs text-gray-500">If you expected something, it may be in a space you haven’t been added to. Ask an admin, or whoever shared it with you.</p>
+                <div className="mt-2"><Chip active={fixed} onClick={() => setFixed(true)}>{fixed ? 'Message sent to workspace admins ✓' : 'Ask an admin'}</Chip></div>
+                <p className="mt-2 text-[11px] text-gray-400">No titles, counts or locations of restricted content are shown.</p>
               </div>
             )}
             {kind === 'error' && (loading ? (
@@ -503,7 +504,7 @@ export function ReturnDemo() {
   };
   const reset = () => { setQ('reading chair'); setFilter(true); setLost(false); };
   return (
-    <DemoFrame label="Try it · Open a result, then go back" caption="Scroll the list, open a chair, then press Back. With context kept, the query, filter and scroll position are where you left them.">
+    <DemoFrame label="Try it · Open a result, then go back" caption="With context kept, the query, filter and scroll position come back exactly as you left them.">
       <div className="flex items-center justify-between gap-2">
         <label className="flex items-center gap-2 text-xs text-gray-600"><input type="checkbox" checked={keep} onChange={e => { setKeep(e.target.checked); if (e.target.checked) setLost(false); }} className="accent-gray-900" />Keep context when going back</label>
         {lost && <button type="button" onClick={reset} className="text-[11px] text-gray-500 underline underline-offset-2">Reset</button>}
@@ -568,7 +569,7 @@ export function JourneyDemo() {
   const tone = { warn: 'bg-amber-50 text-amber-700', good: 'bg-emerald-50 text-emerald-700', bad: 'bg-rose-50 text-rose-700' };
   const f = useFade();
   return (
-    <DemoFrame label="Try it · Read a search session" caption="Both sessions start with the same words. Counting searches and clicks can’t tell them apart; watching what happens between them can.">
+    <DemoFrame label="Try it · Read a search session" caption="Similar numbers in a dashboard, opposite outcomes once you watch what happened between the clicks.">
       <Segmented name="Session" value={s} onChange={v => { setS(v); setStep(0); }} options={[{ value: 'a', label: 'Session A' }, { value: 'b', label: 'Session B' }]} />
       <p className="mt-2 text-[11px] text-gray-400">Dashboard says: <span className="text-gray-600">{session.metric}</span></p>
       <ol className="mt-2 space-y-1">
