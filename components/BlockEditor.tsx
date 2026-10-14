@@ -2,8 +2,9 @@
 
 import { useState, useRef } from 'react';
 import Image from 'next/image';
+import { INTERACTIVE_COMPONENTS } from '@/components/content/interactive/InteractiveBlock';
 
-export type BlockType = 'text' | 'heading' | 'image' | 'svg' | 'code' | 'quote' | 'list';
+export type BlockType = 'text' | 'heading' | 'image' | 'svg' | 'code' | 'quote' | 'list' | 'interactive';
 
 export interface Block {
   id: string;
@@ -34,6 +35,7 @@ const blockTypeLabels: Record<BlockType, string> = {
   code: 'Code',
   quote: 'Quote',
   list: 'List',
+  interactive: 'Interactive',
 };
 
 const blockTypeIcons: Record<BlockType, string> = {
@@ -44,6 +46,7 @@ const blockTypeIcons: Record<BlockType, string> = {
   code: '</>',
   quote: '"',
   list: '•',
+  interactive: '▶',
 };
 
 function generateId(): string {
@@ -354,6 +357,20 @@ export default function BlockEditor({ blocks, onChange, onUpload, uploading }: B
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 text-sm"
                   />
                 </div>
+              )}
+
+              {/* Interactive Block: a live demo, chosen by id */}
+              {block.type === 'interactive' && (
+                <select
+                  value={block.content}
+                  onChange={(e) => updateBlock(index, { content: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                >
+                  <option value="">Choose a demo…</option>
+                  {Object.keys(INTERACTIVE_COMPONENTS).map((id) => (
+                    <option key={id} value={id}>{id}</option>
+                  ))}
+                </select>
               )}
 
               {/* List Block */}

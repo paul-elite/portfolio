@@ -1,5 +1,5 @@
 export interface ContentBlock {
-  type: 'text' | 'heading' | 'image' | 'svg' | 'code' | 'quote' | 'list';
+  type: 'text' | 'heading' | 'image' | 'svg' | 'code' | 'quote' | 'list' | 'interactive';
   content: string;
   meta?: {
     listItems?: string[];

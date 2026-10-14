@@ -2,32 +2,54 @@
 
 import OptimizedImage from '@/components/OptimizedImage';
 import type { ContentBlock } from '@/lib/content-model';
+import InteractiveBlock from '@/components/content/interactive/InteractiveBlock';
 
 interface ContentBlocksProps {
   blocks?: ContentBlock[];
+  /** 'essay': larger reading type for long-form case studies */
+  variant?: 'default' | 'essay';
 }
 
-export default function ContentBlocks({ blocks = [] }: ContentBlocksProps) {
+type Variant = NonNullable<ContentBlocksProps['variant']>;
+
+const TYPE: Record<Variant, { heading: string; text: string; quote: string; list: string; code: string }> = {
+  default: {
+    heading: 'text-base font-semibold text-gray-900 mt-8 mb-4',
+    text: 'text-sm text-gray-600 leading-relaxed mb-4',
+    quote: 'border-l-2 border-gray-200 pl-4 my-6 text-gray-500 italic',
+    list: 'flex items-start gap-3 text-sm text-gray-600',
+    code: 'bg-gray-50 rounded-lg p-4 my-6 overflow-x-auto text-sm',
+  },
+  essay: {
+    heading: 'text-[15px] font-semibold text-gray-900 mt-14 mb-3 tracking-[-0.01em]',
+    text: 'text-[15px] text-gray-600 leading-7 mb-5',
+    quote: 'border-l-2 border-gray-300 pl-4 my-8 text-[17px] leading-7 text-gray-900',
+    list: 'flex items-start gap-3 text-[15px] leading-7 text-gray-600',
+    code: 'bg-gray-50 border border-gray-200/70 rounded-xl px-4 py-3.5 my-6 overflow-x-auto text-[12.5px] leading-6 text-gray-700',
+  },
+};
+
+export default function ContentBlocks({ blocks = [], variant = 'default' }: ContentBlocksProps) {
   return (
     <>
       {blocks.map((block, index) => (
-        <ContentBlockView key={`${block.type}-${index}`} block={block} />
+        <ContentBlockView key={`${block.type}-${index}`} block={block} type={TYPE[variant]} />
       ))}
     </>
   );
 }
 
-function ContentBlockView({ block }: { block: ContentBlock }) {
+function ContentBlockView({ block, type }: { block: ContentBlock; type: (typeof TYPE)[Variant] }) {
   switch (block.type) {
     case 'heading':
       return (
-        <h2 className="text-base font-semibold text-gray-900 mt-8 mb-4">
+        <h2 className={type.heading}>
           {block.content}
         </h2>
       );
     case 'text':
       return (
-        <p className="text-sm text-gray-600 leading-relaxed mb-4">
+        <p className={type.text}>
           {block.content}
         </p>
       );
@@ -51,13 +73,13 @@ function ContentBlockView({ block }: { block: ContentBlock }) {
       );
     case 'quote':
       return (
-        <blockquote className="border-l-2 border-gray-200 pl-4 my-6 text-gray-500 italic">
+        <blockquote className={type.quote}>
           {block.content}
         </blockquote>
       );
     case 'code':
       return (
-        <pre className="bg-gray-50 rounded-lg p-4 my-6 overflow-x-auto text-sm">
+        <pre className={type.code}>
           <code>{block.content}</code>
         </pre>
       );
@@ -72,7 +94,7 @@ function ContentBlockView({ block }: { block: ContentBlock }) {
       return (
         <ul className="my-4 space-y-2">
           {items.map((item, index) => (
-            <li key={`${item}-${index}`} className="flex items-start gap-3 text-sm text-gray-600">
+            <li key={`${item}-${index}`} className={type.list}>
               <span className={bullets[index] ? 'mt-0.5' : 'text-gray-400 mt-1.5'}>
                 {bullets[index] || '•'}
               </span>
@@ -82,6 +104,8 @@ function ContentBlockView({ block }: { block: ContentBlock }) {
         </ul>
       );
     }
+    case 'interactive':
+      return <InteractiveBlock id={block.content} />;
     default:
       return null;
   }

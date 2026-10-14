@@ -52,7 +52,7 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
           </div>
 
           {/* Content Column */}
-          <div className="flex-1 min-w-0 md:col-span-4">
+          <div className={`flex-1 min-w-0 ${isCaseStudy ? 'md:col-span-5' : 'md:col-span-4'}`}>
             {/* Project Title */}
             <div className="h-auto md:h-14 mb-4 md:mb-6">
               <h1 className="text-xl font-semibold text-gray-900">
@@ -91,7 +91,7 @@ export default function ProjectContent({ project, prevProject, nextProject }: Pr
             {/* Block Content - for projects with blocks */}
             {hasBlocks && (
               <div className="prose prose-gray max-w-none">
-                <ContentBlocks blocks={project.blocks} />
+                <ContentBlocks blocks={project.blocks} variant={isCaseStudy ? 'essay' : 'default'} />
               </div>
             )}
 
