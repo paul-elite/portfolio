@@ -1,17 +1,16 @@
 import { getHomeData } from '@/lib/content-service';
-import WorkReel from '@/components/WorkReel';
-import { buildReelSections } from '@/lib/reel';
+import ColumnHome, { type HomeSection } from '@/components/home/ColumnHome';
 
 export const revalidate = 60; // Revalidate every 60 seconds
 
-export default async function Home() {
-  const { config, content } = await getHomeData();
+const SECTIONS: HomeSection[] = ['work', 'explorations', 'writing', 'about'];
 
-  const sections = buildReelSections(content, config.navigationItems);
-
+export default async function Home({ searchParams }: { searchParams: Promise<{ section?: string }> }) {
+  const [{ config, content }, { section }] = await Promise.all([getHomeData(), searchParams]);
+  const active = SECTIONS.includes(section as HomeSection) ? (section as HomeSection) : 'work';
   return (
-    <main>
-      <WorkReel config={config} sections={sections} />
+    <main className="bg-white">
+      <ColumnHome config={config} content={content} section={active} />
     </main>
   );
 }
