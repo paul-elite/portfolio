@@ -9,7 +9,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
   const [{ config, content }, { section }] = await Promise.all([getHomeData(), searchParams]);
   const active = SECTIONS.includes(section as HomeSection) ? (section as HomeSection) : 'work';
   return (
-    <main className="bg-white">
+    <main className="min-h-dvh flex-1 bg-white">
       <ColumnHome config={config} content={content} section={active} />
     </main>
   );

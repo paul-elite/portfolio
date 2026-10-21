@@ -1,8 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import OptimizedImage from '@/components/OptimizedImage';
-import CaseStudyBook from '@/components/CaseStudyBook';
 import TableOfContents from '@/components/content/TableOfContents';
 import { tocFromBlocks } from '@/lib/toc';
 import ContentBlocks from '@/components/content/ContentBlocks';
@@ -15,193 +13,94 @@ interface ProjectContentProps {
   nextProject?: NavItem | null;
 }
 
+const CASE_STUDY: { key: keyof NonNullable<Project['caseStudy']>; label: string }[] = [
+  { key: 'overview', label: 'Overview' },
+  { key: 'challenge', label: 'Challenge' },
+  { key: 'approach', label: 'Approach' },
+  { key: 'outcome', label: 'Outcome' },
+];
+
 export default function ProjectContent({ project, prevProject, nextProject }: ProjectContentProps) {
-  const hasBlocks = project.blocks && project.blocks.length > 0;
+  const hasBlocks = !!project.blocks?.length;
   const isCaseStudy = !!project.tags?.includes('case-study');
   const toc = isCaseStudy ? tocFromBlocks(project.blocks) : [];
+  const tags = (project.tags ?? []).filter((t) => t !== 'case-study').map((t) => t.replace(/-/g, ' '));
+  const facts = [
+    project.year && { label: 'Timeline', value: project.year },
+    project.role && { label: 'Role', value: project.role },
+    tags.length > 0 && { label: 'Focus', value: tags.join(', ') },
+    project.link && { label: 'URL', value: <a href={project.link} target="_blank" rel="noopener noreferrer" className="underline decoration-zinc-100 decoration-2 underline-offset-2 hover:decoration-zinc-300">{project.link.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}</a> },
+  ].filter(Boolean) as { label: string; value: React.ReactNode }[];
+  const screens = [project.preview, ...(project.previewImages ?? [])].filter((s, i, all): s is string => !!s && all.indexOf(s) === i);
 
   return (
     <DetailPageTransition>
-      <div className="w-full pl-2 pr-3 md:px-6">
-        {/* Main Content */}
-        <div className="pt-24 md:pt-48 pb-16 flex md:grid md:grid-cols-12 gap-4 md:gap-6">
-          <div className="hidden md:block md:col-span-3">
-            {isCaseStudy && toc.length > 1 && (
-              <div className="hidden lg:block h-full pl-4 xl:pl-10">
-                <TableOfContents items={toc} />
-              </div>
-            )}
-          </div>
+      <main className="min-h-dvh flex-1 bg-white text-[15px] leading-[1.5] text-black">
+        {toc.length > 1 && (
+          <div className="fixed top-24 left-10 hidden w-56 xl:block"><TableOfContents items={toc} /></div>
+        )}
+        <article className="mx-auto w-full max-w-2xl px-8 py-24">
+          <Link href="/" data-detail-transition className="mb-8 inline-flex items-center gap-1 text-zinc-400 transition-[color] duration-150 hover:text-zinc-600">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M10 3L5 8l5 5" /></svg>
+            Back
+          </Link>
 
-          {/* Back Button */}
-          <div className="flex-shrink-0 md:col-span-1 md:flex md:justify-end md:items-start">
-            <Link
-              href="/"
-              data-detail-transition
-              className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-1 transition-all hover:opacity-80"
-              style={{
-                background: 'linear-gradient(to bottom, #fefeff, #ffffff)',
-                boxShadow: 'inset 0 1px 0.5px rgba(255, 255, 255, 1), 0 0 0 0.5px rgba(0, 0, 0, 0.05)',
-              }}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-gray-400"
-              >
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
-            </Link>
-          </div>
+          <h1 className="font-medium text-balance">{project.title}</h1>
+          {[project.year, project.role].filter(Boolean).length > 0 && <p className="text-zinc-400">{[project.year, project.role].filter(Boolean).join(' · ')}</p>}
+          {project.description && <p className="mt-1 text-pretty text-zinc-500">{project.description}</p>}
 
-          {/* Content Column */}
-          <div className={`flex-1 min-w-0 ${isCaseStudy ? 'md:col-span-5' : 'md:col-span-4'}`}>
-            {/* Project Title */}
-            <div className="h-auto md:h-14 mb-4 md:mb-6">
-              <h1 className="text-xl font-semibold text-gray-900">
-                {project.title}
-              </h1>
-              <div className="flex gap-4 text-sm text-gray-400">
-                {project.year && <span>{project.year}</span>}
-                {project.role && <span>{project.role}</span>}
-              </div>
-            </div>
-
-            {/* Artwork: a case study's book, else the project's own screen; nothing when it has neither */}
-            {isCaseStudy ? (
-              <div className="mb-8 md:mb-16 mt-6 md:mt-0">
-                <div className="relative w-full max-w-[266px] mx-auto md:mx-0 aspect-[116/132]">
-                  <CaseStudyBook title={project.title} />
+          {facts.length > 0 && (
+            <dl className="mt-8 border-t border-zinc-100">
+              {facts.map((f) => (
+                <div key={f.label} className="grid grid-cols-[7rem_1fr] gap-4 border-b border-zinc-100 py-2.5">
+                  <dt className="font-medium">{f.label}</dt>
+                  <dd className="capitalize-first min-w-0 break-words">{f.value}</dd>
                 </div>
-              </div>
-            ) : project.preview ? (
-              <div className="mb-8 md:mb-16 mt-6 md:mt-0">
-                <div className="relative w-full max-w-[266px] mx-auto md:mx-0 aspect-[266/560] bg-gray-900 rounded-[48px] p-3 shadow-xl">
-                  <div className="w-full h-full bg-gray-100 rounded-[38px] overflow-hidden flex items-center justify-center relative">
-                    <OptimizedImage
-                      src={project.preview}
-                      alt={project.title}
-                      fill
-                      className="object-cover"
-                      sizes="266px"
-                    />
-                  </div>
-                  <div className="absolute top-5 left-1/2 -translate-x-1/2 w-20 h-6 bg-gray-900 rounded-full" />
-                </div>
+              ))}
+            </dl>
+          )}
+
+          <div className="mt-12">
+            {hasBlocks ? (
+              <ContentBlocks blocks={project.blocks} variant={isCaseStudy ? 'essay' : 'default'} />
+            ) : project.caseStudy ? (
+              <div className="flex flex-col gap-8">
+                {CASE_STUDY.filter((s) => project.caseStudy?.[s.key]).map((s) => (
+                  <section key={s.key} className="flex flex-col gap-2">
+                    <h2 className="font-medium">{s.label}</h2>
+                    <p className="text-pretty">{project.caseStudy![s.key]}</p>
+                  </section>
+                ))}
               </div>
             ) : null}
-
-            {/* Block Content - for projects with blocks */}
-            {hasBlocks && (
-              <div className="prose prose-gray max-w-none">
-                <ContentBlocks blocks={project.blocks} variant={isCaseStudy ? 'essay' : 'default'} />
-              </div>
-            )}
-
-            {/* Case Study Content - for projects with caseStudy */}
-            {!hasBlocks && project.caseStudy && (
-              <div className="space-y-10">
-                <section>
-                  <h2 className="text-xs text-gray-400 uppercase tracking-wider mb-3">
-                    Overview
-                  </h2>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    {project.caseStudy.overview}
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="text-xs text-gray-400 uppercase tracking-wider mb-3">
-                    Challenge
-                  </h2>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    {project.caseStudy.challenge}
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="text-xs text-gray-400 uppercase tracking-wider mb-3">
-                    Approach
-                  </h2>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    {project.caseStudy.approach}
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="text-xs text-gray-400 uppercase tracking-wider mb-3">
-                    Outcome
-                  </h2>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    {project.caseStudy.outcome}
-                  </p>
-                </section>
-              </div>
-            )}
-
-            {/* Description fallback if no blocks or caseStudy */}
-            {!hasBlocks && !project.caseStudy && project.description && (
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {project.description}
-              </p>
-            )}
-
-            {/* Link */}
-            {project.link && (
-              <a
-                href={project.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-gray-400 hover:text-gray-900 transition-colors mt-12 inline-block"
-              >
-                View Project →
-              </a>
-            )}
-
-            {/* Project Navigation */}
-            {(prevProject || nextProject) && (
-              <div className="flex justify-between items-center mt-16 pt-8 border-t border-gray-100">
-                {prevProject ? (
-                  <Link
-                    href={`/project/${prevProject.slug}`}
-                    data-detail-transition
-                    className="group flex flex-col items-start"
-                  >
-                    <span className="text-xs text-gray-400 mb-1">Previous Project</span>
-                    <span className="text-sm font-medium text-gray-900 group-hover:text-gray-600 transition-colors">
-                      ← {prevProject.title}
-                    </span>
-                  </Link>
-                ) : (
-                  <div />
-                )}
-                {nextProject ? (
-                  <Link
-                    href={`/project/${nextProject.slug}`}
-                    data-detail-transition
-                    className="group flex flex-col items-end"
-                  >
-                    <span className="text-xs text-gray-400 mb-1">Next Project</span>
-                    <span className="text-sm font-medium text-gray-900 group-hover:text-gray-600 transition-colors">
-                      {nextProject.title} →
-                    </span>
-                  </Link>
-                ) : (
-                  <div />
-                )}
-              </div>
-            )}
           </div>
 
-          <div className="hidden md:block md:col-span-3" />
-        </div>
-      </div>
+          {screens.length > 0 && !hasBlocks && (
+            <div className="mt-12 grid gap-6 md:-mx-28 md:grid-cols-2">
+              {screens.map((src, i) => (
+                <img key={src} src={src} alt={`${project.title}, screen ${i + 1}`} loading={i ? 'lazy' : 'eager'} className="w-full bg-zinc-50 object-cover outline outline-1 -outline-offset-1 outline-black/10" />
+              ))}
+            </div>
+          )}
+
+          {(prevProject || nextProject) && (
+            <nav className="mt-20 flex justify-between gap-6 border-t border-zinc-100 pt-6" aria-label="More work">
+              {prevProject ? (
+                <Link href={`/project/${prevProject.slug}`} data-detail-transition className="group flex min-w-0 flex-col">
+                  <span className="text-zinc-400">Previous</span>
+                  <span className="truncate underline decoration-zinc-100 decoration-2 underline-offset-2 group-hover:decoration-zinc-300">{prevProject.title}</span>
+                </Link>
+              ) : <span />}
+              {nextProject ? (
+                <Link href={`/project/${nextProject.slug}`} data-detail-transition className="group flex min-w-0 flex-col items-end text-right">
+                  <span className="text-zinc-400">Next</span>
+                  <span className="truncate underline decoration-zinc-100 decoration-2 underline-offset-2 group-hover:decoration-zinc-300">{nextProject.title}</span>
+                </Link>
+              ) : <span />}
+            </nav>
+          )}
+        </article>
+      </main>
     </DetailPageTransition>
   );
 }
