@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, Geist, Gochi_Hand, Inter } from "next/font/google";
+import { Archivo, Gochi_Hand, Inter } from "next/font/google";
 import { getSettings } from "@/lib/content-service";
 import Analytics from "@/components/Analytics";
 import SiteInteractionGuards from "@/components/SiteInteractionGuards";
@@ -19,12 +19,6 @@ const gochiHand = Gochi_Hand({
 
 const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-// Primary typeface; Inter stays loaded as the fallback
-const geist = Geist({
-  variable: "--font-geist",
   subsets: ["latin"],
 });
 
@@ -70,7 +64,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${archivo.variable} ${gochiHand.variable} ${inter.variable} ${geist.variable} h-full antialiased`}>
+    <html lang="en" className={`${archivo.variable} ${gochiHand.variable} ${inter.variable} h-full antialiased`}>
       <body className="ignore-safe-edges min-h-full flex flex-col font-sans bg-background">
         <PreferenceProvider>
           <SiteInteractionGuards />
