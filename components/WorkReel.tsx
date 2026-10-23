@@ -204,10 +204,15 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
     const reel = reelRef.current;
     if (!reel || reduceMotion || projects.length < 2 || zoom) return;
     let paused = false;
+    let direction = 1;
     let timer: ReturnType<typeof setTimeout>;
     const advance = () => {
       if (!paused && !document.hidden) {
-        const next = (viewIndex.current + 1) % projects.length;
+        const current = viewIndex.current;
+        // Reverse at either end instead of jumping back to the first artifact.
+        if (current >= projects.length - 1) direction = -1;
+        else if (current <= 0) direction = 1;
+        const next = Math.max(0, Math.min(projects.length - 1, current + direction));
         viewIndex.current = next;
         scrollToItem(next);
       }
