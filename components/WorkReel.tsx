@@ -226,11 +226,11 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
         viewIndex.current = next;
         scrollToItem(next);
       }
-      timer = setTimeout(advance, 4200);
+      timer = setTimeout(advance, 6300);
     };
     const pause = () => { paused = true; };
     const resume = () => { paused = false; };
-    timer = setTimeout(advance, 4200);
+    timer = setTimeout(advance, 6300);
     reel.addEventListener('pointerenter', pause);
     reel.addEventListener('pointerleave', resume);
     reel.addEventListener('focusin', pause);
