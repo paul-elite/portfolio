@@ -196,6 +196,52 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
     // Re-run per tab: the items, and so the end padding, change
   }, [measure, thumbLeft, thumbWidth, barOpacity, section.id]);
 
+  // Quiet cinematic drift through the screens, in their existing project order.
+  // Pause whenever someone interacts so the reel remains fully controllable.
+  useEffect(() => {
+    const reel = reelRef.current;
+    if (!reel || reduceMotion || projects.length < 2 || zoom) return;
+    let raf = 0;
+    let last = 0;
+    let paused = false;
+    let resumeAt = performance.now() + 1800;
+    const pause = () => { paused = true; };
+    const resume = () => { paused = false; resumeAt = performance.now() + 2200; last = 0; };
+    const tick = (now: number) => {
+      if (!last) last = now;
+      const elapsed = Math.min(now - last, 48);
+      last = now;
+      if (!paused && !document.hidden && now > resumeAt) {
+        const end = reel.scrollWidth - reel.clientWidth;
+        if (end > 0) {
+          if (reel.scrollLeft >= end - 2) {
+            reel.scrollLeft = 0;
+            resumeAt = now + 1600;
+          } else {
+            reel.scrollLeft = Math.min(end, reel.scrollLeft + elapsed * 0.018);
+          }
+        }
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    reel.addEventListener('pointerenter', pause);
+    reel.addEventListener('pointerleave', resume);
+    reel.addEventListener('focusin', pause);
+    reel.addEventListener('focusout', resume);
+    reel.addEventListener('touchstart', pause, { passive: true });
+    reel.addEventListener('touchend', resume, { passive: true });
+    raf = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(raf);
+      reel.removeEventListener('pointerenter', pause);
+      reel.removeEventListener('pointerleave', resume);
+      reel.removeEventListener('focusin', pause);
+      reel.removeEventListener('focusout', resume);
+      reel.removeEventListener('touchstart', pause);
+      reel.removeEventListener('touchend', resume);
+    };
+  }, [projects.length, reduceMotion, zoom]);
+
   // Reveal phones as they come into view, left to right, a beat apart
   useEffect(() => {
     if (reduceMotion) return;
