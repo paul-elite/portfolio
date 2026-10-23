@@ -42,7 +42,7 @@ export function useNowPlaying() {
 }
 
 export function NowPlayingImage({ data, useAlbumArt = false }: { data: SpotifyData | null; useAlbumArt?: boolean }) {
-  const showAlbumArt = useAlbumArt && Boolean(data?.albumImageUrl);
+  const showAlbumArt = useAlbumArt && Boolean(data?.isPlaying && data?.albumImageUrl);
 
   return (
     <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 relative">
@@ -266,8 +266,8 @@ export function NowPlayingContent({ data, showImage = true }: { data: SpotifyDat
       {/* Now Playing content */}
       <div className="flex items-center py-4">
         {showImage && (
-          <div className="flex-shrink-0" style={{ marginLeft: '-64px', marginRight: '24px' }}>
-            <NowPlayingImage data={data} />
+          <div className="flex-shrink-0 mr-3">
+            <NowPlayingImage data={data} useAlbumArt />
           </div>
         )}
         <div className="min-w-0">
