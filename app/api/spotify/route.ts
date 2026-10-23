@@ -27,14 +27,14 @@ async function getAccessToken() {
 
 export async function GET() {
   if (!CLIENT_ID || !CLIENT_SECRET || !REFRESH_TOKEN) {
-    return NextResponse.json({ isPlaying: false });
+    return NextResponse.json({ isPlaying: false, status: 'configuration_missing' });
   }
 
   try {
     const tokenResponse = await getAccessToken();
 
     if (!tokenResponse.access_token) {
-      return NextResponse.json({ isPlaying: false });
+      return NextResponse.json({ isPlaying: false, status: 'authorization_failed' });
     }
 
     const response = await fetch(NOW_PLAYING_ENDPOINT, {
@@ -43,7 +43,11 @@ export async function GET() {
       },
     });
 
-    if (response.status === 204 || response.status > 400) {
+    if (response.status === 401 || response.status === 403) {
+      return NextResponse.json({ isPlaying: false, status: 'authorization_failed' });
+    }
+
+    if (response.status === 204 || response.status >= 400) {
       // Fetch recently played
       const recentResponse = await fetch(RECENTLY_PLAYED_ENDPOINT, {
         headers: {
@@ -65,13 +69,13 @@ export async function GET() {
         }
       }
 
-      return NextResponse.json({ isPlaying: false });
+      return NextResponse.json({ isPlaying: false, status: response.status === 204 ? 'not_playing' : 'spotify_unavailable' });
     }
 
     const song = await response.json();
 
     if (!song.item) {
-      return NextResponse.json({ isPlaying: false });
+      return NextResponse.json({ isPlaying: false, status: 'not_playing' });
     }
 
     const isPlaying = song.is_playing;
@@ -119,6 +123,6 @@ export async function GET() {
       type: 'track',
     });
   } catch {
-    return NextResponse.json({ isPlaying: false });
+    return NextResponse.json({ isPlaying: false, status: 'spotify_unavailable' });
   }
 }
