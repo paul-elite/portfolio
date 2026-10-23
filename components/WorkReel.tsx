@@ -438,7 +438,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
               <motion.button
                 type="button"
                 aria-label="Close navigation"
-                className="pointer-events-auto absolute inset-0 bg-black/25"
+                className="pointer-events-auto absolute inset-0 bg-black/15 backdrop-blur-[8px]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -448,7 +448,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
               <motion.nav
                 id="portfolio-side-menu"
                 aria-label="Main navigation"
-                className="pointer-events-auto absolute inset-y-0 left-0 w-[70%] bg-white px-8 md:px-12 pt-28 pb-12 overflow-y-auto flex flex-col"
+                className="pointer-events-auto absolute inset-y-0 left-0 w-[70%] bg-white px-8 md:px-12 pt-28 pb-12 overflow-y-auto flex flex-col shadow-[3px_0_12px_rgba(0,0,0,0.12)]"
                 initial={reduceMotion ? { opacity: 0 } : { x: '-100%' }}
                 animate={reduceMotion ? { opacity: 1 } : { x: 0 }}
                 exit={reduceMotion ? { opacity: 0 } : { x: '-100%' }}
