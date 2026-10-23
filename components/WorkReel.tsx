@@ -584,7 +584,7 @@ function ProjectScreenStack({ screens, onOpen, onAspect, reduceMotion }: {
   }));
   return (
     <div
-      className="relative h-full w-[min(350px,78vw)] md:w-[min(400px,34vw)] flex flex-col items-center justify-end select-none"
+      className="relative h-full w-[min(350px,68vw)] md:w-[min(400px,30vw)] mr-[92px] flex flex-col items-center justify-end select-none"
       onPointerDown={e => { start.current = { x: e.clientX, y: e.clientY }; }}
       onPointerUp={e => {
         const s = start.current; start.current = null;
@@ -603,14 +603,14 @@ function ProjectScreenStack({ screens, onOpen, onAspect, reduceMotion }: {
       <span className="absolute top-8 left-1/2 -translate-x-1/2 z-30 whitespace-nowrap rounded-full bg-white px-3 h-7 flex items-center justify-center text-[12px] font-medium text-[#252525] shadow-[0_2px_6px_rgba(0,0,0,0.10)] ring-1 ring-black/[0.04]">
         {screens[0].title.trim().split(/\s+/).slice(0, 2).join(' ')}
       </span>
-      <div className="relative w-full h-[calc(100%-64px)]">
+      <div className="relative w-full h-[calc(100%-64px)] overflow-visible">
         {visible.slice().reverse().map(({ item, depth }) => (
           <motion.div
             key={item.id}
             data-stack-front={depth === 0 ? '' : undefined}
-            className={`absolute inset-0 flex items-end justify-center origin-bottom ${depth === 0 ? 'z-20 cursor-pointer' : depth === 1 ? 'z-10 pointer-events-none' : 'z-0 pointer-events-none'}`}
+            className={`absolute inset-0 flex items-end justify-center origin-left ${depth === 0 ? 'z-20 cursor-pointer' : depth === 1 ? 'z-10 pointer-events-none' : 'z-0 pointer-events-none'}`}
             initial={false}
-            animate={{ scale: 1 - depth * 0.085, y: -depth * 24, opacity: 1 - depth * 0.12 }}
+            animate={{ scale: 1 - depth * 0.045, x: depth * 46, y: 0, opacity: 1 - depth * 0.12 }}
             transition={reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 280, damping: 32 }}
             onClick={() => { if (depth === 0) onOpen(front); }}
           >
