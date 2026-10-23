@@ -8,6 +8,7 @@ import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, typ
 import type { SiteConfig } from '@/lib/content-model';
 import { isExternal, type ReelItem, type ReelSection } from '@/lib/reel';
 import CaseStudyBook from './CaseStudyBook';
+import { NowPlayingContent, useNowPlaying } from './NowPlaying';
 import AnimatedScreen from './AnimatedScreen';
 import { ANIMATED_SCREENS, type AnimatedScreen as AnimatedScreenSpec } from '@/lib/screen-animations';
 
@@ -64,6 +65,15 @@ interface Zoom { index: number; origin: DOMRect; aspects: Map<string, number> }
  * (after mikematas.com): it springs out of the reel, the project's details fade in beside it,
  * neighbouring projects page in sideways, and closing springs it back into its slot.
  */
+function SidebarNowPlaying() {
+  const data = useNowPlaying();
+  return (
+    <section aria-label="Spotify now playing" className="mt-5 border-t border-black/10 pt-2">
+      <NowPlayingContent data={data} showImage={false} />
+    </section>
+  );
+}
+
 export default function WorkReel({ config, sections }: WorkReelProps) {
   // The section the reel shows (Work); the projects in it make the row above the reel
   const tab = 0;
@@ -499,6 +509,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                     );
                   })}
                 </div>
+                <SidebarNowPlaying />
               </motion.nav>
             </>
           )}
