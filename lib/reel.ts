@@ -39,7 +39,10 @@ export function buildReelSections(content: PortfolioContent, navigation: Portfol
       label: 'Work',
       empty: 'New work is on its way.',
       // A project's other screens follow its main one, each on a phone of its own
-      items: content.projects.flatMap(p => {
+      items: [...content.projects].sort((a, b) => {
+        const priority = (p: Project) => /rig[\\s-]*intel/i.test(`${p.title} ${p.slug}`) ? 0 : 1;
+        return priority(a) - priority(b);
+      }).flatMap(p => {
         const item: ReelItem = {
           ...p,
           href: `/project/${p.slug}`,
