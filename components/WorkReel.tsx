@@ -393,32 +393,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
             {bio && <p>{bio}</p>}
           </div>
 
-          {/* The projects in a row: the one in view is dark, its category at the other end */}
-          <div className="mt-6 md:mt-10">
-            <div className="flex items-baseline justify-between gap-4">
-              <nav aria-label="Projects" className="flex min-w-0 flex-wrap items-baseline gap-x-5 gap-y-1">
-                {projectRow.map(p => (
-                  <button
-                    key={p.slug}
-                    type="button"
-                    onClick={() => scrollToItem(p.first)}
-                    aria-current={p.slug === currentProject ? 'true' : undefined}
-                    className={`font-medium transition-colors duration-300 focus-visible:outline-none focus-visible:text-[#2a2a2a] ${p.slug === currentProject ? 'text-[#2a2a2a]' : 'text-[#b2b2b2] hover:text-[#8d8d8d]'}`}
-                  >
-                    {p.title}
-                  </button>
-                ))}
-              </nav>
-              <div className="relative shrink-0 text-[#8d8d8d]" aria-live="polite" aria-atomic="true">
-                <AnimatePresence mode="popLayout" initial={false} custom={dir}>
-                  <motion.span key={currentProject ?? 'none'} custom={dir} variants={swap} initial="enter" animate="center" exit="exit" className="block">
-                    {current?.category}
-                  </motion.span>
-                </AnimatePresence>
-              </div>
-            </div>
-            {!current && <p className="mt-4 text-[#8d8d8d]">{section.empty}</p>}
-          </div>
+
         </div>
       </motion.header>
 
