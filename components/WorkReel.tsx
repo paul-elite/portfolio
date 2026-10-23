@@ -407,9 +407,8 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
           aria-controls="portfolio-side-menu"
           className="pointer-events-auto absolute z-50 top-3 left-[max(12px,calc((100vw-625px)/2-10px))] md:top-4 h-11 w-11 grid place-items-center rounded-full text-[#2a2a2a] hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2a2a2a] transition-colors"
         >
-          <span className="relative block h-5 w-5" aria-hidden="true">
-            <span className={`absolute left-0 top-1/2 h-[1.5px] w-full -translate-y-1/2 bg-current transition-transform duration-300 ${menu ? 'rotate-45' : ''}`} />
-            <span className={`absolute left-1/2 top-0 h-full w-[1.5px] -translate-x-1/2 bg-current transition-transform duration-300 ${menu ? 'rotate-45' : ''}`} />
+          <span className={`block h-7 w-7 transition-transform duration-300 ${menu ? 'rotate-45' : ''}`} aria-hidden="true">
+            <img src="/plus-figma.svg" alt="" className="block h-full w-full" />
           </span>
         </button>
         <AnimatePresence>
@@ -457,7 +456,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
       </motion.div>
 
       <motion.header
-        className="w-full max-w-[625px] mx-auto px-6 md:px-0 pt-20 md:pt-24"
+        className="w-full max-w-[625px] mx-auto px-6 md:px-0 pt-28 md:pt-32"
         animate={reduceMotion ? { opacity: dimmed ? 0 : 1 } : { opacity: dimmed ? 0 : 1, scale: dimmed ? 0.985 : 1 }}
         transition={{ duration: dimmed ? 0.25 : 0.45, delay: dimmed ? 0 : 0.08, ease: EASE_OUT }}
         aria-hidden={zoom ? true : undefined}
