@@ -408,18 +408,8 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
           className="pointer-events-auto absolute z-50 top-4 right-3 md:top-6 md:right-6 h-11 w-11 grid place-items-center rounded-full text-[#2a2a2a] hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2a2a2a] transition-colors"
         >
           <span className="relative block h-5 w-5" aria-hidden="true">
-            {menu ? (
-              <>
-                <span className="absolute left-0 top-1/2 h-[1.5px] w-full -translate-y-1/2 bg-current" />
-                <span className="absolute left-1/2 top-0 h-full w-[1.5px] -translate-x-1/2 bg-current" />
-              </>
-            ) : (
-              <>
-                <span className="absolute left-0 top-[3px] h-[1.5px] w-full bg-current" />
-                <span className="absolute left-0 top-[9px] h-[1.5px] w-full bg-current" />
-                <span className="absolute left-0 top-[15px] h-[1.5px] w-full bg-current" />
-              </>
-            )}
+            <span className={`absolute left-0 top-1/2 h-[1.5px] w-full -translate-y-1/2 bg-current transition-transform duration-300 ${menu ? 'rotate-45' : ''}`} />
+            <span className={`absolute left-1/2 top-0 h-full w-[1.5px] -translate-x-1/2 bg-current transition-transform duration-300 ${menu ? 'rotate-45' : ''}`} />
           </span>
         </button>
         <AnimatePresence>
