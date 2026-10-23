@@ -414,9 +414,9 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
           aria-haspopup="dialog"
           aria-expanded={menu}
           aria-controls="portfolio-side-menu"
-          className="pointer-events-auto absolute z-50 top-3 left-[max(12px,calc((100vw-625px)/2-10px))] md:top-4 h-11 w-11 grid place-items-center rounded-full text-[#2a2a2a] hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2a2a2a] transition-colors"
+          className="pointer-events-auto absolute z-50 top-3 left-[max(12px,calc((100vw-625px)/2-10px))] md:top-4 h-14 w-14 grid place-items-center rounded-full text-[#2a2a2a] hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2a2a2a] transition-colors"
         >
-          <span className={`block h-7 w-7 transition-transform duration-300 ${menu ? 'rotate-45' : ''}`} aria-hidden="true">
+          <span className={`block h-[42px] w-[42px] transition-transform duration-300 ${menu ? 'rotate-45' : ''}`} aria-hidden="true">
             <img src="/plus-figma.svg" alt="" className="block h-full w-full" />
           </span>
         </button>
@@ -426,7 +426,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
               <motion.button
                 type="button"
                 aria-label="Close navigation"
-                className="pointer-events-auto absolute inset-0 bg-black/25"
+                className="pointer-events-auto absolute inset-0 bg-black/10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -436,7 +436,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
               <motion.nav
                 id="portfolio-side-menu"
                 aria-label="Main navigation"
-                className="pointer-events-auto absolute inset-y-0 left-0 w-[70%] bg-white shadow-[12px_0_48px_rgba(0,0,0,0.08)] px-8 md:px-12 pt-28 pb-12 overflow-y-auto"
+                className="pointer-events-auto absolute inset-y-0 left-0 w-[70%] bg-white px-8 md:px-12 pt-28 pb-12 overflow-y-auto"
                 initial={reduceMotion ? { opacity: 0 } : { x: '-100%' }}
                 animate={reduceMotion ? { opacity: 1 } : { x: 0 }}
                 exit={reduceMotion ? { opacity: 0 } : { x: '-100%' }}
@@ -464,6 +464,16 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
         </AnimatePresence>
       </motion.div>
 
+      {/* The live homepage becomes a scaled, screenshot-like preview as the drawer reveals itself. */}
+      <motion.div
+        className="relative z-30 flex flex-col flex-1 min-h-0 w-full bg-white origin-top-left"
+        initial={false}
+        animate={menu && !zoom ? { x: '70%', scale: 0.78, borderRadius: 18, boxShadow: '-12px 8px 45px rgba(0,0,0,0.13)' } : { x: '0%', scale: 1, borderRadius: 0, boxShadow: '0px 0px 0px rgba(0,0,0,0)' }}
+        transition={reduceMotion ? { duration: 0.15 } : { type: 'spring', stiffness: 240, damping: 32, mass: 1 }}
+        style={{ pointerEvents: menu ? 'none' : 'auto', overflow: 'hidden' }}
+        aria-hidden={menu ? true : undefined}
+        inert={menu}
+      >
       <motion.header
         className="w-full max-w-[625px] mx-auto px-6 md:px-0 pt-28 md:pt-32"
         animate={reduceMotion ? { opacity: dimmed ? 0 : 1 } : { opacity: dimmed ? 0 : 1, scale: dimmed ? 0.985 : 1 }}
@@ -540,6 +550,8 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
           </motion.div>
         </motion.section>
       )}
+
+      </motion.div>
 
       {zoom && (
         <ProjectZoom
