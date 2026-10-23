@@ -18,7 +18,7 @@ interface WorkReelProps {
 }
 
 // Text column width and its left edge; the reel starts on the same edge
-const COLUMN = 625;
+const COLUMN = 520;
 const GUTTER = `max(1.5rem, calc((100vw - ${COLUMN}px) / 2))`;
 
 
@@ -451,7 +451,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
       {/* Plus navigation opens a full-height drawer from the left. */}
       <motion.div
         ref={menuRef}
-        className="absolute inset-0 z-40 pointer-events-none"
+        className="absolute inset-0 z-40 pointer-events-none md:hidden"
         animate={{ opacity: dimmed ? 0 : 1 }}
         transition={{ duration: 0.25 }}
         inert={zoom !== null}
@@ -463,7 +463,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
           aria-haspopup="dialog"
           aria-expanded={menu}
           aria-controls="portfolio-side-menu"
-          className="pointer-events-auto absolute z-50 top-3 left-[max(12px,calc((100vw-625px)/2-10px))] md:top-4 h-14 w-14 grid place-items-center rounded-full text-[#2a2a2a] hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2a2a2a] transition-colors"
+          className="pointer-events-auto absolute z-50 top-3 left-3 md:top-4 h-14 w-14 grid place-items-center rounded-full text-[#2a2a2a] hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2a2a2a] transition-colors"
         >
           <span className={`block h-[42px] w-[42px] transition-transform duration-300 ${menu ? 'rotate-45' : ''}`} aria-hidden="true">
             <img src="/plus-figma.svg" alt="" className="block h-full w-full" />
@@ -544,7 +544,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
       </motion.div>
 
       <motion.header
-        className="w-full max-w-[625px] mx-auto px-6 md:px-0 pt-28 md:pt-32"
+        className="w-full max-w-[520px] mx-auto px-6 md:px-0 pt-28 md:pt-32"
         animate={reduceMotion ? { opacity: dimmed ? 0 : 1 } : { opacity: dimmed ? 0 : 1, scale: dimmed ? 0.985 : 1 }}
         transition={{ duration: dimmed ? 0.25 : 0.45, delay: dimmed ? 0 : 0.08, ease: EASE_OUT }}
         aria-hidden={zoom ? true : undefined}
