@@ -1238,64 +1238,29 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
               </div>
             )}
 
-            {activeTab === 'writings' && (() => {
-              const writingsByYear = content.writings.reduce((acc, item) => {
-                const year = item.date ? new Date(item.date).getFullYear().toString() : 'Unknown';
-                if (!acc[year]) acc[year] = [];
-                acc[year].push(item);
-                return acc;
-              }, {} as Record<string, typeof content.writings>);
-
-              const sortedYears = Object.keys(writingsByYear).sort((a, b) => Number(b) - Number(a));
-
-              const isNew = (date?: string) => {
-                if (!date) return false;
-                const itemDate = new Date(date);
-                const now = new Date();
-                const diffDays = (now.getTime() - itemDate.getTime()) / (1000 * 60 * 60 * 24);
-                return diffDays <= 30;
-              };
-
-              return (
-                <div>
-                  {sortedYears.map((year) => (
-                    <div key={year}>
-                      {writingsByYear[year].map((item) => {
-                        const isSelected = selectedWriting?.id === item.id;
-
-                        return (
-                          <button
-                            key={item.id}
-                            onClick={() => handleSelectWriting(isSelected ? null : item)}
-                            className={`project-avatar-row group relative block w-full py-[var(--experience-row-padding)] text-left transition-all duration-[var(--experience-motion)] outline-none focus-visible:ring-1 focus-visible:ring-[var(--experience-accent)] ${hasSelection && !isSelected ? 'opacity-30' : ''}`}
-                          >
-                            <span className="block min-w-0">
-                              <span className="mb-0.5 flex items-center gap-2">
-                                <h3 className="block text-sm font-normal text-[var(--experience-text)] transition-colors group-hover:text-[var(--experience-accent)]">
-                                  {item.title}
-                                </h3>
-                                {isNew(item.date) && (
-                                  <span className="rounded-full border border-[var(--experience-border)] px-2 py-0.5 text-xs text-[var(--experience-muted)]">New</span>
-                                )}
-                              </span>
-                              <span className="block text-sm text-[var(--experience-muted)]">
-                                {year}
-                                {item.date ? (
-                                  <>
-                                    <span className="mx-1">·</span>
-                                    {new Date(item.date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }).replace('/', '/')}
-                                  </>
-                                ) : null}
-                              </span>
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
-              );
-            })()}
+            {activeTab === 'writings' && (
+              <div className="divide-y divide-black/[0.07]" aria-label="Writing list">
+                {content.writings.map((item) => {
+                  const isSelected = selectedWriting?.id === item.id;
+                  const year = item.date && !Number.isNaN(new Date(item.date).getTime())
+                    ? new Date(item.date).getFullYear()
+                    : null;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => handleSelectWriting(isSelected ? null : item)}
+                      className="group flex w-full items-baseline justify-between gap-6 py-4 text-left outline-none transition-colors focus-visible:underline"
+                    >
+                      <span className={`min-w-0 text-[15px] leading-6 tracking-[-0.01em] transition-colors group-hover:text-black ${isSelected ? 'font-medium text-black' : 'font-normal text-[#333]'}`}>
+                        {item.title}
+                      </span>
+                      {year && <span className="shrink-0 text-xs tabular-nums text-[#999]">{year}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
             </div>
           </CustomScrollbar>
 
