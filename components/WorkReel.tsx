@@ -248,10 +248,18 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
               const delta = centred
                 ? r.left + r.width / 2 - (box.left + box.width / 2)
                 : r.left - (columnRef.current?.getBoundingClientRect().left ?? 0);
+              // Reset behind the identical first-project clone without animating backwards.
+              // Disable both snapping and CSS smooth scrolling for the invisible jump.
               const previousSnap = reel.style.scrollSnapType;
+              const previousBehavior = reel.style.scrollBehavior;
               reel.style.scrollSnapType = 'none';
-              reel.scrollTo({ left: reel.scrollLeft + delta, behavior: 'instant' });
-              requestAnimationFrame(() => { reel.style.scrollSnapType = previousSnap; measure(); });
+              reel.style.scrollBehavior = 'auto';
+              reel.scrollLeft += delta;
+              setView({ active: 0, dir: 1 });
+              requestAnimationFrame(() => {
+                reel.style.scrollSnapType = previousSnap;
+                reel.style.scrollBehavior = previousBehavior;
+              });
             }, 1100);
           }
         } else {
