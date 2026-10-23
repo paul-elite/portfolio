@@ -69,7 +69,7 @@ function SidebarNowPlaying() {
   const data = useNowPlaying();
   return (
     <section aria-label="Spotify now playing" className="mt-5 border-t border-black/10 pt-2">
-      <NowPlayingContent data={data} showImage={false} />
+      <NowPlayingContent data={data} showImage />
     </section>
   );
 }
