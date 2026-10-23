@@ -569,7 +569,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
   );
 }
 
-/* Each project owns its own swipeable deck. Only three screens are visible at a time. */
+/* One device per project, cycling through its screens like a gentle animated GIF. */
 function ProjectScreenStack({ screens, onOpen, onAspect, reduceMotion }: {
   screens: ReelItem[];
   onOpen: (screen: number) => void;
@@ -577,54 +577,35 @@ function ProjectScreenStack({ screens, onOpen, onAspect, reduceMotion }: {
   reduceMotion: boolean;
 }) {
   const [front, setFront] = useState(0);
-  const start = useRef<{ x: number; y: number } | null>(null);
-  const move = (step: number) => setFront(n => (n + step + screens.length) % screens.length);
-  const visible = Array.from({ length: Math.min(3, screens.length) }, (_, depth) => ({
-    item: screens[(front + depth) % screens.length], depth,
-  }));
+  useEffect(() => {
+    if (screens.length < 2 || reduceMotion) return;
+    const timer = window.setInterval(() => {
+      if (!document.hidden) setFront(n => (n + 1) % screens.length);
+    }, 2600);
+    return () => window.clearInterval(timer);
+  }, [screens.length, reduceMotion]);
+
   return (
-    <div
-      className="relative h-full w-[min(350px,68vw)] md:w-[min(400px,30vw)] mr-[92px] flex flex-col items-center justify-end select-none"
-      onPointerDown={e => { start.current = { x: e.clientX, y: e.clientY }; }}
-      onPointerUp={e => {
-        const s = start.current; start.current = null;
-        if (!s) return;
-        const dx = e.clientX - s.x;
-        if (Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(e.clientY - s.y)) {
-          move(dx < 0 ? 1 : -1);
-        }
-      }}
-      onKeyDown={e => {
-        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-          e.preventDefault(); e.stopPropagation(); move(e.key === 'ArrowDown' ? 1 : -1);
-        }
-      }}
-    >
+    <div className="relative h-full w-[min(350px,78vw)] md:w-[min(400px,34vw)] flex flex-col items-center justify-end">
       <span className="absolute top-8 left-1/2 -translate-x-1/2 z-30 whitespace-nowrap rounded-full bg-white px-3 h-7 flex items-center justify-center text-[12px] font-medium text-[#252525] shadow-[0_2px_6px_rgba(0,0,0,0.10)] ring-1 ring-black/[0.04]">
         {screens[0].title.trim().split(/\s+/).slice(0, 2).join(' ')}
       </span>
-      <div className="relative w-full h-[calc(100%-64px)] overflow-visible">
-        {visible.slice().reverse().map(({ item, depth }) => (
+      <div className="relative w-full h-[calc(100%-64px)]">
+        <AnimatePresence mode="sync" initial={false}>
           <motion.div
-            key={item.id}
-            data-stack-front={depth === 0 ? '' : undefined}
-            className={`absolute inset-0 flex items-end justify-center origin-left ${depth === 0 ? 'z-20 cursor-pointer' : depth === 1 ? 'z-10 pointer-events-none' : 'z-0 pointer-events-none'}`}
-            initial={false}
-            animate={{ scale: 1 - depth * 0.045, x: depth * 46, y: 0, opacity: 1 - depth * 0.12 }}
-            transition={reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 280, damping: 32 }}
-            onClick={() => { if (depth === 0) onOpen(front); }}
+            key={screens[front].id}
+            data-stack-front=""
+            className="absolute inset-0 flex items-end justify-center cursor-pointer"
+            initial={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.55, ease: EASE_OUT }}
+            onClick={() => onOpen(front)}
           >
-            <DeviceMock project={item} index={front + depth} onAspect={onAspect} revealed />
+            <DeviceMock project={screens[front]} index={front} onAspect={onAspect} revealed />
           </motion.div>
-        ))}
+        </AnimatePresence>
       </div>
-      {screens.length > 1 && (
-        <div className="absolute bottom-1 z-30 flex items-center gap-2">
-          <button type="button" aria-label="Previous screen" onClick={() => move(-1)} className="px-2 py-1 text-neutral-500 hover:text-black">←</button>
-          <span className="text-[11px] tabular-nums text-neutral-500">{front + 1} / {screens.length}</span>
-          <button type="button" aria-label="Next screen" onClick={() => move(1)} className="px-2 py-1 text-neutral-500 hover:text-black">→</button>
-        </div>
-      )}
     </div>
   );
 }
