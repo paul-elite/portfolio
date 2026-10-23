@@ -478,7 +478,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                   animate={reduceMotion || revealed.has(itemKey(p)) ? { x: 0, opacity: 1 } : { x: SLIDE_FROM, opacity: 0 }}
                   transition={revealed.has(itemKey(p)) ? SLIDE_IN : { duration: 0 }}
                 >
-                  <span className="absolute top-[32px] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white px-5 py-2.5 text-[13px] font-medium text-[#252525] shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.10),0_24px_48px_rgba(0,0,0,0.06)] ring-1 ring-black/[0.04] pointer-events-none">{p.title}</span>
+                  <span className="absolute top-[32px] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white px-3 h-9 flex items-center justify-center text-[12px] leading-none font-medium text-[#252525] shadow-[0_2px_8px_rgba(0,0,0,0.07),0_12px_32px_rgba(0,0,0,0.08)] ring-1 ring-black/[0.04] pointer-events-none">{p.title.trim().split(/\s+/).slice(0, 2).join(' ')}</span>
                   <DeviceMock project={p} index={i} onAspect={recordAspect} revealed={!!reduceMotion || revealed.has(itemKey(p))} />
                 </motion.div>
               </Link>
