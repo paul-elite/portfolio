@@ -438,7 +438,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
               <motion.nav
                 id="portfolio-side-menu"
                 aria-label="Main navigation"
-                className="pointer-events-auto absolute inset-y-0 right-0 w-1/2 bg-white shadow-[-12px_0_48px_rgba(0,0,0,0.08)] px-8 md:px-12 pt-28 pb-12 overflow-y-auto"
+                className="pointer-events-auto absolute inset-y-0 right-0 w-[70%] bg-white shadow-[-12px_0_48px_rgba(0,0,0,0.08)] px-8 md:px-12 pt-28 pb-12 overflow-y-auto"
                 initial={reduceMotion ? { opacity: 0 } : { x: '100%' }}
                 animate={reduceMotion ? { opacity: 1 } : { x: 0 }}
                 exit={reduceMotion ? { opacity: 0 } : { x: '100%' }}
