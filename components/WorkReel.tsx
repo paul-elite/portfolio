@@ -390,52 +390,69 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
       animate={{ opacity: departing ? 0 : 1 }}
       transition={{ duration: DEPART_MS / 1000, ease: EASE_OUT }}
     >
-      {/* More: the ⋯ button in the corner, opening the explore pages and contact links */}
+      {/* Three-line navigation opens a full-height drawer from the right. */}
       <motion.div
         ref={menuRef}
-        className="absolute z-20 top-4 right-3 md:top-6 md:right-6"
+        className="absolute inset-0 z-40 pointer-events-none"
         animate={{ opacity: dimmed ? 0 : 1 }}
-        transition={{ duration: dimmed ? 0.25 : 0.45, ease: EASE_OUT }}
+        transition={{ duration: 0.25 }}
         inert={zoom !== null}
       >
         <button
           type="button"
           onClick={() => setMenu(m => !m)}
-          aria-label="More"
-          aria-haspopup="menu"
+          aria-label={menu ? 'Close navigation' : 'Open navigation'}
+          aria-haspopup="dialog"
           aria-expanded={menu}
-          className="h-11 w-11 grid place-items-center rounded-full text-[#8d8d8d] hover:text-[#2a2a2a] hover:bg-neutral-100 focus-visible:outline-none focus-visible:bg-neutral-100 focus-visible:text-[#2a2a2a] transition-colors"
+          aria-controls="portfolio-side-menu"
+          className="pointer-events-auto absolute z-50 top-4 right-3 md:top-6 md:right-6 h-11 w-11 grid place-items-center rounded-full text-[#2a2a2a] hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2a2a2a] transition-colors"
         >
-          <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor" aria-hidden="true">
-            <circle cx="5.5" cy="12" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="18.5" cy="12" r="1.6" />
-          </svg>
+          <span className="flex w-5 flex-col gap-[5px]" aria-hidden="true">
+            <span className={`block h-[1.5px] w-full bg-current transition-transform duration-300 ${menu ? 'translate-y-[6.5px] rotate-45' : ''}`} />
+            <span className={`block h-[1.5px] w-full bg-current transition-opacity duration-200 ${menu ? 'opacity-0' : ''}`} />
+            <span className={`block h-[1.5px] w-full bg-current transition-transform duration-300 ${menu ? '-translate-y-[6.5px] -rotate-45' : ''}`} />
+          </span>
         </button>
         <AnimatePresence>
           {menu && (
-            <motion.div
-              role="menu"
-              className="absolute right-0 top-12 w-52 origin-top-right rounded-xl bg-white py-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.08)] ring-1 ring-black/5"
-              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: -4 }}
-              animate={{ opacity: 1, scale: 1, y: 0, transition: { type: 'spring', visualDuration: 0.25, bounce: 0 } }}
-              exit={{ opacity: 0, scale: reduceMotion ? 1 : 0.97, transition: { duration: 0.12 } }}
-            >
-              {menuGroups.map((group, g) => (
-                <div key={g} className={g > 0 ? 'mt-1.5 pt-1.5 border-t border-black/5' : ''}>
-                  {group.map(item => (
-                    <a
-                      key={item.label}
-                      role="menuitem"
-                      href={item.href}
-                      {...(isExternal(item.href) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                      onClick={() => setMenu(false)}
-                      className="block px-3.5 py-1.5 text-[#2a2a2a] hover:bg-neutral-50 focus-visible:outline-none focus-visible:bg-neutral-50"
-                    >
-                      {item.label}
-                    </a>
-                  ))}
-                </div>
-              ))}
-            </motion.div>
+            <>
+              <motion.button
+                type="button"
+                aria-label="Close navigation"
+                className="pointer-events-auto absolute inset-0 bg-black/25"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                onClick={() => setMenu(false)}
+              />
+              <motion.nav
+                id="portfolio-side-menu"
+                aria-label="Main navigation"
+                className="pointer-events-auto absolute inset-y-0 right-0 w-[min(420px,100vw)] bg-white shadow-[-12px_0_48px_rgba(0,0,0,0.08)] px-8 md:px-12 pt-28 pb-12 overflow-y-auto"
+                initial={reduceMotion ? { opacity: 0 } : { x: '100%' }}
+                animate={reduceMotion ? { opacity: 1 } : { x: 0 }}
+                exit={reduceMotion ? { opacity: 0 } : { x: '100%' }}
+                transition={reduceMotion ? { duration: 0.15 } : { type: 'spring', stiffness: 300, damping: 34 }}
+              >
+                <p className="text-xs uppercase tracking-[0.16em] text-[#999] mb-8">Explore</p>
+                {menuGroups.map((group, g) => (
+                  <div key={g} className={g > 0 ? 'mt-12 pt-8 border-t border-black/10' : ''}>
+                    {group.map(item => (
+                      <a
+                        key={item.label}
+                        href={item.href}
+                        {...(isExternal(item.href) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                        onClick={() => setMenu(false)}
+                        className="block py-3 text-[22px] leading-8 tracking-[-0.025em] font-medium text-[#252525] hover:text-[#777] focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors"
+                      >
+                        {item.label}
+                      </a>
+                    ))}
+                  </div>
+                ))}
+              </motion.nav>
+            </>
           )}
         </AnimatePresence>
       </motion.div>
