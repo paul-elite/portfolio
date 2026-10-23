@@ -458,7 +458,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
       </motion.div>
 
       <motion.header
-        className="w-full max-w-[625px] mx-auto px-6 md:px-0 pt-20 md:pt-28"
+        className="w-full max-w-[625px] mx-auto px-6 md:px-0 pt-6 md:pt-8"
         animate={reduceMotion ? { opacity: dimmed ? 0 : 1 } : { opacity: dimmed ? 0 : 1, scale: dimmed ? 0.985 : 1 }}
         transition={{ duration: dimmed ? 0.25 : 0.45, delay: dimmed ? 0 : 0.08, ease: EASE_OUT }}
         aria-hidden={zoom ? true : undefined}
