@@ -91,6 +91,8 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
   // The project in view, and which way the reel last moved (for the title swap)
   const [view, setView] = useState({ active: 0, dir: 1 });
   const { active, dir } = view;
+  const viewIndex = useRef(0);
+  useEffect(() => { viewIndex.current = active; }, [active]);
   const [departing, setDeparting] = useState(false);
   const router = useRouter();
   const [zoom, setZoom] = useState<Zoom | null>(null);
@@ -196,43 +198,31 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
     // Re-run per tab: the items, and so the end padding, change
   }, [measure, thumbLeft, thumbWidth, barOpacity, section.id]);
 
-  // Quiet cinematic drift through the screens, in their existing project order.
-  // Pause whenever someone interacts so the reel remains fully controllable.
+  // Move one artifact at a time, with a quiet pause between snaps.
   useEffect(() => {
     const reel = reelRef.current;
     if (!reel || reduceMotion || projects.length < 2 || zoom) return;
-    let raf = 0;
-    let last = 0;
     let paused = false;
-    let resumeAt = performance.now() + 1800;
-    const pause = () => { paused = true; };
-    const resume = () => { paused = false; resumeAt = performance.now() + 2200; last = 0; };
-    const tick = (now: number) => {
-      if (!last) last = now;
-      const elapsed = Math.min(now - last, 48);
-      last = now;
-      if (!paused && !document.hidden && now > resumeAt) {
-        const end = reel.scrollWidth - reel.clientWidth;
-        if (end > 0) {
-          if (reel.scrollLeft >= end - 2) {
-            reel.scrollLeft = 0;
-            resumeAt = now + 1600;
-          } else {
-            reel.scrollLeft = Math.min(end, reel.scrollLeft + elapsed * 0.018);
-          }
-        }
+    let timer: ReturnType<typeof setTimeout>;
+    const advance = () => {
+      if (!paused && !document.hidden) {
+        const next = (viewIndex.current + 1) % projects.length;
+        viewIndex.current = next;
+        scrollToItem(next);
       }
-      raf = requestAnimationFrame(tick);
+      timer = setTimeout(advance, 4200);
     };
+    const pause = () => { paused = true; };
+    const resume = () => { paused = false; };
+    timer = setTimeout(advance, 4200);
     reel.addEventListener('pointerenter', pause);
     reel.addEventListener('pointerleave', resume);
     reel.addEventListener('focusin', pause);
     reel.addEventListener('focusout', resume);
     reel.addEventListener('touchstart', pause, { passive: true });
     reel.addEventListener('touchend', resume, { passive: true });
-    raf = requestAnimationFrame(tick);
     return () => {
-      cancelAnimationFrame(raf);
+      clearTimeout(timer);
       reel.removeEventListener('pointerenter', pause);
       reel.removeEventListener('pointerleave', resume);
       reel.removeEventListener('focusin', pause);
@@ -460,7 +450,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
             tabIndex={0}
             aria-label="Projects. Use the left and right arrow keys to move through them."
             onKeyDown={onReelKey}
-            className="w-full h-[min(700px,92vw)] max-h-full md:h-[min(460px,36vw)] flex items-end gap-12 overflow-x-auto overflow-y-hidden hide-scrollbar overscroll-x-contain focus-visible:outline-none"
+            className="w-full h-[min(700px,92vw)] max-h-full md:h-[min(520px,42vw)] flex items-end gap-12 overflow-x-auto overflow-y-hidden hide-scrollbar overscroll-x-contain focus-visible:outline-none snap-x snap-mandatory"
             // Same left edge as the text column
             style={{ paddingInline: GUTTER, scrollPaddingInline: GUTTER }}
           >
@@ -479,15 +469,16 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                   e.preventDefault();
                   openAt(i);
                 }}
-                className={`shrink-0 h-full flex items-end cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[#2a2a2a] rounded-lg ${zoom?.index === i ? 'opacity-0' : ''}`}
+                className={`shrink-0 h-full flex items-end cursor-pointer snap-center md:snap-start focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[#2a2a2a] rounded-lg ${zoom?.index === i ? 'opacity-0' : ''}`}
               >
                 {/* The entrance: slides in from the right, once, as it comes into view */}
                 <motion.div
-                  className="h-full flex items-end"
+                  className="relative h-full flex items-end pt-[96px]"
                   initial={false}
                   animate={reduceMotion || revealed.has(itemKey(p)) ? { x: 0, opacity: 1 } : { x: SLIDE_FROM, opacity: 0 }}
                   transition={revealed.has(itemKey(p)) ? SLIDE_IN : { duration: 0 }}
                 >
+                  <span className="absolute top-[32px] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white px-5 py-2.5 text-[13px] font-medium text-[#252525] shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.10),0_24px_48px_rgba(0,0,0,0.06)] ring-1 ring-black/[0.04] pointer-events-none">{p.title}</span>
                   <DeviceMock project={p} index={i} onAspect={recordAspect} revealed={!!reduceMotion || revealed.has(itemKey(p))} />
                 </motion.div>
               </Link>
