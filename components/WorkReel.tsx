@@ -491,7 +491,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                 exit={reduceMotion ? { opacity: 0 } : { x: '-100%' }}
                 transition={reduceMotion ? { duration: 0.15 } : { type: 'spring', stiffness: 300, damping: 34 }}
               >
-                
+                <button type="button" onClick={() => setMenu(false)} aria-label="Close menu" className="absolute right-6 top-6 md:right-10 md:top-8 flex h-10 w-10 items-center justify-center rounded-full text-[#2a2a2a] hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"><span aria-hidden="true" className="text-[28px] leading-none font-light">×</span></button>
                 <div>
                   {menuGroups[0]?.map(item => (
                     <a
@@ -504,7 +504,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                     </a>
                   ))}
                 </div>
-                <div className="mt-auto pt-10 flex flex-wrap items-center gap-3" aria-label="Social links">
+                <div className="mt-auto pt-10 flex flex-wrap items-center justify-start gap-3 -ml-2" aria-label="Social links">
                   {socials.filter(item => item.label !== 'GitHub' && item.label !== 'Email').map(item => {
                     
                     return (
