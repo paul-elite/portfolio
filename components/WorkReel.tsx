@@ -390,7 +390,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
       animate={{ opacity: departing ? 0 : 1 }}
       transition={{ duration: DEPART_MS / 1000, ease: EASE_OUT }}
     >
-      {/* Three-line navigation opens a full-height drawer from the right. */}
+      {/* Plus navigation opens a full-height drawer from the left. */}
       <motion.div
         ref={menuRef}
         className="absolute inset-0 z-40 pointer-events-none"
@@ -405,7 +405,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
           aria-haspopup="dialog"
           aria-expanded={menu}
           aria-controls="portfolio-side-menu"
-          className="pointer-events-auto absolute z-50 top-4 right-3 md:top-6 md:right-6 h-11 w-11 grid place-items-center rounded-full text-[#2a2a2a] hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2a2a2a] transition-colors"
+          className="pointer-events-auto absolute z-50 top-3 left-[max(12px,calc((100vw-625px)/2-10px))] md:top-4 h-11 w-11 grid place-items-center rounded-full text-[#2a2a2a] hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2a2a2a] transition-colors"
         >
           <span className="relative block h-5 w-5" aria-hidden="true">
             <span className={`absolute left-0 top-1/2 h-[1.5px] w-full -translate-y-1/2 bg-current transition-transform duration-300 ${menu ? 'rotate-45' : ''}`} />
@@ -428,10 +428,10 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
               <motion.nav
                 id="portfolio-side-menu"
                 aria-label="Main navigation"
-                className="pointer-events-auto absolute inset-y-0 right-0 w-[70%] bg-white shadow-[-12px_0_48px_rgba(0,0,0,0.08)] px-8 md:px-12 pt-28 pb-12 overflow-y-auto"
-                initial={reduceMotion ? { opacity: 0 } : { x: '100%' }}
+                className="pointer-events-auto absolute inset-y-0 left-0 w-[70%] bg-white shadow-[12px_0_48px_rgba(0,0,0,0.08)] px-8 md:px-12 pt-28 pb-12 overflow-y-auto"
+                initial={reduceMotion ? { opacity: 0 } : { x: '-100%' }}
                 animate={reduceMotion ? { opacity: 1 } : { x: 0 }}
-                exit={reduceMotion ? { opacity: 0 } : { x: '100%' }}
+                exit={reduceMotion ? { opacity: 0 } : { x: '-100%' }}
                 transition={reduceMotion ? { duration: 0.15 } : { type: 'spring', stiffness: 300, damping: 34 }}
               >
                 
@@ -457,7 +457,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
       </motion.div>
 
       <motion.header
-        className="w-full max-w-[625px] mx-auto px-6 md:px-0 pt-6 md:pt-8"
+        className="w-full max-w-[625px] mx-auto px-6 md:px-0 pt-20 md:pt-24"
         animate={reduceMotion ? { opacity: dimmed ? 0 : 1 } : { opacity: dimmed ? 0 : 1, scale: dimmed ? 0.985 : 1 }}
         transition={{ duration: dimmed ? 0.25 : 0.45, delay: dimmed ? 0 : 0.08, ease: EASE_OUT }}
         aria-hidden={zoom ? true : undefined}
