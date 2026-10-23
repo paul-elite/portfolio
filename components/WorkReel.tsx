@@ -394,7 +394,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
   return (
     // Opacity only on the root: a transform here would move the fixed project view
     <motion.div
-      className="relative h-dvh overflow-hidden flex flex-col bg-white text-[14px] leading-6 text-[#2a2a2a] font-sans"
+      className="relative h-dvh overflow-hidden flex flex-col bg-[#e9e9e9] text-[14px] leading-6 text-[#2a2a2a] font-sans"
       initial={false}
       animate={{ opacity: departing ? 0 : 1 }}
       transition={{ duration: DEPART_MS / 1000, ease: EASE_OUT }}
@@ -468,7 +468,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
       <motion.div
         className="relative z-30 flex flex-col flex-1 min-h-0 w-full bg-white origin-top-left"
         initial={false}
-        animate={menu && !zoom ? { x: '70%', scale: 0.78, borderRadius: 18, boxShadow: '-12px 8px 45px rgba(0,0,0,0.13)' } : { x: '0%', scale: 1, borderRadius: 0, boxShadow: '0px 0px 0px rgba(0,0,0,0)' }}
+        animate={menu && !zoom ? { x: 'calc(100vw - 28px - 78vw)', scale: 0.78, borderRadius: 18, boxShadow: '-12px 8px 45px rgba(0,0,0,0.13)' } : { x: '0px', scale: 1, borderRadius: 0, boxShadow: '0px 0px 0px rgba(0,0,0,0)' }}
         transition={reduceMotion ? { duration: 0.15 } : { type: 'spring', stiffness: 240, damping: 32, mass: 1 }}
         style={{ pointerEvents: menu ? 'none' : 'auto', overflow: 'hidden' }}
         aria-hidden={menu ? true : undefined}
