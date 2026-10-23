@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { Github, Instagram, Linkedin, Mail } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, type MotionValue } from 'framer-motion';
@@ -470,7 +469,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                 </div>
                 <div className="mt-auto pt-10 flex flex-wrap items-center gap-3" aria-label="Social links">
                   {[...socials, ...(email ? [{ label: 'Email', href: email }] : [])].map(item => {
-                    const Icon = item.label === 'GitHub' ? Github : item.label === 'Instagram' ? Instagram : item.label === 'LinkedIn' ? Linkedin : item.label === 'Email' ? Mail : null;
+                    
                     return (
                       <a
                         key={item.label}
@@ -481,11 +480,13 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                         onClick={() => setMenu(false)}
                         className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-[#333] hover:bg-neutral-100 hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black transition-colors"
                       >
-                        {Icon ? <Icon size={21} strokeWidth={1.8} aria-hidden="true" /> : (
-                          <svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.847h-7.406l-5.8-7.585-6.638 7.585H.474l8.6-9.83L0 1.153h7.594l5.243 6.932 6.064-6.932Zm-1.29 19.49h2.039L6.486 3.24H4.298l13.313 17.403Z" />
-                          </svg>
-                        )}
+                        <svg width="21" height="21" viewBox="0 0 24 24" fill={item.label === 'X' || item.label === 'GitHub' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          {item.label === 'GitHub' ? <path stroke="none" d="M12 .8a11.2 11.2 0 0 0-3.54 21.83c.56.1.77-.24.77-.54v-2.1c-3.13.68-3.79-1.33-3.79-1.33-.51-1.3-1.25-1.65-1.25-1.65-1.02-.7.08-.69.08-.69 1.13.08 1.73 1.16 1.73 1.16 1 .1.82 2.1 3.25 1.5.1-.73.39-1.22.71-1.5-2.5-.28-5.13-1.25-5.13-5.56 0-1.23.44-2.24 1.16-3.03-.12-.28-.5-1.43.11-2.98 0 0 .95-.3 3.08 1.16a10.7 10.7 0 0 1 5.6 0c2.13-1.45 3.07-1.16 3.07-1.16.62 1.55.23 2.7.12 2.98.72.79 1.15 1.8 1.15 3.03 0 4.32-2.63 5.27-5.14 5.55.4.35.76 1.03.76 2.08v3.08c0 .3.2.65.78.54A11.2 11.2 0 0 0 12 .8Z" /> :
+                            item.label === 'Instagram' ? <><rect x="2" y="2" width="20" height="20" rx="5" /><circle cx="12" cy="12" r="4.5" /><circle cx="18" cy="6" r="1" fill="currentColor" stroke="none" /></> :
+                            item.label === 'LinkedIn' ? <><rect x="2" y="2" width="20" height="20" rx="2" /><path d="M7 10v7M7 7v.1M11 17v-7h3v1.5c.5-1 1.4-1.5 2.5-1.5 1.7 0 2.5 1 2.5 3V17" /></> :
+                            item.label === 'Email' ? <><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m3 6 9 7 9-7" /></> :
+                            <path stroke="none" d="M18.901 1.153h3.68l-8.04 9.19L24 22.847h-7.406l-5.8-7.585-6.638 7.585H.474l8.6-9.83L0 1.153h7.594l5.243 6.932 6.064-6.932Zm-1.29 19.49h2.039L6.486 3.24H4.298l13.313 17.403Z" />}
+                        </svg>
                       </a>
                     );
                   })}
