@@ -73,6 +73,15 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
   const section = sections[tab] ?? sections[0];
   const projects = section.items;
   const hasItems = projects.length > 0;
+  // Each horizontal snap is a whole project; its screens live in an independent swipeable stack.
+  const stacks = projects.reduce<{ first: number; screens: ReelItem[] }[]>((groups, item, index) => {
+    const slug = item.slug.split('~')[0];
+    const last = groups[groups.length - 1];
+    if (last && last.screens[0].slug.split('~')[0] === slug) last.screens.push(item);
+    else groups.push({ first: index, screens: [item] });
+    return groups;
+  }, []);
+
   // Items that have slid into view (each enters once)
   const [revealed, setRevealed] = useState<Set<string>>(() => new Set());
   const itemKey = (p: ReelItem) => `${section.id}:${p.slug}`;
@@ -103,7 +112,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
   const quietFocus = useRef(false);
   const returnFocus = useRef<number | null>(null);
   const reduceMotion = useReducedMotion();
-  const current = projects[active];
+  const current = stacks[active]?.screens[0];
   const currentProject = current?.slug.split('~')[0];
   const dimmed = zoom !== null && !leaving;
 
@@ -140,7 +149,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
     itemRefs.current.forEach((el, i) => {
       if (!el) return;
       const r = el.getBoundingClientRect();
-      const distance = atEnd && i === projects.length - 1 ? -1
+      const distance = atEnd && i === stacks.length - 1 ? -1
         : Math.abs((centred ? r.left + r.width / 2 : r.left + Math.min(r.width, 200) / 2) - anchorX);
       if (distance < bestDistance) {
         bestDistance = distance;
@@ -148,7 +157,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
       }
     });
     setView(v => (v.active === best ? v : { active: best, dir: best > v.active ? 1 : -1 }));
-  }, [projects.length]);
+  }, [stacks.length]);
 
   useEffect(() => {
     const reel = reelRef.current;
@@ -202,7 +211,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
   // Move one artifact at a time, with a quiet pause between snaps.
   useEffect(() => {
     const reel = reelRef.current;
-    if (!reel || reduceMotion || projects.length < 2 || zoom) return;
+    if (!reel || reduceMotion || stacks.length < 2 || zoom) return;
     let paused = false;
     let direction = 1;
     let timer: ReturnType<typeof setTimeout>;
@@ -210,9 +219,9 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
       if (!paused && !document.hidden) {
         const current = viewIndex.current;
         // Reverse at either end instead of jumping back to the first artifact.
-        if (current >= projects.length - 1) direction = -1;
+        if (current >= stacks.length - 1) direction = -1;
         else if (current <= 0) direction = 1;
-        const next = Math.max(0, Math.min(projects.length - 1, current + direction));
+        const next = Math.max(0, Math.min(stacks.length - 1, current + direction));
         viewIndex.current = next;
         scrollToItem(next);
       }
@@ -236,7 +245,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
       reel.removeEventListener('touchstart', pause);
       reel.removeEventListener('touchend', resume);
     };
-  }, [projects.length, reduceMotion, zoom]);
+  }, [stacks.length, reduceMotion, zoom]);
 
   // Browser/device Back dismisses the expanded project without leaving the homepage.
   useEffect(() => {
@@ -349,7 +358,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
   const onReelKey = (e: React.KeyboardEvent) => {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
     e.preventDefault();
-    const next = Math.min(projects.length - 1, Math.max(0, active + (e.key === 'ArrowRight' ? 1 : -1)));
+    const next = Math.min(stacks.length - 1, Math.max(0, active + (e.key === 'ArrowRight' ? 1 : -1)));
     scrollToItem(next);
     itemRefs.current[next]?.focus({ preventScroll: true });
   };
@@ -497,34 +506,28 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
             // Same left edge as the text column
             style={{ paddingInline: GUTTER, scrollPaddingInline: GUTTER }}
           >
-            {projects.map((p, i) => (
-              <Link
-                key={itemKey(p)}
-                data-reel-key={itemKey(p)}
+            {stacks.map((stack, i) => (
+              <div
+                key={stack.screens[0].slug}
                 role="listitem"
-                ref={el => { itemRefs.current[i] = el; }}
-                href={p.href}
-                aria-label={`${p.title}${p.description ? `, ${p.description}` : ''}`}
-                onFocus={() => { if (!quietFocus.current) scrollToItem(i); }}
-                onClick={e => {
-                  // Modified clicks still open the case study in a new tab or window
-                  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-                  e.preventDefault();
-                  openAt(i);
-                }}
-                className={`shrink-0 h-full flex items-end cursor-pointer snap-center md:snap-start focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[#2a2a2a] rounded-lg ${zoom?.index === i ? 'opacity-0' : ''}`}
+                ref={el => { itemRefs.current[i] = el as unknown as HTMLAnchorElement; }}
+                className="shrink-0 h-full flex items-end snap-center md:snap-start"
               >
-                {/* The entrance: slides in from the right, once, as it comes into view */}
-                <motion.div
-                  className="relative h-full flex items-end pt-[60px]"
-                  initial={false}
-                  animate={reduceMotion || revealed.has(itemKey(p)) ? { x: 0, opacity: 1 } : { x: SLIDE_FROM, opacity: 0 }}
-                  transition={revealed.has(itemKey(p)) ? SLIDE_IN : { duration: 0 }}
-                >
-                  <span className="absolute top-[32px] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white px-3 h-7 flex items-center justify-center text-[12px] leading-none font-medium text-[#252525] shadow-[0_2px_6px_rgba(0,0,0,0.10)] ring-1 ring-black/[0.04] pointer-events-none">{p.title.trim().split(/\s+/).slice(0, 2).join(' ')}</span>
-                  <DeviceMock project={p} index={i} onAspect={recordAspect} revealed={!!reduceMotion || revealed.has(itemKey(p))} />
-                </motion.div>
-              </Link>
+                <ProjectScreenStack
+                  screens={stack.screens}
+                  onOpen={screen => {
+                    const flatIndex = stack.first + screen;
+                    const device = itemRefs.current[i]?.querySelector('[data-stack-front]');
+                    if (!device) return;
+                    setLeaving(false);
+                    window.history.pushState({ portfolioProjectOverlay: true }, '', window.location.href);
+                    historyOverlayRef.current = true;
+                    setZoom({ index: flatIndex, origin: device.getBoundingClientRect(), aspects: new Map(aspects.current) });
+                  }}
+                  onAspect={recordAspect}
+                  reduceMotion={!!reduceMotion}
+                />
+              </div>
             ))}
           </div>
           {/* Small rounded scroll indicator, on the column's left edge, only while the reel scrolls */}
@@ -551,6 +554,66 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
         />
       )}
     </motion.div>
+  );
+}
+
+/* Each project owns its own swipeable deck. Only three screens are visible at a time. */
+function ProjectScreenStack({ screens, onOpen, onAspect, reduceMotion }: {
+  screens: ReelItem[];
+  onOpen: (screen: number) => void;
+  onAspect: (slug: string, aspect: number) => void;
+  reduceMotion: boolean;
+}) {
+  const [front, setFront] = useState(0);
+  const start = useRef<{ x: number; y: number } | null>(null);
+  const move = (step: number) => setFront(n => (n + step + screens.length) % screens.length);
+  const visible = Array.from({ length: Math.min(3, screens.length) }, (_, depth) => ({
+    item: screens[(front + depth) % screens.length], depth,
+  }));
+  return (
+    <div
+      className="relative h-full w-[min(350px,78vw)] md:w-[min(400px,34vw)] flex flex-col items-center justify-end select-none"
+      onPointerDown={e => { start.current = { x: e.clientX, y: e.clientY }; }}
+      onPointerUp={e => {
+        const s = start.current; start.current = null;
+        if (!s) return;
+        const dx = e.clientX - s.x;
+        if (Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(e.clientY - s.y)) {
+          move(dx < 0 ? 1 : -1);
+        }
+      }}
+      onKeyDown={e => {
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+          e.preventDefault(); e.stopPropagation(); move(e.key === 'ArrowDown' ? 1 : -1);
+        }
+      }}
+    >
+      <span className="absolute top-8 left-1/2 -translate-x-1/2 z-30 whitespace-nowrap rounded-full bg-white px-3 h-7 flex items-center justify-center text-[12px] font-medium text-[#252525] shadow-[0_2px_6px_rgba(0,0,0,0.10)] ring-1 ring-black/[0.04]">
+        {screens[0].title.trim().split(/\s+/).slice(0, 2).join(' ')}
+      </span>
+      <div className="relative w-full h-[calc(100%-64px)]">
+        {visible.slice().reverse().map(({ item, depth }) => (
+          <motion.div
+            key={item.id}
+            data-stack-front={depth === 0 ? '' : undefined}
+            className={`absolute inset-0 flex items-end justify-center origin-bottom ${depth === 0 ? 'z-20 cursor-pointer' : depth === 1 ? 'z-10 pointer-events-none' : 'z-0 pointer-events-none'}`}
+            initial={false}
+            animate={{ scale: 1 - depth * 0.085, y: -depth * 24, opacity: 1 - depth * 0.12 }}
+            transition={reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 280, damping: 32 }}
+            onClick={() => { if (depth === 0) onOpen(front); }}
+          >
+            <DeviceMock project={item} index={front + depth} onAspect={onAspect} revealed />
+          </motion.div>
+        ))}
+      </div>
+      {screens.length > 1 && (
+        <div className="absolute bottom-1 z-30 flex items-center gap-2">
+          <button type="button" aria-label="Previous screen" onClick={() => move(-1)} className="px-2 py-1 text-neutral-500 hover:text-black">←</button>
+          <span className="text-[11px] tabular-nums text-neutral-500">{front + 1} / {screens.length}</span>
+          <button type="button" aria-label="Next screen" onClick={() => move(1)} className="px-2 py-1 text-neutral-500 hover:text-black">→</button>
+        </div>
+      )}
+    </div>
   );
 }
 
