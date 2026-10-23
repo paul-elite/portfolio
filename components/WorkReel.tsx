@@ -98,6 +98,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
   const [zoom, setZoom] = useState<Zoom | null>(null);
   const [leaving, setLeaving] = useState(false);
   const zoomRef = useRef<Zoom | null>(null);
+  const historyOverlayRef = useRef(false);
   const aspects = useRef(new Map<string, number>());
   const quietFocus = useRef(false);
   const returnFocus = useRef<number | null>(null);
@@ -232,6 +233,19 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
     };
   }, [projects.length, reduceMotion, zoom]);
 
+  // Browser/device Back dismisses the expanded project without leaving the homepage.
+  useEffect(() => {
+    const onPopState = () => {
+      if (historyOverlayRef.current) {
+        historyOverlayRef.current = false;
+        setZoom(null);
+        setLeaving(false);
+      }
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
   // Reveal phones as they come into view, left to right, a beat apart
   useEffect(() => {
     if (reduceMotion) return;
@@ -290,6 +304,8 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
     const device = itemRefs.current[i]?.firstElementChild?.firstElementChild;
     if (!device) return;
     setLeaving(false);
+    window.history.pushState({ portfolioProjectOverlay: true }, '', window.location.href);
+    historyOverlayRef.current = true;
     setZoom({ index: i, origin: device.getBoundingClientRect(), aspects: new Map(aspects.current) });
   };
 
@@ -316,6 +332,10 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
   };
 
   const onZoomClosed = (i: number) => {
+    if (historyOverlayRef.current) {
+      historyOverlayRef.current = false;
+      if (window.history.state?.portfolioProjectOverlay) window.history.back();
+    }
     returnFocus.current = i;
     setZoom(null);
     setLeaving(false);
