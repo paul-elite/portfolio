@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import { Github, Instagram, Linkedin, Mail } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, type MotionValue } from 'framer-motion';
@@ -436,28 +437,47 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
               <motion.nav
                 id="portfolio-side-menu"
                 aria-label="Main navigation"
-                className="pointer-events-auto absolute inset-y-0 left-0 w-[70%] bg-white px-8 md:px-12 pt-28 pb-12 overflow-y-auto"
+                className="pointer-events-auto absolute inset-y-0 left-0 w-[70%] bg-white px-8 md:px-12 pt-28 pb-12 overflow-y-auto flex flex-col"
                 initial={reduceMotion ? { opacity: 0 } : { x: '-100%' }}
                 animate={reduceMotion ? { opacity: 1 } : { x: 0 }}
                 exit={reduceMotion ? { opacity: 0 } : { x: '-100%' }}
                 transition={reduceMotion ? { duration: 0.15 } : { type: 'spring', stiffness: 300, damping: 34 }}
               >
                 
-                {menuGroups.map((group, g) => (
-                  <div key={g} className={g > 0 ? 'mt-8' : ''}>
-                    {group.map(item => (
+                <div>
+                  {menuGroups[0]?.map(item => (
+                    <a
+                      key={item.label}
+                      href={item.href}
+                      onClick={() => setMenu(false)}
+                      className="block py-3 text-[22px] leading-8 tracking-[-0.025em] font-medium text-[#252525] hover:text-[#777] focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors"
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </div>
+                <div className="mt-auto pt-10 flex flex-wrap items-center gap-3" aria-label="Social links">
+                  {[...socials, ...(email ? [{ label: 'Email', href: email }] : [])].map(item => {
+                    const Icon = item.label === 'GitHub' ? Github : item.label === 'Instagram' ? Instagram : item.label === 'LinkedIn' ? Linkedin : item.label === 'Email' ? Mail : null;
+                    return (
                       <a
                         key={item.label}
                         href={item.href}
                         {...(isExternal(item.href) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                        aria-label={item.label}
+                        title={item.label}
                         onClick={() => setMenu(false)}
-                        className="block py-3 text-[22px] leading-8 tracking-[-0.025em] font-medium text-[#252525] hover:text-[#777] focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors"
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-[#333] hover:bg-neutral-100 hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black transition-colors"
                       >
-                        {item.label}
+                        {Icon ? <Icon size={21} strokeWidth={1.8} aria-hidden="true" /> : (
+                          <svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.847h-7.406l-5.8-7.585-6.638 7.585H.474l8.6-9.83L0 1.153h7.594l5.243 6.932 6.064-6.932Zm-1.29 19.49h2.039L6.486 3.24H4.298l13.313 17.403Z" />
+                          </svg>
+                        )}
                       </a>
-                    ))}
-                  </div>
-                ))}
+                    );
+                  })}
+                </div>
               </motion.nav>
             </>
           )}
