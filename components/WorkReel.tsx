@@ -42,14 +42,14 @@ const PHONE_MASK = {
 
 // Springs after mikematas.com, tuned by feel: the device eases out of the reel with a hint of
 // bounce and settles back into its slot without overshooting; paging glides with a little give
-const OPEN_SPRING = { type: 'spring', visualDuration: 0.5, bounce: 0.14 } as const;
-const CLOSE_SPRING = { type: 'spring', visualDuration: 0.42, bounce: 0, restDelta: 0.002, restSpeed: 0.02 } as const;
-const PAGE_SPRING = { type: 'spring', visualDuration: 0.5, bounce: 0.08 } as const;
+const OPEN_SPRING = { type: 'spring', stiffness: 260, damping: 32, mass: 1 } as const;
+const CLOSE_SPRING = { type: 'spring', stiffness: 300, damping: 35, mass: 1, restDelta: 0.002, restSpeed: 0.02 } as const;
+const PAGE_SPRING = { type: 'spring', stiffness: 240, damping: 32, mass: 1 } as const;
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 // Phones slide in from the right as they come into view: a long, decelerating glide with no
 // overshoot (Material 3 emphasized decelerate), fading in over its first half, a beat apart
-const SLIDE_IN = { x: { duration: 0.9, ease: [0.05, 0.7, 0.1, 1] as const }, opacity: { duration: 0.45, ease: 'easeOut' as const } };
-const SLIDE_FROM = 120;
+const SLIDE_IN = { x: { type: 'spring' as const, stiffness: 180, damping: 30, mass: 1 }, opacity: { duration: 0.5, ease: 'easeOut' as const } };
+const SLIDE_FROM = 52;
 const SLIDE_STAGGER_MS = 120;
 // How long the page takes to fade before navigating to a case study
 const DEPART_MS = 200;
@@ -493,12 +493,12 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
               >
                 {/* The entrance: slides in from the right, once, as it comes into view */}
                 <motion.div
-                  className="relative h-full flex items-end pt-[96px]"
+                  className="relative h-full flex items-end pt-[60px]"
                   initial={false}
                   animate={reduceMotion || revealed.has(itemKey(p)) ? { x: 0, opacity: 1 } : { x: SLIDE_FROM, opacity: 0 }}
                   transition={revealed.has(itemKey(p)) ? SLIDE_IN : { duration: 0 }}
                 >
-                  <span className="absolute top-[32px] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white px-3 h-9 flex items-center justify-center text-[12px] leading-none font-medium text-[#252525] shadow-[0_2px_6px_rgba(0,0,0,0.10)] ring-1 ring-black/[0.04] pointer-events-none">{p.title.trim().split(/\s+/).slice(0, 2).join(' ')}</span>
+                  <span className="absolute top-[32px] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white px-3 h-7 flex items-center justify-center text-[12px] leading-none font-medium text-[#252525] shadow-[0_2px_6px_rgba(0,0,0,0.10)] ring-1 ring-black/[0.04] pointer-events-none">{p.title.trim().split(/\s+/).slice(0, 2).join(' ')}</span>
                   <DeviceMock project={p} index={i} onAspect={recordAspect} revealed={!!reduceMotion || revealed.has(itemKey(p))} />
                 </motion.div>
               </Link>
