@@ -214,17 +214,29 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
     const reel = reelRef.current;
     if (!reel || reduceMotion || stacks.length < 2 || zoom) return;
     let paused = false;
-    let direction = 1;
     let timer: ReturnType<typeof setTimeout>;
     const advance = () => {
       if (!paused && !document.hidden) {
         const current = viewIndex.current;
-        // Reverse at either end instead of jumping back to the first artifact.
-        if (current >= stacks.length - 1) direction = -1;
-        else if (current <= 0) direction = 1;
-        const next = Math.max(0, Math.min(stacks.length - 1, current + direction));
+        // Always advance left-to-right. At the end, reset without a backwards animation.
+        const next = (current + 1) % stacks.length;
         viewIndex.current = next;
-        scrollToItem(next);
+        if (next === 0) {
+          const el = itemRefs.current[0];
+          if (el) {
+            const box = reel.getBoundingClientRect();
+            const r = el.getBoundingClientRect();
+            const offset = window.matchMedia('(max-width: 767px)').matches
+              ? r.left + r.width / 2 - (box.left + box.width / 2)
+              : r.left - (columnRef.current?.getBoundingClientRect().left ?? 0);
+            const previousSnap = reel.style.scrollSnapType;
+            reel.style.scrollSnapType = 'none';
+            reel.scrollTo({ left: reel.scrollLeft + offset, behavior: 'instant' });
+            requestAnimationFrame(() => { reel.style.scrollSnapType = previousSnap; });
+          }
+        } else {
+          scrollToItem(next);
+        }
       }
       timer = setTimeout(advance, 6300);
     };
