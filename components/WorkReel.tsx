@@ -227,21 +227,32 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
     const advance = () => {
       if (!paused && !document.hidden) {
         const current = viewIndex.current;
-        // Always advance left-to-right. At the end, reset without a backwards animation.
+        // Continue forward into a duplicate of the first project, then silently
+        // reposition to the real first project after the slide has finished.
         const next = (current + 1) % stacks.length;
         viewIndex.current = next;
         if (next === 0) {
-          const el = itemRefs.current[0];
-          if (el) {
+          const clone = reel.querySelector<HTMLElement>('[data-reel-loop-clone]');
+          const first = itemRefs.current[0];
+          if (clone && first) {
+            const centred = window.matchMedia('(max-width: 767px)').matches;
             const box = reel.getBoundingClientRect();
-            const r = el.getBoundingClientRect();
-            const offset = window.matchMedia('(max-width: 767px)').matches
-              ? r.left + r.width / 2 - (box.left + box.width / 2)
-              : r.left - (columnRef.current?.getBoundingClientRect().left ?? 0);
-            const previousSnap = reel.style.scrollSnapType;
-            reel.style.scrollSnapType = 'none';
-            reel.scrollTo({ left: reel.scrollLeft + offset, behavior: 'instant' });
-            requestAnimationFrame(() => { reel.style.scrollSnapType = previousSnap; });
+            const target = clone.getBoundingClientRect();
+            const offset = centred
+              ? target.left + target.width / 2 - (box.left + box.width / 2)
+              : target.left - (columnRef.current?.getBoundingClientRect().left ?? 0);
+            reel.scrollTo({ left: reel.scrollLeft + offset, behavior: 'smooth' });
+            window.setTimeout(() => {
+              if (!reel.isConnected) return;
+              const r = first.getBoundingClientRect();
+              const delta = centred
+                ? r.left + r.width / 2 - (box.left + box.width / 2)
+                : r.left - (columnRef.current?.getBoundingClientRect().left ?? 0);
+              const previousSnap = reel.style.scrollSnapType;
+              reel.style.scrollSnapType = 'none';
+              reel.scrollTo({ left: reel.scrollLeft + delta, behavior: 'instant' });
+              requestAnimationFrame(() => { reel.style.scrollSnapType = previousSnap; measure(); });
+            }, 1100);
           }
         } else {
           scrollToItem(next);
@@ -581,6 +592,16 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                 />
               </div>
             ))}
+            {stacks.length > 1 && (
+              <div data-reel-loop-clone aria-hidden="true" className="shrink-0 h-full flex items-end snap-center md:snap-start pointer-events-none">
+                <ProjectScreenStack
+                  screens={stacks[0].screens}
+                  onOpen={() => {}}
+                  onAspect={() => {}}
+                  reduceMotion={!!reduceMotion}
+                />
+              </div>
+            )}
           </div>
           {/* Small rounded scroll indicator, on the column's left edge, only while the reel scrolls */}
           <motion.div
