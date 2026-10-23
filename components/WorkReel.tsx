@@ -581,9 +581,9 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
             tabIndex={0}
             aria-label="Projects. Use the left and right arrow keys to move through them."
             onKeyDown={onReelKey}
-            className="w-full h-[min(700px,92vw)] max-h-full md:h-[min(520px,42vw)] flex items-end gap-12 overflow-x-auto overflow-y-hidden hide-scrollbar overscroll-x-contain focus-visible:outline-none snap-x snap-mandatory"
+            className="w-full h-[min(700px,92vw)] max-h-full md:h-[min(520px,42vw)] flex items-end gap-5 md:gap-6 overflow-x-auto overflow-y-hidden hide-scrollbar overscroll-x-contain focus-visible:outline-none snap-x snap-mandatory"
             // Same left edge as the text column
-            style={{ paddingInline: GUTTER, scrollPaddingInline: GUTTER }}
+            style={{ paddingLeft: GUTTER, paddingRight: 24, scrollPaddingLeft: GUTTER, scrollPaddingRight: 24 }}
           >
             {stacks.map((stack, i) => (
               <div
@@ -663,7 +663,7 @@ function ProjectScreenStack({ screens, onOpen, onAspect, reduceMotion }: {
   }, [screens.length, reduceMotion]);
 
   return (
-    <div className="relative h-full w-[min(350px,78vw)] md:w-[min(400px,34vw)] flex flex-col items-center justify-end">
+    <div className="relative h-full w-[min(350px,76vw)] md:w-[min(400px,34vw)] flex flex-col items-center justify-end">
       <span className="absolute top-8 left-1/2 -translate-x-1/2 z-30 whitespace-nowrap rounded-full bg-white px-3 h-7 flex items-center justify-center text-[12px] font-medium text-[#252525] shadow-[0_2px_6px_rgba(0,0,0,0.10)] ring-1 ring-black/[0.04]">
         {screens[0].title.trim().split(/\s+/).slice(0, 2).join(' ')}
       </span>
