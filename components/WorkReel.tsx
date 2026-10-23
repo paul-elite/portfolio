@@ -236,31 +236,39 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
           const first = itemRefs.current[0];
           if (clone && first) {
             const centred = window.matchMedia('(max-width: 767px)').matches;
-            const box = reel.getBoundingClientRect();
-            const target = clone.getBoundingClientRect();
-            const offset = centred
-              ? target.left + target.width / 2 - (box.left + box.width / 2)
-              : target.left - (columnRef.current?.getBoundingClientRect().left ?? 0);
-            reel.scrollTo({ left: reel.scrollLeft + offset, behavior: 'smooth' });
-            window.setTimeout(() => {
-              if (!reel.isConnected) return;
-              const r = first.getBoundingClientRect();
-              const delta = centred
-                ? r.left + r.width / 2 - (box.left + box.width / 2)
-                : r.left - (columnRef.current?.getBoundingClientRect().left ?? 0);
-              // Reset behind the identical first-project clone without animating backwards.
-              // Disable both snapping and CSS smooth scrolling for the invisible jump.
-              const previousSnap = reel.style.scrollSnapType;
-              const previousBehavior = reel.style.scrollBehavior;
-              reel.style.scrollSnapType = 'none';
-              reel.style.scrollBehavior = 'auto';
-              reel.scrollLeft += delta;
+            const anchor = () => centred
+              ? reel.getBoundingClientRect().left + reel.clientWidth / 2
+              : (columnRef.current?.getBoundingClientRect().left ?? 0);
+            const position = (el: HTMLElement) => {
+              const rect = el.getBoundingClientRect();
+              return centred ? rect.left + rect.width / 2 : rect.left;
+            };
+            // Scroll forward to the duplicate first project. Do not allow
+            // scroll-snap to pull the viewport backwards during the handoff.
+            const previousSnap = reel.style.scrollSnapType;
+            const previousBehavior = reel.style.scrollBehavior;
+            reel.style.scrollSnapType = 'none';
+            reel.style.scrollBehavior = 'auto';
+            let finished = false;
+            let fallback: ReturnType<typeof setTimeout>;
+            const finish = () => {
+              if (finished || !reel.isConnected) return;
+              finished = true;
+              clearTimeout(fallback);
+              reel.removeEventListener('scrollend', finish);
+              // The duplicate and original are visually identical. Jump
+              // invisibly to the original before enabling snapping again.
+              reel.scrollLeft += position(first) - anchor();
               setView({ active: 0, dir: 1 });
               requestAnimationFrame(() => {
                 reel.style.scrollSnapType = previousSnap;
                 reel.style.scrollBehavior = previousBehavior;
               });
-            }, 1100);
+            };
+            reel.addEventListener('scrollend', finish, { once: true });
+            reel.scrollTo({ left: reel.scrollLeft + position(clone) - anchor(), behavior: 'smooth' });
+            // Browsers without scrollend still finish the forward-only loop.
+            fallback = setTimeout(finish, 1800);
           }
         } else {
           scrollToItem(next);
