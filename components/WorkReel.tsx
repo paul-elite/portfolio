@@ -478,13 +478,13 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                         aria-label={item.label}
                         title={item.label}
                         onClick={() => setMenu(false)}
-                        className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-[#333] hover:bg-neutral-100 hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black transition-colors"
+                        className="inline-flex h-[60px] w-[60px] shrink-0 items-center justify-center rounded-xl text-[#333] hover:bg-neutral-100 hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black transition-colors"
                       >
                         {['X', 'Instagram', 'LinkedIn'].includes(item.label) ? (
                           <img
                             src={item.label === 'X' ? '/social-x.svg' : item.label === 'Instagram' ? '/social-instagram.svg' : '/social-linkedin.svg'}
                             alt=""
-                            className="block h-7 w-7 object-contain"
+                            className={`block object-contain ${item.label === 'LinkedIn' ? 'h-[46.2px] w-[46.2px]' : 'h-[42px] w-[42px]'}`}
                           />
                         ) : (
                           <svg width="21" height="21" viewBox="0 0 24 24" fill={item.label === 'GitHub' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
