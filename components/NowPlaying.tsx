@@ -45,7 +45,7 @@ export function NowPlayingImage({ data, useAlbumArt = false }: { data: SpotifyDa
   const showAlbumArt = useAlbumArt && Boolean(data?.isPlaying && data?.albumImageUrl);
 
   return (
-    <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 relative">
+    <div className={`w-10 h-10 rounded-full overflow-hidden flex-shrink-0 relative ${showAlbumArt ? "shadow-[0_0_0_0.5px_rgba(0,0,0,0.15)]" : ""}`}>
       <Image
         src={showAlbumArt ? data?.albumImageUrl || '/music-icon.svg' : '/music-icon.svg'}
         alt={showAlbumArt ? data?.album || 'Album art' : 'Music'}
