@@ -435,19 +435,6 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
         </AnimatePresence>
       </motion.div>
 
-      {email && (
-        <motion.a
-          href={email}
-          aria-label="Send email"
-          className="absolute z-20 top-7 right-16 md:top-9 md:right-20 inline-flex h-9 items-center justify-center rounded-[5px] bg-gradient-to-b from-[#487cff] to-[#2b64f8] px-3 text-sm font-medium tracking-[-0.01em] text-white shadow-[0_1px_1px_rgba(20,31,87,0.2),0_2px_4px_-2px_rgba(20,31,87,0.4),0_0_0_1px_#2b64f8,inset_0_1px_0.5px_rgba(255,255,255,0.13)] transition-[background,box-shadow] duration-200 hover:bg-[#3e71f6] active:bg-[#2658e9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#2b64f8]"
-          animate={{ opacity: dimmed ? 0 : 1 }}
-          transition={{ duration: 0.25 }}
-          inert={zoom !== null}
-        >
-          Send email
-        </motion.a>
-      )}
-
       <motion.header
         className="w-full max-w-[625px] mx-auto px-6 md:px-0 pt-20 md:pt-28"
         animate={reduceMotion ? { opacity: dimmed ? 0 : 1 } : { opacity: dimmed ? 0 : 1, scale: dimmed ? 0.985 : 1 }}
@@ -460,6 +447,9 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
           <div className="grid gap-3">
             <h1 className="text-[22px] leading-7 font-semibold tracking-[-0.025em] text-[#1a1a1a]">{config.name}</h1>
             {bio && <p>{bio}</p>}
+            {email && (
+              <a href={email} aria-label="Send email" className="mt-2 self-start justify-self-start inline-flex h-9 items-center justify-center rounded-[5px] bg-gradient-to-b from-[#487cff] to-[#2b64f8] px-3 text-sm font-medium tracking-[-0.01em] text-white shadow-[0_1px_1px_rgba(20,31,87,0.2),0_2px_4px_-2px_rgba(20,31,87,0.4),0_0_0_1px_#2b64f8,inset_0_1px_0.5px_rgba(255,255,255,0.13)] transition-[background,box-shadow] duration-200 hover:bg-[#3e71f6] active:bg-[#2658e9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#2b64f8]">Send email</a>
+            )}
           </div>
 
 
