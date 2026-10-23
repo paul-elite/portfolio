@@ -444,9 +444,9 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                 exit={reduceMotion ? { opacity: 0 } : { x: '100%' }}
                 transition={reduceMotion ? { duration: 0.15 } : { type: 'spring', stiffness: 300, damping: 34 }}
               >
-                <p className="text-xs uppercase tracking-[0.16em] text-[#999] mb-8">Explore</p>
+                
                 {menuGroups.map((group, g) => (
-                  <div key={g} className={g > 0 ? 'mt-12 pt-8 border-t border-black/10' : ''}>
+                  <div key={g} className={g > 0 ? 'mt-8' : ''}>
                     {group.map(item => (
                       <a
                         key={item.label}
