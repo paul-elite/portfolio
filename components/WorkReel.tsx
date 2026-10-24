@@ -85,6 +85,36 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
   const tab = 0;
   // The ⋯ menu in the top-right corner
   const [menu, setMenu] = useState(false);
+  const designTips = [
+    "Spacing is a relationship, not a decoration. Group what belongs together.",
+    "A strong hierarchy makes the next action obvious before anyone reads.",
+    "Reduce visual noise before adding another accent color.",
+    "Use contrast to communicate importance, not just to make things louder.",
+    "A component should remain clear in its empty, loading, and error states.",
+    "Alignment creates rhythm. Consistency makes an interface feel intentional.",
+    "Make the primary action easy to spot, but don't make everything primary.",
+    "Typography is an interface. Line length and spacing shape comprehension.",
+    "Design for the longest realistic content, not the neatest placeholder.",
+    "A good interaction explains what happened and what happens next.",
+    "Whitespace is useful when it makes relationships easier to understand.",
+    "A polished interface is often the result of removing one more thing.",
+  ];
+  const [designToast, setDesignToast] = useState<{ id: number; message: string; x: number; y: number } | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTip = useRef(-1);
+  const showDesignTip = () => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    let next = Math.floor(Math.random() * designTips.length);
+    if (next === lastTip.current) next = (next + 1) % designTips.length;
+    lastTip.current = next;
+    const width = Math.min(320, window.innerWidth - 32);
+    const x = 16 + Math.random() * Math.max(0, window.innerWidth - width - 32);
+    const y = 24 + Math.random() * Math.max(0, window.innerHeight - 180);
+    setDesignToast({ id: Date.now(), message: designTips[next], x, y });
+    toastTimer.current = setTimeout(() => setDesignToast(null), 5500);
+  };
+  useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
+
   const menuRef = useRef<HTMLDivElement>(null);
   const section = sections[tab] ?? sections[0];
   const projects = section.items;
@@ -559,7 +589,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
             <h1 className="text-[22px] leading-7 font-semibold tracking-[-0.025em] text-[#1a1a1a]">{config.name}</h1>
             {bio && <p>{bio}</p>}
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <a href="#case-studies" className="inline-flex h-9 items-center justify-center rounded-[10px] bg-white px-3 text-sm font-medium tracking-[-0.01em] text-[#525252] shadow-[0_0_0_0.5px_rgba(0,0,0,0.15)] transition-colors hover:bg-neutral-50 hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#2b64f8]">See case studies</a>
+              <button type="button" onClick={showDesignTip} className="inline-flex h-9 items-center justify-center rounded-[10px] bg-white px-3 text-sm font-medium tracking-[-0.01em] text-[#525252] shadow-[0_0_0_0.5px_rgba(0,0,0,0.15)] transition-colors hover:bg-neutral-50 hover:text-black active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#2b64f8]">Get design tip</button>
               {email && (
                 <a href={email} aria-label="Send email" className="inline-flex h-9 items-center justify-center rounded-[10px] bg-gradient-to-b from-[#487cff] to-[#2b64f8] px-3 text-sm font-medium tracking-[-0.01em] text-white shadow-[0_1px_1px_rgba(20,31,87,0.2),0_2px_4px_-2px_rgba(20,31,87,0.4),0_0_0_1px_#2b64f8,inset_0_1px_0.5px_rgba(255,255,255,0.13)] transition-[background,box-shadow] duration-200 hover:bg-[#3e71f6] active:bg-[#2658e9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#2b64f8]">Send email</a>
               )}
@@ -636,6 +666,27 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
           </motion.div>
         </motion.section>
       )}
+
+      <AnimatePresence mode="wait">
+        {designToast && (
+          <motion.div
+            key={designToast.id}
+            role="status"
+            aria-live="polite"
+            className="fixed z-[90] w-[min(320px,calc(100vw-32px))] rounded-xl bg-white px-4 py-3 text-sm leading-5 text-[#333] shadow-[0_8px_32px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.12)]"
+            style={{ left: designToast.x, top: designToast.y }}
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.96 }}
+            transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div><p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#999]">Design tip</p><p>{designToast.message}</p></div>
+              <button type="button" onClick={() => { if (toastTimer.current) clearTimeout(toastTimer.current); setDesignToast(null); }} aria-label="Dismiss design tip" className="shrink-0 text-[#999] hover:text-[#333] focus-visible:outline-2 focus-visible:outline-offset-2">×</button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {zoom && (
         <ProjectZoom
