@@ -524,12 +524,14 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                         aria-label={item.label}
                         title={item.label}
                         onClick={() => setMenu(false)}
-                        className="inline-flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-xl text-gray-400 hover:bg-neutral-100 hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black transition-colors"
+                        className="inline-flex h-[60px] w-[60px] shrink-0 items-center justify-center rounded-xl text-[#333] hover:bg-neutral-100 hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black transition-colors"
                       >
                         {['X', 'Instagram', 'LinkedIn'].includes(item.label) ? (
-                          <svg aria-hidden="true" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" className={item.label === 'LinkedIn' ? 'h-[36.96px] w-[36.96px]' : 'h-[33.6px] w-[33.6px]'}>
-                            {(item.label === 'X' ? xSocialPaths : item.label === 'Instagram' ? instagramSocialPaths : linkedinSocialPaths).map((d, index) => <path key={index} d={d} />)}
-                          </svg>
+                          <img
+                            src={item.label === 'X' ? '/social-x.svg' : item.label === 'Instagram' ? '/social-instagram.svg' : '/social-linkedin.svg'}
+                            alt=""
+                            className={`block object-contain ${item.label === 'LinkedIn' ? 'h-[46.2px] w-[46.2px]' : 'h-[42px] w-[42px]'}`}
+                          />
                         ) : (
                           <svg width="21" height="21" viewBox="0 0 24 24" fill={item.label === 'GitHub' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             {item.label === 'GitHub' ? (
