@@ -292,7 +292,7 @@ export function NowPlayingContent({ data, showImage = true }: { data: SpotifyDat
             </>
           ) : (
             <>
-              <p className="text-sm text-gray-900">Elite is not listening to anything right now</p>
+              <p className="text-sm text-gray-900">Not listening right now</p>
               {data?.lastPlayed ? (
                 <p className="text-sm text-gray-400 truncate">
                   last listened to {data.lastPlayed.title}
@@ -337,7 +337,7 @@ export function NowPlayingText({ data }: { data: SpotifyData | null }) {
 
   return (
     <>
-      <p className="text-sm text-gray-900">Elite is not listening to anything right now</p>
+      <p className="text-sm text-gray-900">Not listening right now</p>
       {data?.lastPlayed ? (
         <p className="text-sm text-gray-400 truncate">
           last listened to {data.lastPlayed.title}
