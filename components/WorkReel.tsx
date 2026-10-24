@@ -578,9 +578,9 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
             tabIndex={0}
             aria-label="Projects. Use the left and right arrow keys to move through them."
             onKeyDown={onReelKey}
-            className="[--reel-padding:16vw] md:[--reel-padding:max(1.5rem,calc((100vw-520px)/2))] w-full h-[min(700px,92vw)] max-h-full md:h-[min(520px,42vw)] flex items-end gap-[3vw] md:gap-6 overflow-x-auto overflow-y-hidden hide-scrollbar overscroll-x-contain focus-visible:outline-none snap-x snap-mandatory"
+            className="[--reel-padding:24vw] md:[--reel-padding:max(1.5rem,calc((100vw-520px)/2))] w-full h-[min(700px,92vw)] max-h-full md:h-[min(520px,42vw)] flex items-end gap-[2vw] md:gap-6 overflow-x-auto overflow-y-hidden hide-scrollbar overscroll-x-contain focus-visible:outline-none snap-x snap-mandatory"
             // Same left edge as the text column
-            style={{ paddingLeft: "var(--reel-padding, 16vw)", paddingRight: "var(--reel-padding, 16vw)", scrollPaddingLeft: "var(--reel-padding, 16vw)", scrollPaddingRight: "var(--reel-padding, 16vw)" }}
+            style={{ paddingLeft: "var(--reel-padding, 24vw)", paddingRight: "var(--reel-padding, 16vw)", scrollPaddingLeft: "var(--reel-padding, 16vw)", scrollPaddingRight: "var(--reel-padding, 16vw)" }}
           >
             {stacks.map((stack, i) => (
               <div
@@ -660,7 +660,7 @@ function ProjectScreenStack({ screens, onOpen, onAspect, reduceMotion }: {
   }, [screens.length, reduceMotion]);
 
   return (
-    <div className="relative h-full w-[68vw] md:w-[min(400px,34vw)] flex flex-col items-center justify-end">
+    <div className="relative h-full w-[52vw] md:w-[min(400px,34vw)] flex flex-col items-center justify-end">
       <span className="absolute top-8 left-1/2 -translate-x-1/2 z-30 whitespace-nowrap rounded-full bg-white px-3 h-7 flex items-center justify-center text-[12px] font-medium text-[#252525] shadow-[0_2px_6px_rgba(0,0,0,0.10)] ring-1 ring-black/[0.04]">
         {screens[0].title}
       </span>
