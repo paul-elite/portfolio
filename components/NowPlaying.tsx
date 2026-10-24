@@ -330,7 +330,7 @@ export function NowPlayingContent({ data, showImage = true }: { data: SpotifyDat
                   </span>
                 )}
               </div>
-              <FlowingMusicText text={data.artist || ""} className="text-sm text-gray-400" />
+              <p className="text-sm text-gray-400 whitespace-normal break-words line-clamp-2">{data.artist}</p>
             </>
           ) : (
             <>
@@ -372,7 +372,7 @@ export function NowPlayingText({ data }: { data: SpotifyData | null }) {
             </span>
           )}
         </div>
-        <p className="text-sm text-gray-400 truncate">{data.artist}</p>
+        <p className="text-sm text-gray-400 whitespace-normal break-words line-clamp-2">{data.artist}</p>
       </>
     );
   }
