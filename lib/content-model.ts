@@ -67,6 +67,8 @@ export interface Illustration {
   avatar?: string;
   thumbnail?: string;
   youtubeUrl?: string;
+  /** Number of square grid cells occupied: 1, 2, 3, 4, 6 or 9. */
+  gridSpan?: 1 | 2 | 3 | 4 | 6 | 9;
   category?: IllustrationCategory;
 }
 
