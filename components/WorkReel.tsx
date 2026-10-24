@@ -304,11 +304,11 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
           scrollToItem(next);
         }
       }
-      timer = setTimeout(advance, 6300);
+      timer = setTimeout(advance, 3150);
     };
     const pause = () => { paused = true; };
     const resume = () => { paused = false; };
-    timer = setTimeout(advance, 6300);
+    timer = setTimeout(advance, 3150);
     reel.addEventListener('pointerenter', pause);
     reel.addEventListener('pointerleave', resume);
     reel.addEventListener('focusin', pause);
