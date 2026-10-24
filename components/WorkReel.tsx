@@ -925,7 +925,7 @@ function ProjectZoom({ projects, start, reduceMotion, onIndex, slotFor, onLeave,
             >
               <h2 className="font-medium">{project.title}</h2>
               {details.map(d => <p key={d} className="text-[#8d8d8d]">{d}</p>)}
-              {project.description && <p className="mt-4">{project.description}</p>}
+              {project.description && <p className="mt-4 text-sm text-gray-400">{project.description}</p>}
               <p className="mt-6 flex flex-wrap gap-x-5 gap-y-1">
                 <Link href={project.href} {...linkTarget(project.href)} onClick={e => onCaseStudy(e, project.href)} className={inlineLink}>{project.cta}</Link>
                 {project.link && <a href={project.link} target="_blank" rel="noopener noreferrer" className={inlineLink}>Visit site</a>}
