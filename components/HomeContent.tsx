@@ -1113,10 +1113,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
             }`}
             aria-hidden={showSettingsDetail}
           >
-            <h1 className="text-base font-semibold text-gray-900">
-              {siteConfig.name}
-            </h1>
-            <p className="text-base font-normal text-gray-500">{siteConfig.title}</p>
+            <h1 className="text-[22px] leading-7 font-semibold tracking-[-0.025em] text-[#1a1a1a]">{activeTab === 'writings' ? 'Writing' : activeTab === 'illustration' ? 'Illustrations' : activeTab === 'interaction' ? 'Interactions' : 'Work'}</h1>
           </div>
           {!hasDetailContent && (
             <div className="md:hidden mb-6 transition-opacity">
@@ -1145,8 +1142,7 @@ export default function HomeContent({ initialConfig, initialContent }: HomeConte
                   })()}
                 </button>
                 <div>
-                  <h1 className="text-base font-semibold text-gray-900">{siteConfig.name}</h1>
-                  <p className="text-sm text-gray-500">{siteConfig.title}</p>
+                  <h1 className="text-[22px] leading-7 font-semibold tracking-[-0.025em] text-[#1a1a1a]">{activeTab === 'writings' ? 'Writing' : activeTab === 'illustration' ? 'Illustrations' : activeTab === 'interaction' ? 'Interactions' : 'Work'}</h1>
                 </div>
               </div>
             </div>
