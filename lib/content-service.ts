@@ -1,4 +1,8 @@
 import 'server-only';
+import { patternSeekingEssay } from './pattern-seeking-essay';
+
+const publishedWritings = [patternSeekingEssay];
+const mergeWritings = (writings: Writing[]) => [...publishedWritings, ...writings.filter(w => !publishedWritings.some(p => p.slug === w.slug))];
 
 import { hasSupabaseConfig, supabase } from './supabase';
 import {
@@ -47,7 +51,7 @@ export async function getPortfolioContent(): Promise<PortfolioContent> {
   if (!hasSupabaseConfig) {
     return {
       projects: [],
-      writings: staticWritings,
+      writings: mergeWritings(staticWritings),
       illustrations: staticIllustrations,
       interactions: staticInteractions,
     };
@@ -61,16 +65,17 @@ export async function getPortfolioContent(): Promise<PortfolioContent> {
       supabase.from('interactions').select('*').order('created_at', { ascending: false }),
     ]);
 
-    return mapPortfolioContent({
+    const content = mapPortfolioContent({
       projects: projectsRes.data || [],
       writings: writingsRes.data || [],
       illustrations: illustrationsRes.data || [],
       interactions: interactionsRes.data || [],
     });
+    return { ...content, writings: mergeWritings(content.writings) };
   } catch {
     return {
       projects: [],
-      writings: staticWritings,
+      writings: mergeWritings(staticWritings),
       illustrations: staticIllustrations,
       interactions: staticInteractions,
     };
@@ -109,7 +114,7 @@ export async function getProjectNavigation(): Promise<NavItem[]> {
 
 export async function getWritingNavigation(): Promise<NavItem[]> {
   if (!hasSupabaseConfig) {
-    return staticWritings.map(({ slug, title }) => ({ slug, title }));
+    return mergeWritings(staticWritings).map(({ slug, title }) => ({ slug, title }));
   }
 
   try {
@@ -148,6 +153,8 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
 }
 
 export async function getWritingBySlug(slug: string): Promise<Writing | null> {
+  const published = publishedWritings.find(w => w.slug === slug);
+  if (published) return published;
   if (!hasSupabaseConfig) {
     const writing = staticWritings.find((item) => item.slug === slug);
     return writing ? { ...writing, blocks: [] } : null;
