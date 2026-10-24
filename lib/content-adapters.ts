@@ -105,7 +105,7 @@ export function mapIllustration(row: RecordLike): Illustration {
     title: asString(row.title),
     description: asString(row.description),
     avatar: asString(row.avatar),
-    thumbnail: asString(row.thumbnail),
+    thumbnail: asString(row.thumbnail || row.image_url || row.imageUrl || row.avatar),
     youtubeUrl: asString(row.youtube_url || row.youtubeUrl),
     gridSpan: ([1, 2, 3, 4, 6, 9] as number[]).includes(Number(row.grid_span || row.gridSpan)) ? Number(row.grid_span || row.gridSpan) as Illustration['gridSpan'] : 1,
     category: (row.category || 'assets') as Illustration['category'],
