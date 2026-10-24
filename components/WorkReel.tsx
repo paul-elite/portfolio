@@ -750,15 +750,21 @@ function ProjectZoom({ projects, start, reduceMotion, onIndex, slotFor, onLeave,
       animate(fade, 0, { duration: 0.2 }).then(() => onClosed(index));
       return;
     }
-    // Where the device would sit untransformed, then the flight from there back to its slot
+    // Reverse the exact opening flight: move and scale the expanded device
+    // back to the small reel slot, and only unmount after every axis lands.
     const now = el.getBoundingClientRect();
-    const s = scale.get();
-    const cx = now.left + now.width / 2 - x.get();
-    const cy = now.top + now.height / 2 - y.get();
-    const height = now.height / s;
-    animate(x, slot.left + slot.width / 2 - cx, CLOSE_SPRING);
-    animate(y, slot.top + slot.height / 2 - cy, CLOSE_SPRING);
-    animate(scale, slot.height / height, CLOSE_SPRING).then(() => onClosed(index));
+    const currentScale = scale.get();
+    const untransformedCenterX = now.left + now.width / 2 - x.get();
+    const untransformedCenterY = now.top + now.height / 2 - y.get();
+    const untransformedHeight = now.height / currentScale;
+    const targetX = slot.left + slot.width / 2 - untransformedCenterX;
+    const targetY = slot.top + slot.height / 2 - untransformedCenterY;
+    const targetScale = slot.height / untransformedHeight;
+    Promise.all([
+      animate(x, targetX, OPEN_SPRING),
+      animate(y, targetY, OPEN_SPRING),
+      animate(scale, targetScale, OPEN_SPRING),
+    ]).then(() => onClosed(index));
   }, [closing, onLeave, project.slug, slotFor, index, reduceMotion, fade, scale, x, y, onClosed]);
 
   const go = useCallback((step: number) => {
