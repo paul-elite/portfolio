@@ -464,7 +464,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
               <motion.button
                 type="button"
                 aria-label="Close navigation"
-                className="pointer-events-auto absolute inset-0 bg-black/[0.07] backdrop-blur-[2px]"
+                className="pointer-events-auto absolute inset-0 bg-black/[0.045] backdrop-blur-[1px]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -474,13 +474,13 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
               <motion.nav
                 id="portfolio-side-menu"
                 aria-label="Main navigation"
-                className="pointer-events-auto absolute inset-y-0 left-0 w-[70%] bg-white px-8 md:px-12 pt-28 pb-12 overflow-y-auto flex flex-col shadow-[1px_0_5px_rgba(0,0,0,0.055)]"
+                className="pointer-events-auto absolute inset-y-0 left-0 w-[70%] bg-white pl-4 pr-8 md:px-12 pt-28 pb-12 overflow-y-auto flex flex-col shadow-[1px_0_2px_rgba(0,0,0,0.04)]"
                 initial={reduceMotion ? { opacity: 0 } : { x: '-100%' }}
                 animate={reduceMotion ? { opacity: 1 } : { x: 0 }}
                 exit={reduceMotion ? { opacity: 0 } : { x: '-100%' }}
                 transition={reduceMotion ? { duration: 0.15 } : { type: 'spring', stiffness: 300, damping: 34 }}
               >
-                <button type="button" onClick={() => setMenu(false)} aria-label="Close menu" className="absolute right-6 top-6 md:right-10 md:top-8 flex h-10 w-10 items-center justify-center rounded-full text-[#2a2a2a] hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"><span aria-hidden="true" className="text-[28px] leading-none font-light">×</span></button>
+                
                 <div>
                   {menuGroups[0]?.map(item => (
                     <a
