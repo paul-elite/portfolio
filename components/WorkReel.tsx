@@ -83,24 +83,13 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
   const section = sections[tab] ?? sections[0];
   const projects = section.items;
   const hasItems = projects.length > 0;
-  // Each horizontal snap is a whole project; its screens live in an independent swipeable stack.
-  const stacks = projects.reduce<{ first: number; screens: ReelItem[] }[]>((groups, item, index) => {
-    const slug = item.slug.split('~')[0];
-    const last = groups[groups.length - 1];
-    if (last && last.screens[0].slug.split('~')[0] === slug) last.screens.push(item);
-    else groups.push({ first: index, screens: [item] });
-    return groups;
-  }, []);
+  // Each screen scrolls independently instead of cycling within a project stack.
+  const stacks = projects.map((item, index) => ({ first: index, screens: [item] }));
 
   // Items that have slid into view (each enters once)
   const [revealed, setRevealed] = useState<Set<string>>(() => new Set());
   const itemKey = (p: ReelItem) => `${section.id}:${p.slug}`;
-  // One entry per project (its extra screens share it), pointing at its first item in the reel
-  const projectRow = projects.reduce<{ slug: string; title: string; first: number }[]>((row, p, i) => {
-    const slug = p.slug.split('~')[0];
-    if (!row.some(r => r.slug === slug)) row.push({ slug, title: p.title, first: i });
-    return row;
-  }, []);
+  const projectRow = projects.map((p, i) => ({ slug: p.slug, title: p.title, first: i }));
   const thumbLeft = useMotionValue('0%');
   const thumbWidth = useMotionValue('100%');
   const barOpacity = useMotionValue(0);
@@ -123,7 +112,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
   const returnFocus = useRef<number | null>(null);
   const reduceMotion = useReducedMotion();
   const current = stacks[active]?.screens[0];
-  const currentProject = current?.slug.split('~')[0];
+  const currentProject = current?.slug;
   const dimmed = zoom !== null && !leaving;
 
   useEffect(() => {
@@ -668,7 +657,7 @@ function ProjectScreenStack({ screens, onOpen, onAspect, reduceMotion }: {
   return (
     <div className="relative h-full w-[min(350px,76vw)] md:w-[min(400px,34vw)] flex flex-col items-center justify-end">
       <span className="absolute top-8 left-1/2 -translate-x-1/2 z-30 whitespace-nowrap rounded-full bg-white px-3 h-7 flex items-center justify-center text-[12px] font-medium text-[#252525] shadow-[0_2px_6px_rgba(0,0,0,0.10)] ring-1 ring-black/[0.04]">
-        {screens[0].title.trim().split(/\s+/).slice(0, 2).join(' ')}
+        {screens[0].title}
       </span>
       <div className="relative w-full h-[calc(100%-64px)]">
         <AnimatePresence mode="sync" initial={false}>
