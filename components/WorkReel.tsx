@@ -524,7 +524,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                           <img
                             src={item.label === 'X' ? '/social-x.svg?v=gray400-2' : item.label === 'Instagram' ? '/social-instagram.svg?v=gray400-2' : '/social-linkedin.svg?v=gray400-2'}
                             alt=""
-                            className={`block object-contain ${item.label === 'LinkedIn' ? 'h-[46.2px] w-[46.2px]' : 'h-[42px] w-[42px]'}`}
+                            className={`block object-contain ${item.label === 'LinkedIn' ? 'h-[36.96px] w-[36.96px]' : 'h-[33.6px] w-[33.6px]'}`}
                           />
                         ) : (
                           <svg width="21" height="21" viewBox="0 0 24 24" fill={item.label === 'GitHub' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
