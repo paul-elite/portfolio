@@ -140,7 +140,7 @@ function FlowingMusicText({ text, className = '' }: { text: string; className?: 
       {!started || !overflow ? (
         <span className="block truncate">{text}</span>
       ) : (
-        <span className="music-text-track flex w-max whitespace-nowrap will-change-transform" style={{ animation: `music-text-flow ${Math.max(5, text.length / 5)}s linear infinite` }}>
+        <span className="music-text-track flex w-max whitespace-nowrap will-change-transform" style={{ animation: `music-text-flow ${Math.max(5, text.length / 5) / 0.67}s linear infinite` }}>
           <span className="shrink-0 pr-6">{text}</span>
           <span className="shrink-0 pr-6" aria-hidden="true">{text}</span>
         </span>
