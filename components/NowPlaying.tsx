@@ -106,6 +106,36 @@ function useRemainingMs(data: SpotifyData | null) {
   return Math.max(0, data.durationMs - data.progressMs - elapsedMs);
 }
 
+function FlowingMusicText({ text, className = '' }: { text: string; className?: string }) {
+  const viewport = useRef<HTMLSpanElement>(null);
+  const content = useRef<HTMLSpanElement>(null);
+  const [overflow, setOverflow] = useState(0);
+
+  useEffect(() => {
+    const measure = () => {
+      if (viewport.current && content.current) {
+        setOverflow(Math.max(0, content.current.scrollWidth - viewport.current.clientWidth));
+      }
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    if (viewport.current) observer.observe(viewport.current);
+    if (content.current) observer.observe(content.current);
+    return () => observer.disconnect();
+  }, [text]);
+
+  return (
+    <span ref={viewport} className={`block min-w-0 overflow-hidden whitespace-nowrap ${className}`}>
+      <span ref={content} className="inline-block whitespace-nowrap" style={overflow > 0 ? {
+        animation: `music-text-flow ${Math.max(3, overflow / 25)}s ease-in-out 1.5s infinite alternate`,
+        ['--music-text-overflow' as string]: `-${overflow}px`,
+      } : undefined}>{text}</span>
+    </span>
+  );
+}
+
+<style jsx global>{`@keyframes music-text-flow { from { transform: translateX(0); } to { transform: translateX(var(--music-text-overflow)); } } @media (prefers-reduced-motion: reduce) { span[style*="music-text-flow"] { animation: none !important; } }`}</style>
+
 export function NowPlayingContent({ data, showImage = true }: { data: SpotifyData | null; showImage?: boolean }) {
   const remainingMs = useRemainingMs(data);
   const [isHovered, setIsHovered] = useState(false);
@@ -272,7 +302,7 @@ export function NowPlayingContent({ data, showImage = true }: { data: SpotifyDat
             <NowPlayingImage data={data} useAlbumArt />
           </div>
         )}
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           {data?.isPlaying ? (
             <>
               <div className="flex items-center gap-2">
@@ -280,9 +310,9 @@ export function NowPlayingContent({ data, showImage = true }: { data: SpotifyDat
                   href={data.songUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm font-normal text-black hover:text-gray-600 transition-colors truncate"
+                  className="block min-w-0 flex-1 text-sm font-normal text-black hover:text-gray-600 transition-colors"
                 >
-                  {data.title}
+                  <FlowingMusicText text={data.title || ""} />
                 </a>
                 {remainingMs !== null && (
                   <span className="text-sm text-gray-400 flex-shrink-0">
@@ -290,7 +320,7 @@ export function NowPlayingContent({ data, showImage = true }: { data: SpotifyDat
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-400 truncate">{data.artist}</p>
+              <FlowingMusicText text={data.artist || ""} className="text-sm text-gray-400" />
             </>
           ) : (
             <>
