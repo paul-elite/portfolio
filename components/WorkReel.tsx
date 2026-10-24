@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, type MotionValue } from 'framer-motion';
-import type { SiteConfig } from '@/lib/content-model';
+import type { SiteConfig, Writing } from '@/lib/content-model';
 import { isExternal, type ReelItem, type ReelSection } from '@/lib/reel';
 import CaseStudyBook from './CaseStudyBook';
 import { NowPlayingContent, useNowPlaying } from './NowPlaying';
@@ -22,6 +22,8 @@ const linkedinSocialPaths = ["M30.7015 35.9343C30.7015 35.9791 30.7015 45.0952 3
 interface WorkReelProps {
   config: SiteConfig;
   sections: ReelSection[];
+  writings?: Writing[];
+  view?: 'work' | 'writings';
 }
 
 // Text column width and its left edge; the reel starts on the same edge
@@ -81,7 +83,7 @@ function SidebarNowPlaying() {
   );
 }
 
-export default function WorkReel({ config, sections }: WorkReelProps) {
+export default function WorkReel({ config, sections, writings = [], view = 'work' }: WorkReelProps) {
   // The section the reel shows (Work); the projects in it make the row above the reel
   const tab = 0;
   // The ⋯ menu in the top-right corner
@@ -646,7 +648,28 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
       </motion.header>
 
 
-      {projects.length > 0 && (
+      {view === 'writings' && (
+        <motion.section
+          aria-label="Writing"
+          className="flex-1 min-h-0 w-full max-w-[520px] mx-auto px-6 md:px-0 pt-12 pb-12 overflow-y-auto hide-scrollbar"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: EASE_OUT }}
+        >
+          <h2 className="mb-7 text-[18px] font-medium tracking-[-0.02em] text-[#252525]">Writing</h2>
+          <div className="flex flex-col">
+            {[...writings].sort((a, b) => (b.date || '').localeCompare(a.date || '')).map(writing => (
+              <Link key={writing.id} href={`/writing/${writing.slug}`} className="group flex items-start justify-between gap-6 border-b border-black/[0.07] py-5 first:pt-0" >
+                <span className="min-w-0 text-[15px] leading-6 font-normal text-[#252525] transition-colors group-hover:text-[#777]">{writing.title}</span>
+                <span className="shrink-0 text-[13px] leading-6 text-gray-400">{writing.date ? new Date(writing.date).getFullYear() : ''}</span>
+              </Link>
+            ))}
+            {writings.length === 0 && <p className="text-gray-400">No writing published yet.</p>}
+          </div>
+        </motion.section>
+      )}
+
+      {view === 'work' && projects.length > 0 && (
         <motion.section
           id="case-studies"
           aria-label="Work"
