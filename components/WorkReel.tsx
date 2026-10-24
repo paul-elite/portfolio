@@ -774,7 +774,7 @@ function ProjectScreenStack({ screens, onOpen, onAspect, reduceMotion }: {
 
   return (
     <div className="relative h-full w-[52vw] md:w-[min(400px,34vw)] flex flex-col items-center justify-end">
-      <span className="absolute top-8 left-1/2 -translate-x-1/2 z-30 whitespace-nowrap rounded-full bg-white px-3 h-7 flex items-center justify-center text-[12px] font-medium text-[#252525] shadow-[0_2px_6px_rgba(0,0,0,0.10)] ring-1 ring-black/[0.04]">
+      <span className="absolute top-8 left-1/2 -translate-x-1/2 z-30 whitespace-nowrap rounded-full bg-white px-3 h-7 flex items-center justify-center text-[12px] font-normal text-gray-400 shadow-[0_1px_2px_rgba(0,0,0,0.07)] ring-1 ring-black/[0.04]">
         {screens[0].title}
       </span>
       <div className="relative w-full h-[calc(100%-64px)]">
