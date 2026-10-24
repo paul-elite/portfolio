@@ -573,7 +573,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                     </a>
                   ))}
                 </div>
-                <div className="mt-auto pt-10 flex flex-wrap items-center justify-start gap-3 -ml-2" aria-label="Social links">
+                <div className="mt-auto pt-10 flex flex-wrap items-center justify-start gap-1 -ml-2" aria-label="Social links">
                   {socials.filter(item => item.label !== 'GitHub' && item.label !== 'Email').map(item => {
                     
                     return (
