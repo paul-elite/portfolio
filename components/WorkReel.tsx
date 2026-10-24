@@ -99,21 +99,26 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
     "Whitespace is useful when it makes relationships easier to understand.",
     "A polished interface is often the result of removing one more thing.",
   ];
-  const [designToast, setDesignToast] = useState<{ id: number; message: string; x: number; y: number } | null>(null);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [designToasts, setDesignToasts] = useState<{ id: number; message: string }[]>([]);
+  const toastTimers = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
+  const toastSequence = useRef(0);
   const lastTip = useRef(-1);
   const showDesignTip = () => {
-    if (toastTimer.current) clearTimeout(toastTimer.current);
     let next = Math.floor(Math.random() * designTips.length);
     if (next === lastTip.current) next = (next + 1) % designTips.length;
     lastTip.current = next;
-    const width = Math.min(320, window.innerWidth - 32);
-    const x = 16 + Math.random() * Math.max(0, window.innerWidth - width - 32);
-    const y = 24 + Math.random() * Math.max(0, window.innerHeight - 180);
-    setDesignToast({ id: Date.now(), message: designTips[next], x, y });
-    toastTimer.current = setTimeout(() => setDesignToast(null), 5500);
+    const id = ++toastSequence.current;
+    setDesignToasts(current => [...current, { id, message: designTips[next] }]);
+    const timer = setTimeout(() => {
+      setDesignToasts(current => current.filter(toast => toast.id !== id));
+      toastTimers.current.delete(id);
+    }, 5500);
+    toastTimers.current.set(id, timer);
   };
-  useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
+  useEffect(() => {
+    const timers = toastTimers.current;
+    return () => { timers.forEach(timer => clearTimeout(timer)); timers.clear(); };
+  }, []);
 
   const menuRef = useRef<HTMLDivElement>(null);
   const section = sections[tab] ?? sections[0];
@@ -697,23 +702,24 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
         </motion.section>
       )}
 
-      <AnimatePresence mode="wait">
-        {designToast && (
-          <motion.div
-            key={designToast.id}
-            role="status"
-            aria-live="polite"
-            className="fixed z-[90] w-max max-w-[min(420px,calc(100vw-32px))] rounded-xl bg-black px-5 py-4 text-[18px] leading-[1.45] text-white shadow-[0_8px_32px_rgba(0,0,0,0.18)]"
-            style={{ left: designToast.x, top: designToast.y }}
-            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.96 }}
-            transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
-          >
-            <p>{designToast.message}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div className="fixed top-5 left-1/2 z-[90] flex w-[min(420px,calc(100vw-32px))] -translate-x-1/2 flex-col items-center gap-2 pointer-events-none" aria-live="polite" aria-atomic="false">
+        <AnimatePresence initial={false}>
+          {designToasts.map(toast => (
+            <motion.div
+              key={toast.id}
+              role="status"
+              className="w-fit max-w-full rounded-xl bg-black px-5 py-4 text-[18px] leading-[1.45] text-white shadow-[0_8px_32px_rgba(0,0,0,0.18)]"
+              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -28, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -16, scale: 0.98 }}
+              layout
+              transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+            >
+              <p>{toast.message}</p>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
 
       {zoom && (
         <ProjectZoom
