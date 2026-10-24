@@ -23,7 +23,7 @@ export default function IllustrationsGallery({ illustrations }: { illustrations:
       <div className="mx-auto w-full max-w-[880px]">
         <Link href="/" className="mb-10 inline-flex text-sm text-gray-400 transition-colors hover:text-gray-900">← Back</Link>
         <h1 className="mb-8 text-2xl font-semibold tracking-tight text-gray-900">Illustrations</h1>
-        <div className="grid grid-cols-3 auto-rows-[minmax(0,1fr)] grid-flow-row-dense gap-2 md:gap-3" style={{ gridAutoRows: 'minmax(0, 1fr)' }}>
+        <div className="grid grid-cols-3 grid-flow-row-dense gap-2 md:gap-3">
           {illustrations.map((item) => {
             const span = dimensions[item.gridSpan || 1] || dimensions[1];
             return (
