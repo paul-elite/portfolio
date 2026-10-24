@@ -703,17 +703,14 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
             key={designToast.id}
             role="status"
             aria-live="polite"
-            className="fixed z-[90] w-[min(320px,calc(100vw-32px))] rounded-xl bg-white px-4 py-3 text-sm leading-5 text-[#333] shadow-[0_8px_32px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.12)]"
+            className="fixed z-[90] w-max max-w-[min(420px,calc(100vw-32px))] rounded-xl bg-black px-5 py-4 text-[18px] leading-[1.45] text-white shadow-[0_8px_32px_rgba(0,0,0,0.18)]"
             style={{ left: designToast.x, top: designToast.y }}
             initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.96 }}
             transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
           >
-            <div className="flex items-start justify-between gap-3">
-              <div><p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#999]">Design tip</p><p>{designToast.message}</p></div>
-              <button type="button" onClick={() => { if (toastTimer.current) clearTimeout(toastTimer.current); setDesignToast(null); }} aria-label="Dismiss design tip" className="shrink-0 text-[#999] hover:text-[#333] focus-visible:outline-2 focus-visible:outline-offset-2">×</button>
-            </div>
+            <p>{designToast.message}</p>
           </motion.div>
         )}
       </AnimatePresence>
