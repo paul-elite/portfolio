@@ -524,7 +524,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                       >
                         {['X', 'Instagram', 'LinkedIn'].includes(item.label) ? (
                           <img
-                            src={item.label === 'X' ? '/social-x.svg' : item.label === 'Instagram' ? '/social-instagram.svg' : '/social-linkedin.svg'}
+                            src={item.label === 'X' ? '/social-x.svg?v=gray400-2' : item.label === 'Instagram' ? '/social-instagram.svg?v=gray400-2' : '/social-linkedin.svg?v=gray400-2'}
                             alt=""
                             className={`block object-contain ${item.label === 'LinkedIn' ? 'h-[46.2px] w-[46.2px]' : 'h-[42px] w-[42px]'}`}
                           />
