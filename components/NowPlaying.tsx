@@ -56,8 +56,10 @@ export function NowPlayingImage({ data, useAlbumArt = false }: { data: SpotifyDa
       {showAlbumArt && (
         <span
           aria-hidden="true"
-          className="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black"
-        />
+          className="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black flex items-center justify-center"
+        >
+          <span className="h-[4px] w-[4px] rounded-full bg-white" />
+        </span>
       )}
     </div>
   );
