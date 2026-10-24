@@ -109,12 +109,14 @@ function useRemainingMs(data: SpotifyData | null) {
 function FlowingMusicText({ text, className = '' }: { text: string; className?: string }) {
   const viewport = useRef<HTMLSpanElement>(null);
   const content = useRef<HTMLSpanElement>(null);
-  const [overflow, setOverflow] = useState(0);
+  const [overflow, setOverflow] = useState(false);
+  const [started, setStarted] = useState(false);
 
   useEffect(() => {
+    setStarted(false);
     const measure = () => {
       if (viewport.current && content.current) {
-        setOverflow(Math.max(0, content.current.scrollWidth - viewport.current.clientWidth));
+        setOverflow(content.current.scrollWidth > viewport.current.clientWidth + 1);
       }
     };
     measure();
@@ -124,13 +126,22 @@ function FlowingMusicText({ text, className = '' }: { text: string; className?: 
     return () => observer.disconnect();
   }, [text]);
 
+  useEffect(() => {
+    if (!overflow) return;
+    const timer = window.setTimeout(() => setStarted(true), 1500);
+    return () => window.clearTimeout(timer);
+  }, [overflow, text]);
+
   return (
     <span ref={viewport} className={`block min-w-0 overflow-hidden whitespace-nowrap ${className}`}>
-      <style jsx global>{`@keyframes music-text-flow { from { transform: translateX(0); } to { transform: translateX(var(--music-text-overflow)); } } @media (prefers-reduced-motion: reduce) { span[style*="music-text-flow"] { animation: none !important; } }`}</style>
-      <span ref={content} className="inline-block whitespace-nowrap" style={overflow > 0 ? {
-        animation: `music-text-flow ${Math.max(3, overflow / 25)}s ease-in-out 1.5s infinite alternate`,
-        ['--music-text-overflow' as string]: `-${overflow}px`,
-      } : undefined}>{text}</span>
+      <style jsx global>{`@keyframes music-text-flow { from { transform: translateX(0); } to { transform: translateX(-50%); } } @media (prefers-reduced-motion: reduce) { .music-text-track { animation: none !important; } }`}</style>
+      <span ref={content} className={started && overflow ? 'hidden absolute pointer-events-none opacity-0' : 'block truncate'} aria-hidden={started && overflow}>{text}</span>
+      {started && overflow && (
+        <span className="music-text-track flex w-max whitespace-nowrap" style={{ animation: `music-text-flow ${Math.max(5, text.length / 5)}s linear infinite` }}>
+          <span className="shrink-0 pr-6">{text}</span>
+          <span className="shrink-0 pr-6" aria-hidden="true">{text}</span>
+        </span>
+      )}
     </span>
   );
 }
