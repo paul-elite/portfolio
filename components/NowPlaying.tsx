@@ -126,6 +126,7 @@ function FlowingMusicText({ text, className = '' }: { text: string; className?: 
 
   return (
     <span ref={viewport} className={`block min-w-0 overflow-hidden whitespace-nowrap ${className}`}>
+      <style jsx global>{`@keyframes music-text-flow { from { transform: translateX(0); } to { transform: translateX(var(--music-text-overflow)); } } @media (prefers-reduced-motion: reduce) { span[style*="music-text-flow"] { animation: none !important; } }`}</style>
       <span ref={content} className="inline-block whitespace-nowrap" style={overflow > 0 ? {
         animation: `music-text-flow ${Math.max(3, overflow / 25)}s ease-in-out 1.5s infinite alternate`,
         ['--music-text-overflow' as string]: `-${overflow}px`,
@@ -133,8 +134,6 @@ function FlowingMusicText({ text, className = '' }: { text: string; className?: 
     </span>
   );
 }
-
-<style jsx global>{`@keyframes music-text-flow { from { transform: translateX(0); } to { transform: translateX(var(--music-text-overflow)); } } @media (prefers-reduced-motion: reduce) { span[style*="music-text-flow"] { animation: none !important; } }`}</style>
 
 export function NowPlayingContent({ data, showImage = true }: { data: SpotifyData | null; showImage?: boolean }) {
   const remainingMs = useRemainingMs(data);
