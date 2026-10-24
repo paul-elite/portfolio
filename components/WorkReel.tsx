@@ -394,7 +394,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
 
   // Zoom a device out of the reel, from exactly where it sits
   const openAt = (i: number) => {
-    const device = itemRefs.current[i]?.firstElementChild?.firstElementChild;
+    const device = itemRefs.current[i]?.querySelector('[data-stack-front] > *');
     if (!device) return;
     setLeaving(false);
     window.history.pushState({ portfolioProjectOverlay: true }, '', window.location.href);
@@ -411,7 +411,9 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
     if (r.left < 0 || r.right > window.innerWidth) {
       reel.scrollLeft += r.left - (columnRef.current?.getBoundingClientRect().left ?? 0);
     }
-    return el.firstElementChild?.firstElementChild?.getBoundingClientRect() ?? null;
+    // The actual mockup is the direct child of the front screen. The old
+    // firstElementChild chain landed on the title badge, not the device.
+    return el.querySelector<HTMLElement>('[data-stack-front] > *')?.getBoundingClientRect() ?? null;
   };
 
   // Leave for a case study: fade the page out, then navigate, so the case study rises in after it.
@@ -633,7 +635,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                   screens={stack.screens}
                   onOpen={screen => {
                     const flatIndex = stack.first + screen;
-                    const device = itemRefs.current[i]?.querySelector('[data-stack-front]');
+                    const device = itemRefs.current[i]?.querySelector('[data-stack-front] > *');
                     if (!device) return;
                     setLeaving(false);
                     window.history.pushState({ portfolioProjectOverlay: true }, '', window.location.href);
