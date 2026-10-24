@@ -186,7 +186,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
         return;
       }
       reel.style.paddingLeft = `${Math.max(24, (reel.clientWidth - items[0].offsetWidth) / 2)}px`;
-      reel.style.paddingRight = `${Math.max(24, (reel.clientWidth - items[items.length - 1].offsetWidth) / 2)}px`;
+      reel.style.paddingRight = `${Math.max(24, (reel.clientWidth - items[0].offsetWidth) / 2)}px`;
     };
     placePadding();
     const onResize = () => {
@@ -238,39 +238,37 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
               const rect = el.getBoundingClientRect();
               return centred ? rect.left + rect.width / 2 : rect.left;
             };
-            // Scroll forward to the duplicate first project. Do not allow
-            // scroll-snap to pull the viewport backwards during the handoff.
+            // Drive the last-to-first transition ourselves. Native smooth scrolling
+            // can be interrupted by scroll-snap or the browser's scroll boundary.
             const previousSnap = reel.style.scrollSnapType;
             const previousBehavior = reel.style.scrollBehavior;
             reel.style.scrollSnapType = 'none';
             reel.style.scrollBehavior = 'auto';
-            let finished = false;
-            let fallback: ReturnType<typeof setTimeout>;
-            const cloneOffset = () => position(clone) - anchor();
-            const finish = () => {
-              if (finished || !reel.isConnected) return;
-              // Do not reset while the last-to-first transition is still moving:
-              // an early scrollend/fallback would visibly wipe the current slide.
-              if (Math.abs(cloneOffset()) > 3) return;
-              finished = true;
-              clearInterval(fallback);
-              reel.removeEventListener('scrollend', finish);
-              // Move the viewport only, not the rendered project or its animation.
-              // Keep snapping disabled through the next paint so no backwards flash occurs.
-              reel.scrollLeft += position(first) - anchor();
+            const startLeft = reel.scrollLeft;
+            const destination = Math.min(reel.scrollWidth - reel.clientWidth, startLeft + position(clone) - anchor());
+            const distance = destination - startLeft;
+            const duration = 850;
+            const started = performance.now();
+            const step = (now: number) => {
+              if (!reel.isConnected) return;
+              const progress = Math.min(1, (now - started) / duration);
+              const eased = 0.5 - Math.cos(Math.PI * progress) / 2;
+              reel.scrollLeft = startLeft + distance * eased;
+              if (progress < 1) {
+                requestAnimationFrame(step);
+                return;
+              }
+              // The clone is visually identical to the first item. Rebase in
+              // the same frame without any reverse animation.
+              reel.scrollLeft += position(first) - position(clone);
               viewIndex.current = 0;
               requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                  reel.style.scrollSnapType = previousSnap;
-                  reel.style.scrollBehavior = previousBehavior;
-                  measure();
-                });
+                reel.style.scrollSnapType = previousSnap;
+                reel.style.scrollBehavior = previousBehavior;
+                measure();
               });
             };
-            reel.addEventListener('scrollend', finish);
-            reel.scrollTo({ left: reel.scrollLeft + cloneOffset(), behavior: 'smooth' });
-            // Poll only for browsers that do not emit scrollend. Never jump early.
-            fallback = setInterval(finish, 100);
+            requestAnimationFrame(step);
           }
         } else {
           scrollToItem(next);
