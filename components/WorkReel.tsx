@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, type MotionValue } from 'framer-motion';
 import type { SiteConfig } from '@/lib/content-model';
@@ -100,6 +101,9 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
     "A polished interface is often the result of removing one more thing.",
   ];
   const [designToasts, setDesignToasts] = useState<{ id: number; message: string }[]>([]);
+  const [toastExpanded, setToastExpanded] = useState(false);
+  const [toastPortalReady, setToastPortalReady] = useState(false);
+  useEffect(() => setToastPortalReady(true), []);
   const toastTimers = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
   const toastSequence = useRef(0);
   const lastTip = useRef(-1);
@@ -702,24 +706,39 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
         </motion.section>
       )}
 
-      <div className="fixed top-5 left-1/2 z-[90] flex w-[min(420px,calc(100vw-32px))] -translate-x-1/2 flex-col items-center gap-2 pointer-events-none" aria-live="polite" aria-atomic="false">
-        <AnimatePresence initial={false}>
-          {designToasts.map(toast => (
-            <motion.div
-              key={toast.id}
-              role="status"
-              className="w-fit max-w-full rounded-xl bg-black px-5 py-4 text-[18px] leading-[1.45] text-white shadow-[0_8px_32px_rgba(0,0,0,0.18)]"
-              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -28, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -16, scale: 0.98 }}
-              layout
-              transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
-            >
-              <p>{toast.message}</p>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
+      {toastPortalReady && createPortal(
+        <div
+          className="fixed top-5 left-1/2 z-[9999] w-[min(420px,calc(100vw-32px))] -translate-x-1/2"
+          onMouseEnter={() => setToastExpanded(true)}
+          onMouseLeave={() => setToastExpanded(false)}
+          aria-live="polite"
+          aria-atomic="false"
+        >
+          <div className="relative flex flex-col items-center" style={{ minHeight: designToasts.length ? (toastExpanded ? undefined : 76 + Math.min(designToasts.length - 1, 3) * 12) : 0 }}>
+            <AnimatePresence initial={false}>
+              {designToasts.map((toast, index) => {
+                const depth = designToasts.length - index - 1;
+                return (
+                  <motion.div
+                    key={toast.id}
+                    role="status"
+                    layout
+                    className={toastExpanded ? "relative mb-2 w-fit max-w-full origin-top rounded-xl bg-black px-5 py-4 text-[18px] leading-[1.45] text-white shadow-[0_8px_32px_rgba(0,0,0,0.18)]" : "absolute top-0 w-fit max-w-full origin-top rounded-xl bg-black px-5 py-4 text-[18px] leading-[1.45] text-white shadow-[0_8px_32px_rgba(0,0,0,0.18)]"}
+                    style={{ zIndex: index + 1, pointerEvents: 'auto' }}
+                    initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -90, scale: 0.94 }}
+                    animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: toastExpanded ? 0 : Math.min(depth, 3) * 12, scale: toastExpanded ? 1 : Math.max(0.88, 1 - depth * 0.045) }}
+                    exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -48, scale: 0.94 }}
+                    transition={{ type: 'spring', stiffness: 360, damping: 32 }}
+                  >
+                    <p>{toast.message}</p>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {zoom && (
         <ProjectZoom
