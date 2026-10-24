@@ -32,11 +32,25 @@ function setTitle(title: string): { size: number; lines: string[] } {
   return { size: 5, lines: [title] };
 }
 
+// Keep the idea of a long article title, but typeset a concise editorial cover title.
+function coverTitle(title: string): string {
+  const clean = title.trim().replace(/\\s+/g, ' ');
+  const clauses = clean.split(/\\s+(?:—|–|\\||:)\\s+|:\\s+/).filter(Boolean);
+  const meaningful = clauses.find(part => part.split(/\\s+/).length >= 2) || clean;
+  const stripped = meaningful
+    .replace(/^(?:how to|a guide to|an introduction to|the art of|the future of|why we need to|what it means to)\\s+/i, '')
+    .replace(/[.!?]+$/, '');
+  const words = stripped.split(/\\s+/);
+  if (words.length <= 6) return stripped;
+  const boundary = words.slice(0, 6).findIndex((w, i) => i >= 3 && /^(and|but|because|while|when|that|which|with|without|for)$/i.test(w));
+  return words.slice(0, boundary >= 0 ? boundary : 5).join(' ');
+}
+
 export default function CaseStudyBook({ title }: { title: string }) {
   const uid = useId().replace(/:/g, '');
   const id = (k: string) => `${k}-${uid}`;
   const url = (k: string) => `url(#${id(k)})`;
-  const { size, lines } = setTitle(title || 'Case study');
+  const { size, lines } = setTitle(coverTitle(title || 'Case study'));
   // Centre the block of lines vertically in the band
   const first = TOP + (BAND_H - lines.length * size * 1.05) / 2 + size * 0.8;
   return (
