@@ -392,14 +392,48 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
     reel.scrollTo({ left: reel.scrollLeft + offset, behavior: reduceMotion ? 'auto' : 'smooth' });
   };
 
-  // Zoom a device out of the reel, from exactly where it sits
+  // Move off-centre projects toward the focus point before expanding them.
   const openAt = (i: number) => {
-    const device = itemRefs.current[i]?.querySelector('[data-stack-front] > *');
-    if (!device) return;
-    setLeaving(false);
-    window.history.pushState({ portfolioProjectOverlay: true }, '', window.location.href);
-    historyOverlayRef.current = true;
-    setZoom({ index: i, origin: device.getBoundingClientRect(), aspects: new Map(aspects.current) });
+    const reel = reelRef.current;
+    const item = itemRefs.current[i];
+    const device = item?.querySelector<HTMLElement>('[data-stack-front] > *');
+    if (!reel || !item || !device || zoomRef.current) return;
+    const beginZoom = () => {
+      const target = itemRefs.current[i]?.querySelector<HTMLElement>('[data-stack-front] > *');
+      if (!target || zoomRef.current) return;
+      setLeaving(false);
+      window.history.pushState({ portfolioProjectOverlay: true }, '', window.location.href);
+      historyOverlayRef.current = true;
+      setZoom({ index: i, origin: target.getBoundingClientRect(), aspects: new Map(aspects.current) });
+    };
+    const r = item.getBoundingClientRect();
+    const box = reel.getBoundingClientRect();
+    const offset = window.matchMedia('(max-width: 767px)').matches
+      ? r.left + r.width / 2 - (box.left + box.width / 2)
+      : r.left - (columnRef.current?.getBoundingClientRect().left ?? 0);
+    const from = reel.scrollLeft;
+    const to = Math.max(0, Math.min(reel.scrollWidth - reel.clientWidth, from + offset));
+    const distance = to - from;
+    if (reduceMotion || Math.abs(distance) < 12) { beginZoom(); return; }
+    const oldSnap = reel.style.scrollSnapType;
+    const oldBehavior = reel.style.scrollBehavior;
+    reel.style.scrollSnapType = 'none';
+    reel.style.scrollBehavior = 'auto';
+    const start = performance.now();
+    let opened = false;
+    const tick = (now: number) => {
+      if (!reel.isConnected) return;
+      const progress = Math.min(1, (now - start) / 420);
+      const eased = 1 - (1 - progress) * (1 - progress);
+      reel.scrollLeft = from + distance * eased;
+      if (!opened && eased >= 0.8) { opened = true; beginZoom(); }
+      if (progress < 1) requestAnimationFrame(tick);
+      else {
+        reel.style.scrollSnapType = oldSnap;
+        reel.style.scrollBehavior = oldBehavior;
+      }
+    };
+    requestAnimationFrame(tick);
   };
 
   // Where project i's device sits in the reel, for the flight home; brought into view first if needed
@@ -634,13 +668,7 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
                 <ProjectScreenStack
                   screens={stack.screens}
                   onOpen={screen => {
-                    const flatIndex = stack.first + screen;
-                    const device = itemRefs.current[i]?.querySelector('[data-stack-front] > *');
-                    if (!device) return;
-                    setLeaving(false);
-                    window.history.pushState({ portfolioProjectOverlay: true }, '', window.location.href);
-                    historyOverlayRef.current = true;
-                    setZoom({ index: flatIndex, origin: device.getBoundingClientRect(), aspects: new Map(aspects.current) });
+                    openAt(stack.first + screen);
                   }}
                   onAspect={recordAspect}
                   reduceMotion={!!reduceMotion}
