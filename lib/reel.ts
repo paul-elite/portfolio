@@ -62,9 +62,9 @@ export function buildReelSections(content: PortfolioContent, navigation: Portfol
           category: projectCategory(p),
           book: p.tags?.includes('case-study'),
         };
-        if (item.book) return [item];
+        // Keep attached screens visible for case-study projects too.
         const extra = (p.previewImages ?? []).filter(src => src && src !== p.preview);
-        return [item, ...extra.map((src, k) => ({ ...item, id: `${p.id}-${k + 2}`, slug: `${p.slug}~${k + 2}`, title: screenTitle(src, `Screen ${k + 2}`), preview: src, previewImages: [] }))];
+        return [item, ...extra.map((src, k) => ({ ...item, book: false, id: `${p.id}-${k + 2}`, slug: `${p.slug}~${k + 2}`, title: screenTitle(src, `Screen ${k + 2}`), preview: src, previewImages: [] }))];
       }),
     },
     {
