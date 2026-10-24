@@ -11,6 +11,7 @@ const dimensions: Record<number, [number, number]> = {
 
 export default function IllustrationsGallery({ illustrations }: { illustrations: Illustration[] }) {
   const [selected, setSelected] = useState<Illustration | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
     if (!selected) return;
     const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') setSelected(null); };
@@ -21,8 +22,13 @@ export default function IllustrationsGallery({ illustrations }: { illustrations:
   return (
     <div className="h-full overflow-y-auto px-3 py-10 md:px-8 md:py-16">
       <div className="mx-auto w-full max-w-[880px]">
-        <Link href="/" className="mb-10 inline-flex text-sm text-gray-400 transition-colors hover:text-gray-900">← Back</Link>
-        <h1 className="mb-8 text-2xl font-semibold tracking-tight text-gray-900">Illustrations</h1>
+        <div className="mb-8 flex items-center gap-4">
+          <button type="button" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={menuOpen} onClick={() => setMenuOpen(v => !v)} className="grid h-14 w-14 shrink-0 place-items-center rounded-full hover:bg-neutral-100">
+            <img src="/plus-figma.svg" alt="" className={`h-[42px] w-[42px] transition-transform duration-300 ${menuOpen ? 'rotate-45' : ''}`} />
+          </button>
+          <h1 className="text-[22px] leading-7 font-semibold tracking-[-0.025em] text-[#1a1a1a]">Illustrations</h1>
+        </div>
+        {menuOpen && <nav aria-label="Portfolio navigation" className="mb-8 flex flex-col gap-3 rounded-xl bg-neutral-50 p-5 text-sm text-neutral-700"><Link href="/">Work</Link><Link href="/explore?view=writings">Writing</Link><Link href="/explore?view=illustration" onClick={() => setMenuOpen(false)}>Illustrations</Link><Link href="/explore?view=interaction">Interactions</Link></nav>}
         <div className="grid grid-cols-3 grid-flow-row-dense gap-2 md:gap-3">
           {illustrations.map((item) => {
             const span = dimensions[item.gridSpan || 1] || dimensions[1];
