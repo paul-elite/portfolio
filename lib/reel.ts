@@ -32,6 +32,18 @@ function projectCategory(p: Project): string {
   return p.role || '';
 }
 
+// Derive the individual page label from its image filename, not the parent project.
+function screenTitle(src: string, fallback: string): string {
+  const filename = decodeURIComponent(src.split('?')[0].split('/').pop() || '')
+    .replace(/\\.[^.]+$/, '')
+    .replace(/[-_]+/g, ' ')
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/\\s+/g, ' ').trim();
+  return filename && !/^(image|img|screen|screenshot|preview|frame|mockup|\\d+)(\\s*\\d+)?$/i.test(filename)
+    ? filename
+    : fallback;
+}
+
 export function buildReelSections(content: PortfolioContent, navigation: PortfolioNavigationItem[] = []): ReelSection[] {
   const sections: ReelSection[] = [
     {
@@ -52,7 +64,7 @@ export function buildReelSections(content: PortfolioContent, navigation: Portfol
         };
         if (item.book) return [item];
         const extra = (p.previewImages ?? []).filter(src => src && src !== p.preview);
-        return [item, ...extra.map((src, k) => ({ ...item, id: `${p.id}-${k + 2}`, slug: `${p.slug}~${k + 2}`, preview: src, previewImages: [] }))];
+        return [item, ...extra.map((src, k) => ({ ...item, id: `${p.id}-${k + 2}`, slug: `${p.slug}~${k + 2}`, title: screenTitle(src, `Screen ${k + 2}`), preview: src, previewImages: [] }))];
       }),
     },
     {
