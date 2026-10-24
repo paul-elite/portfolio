@@ -132,7 +132,7 @@ function FlowingMusicText({ text, className = '' }: { text: string; className?: 
   }, [overflow, text]);
 
   return (
-    <span ref={viewport} className={`relative block min-w-0 w-full overflow-hidden whitespace-nowrap ${className}`}>
+    <span ref={viewport} className={`relative block min-w-0 w-full overflow-hidden whitespace-nowrap ${className}`} style={started && overflow ? { maskImage: "linear-gradient(to right, transparent 0%, black 9%, black 86%, transparent 100%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 9%, black 86%, transparent 100%)" } : undefined}>
       <style jsx global>{`@keyframes music-text-flow { to { transform: translate3d(-50%, 0, 0); } } @media (prefers-reduced-motion: reduce) { .music-text-track { animation: none !important; } }`}</style>
       {/* Keep measurement in an independent, non-animated layer to avoid
           ResizeObserver toggling the marquee on every animation frame. */}
