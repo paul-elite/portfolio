@@ -246,24 +246,31 @@ export default function WorkReel({ config, sections }: WorkReelProps) {
             reel.style.scrollBehavior = 'auto';
             let finished = false;
             let fallback: ReturnType<typeof setTimeout>;
+            const cloneOffset = () => position(clone) - anchor();
             const finish = () => {
               if (finished || !reel.isConnected) return;
+              // Do not reset while the last-to-first transition is still moving:
+              // an early scrollend/fallback would visibly wipe the current slide.
+              if (Math.abs(cloneOffset()) > 3) return;
               finished = true;
-              clearTimeout(fallback);
+              clearInterval(fallback);
               reel.removeEventListener('scrollend', finish);
-              // The duplicate and original are visually identical. Jump
-              // invisibly to the original before enabling snapping again.
+              // Move the viewport only, not the rendered project or its animation.
+              // Keep snapping disabled through the next paint so no backwards flash occurs.
               reel.scrollLeft += position(first) - anchor();
-              setView({ active: 0, dir: 1 });
+              viewIndex.current = 0;
               requestAnimationFrame(() => {
-                reel.style.scrollSnapType = previousSnap;
-                reel.style.scrollBehavior = previousBehavior;
+                requestAnimationFrame(() => {
+                  reel.style.scrollSnapType = previousSnap;
+                  reel.style.scrollBehavior = previousBehavior;
+                  measure();
+                });
               });
             };
-            reel.addEventListener('scrollend', finish, { once: true });
-            reel.scrollTo({ left: reel.scrollLeft + position(clone) - anchor(), behavior: 'smooth' });
-            // Browsers without scrollend still finish the forward-only loop.
-            fallback = setTimeout(finish, 1800);
+            reel.addEventListener('scrollend', finish);
+            reel.scrollTo({ left: reel.scrollLeft + cloneOffset(), behavior: 'smooth' });
+            // Poll only for browsers that do not emit scrollend. Never jump early.
+            fallback = setInterval(finish, 100);
           }
         } else {
           scrollToItem(next);
