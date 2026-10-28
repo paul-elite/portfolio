@@ -107,22 +107,28 @@ function useRemainingMs(data: SpotifyData | null) {
 }
 
 function FlowingMusicText({ text, className = '' }: { text: string; className?: string }) {
+  return <FlowingMusicTextContent key={text} text={text} className={className} />;
+}
+
+function FlowingMusicTextContent({ text, className = '' }: { text: string; className?: string }) {
   const viewport = useRef<HTMLSpanElement>(null);
   const probe = useRef<HTMLSpanElement>(null);
   const [overflow, setOverflow] = useState(false);
   const [started, setStarted] = useState(false);
 
   useEffect(() => {
-    setStarted(false);
     const measure = () => {
       if (viewport.current && probe.current) {
         setOverflow(probe.current.getBoundingClientRect().width > viewport.current.clientWidth + 1);
       }
     };
-    measure();
+    const frame = requestAnimationFrame(measure);
     const observer = new ResizeObserver(measure);
     if (viewport.current) observer.observe(viewport.current);
-    return () => observer.disconnect();
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, [text]);
 
   useEffect(() => {
