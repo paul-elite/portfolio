@@ -1,108 +1,90 @@
-import Image from 'next/image';
 import { Inter } from 'next/font/google';
 import { getHomeData } from '@/lib/content-service';
-import SectionIndex from '@/components/home/SectionIndex';
+import AvatarCard, { type CardAction } from '@/components/home/AvatarCard';
 import styles from './home.module.css';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
 export const revalidate = 60;
 
-// Full-height sections; the page always settles on one of them (scroll-snap in home.module.css).
-const SECTIONS = [
-  { id: 'work', label: 'Work' },
-  { id: 'explorations', label: 'Explorations' },
-  { id: 'writing', label: 'Writing' },
+// Set at build time in next.config.ts, so "Updated" is the last deploy.
+const updated = process.env.SITE_UPDATED ? new Date(process.env.SITE_UPDATED).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).replace(/ (\d{4})$/, ', $1') : '';
+
+const SOCIAL: { id: keyof typeof LABEL; label: string }[] = [
+  { id: 'twitter', label: 'X' },
+  { id: 'github', label: 'Github' },
+  { id: 'linkedin', label: 'LinkedIn' },
+  { id: 'instagram', label: 'Instagram' },
+  { id: 'behance', label: 'Behance' },
 ];
+const LABEL = { twitter: 'X (Twitter)', github: 'Github', linkedin: 'LinkedIn', instagram: 'Instagram', behance: 'Behance' };
 
-const day = (d?: string) => (d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '');
-
-export default async function Home({ searchParams }: { searchParams: Promise<{ section?: string }> }) {
-  const [{ config, content }, { section }] = await Promise.all([getHomeData(), searchParams]);
-  const shots = [
-    ...content.illustrations.map((i) => ({ src: i.thumbnail || i.avatar, alt: i.title })),
-    ...content.projects.flatMap((p) => [p.preview, ...(p.previewImages ?? [])].map((src) => ({ src, alt: p.title }))),
-  ].filter((s): s is { src: string; alt: string } => Boolean(s.src));
+export default async function Home() {
+  const { config, content } = await getHomeData();
+  const name = config.name || 'Paul Elite';
+  const social = SOCIAL.filter((s) => config.social[s.id]);
+  const email = config.social.email ? `mailto:${config.social.email.replace(/^mailto:/, '')}` : '';
+  const actions: CardAction[] = [
+    ...(email ? [{ id: 'email', label: 'Email', href: email }] : []),
+    ...social.map((s) => ({ id: s.id, label: LABEL[s.id], href: config.social[s.id] })),
+  ];
 
   return (
     <main className={`${inter.className} ${styles.home}`}>
-      <SectionIndex sections={SECTIONS} initial={SECTIONS.some((s) => s.id === section) ? section : undefined} />
+      <AvatarCard src="/portrait.png" thumb="/portrait-avatar.png" name={name} actions={actions} />
 
-      <section id="intro" aria-label="Introduction" className={styles.section}>
-        <div className={styles.column}>
-          <header className={styles.profile}>
-            <Image
-              src="/portrait.png"
-              alt={`${config.name || 'Paul Elite'}, seen from behind, in a shirt that reads “Creatives are the new athletes”`}
-              width={400}
-              height={400}
-              priority
-              className={styles.portrait}
-            />
-            <div className={styles.nameBlock}>
-              <h1>{config.name || 'Paul Elite'}</h1>
-              {config.title && <p className={styles.role}>{config.title}</p>}
-            </div>
-          </header>
+      <div className={styles.introduction}>
+        {config.bio.split(/\n\s*\n/).filter(Boolean).map((paragraph, index) => (
+          <p key={index}>
+            {paragraph.split(/(design and build digital products)/i).map((part, partIndex) =>
+              /^design and build digital products$/i.test(part)
+                ? <strong key={partIndex}>{part}</strong>
+                : part,
+            )}
+          </p>
+        ))}
+        {(social.length > 0 || email) && (
+          <p>
+            {social.length > 0 && <>You can find me on {social.map((s, i) => (
+              <span key={s.id}>
+                {i > 0 && (i === social.length - 1 && !email ? ' or ' : ', ')}
+                <a href={config.social[s.id]} target="_blank" rel="noreferrer">{s.label}</a>
+              </span>
+            ))}</>}
+            {email && <>{social.length ? ' or send me an ' : 'Send me an '}<a href={email}>Email</a></>}.
+          </p>
+        )}
+      </div>
 
-          <div className={styles.introduction}>
-            {config.bio.split(/\n\s*\n/).filter(Boolean).map((paragraph, index) => (
-              <p key={index}>
-                {paragraph.split(/(design and build digital products)/i).map((part, partIndex) =>
-                  /^design and build digital products$/i.test(part)
-                    ? <strong key={partIndex}>{part}</strong>
-                    : part,
-                )}
-              </p>
-            ))}
-            <p className={styles.contact}>
-              {config.social.twitter && <><span>You can find me on </span><a href={config.social.twitter}>X</a></>}
-              {config.social.email && <><span>{config.social.twitter ? ', or send me an ' : 'Send me an '}</span><a href={`mailto:${config.social.email.replace(/^mailto:/, '')}`}>email</a><span>.</span></>}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section id="work" aria-labelledby="work-title" className={styles.section}>
-        <div className={styles.column}>
+      {content.projects.length > 0 && (
+        <section className={styles.group} aria-labelledby="work-title">
           <h2 id="work-title" className={styles.heading}>Work</h2>
           <ul className={styles.list}>
             {content.projects.map((p) => (
               <li key={p.id}>
-                <span>{p.title}</span>
-                {(p.year || p.role) && <span className={styles.meta}>{[p.year, p.role].filter(Boolean).join(' · ')}</span>}
+                {/* Case-study pages are cleared for the redesign, so only outside links are linked. */}
+                {p.link ? <a href={p.link} target="_blank" rel="noreferrer" className={styles.itemTitle}>{p.title}</a> : <span className={styles.itemTitle}>{p.title}</span>}
+                {p.description && <p>{p.description}</p>}
               </li>
             ))}
           </ul>
-        </div>
-      </section>
+        </section>
+      )}
 
-      <section id="explorations" aria-labelledby="explorations-title" className={styles.section}>
-        <div className={styles.column}>
-          <h2 id="explorations-title" className={styles.heading}>Explorations</h2>
-        </div>
-        {shots.length ? (
-          // A sideways strip keeps the section to one screen however many shots there are.
-          <div className={styles.strip}>
-            {shots.map((s, i) => <img key={s.src + i} src={s.src} alt={s.alt} loading="lazy" />)}
-          </div>
-        ) : (
-          <p className={`${styles.column} ${styles.meta}`}>Explorations are on their way.</p>
-        )}
-      </section>
-
-      <section id="writing" aria-labelledby="writing-title" className={styles.section}>
-        <div className={styles.column}>
+      {content.writings.length > 0 && (
+        <section className={styles.group} aria-labelledby="writing-title">
           <h2 id="writing-title" className={styles.heading}>Writing</h2>
           <ul className={styles.list}>
             {content.writings.map((w) => (
               <li key={w.id}>
-                {w.link ? <a href={w.link}>{w.title}</a> : <span>{w.title}</span>}
-                {w.date && <span className={styles.meta}>{day(w.date)}</span>}
+                {w.link ? <a href={w.link} target="_blank" rel="noreferrer" className={styles.itemTitle}>{w.title}</a> : <span className={styles.itemTitle}>{w.title}</span>}
+                {w.description && <p>{w.description}</p>}
               </li>
             ))}
           </ul>
-        </div>
-      </section>
+        </section>
+      )}
+
+      {updated && <p className={styles.updated}>Updated {updated}</p>}
     </main>
   );
 }
