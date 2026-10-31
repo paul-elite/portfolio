@@ -1,16 +1,134 @@
 .home {
   --ink: #2a2a2a;
   --muted: #8d8d8d;
+  --gutter: 24px;
   box-sizing: border-box;
   width: 100%;
-  max-width: 678px;
-  margin: 0 auto;
-  padding: 96px 24px 96px;
   color: var(--ink);
   font-size: 14px;
   font-weight: 400;
   line-height: 1.75;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Every section fills the screen. Scrolling always settles on a section (mandatory),
+   and which one depends on how far you scrolled; there is no forced stop at each. */
+:global(html):has(.home) {
+  scroll-snap-type: y mandatory;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :global(html):has(.home) {
+    scroll-behavior: smooth;
+  }
+}
+
+.section {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100svh;
+  padding: 96px 0;
+  scroll-snap-align: start;
+}
+
+.column {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 678px;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.heading {
+  margin: 0 0 32px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list li {
+  display: flex;
+  flex-direction: column;
+}
+
+.meta {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.strip {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 0 max(var(--gutter), calc((100vw - 678px) / 2 + var(--gutter)));
+  scroll-padding: 0 max(var(--gutter), calc((100vw - 678px) / 2 + var(--gutter)));
+  scrollbar-width: none;
+}
+
+.strip::-webkit-scrollbar {
+  display: none;
+}
+
+.strip img {
+  flex: none;
+  height: 55svh;
+  width: auto;
+  border-radius: 8px;
+  outline: 1px solid rgba(0, 0, 0, 0.08);
+  outline-offset: -1px;
+  scroll-snap-align: start;
+}
+
+.sectionIndex {
+  position: fixed;
+  top: 50%;
+  right: 32px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  transform: translateY(-50%);
+  transition: opacity 200ms ease;
+}
+
+.sectionIndex[data-hidden] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.home .sectionIndex a {
+  color: #c4c4c4;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.home .sectionIndex a:hover,
+.home .sectionIndex a[aria-current] {
+  color: var(--ink);
+}
+
+@media (max-width: 900px) {
+  .sectionIndex {
+    display: none;
+  }
 }
 
 .home p,
@@ -25,26 +143,14 @@
   gap: 24px;
 }
 
-.portrait,
-.portrait img,
-.portraitPlaceholder {
+.portrait {
   display: block;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-}
-
-.portrait img {
+  width: 240px;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 1;
   object-fit: cover;
-}
-
-.portraitPlaceholder {
-  box-sizing: border-box;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--muted);
-  color: var(--muted);
-  font-weight: 500;
+  border-radius: 12px;
 }
 
 .nameBlock h1 {
@@ -89,8 +195,8 @@
 }
 
 @media (max-width: 600px) {
-  .home {
-    padding-top: 56px;
+  .section {
+    padding: 56px 0;
   }
 }
 
