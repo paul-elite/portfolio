@@ -1,6 +1,7 @@
 import { Inter } from 'next/font/google';
 import { getHomeData } from '@/lib/content-service';
 import AvatarCard, { type CardAction } from '@/components/home/AvatarCard';
+import WritingList from '@/components/home/WritingList';
 import styles from './home.module.css';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
@@ -73,14 +74,7 @@ export default async function Home() {
       {content.writings.length > 0 && (
         <section className={styles.group} aria-labelledby="writing-title">
           <h2 id="writing-title" className={styles.heading}>Writing</h2>
-          <ul className={styles.list}>
-            {content.writings.map((w) => (
-              <li key={w.id}>
-                {w.link ? <a href={w.link} target="_blank" rel="noreferrer" className={styles.itemTitle}>{w.title}</a> : <span className={styles.itemTitle}>{w.title}</span>}
-                {w.description && <p>{w.description}</p>}
-              </li>
-            ))}
-          </ul>
+          <WritingList items={content.writings} />
         </section>
       )}
 

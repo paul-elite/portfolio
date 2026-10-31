@@ -240,3 +240,106 @@
   outline: none;
   background: rgba(255, 255, 255, 0.12);
 }
+
+/* writing: grouped by year, date on the right */
+.writing,
+.writing ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.writing {
+  --year: 108px;
+  --divider: rgba(0, 0, 0, 0.07);
+}
+
+.writingYear {
+  display: grid;
+  grid-template-columns: var(--year) minmax(0, 1fr);
+  border-top: 1px solid var(--divider);
+}
+
+.writingYearLabel {
+  padding: 10px 0;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  transition: color 150ms ease;
+}
+
+.writingRow + .writingRow {
+  border-top: 1px solid var(--divider);
+}
+
+.writingRow > a,
+.writingRow > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  text-decoration: none;
+  transition: opacity 150ms ease;
+}
+
+.writingTitle {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.writingRow time {
+  flex: none;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .writing:has(.writingRow:hover) .writingRow:not(:hover) > * {
+    opacity: 0.4;
+  }
+  .writingYear:has(.writingRow:hover) .writingYearLabel {
+    color: var(--ink);
+  }
+}
+
+.newMark {
+  position: relative;
+  margin-left: 12px;
+  padding: 0 4px;
+  color: #ff00aa;
+}
+
+.newMark svg {
+  position: absolute;
+  inset: -3px -6px -3px -7px;
+  width: calc(100% + 13px);
+  height: calc(100% + 6px);
+  overflow: visible;
+  pointer-events: none;
+}
+
+.newMark path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .newMark path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: new-mark-draw 500ms ease-out 300ms forwards;
+  }
+}
+
+@keyframes new-mark-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@media (max-width: 600px) {
+  .writing {
+    --year: 48px;
+  }
+}
