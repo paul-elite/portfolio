@@ -343,3 +343,250 @@
     --year: 48px;
   }
 }
+
+/* ---------- single page: info left, showreel phone right ---------- */
+
+.wide {
+  max-width: none;
+  padding: 0;
+}
+
+.stage {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 340px) auto;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(56px, 9vw, 120px);
+  min-height: 100dvh;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 56px 32px;
+}
+
+.home h1 {
+  margin: 0;
+}
+
+.info {
+  max-width: 340px;
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+
+.name {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+}
+
+.role {
+  margin: 0;
+  color: var(--muted);
+}
+
+.bio {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 42ch;
+  margin-top: 28px;
+}
+
+.socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-top: 32px;
+}
+
+.contact {
+  margin-top: 10px;
+}
+
+.home .socials a,
+.home .contact a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .home .socials a:hover,
+  .home .contact a:hover {
+    color: var(--ink);
+  }
+}
+
+.home .socials a:focus-visible,
+.home .contact a:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.deviceWrap {
+  display: flex;
+  justify-content: center;
+}
+
+/* iPhone 16 Pro Max frame (772×1600) with the video underneath */
+.device {
+  position: relative;
+  height: clamp(520px, 76vh, 700px);
+  aspect-ratio: 772 / 1600;
+  max-width: 100%;
+}
+
+.screen {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  -webkit-mask-image: url('/mockups/iphone-16-pro-max-mask.png');
+  mask-image: url('/mockups/iphone-16-pro-max-mask.png');
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.screenInner {
+  position: absolute;
+  inset: 1.52% 3.83%;
+  overflow: hidden;
+  background: #0b0b0b;
+}
+
+.frame {
+  z-index: 2;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.screenFallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 50% 28%, #2c2c2c, #0b0b0b 72%);
+}
+
+.screenFallback span {
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 400ms ease-out;
+}
+
+.videoReady {
+  opacity: 1;
+}
+
+/* Landscape showreels letterbox on the black screen instead of being cropped */
+.videoContain {
+  object-fit: contain;
+}
+
+.play {
+  position: absolute;
+  bottom: 22px;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 150ms ease, transform 150ms ease-out;
+}
+
+/* a 44px target around the 36px circle */
+.play::before {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+}
+
+.play:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.play:active {
+  transform: scale(0.97);
+}
+
+.play:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.play svg {
+  width: 12px;
+  height: 12px;
+  margin-left: 1px;
+  fill: currentColor;
+}
+
+@media (max-width: 860px) {
+  .stage {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 48px;
+    min-height: 100svh;
+    padding: 40px 24px 56px;
+  }
+
+  .info {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .device {
+    height: clamp(460px, 66vh, 580px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .video,
+  .play,
+  .socials a {
+    transition: none;
+  }
+}
