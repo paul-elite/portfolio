@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { iconColor } from '@/lib/icon-color';
@@ -124,6 +124,24 @@ type Props = {
   social: SocialLink[];
 };
 
+// Phones get the October layout: the page is just the content (the showreel centred on the
+// Lobby) and this whole sidebar becomes a drawer behind a plus button in the top-left corner.
+const PHONE = '(max-width: 860px)';
+
+function subscribePhone(callback: () => void) {
+  const query = window.matchMedia(PHONE);
+  query.addEventListener('change', callback);
+  return () => query.removeEventListener('change', callback);
+}
+
+function useIsPhone() {
+  return useSyncExternalStore(
+    subscribePhone,
+    () => window.matchMedia(PHONE).matches,
+    () => false,
+  );
+}
+
 function isCurrent(pathname: string, href: string) {
   if (href === '/') return pathname === '/';
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -135,9 +153,57 @@ function isCurrent(pathname: string, href: string) {
 export default function SiteNav({ name, bio, menu, social }: Props) {
   const pathname = usePathname();
   const onLobby = pathname === '/';
+  const isPhone = useIsPhone();
+  const [open, setOpen] = useState(false);
+  const [openedAt, setOpenedAt] = useState(pathname);
+  // Following a link closes the drawer.
+  const drawerOpen = open && openedAt === pathname && isPhone;
+
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+    const root = document.documentElement;
+    const previous = root.style.overflow;
+    root.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKey);
+    return () => {
+      root.style.overflow = previous;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [drawerOpen]);
+
+  const toggle = () => {
+    setOpenedAt(pathname);
+    setOpen(!drawerOpen);
+  };
 
   return (
-    <header className={styles.nav}>
+    <>
+    <button
+      type="button"
+      className={`${styles.drawerToggle} ${drawerOpen ? styles.drawerToggleOpen : ''}`}
+      onClick={toggle}
+      aria-label={drawerOpen ? 'Close navigation' : 'Open navigation'}
+      aria-expanded={drawerOpen}
+      aria-controls="site-nav"
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element -- the hand-drawn plus from public/ */}
+      <img src="/plus-figma.svg" alt="" />
+    </button>
+    <button
+      type="button"
+      tabIndex={-1}
+      aria-hidden="true"
+      className={`${styles.drawerBackdrop} ${drawerOpen ? styles.drawerBackdropOpen : ''}`}
+      onClick={() => setOpen(false)}
+    />
+    <header
+      id="site-nav"
+      className={`${styles.nav} ${drawerOpen ? styles.navOpen : ''}`}
+      inert={isPhone && !drawerOpen}
+    >
       <div>
         {onLobby ? (
           <h1 className={styles.name}>{name}</h1>
@@ -182,5 +248,6 @@ export default function SiteNav({ name, bio, menu, social }: Props) {
         )}
       </div>
     </header>
+    </>
   );
 }
