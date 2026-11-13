@@ -54,7 +54,7 @@
 }
 
 .name {
-  font-size: clamp(24px, 2vw, 34px);
+  font-size: 24px;
   font-weight: 500;
   line-height: 1.2;
   letter-spacing: 0.02em;
@@ -129,9 +129,12 @@
   padding: clamp(28px, 2.6vw, 44px) clamp(24px, 3vw, 56px) 64px;
 }
 
+/* Centred on the viewport, not the pane: the extra right padding mirrors the nav's width. */
 .paneCentered {
   display: grid;
   place-items: center;
+  padding-block: clamp(28px, 2.6vw, 44px);
+  padding-right: calc(var(--side) + clamp(24px, 3vw, 56px));
 }
 
 /* Left-aligned and kept clear of the right edge, so the info sidebar slides into empty space
@@ -312,7 +315,7 @@
   gap: 16px;
   margin-top: 16px;
   color: rgba(7, 6, 6, 0.8);
-  font-size: 24px;
+  font-size: 18px;
   line-height: 1.2;
   letter-spacing: 0.015em;
 }
@@ -387,10 +390,6 @@
     border-bottom: 1px solid var(--border);
   }
 
-  .name {
-    font-size: 28px;
-  }
-
   .menu {
     font-size: 20px;
   }
@@ -403,6 +402,7 @@
 
   .paneCentered {
     min-height: 70svh;
+    padding-right: 24px;
   }
 
   .info {
