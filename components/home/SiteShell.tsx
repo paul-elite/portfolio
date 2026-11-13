@@ -1,7 +1,7 @@
-import Link from 'next/link';
 import { Inter_Tight } from 'next/font/google';
-import type { PortfolioNavTarget, SiteConfig } from '@/lib/content-model';
+import type { SiteConfig } from '@/lib/content-model';
 import { enabledNavigationItems, sectionHref } from '@/lib/site-navigation';
+import SiteNav from './SiteNav';
 import styles from './shell.module.css';
 
 const interTight = Inter_Tight({
@@ -17,75 +17,34 @@ const SOCIAL = [
 
 type Props = {
   config: SiteConfig;
-  /** The section being viewed; leave unset on the home page. */
-  active?: PortfolioNavTarget;
-  /** The content pane, plus an info sidebar when the page has one open. */
+  /** The page: its content pane, plus an info sidebar when it has one open. */
   children: React.ReactNode;
 };
 
-// The main navigation is always on the left (with the bio on the home page) and the page's content
-// fills the rest. Pages that need it slide an info/properties sidebar in from the right on demand.
-export default function SiteShell({ config, active, children }: Props) {
+// Rendered once by the (site) layout. The main navigation is always on the left (with the bio on
+// the Lobby) and the page's content fills the rest; pages that need it slide an info/properties
+// sidebar in from the right on demand.
+export default function SiteShell({ config, children }: Props) {
   const name = config.name || 'Paul Elite';
-  const social = SOCIAL.filter((s) => config.social[s.id]);
   // The landing page is a menu item too ("Lobby"), so every page has a current item.
   const menu = [
-    { id: 'lobby', label: 'Lobby', href: '/', current: !active },
+    { id: 'lobby', label: 'Lobby', href: '/' },
     ...enabledNavigationItems(config).map((item) => ({
-      id: item.id, label: item.label, href: sectionHref(item.target), current: item.target === active,
+      id: item.id,
+      label: item.label,
+      href: sectionHref(item.target),
     })),
   ];
-  const paragraphs = active ? [] : config.bio.split(/\n\s*\n/).filter(Boolean);
+  const social = SOCIAL.filter((s) => config.social[s.id]).map((s) => ({
+    id: s.id,
+    label: s.label,
+    href: config.social[s.id],
+  }));
+  const bio = config.bio.split(/\n\s*\n/).filter(Boolean);
 
   return (
     <main className={`${interTight.className} ${styles.shell}`}>
-      <header className={styles.nav}>
-        <div>
-          {active ? (
-            <p className={styles.name}>
-              <Link href="/" className={styles.nameLink}>{name}</Link>
-            </p>
-          ) : (
-            <h1 className={styles.name}>{name}</h1>
-          )}
-          {paragraphs.length > 0 && (
-            <div className={styles.bio}>
-              {paragraphs.map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className={styles.navBottom}>
-          <nav className={styles.menu} aria-label="Sections">
-            <ul>
-              {menu.map((item) => (
-                <li key={item.id}>
-                  <Link
-                    href={item.href}
-                    aria-current={item.current ? 'page' : undefined}
-                    className={item.current ? styles.menuCurrent : undefined}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          {social.length > 0 && (
-            <nav className={styles.socials} aria-label="Elsewhere">
-              {social.map((s) => (
-                <a key={s.id} href={config.social[s.id]} target="_blank" rel="noreferrer">
-                  {s.label}
-                </a>
-              ))}
-            </nav>
-          )}
-        </div>
-      </header>
-
+      <SiteNav name={name} bio={bio} menu={menu} social={social} />
       {children}
     </main>
   );

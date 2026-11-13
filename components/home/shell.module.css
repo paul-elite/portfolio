@@ -5,9 +5,13 @@
   --page: #f7f7f7; /* 97% brightness */
   --surface: #fff;
   --border: #e4e4e7;
-  /* Two greys: ink for primary text (name, menu, socials), muted for secondary (bio, meta). */
-  --ink: #2a2a2a;
-  --muted: #8d8d8d;
+  /* Two blue-leaning greys: ink for primary text (name, current menu item, socials), muted for
+     secondary (bio, resting menu items, meta). */
+  --ink: #262b36;
+  --muted: #7f8696;
+  /* One motion language for every hover/press/current change. */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --fast: 200ms;
   --divider: rgba(0, 0, 0, 0.07);
 
   display: grid;
@@ -65,6 +69,26 @@
   text-decoration: none;
 }
 
+/* The bio belongs to the Lobby: on other pages it folds up instead of popping out. */
+.bioFold {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition: grid-template-rows 320ms var(--ease), opacity var(--fast) var(--ease);
+}
+
+.bioFolded {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  transition: grid-template-rows 320ms var(--ease), opacity 120ms var(--ease), visibility 0s 320ms;
+}
+
+.bioFoldInner {
+  min-height: 0;
+  overflow: hidden;
+}
+
 .navBottom {
   display: flex;
   flex-direction: column;
@@ -98,11 +122,16 @@
   text-decoration-thickness: 1px;
   text-underline-offset: 5px;
   text-decoration-color: transparent;
-  transition: color 150ms ease, text-decoration-color 150ms ease, opacity 150ms ease;
+  transition:
+    color var(--fast) var(--ease),
+    text-decoration-color var(--fast) var(--ease),
+    opacity var(--fast) var(--ease);
 }
 
+/* Pressing dims at once; releasing eases back. */
 .shell .menu a:active {
   opacity: 0.6;
+  transition-duration: 0ms;
 }
 
 .shell .menu a.menuCurrent {
@@ -121,12 +150,17 @@
 
 .shell .socials a {
   text-decoration: none;
-  transition: opacity 150ms ease;
+  transition: color var(--fast) var(--ease), opacity var(--fast) var(--ease);
+}
+
+.shell .socials a:active {
+  opacity: 0.6;
+  transition-duration: 0ms;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .shell .socials a:hover {
-    opacity: 0.55;
+    color: var(--muted);
   }
   .shell .menu a:not(.menuCurrent):hover {
     color: var(--ink);
@@ -200,7 +234,7 @@
   text-align: left;
   cursor: pointer;
   -webkit-touch-callout: none;
-  transition: opacity 150ms ease;
+  transition: opacity var(--fast) var(--ease);
 }
 
 .rowTitle {
@@ -245,7 +279,7 @@
   background: #ececee;
   cursor: pointer;
   -webkit-touch-callout: none;
-  transition: opacity 150ms ease;
+  transition: opacity var(--fast) var(--ease);
 }
 
 .tile img {
@@ -457,6 +491,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .bioFold,
+  .bioFolded {
+    transition: none;
+  }
   .info,
   .infoSheet {
     animation: none;

@@ -4,7 +4,6 @@ import type { PortfolioContent, PortfolioNavTarget } from '@/lib/content-model';
 import { getHomeData, getSiteConfig } from '@/lib/content-service';
 import { enabledNavigationItems } from '@/lib/site-navigation';
 import { ILLUSTRATION_CATEGORIES } from '@/lib/portfolio-options';
-import SiteShell from './SiteShell';
 import SectionBrowser, { type BrowserItem } from './SectionBrowser';
 
 export async function sectionMetadata(target: PortfolioNavTarget): Promise<Metadata> {
@@ -76,19 +75,18 @@ function itemsFor(target: PortfolioNavTarget, content: PortfolioContent): Browse
   }
 }
 
-// One page per menu item. A section switched off in admin returns a 404.
+// One page per menu item, rendered inside the (site) layout's shell. A section switched off in
+// admin returns a 404.
 export default async function SectionPage({ target }: { target: PortfolioNavTarget }) {
   const { config, content } = await getHomeData();
   const item = enabledNavigationItems(config).find((i) => i.target === target);
   if (!item) notFound();
 
   return (
-    <SiteShell config={config} active={target}>
-      <SectionBrowser
-        title={item.label}
-        layout={target === 'illustration' ? 'grid' : 'list'}
-        items={itemsFor(target, content)}
-      />
-    </SiteShell>
+    <SectionBrowser
+      title={item.label}
+      layout={target === 'illustration' ? 'grid' : 'list'}
+      items={itemsFor(target, content)}
+    />
   );
 }
