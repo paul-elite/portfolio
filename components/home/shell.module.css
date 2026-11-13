@@ -140,8 +140,23 @@
   position: relative;
 }
 
+/* Hovered/focused menu and social labels go from regular to medium. Each label reserves its
+   medium width with an invisible copy, so the heavier text never nudges anything. */
+.weightStable {
+  display: inline-grid;
+}
+
+.weightStable::after {
+  content: attr(data-text) / "";
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  font-weight: 500;
+  pointer-events: none;
+  user-select: none;
+}
+
 .menuLabel {
-  display: inline-block;
   transition: transform var(--fast) var(--ease);
 }
 
@@ -172,6 +187,7 @@ img.menuIconArt {
 @media (hover: hover) and (pointer: fine) {
   .shell .menu a:hover .menuLabel {
     transform: translateX(36px);
+    font-weight: 500;
   }
   .shell .menu a:hover .menuIcon {
     opacity: 1;
@@ -181,6 +197,7 @@ img.menuIconArt {
 
 .shell .menu a:focus-visible .menuLabel {
   transform: translateX(36px);
+  font-weight: 500;
 }
 
 .shell .menu a:focus-visible .menuIcon {
@@ -229,6 +246,11 @@ img.menuIconArt {
   object-fit: cover;
 }
 
+.shell .socials a:focus-visible {
+  color: var(--ink);
+  font-weight: 500;
+}
+
 .shell .socials a:focus-visible .socialMark {
   width: 20px;
   margin-right: 8px;
@@ -237,6 +259,7 @@ img.menuIconArt {
 }
 
 .shell .socials a {
+  color: var(--muted);
   text-decoration: none;
   transition: color var(--fast) var(--ease), opacity var(--fast) var(--ease);
 }
@@ -248,7 +271,8 @@ img.menuIconArt {
 
 @media (hover: hover) and (pointer: fine) {
   .shell .socials a:hover {
-    color: var(--muted);
+    color: var(--ink);
+    font-weight: 500;
   }
   .shell .socials a:hover .socialMark {
     width: 20px;

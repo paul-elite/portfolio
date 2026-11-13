@@ -114,7 +114,7 @@ export default function SiteNav({ name, bio, menu, social }: Props) {
                     className={current ? styles.menuCurrent : undefined}
                   >
                     <MenuIcon item={item} />
-                    <span className={styles.menuLabel}>{item.label}</span>
+                    <span className={`${styles.menuLabel} ${styles.weightStable}`} data-text={item.label}>{item.label}</span>
                   </Link>
                 </li>
               );
@@ -127,7 +127,7 @@ export default function SiteNav({ name, bio, menu, social }: Props) {
             {social.map((s) => (
               <a key={s.id} href={s.href} target="_blank" rel="noreferrer">
                 <span className={styles.socialMark} aria-hidden="true"><SocialMark link={s} /></span>
-                <span>{s.label}</span>
+                <span className={styles.weightStable} data-text={s.label}>{s.label}</span>
               </a>
             ))}
           </nav>
