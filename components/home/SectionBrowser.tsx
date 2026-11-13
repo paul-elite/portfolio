@@ -91,10 +91,13 @@ export default function SectionBrowser({ title, layout, items }: Props) {
                 <li key={item.id}>
                   <button
                     {...itemProps(item)}
-                    aria-label={item.subtitle ? `${item.title}, ${item.subtitle}` : item.title}
                     className={`${styles.book} ${item.id === pinnedId ? styles.rowActive : ''}`}
                   >
                     <BookCover item={item} />
+                    <span className={styles.bookCaption}>
+                      <span className={styles.bookCaptionTitle}>{item.title}</span>
+                      {item.subtitle && <span className={styles.bookCaptionDate}>{item.subtitle}</span>}
+                    </span>
                   </button>
                 </li>
               ))}
@@ -177,7 +180,9 @@ function BookCover({ item }: { item: BrowserItem }) {
       <span className={styles.bookSpine} aria-hidden="true" />
       <span className={`${styles.bookSpine} ${styles.bookSpineInner}`} aria-hidden="true" />
       <span className={styles.bookFace}>
-        <span className={`${styles.bookTitle} ${item.title.length > 20 ? styles.bookTitleLong : ''}`}>{item.title}</span>
+        <span className={`${styles.bookTitle} ${item.title.length > 20 ? styles.bookTitleLong : ''}`} aria-hidden="true">
+          {item.title}
+        </span>
         {item.image ? (
           /* eslint-disable-next-line @next/next/no-img-element -- admin uploads can live on any host */
           <img className={styles.bookArt} src={item.image} alt="" />

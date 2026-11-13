@@ -212,40 +212,44 @@ img.menuIconArt {
 .socials {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 24px;
+  gap: 8px 14px;
   font-size: 17px;
   line-height: 1.2;
   letter-spacing: 0.025em;
 }
 
-/* Social links: hover / keyboard focus grows the network's coloured mark in before the label.
-   The links sit in a row, so the mark takes up room (nudging the next link along) instead of
-   overlapping like the vertical menu's slide. */
+/* Social links: on hover / keyboard focus the label slides right and the network's scribble
+   fades in where it started, like the menu. Each link always keeps that slide's room after its
+   label, so hovering never changes the row's layout (a growing mark used to rewrap the row and
+   move links out from under the pointer). */
 .shell .socials a {
+  --mark: 24px;
+  --slide: calc(var(--mark) + 8px);
+  position: relative;
   display: inline-flex;
   align-items: center;
-}
-
-.socialMark {
-  --mark: 24px;
-  display: inline-block;
-  flex: none;
-  width: 0;
-  height: var(--mark);
-  margin-right: 0;
-  overflow: hidden;
-  opacity: 0;
-  transform: scale(0.85);
-  transition:
-    width var(--fast) var(--ease),
-    margin-right var(--fast) var(--ease),
-    opacity var(--fast) var(--ease),
-    transform var(--fast) var(--ease);
+  padding-right: var(--slide);
 }
 
 /* The LinkedIn scribble was always drawn 10% larger than the others. */
-.socialMarkLarge {
+.shell .socials a.socialLinkLarge {
   --mark: 26.4px;
+}
+
+.socialLabel {
+  transition: transform var(--fast) var(--ease);
+}
+
+.socialMark {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: var(--mark);
+  height: var(--mark);
+  opacity: 0;
+  transform: translateY(-50%) scale(0.85);
+  transition: opacity var(--fast) var(--ease), transform var(--fast) var(--ease);
+  pointer-events: none;
 }
 
 .socialMarkArt {
@@ -271,11 +275,13 @@ img.socialMarkArt {
   font-weight: 500;
 }
 
+.shell .socials a:focus-visible .socialLabel {
+  transform: translateX(var(--slide));
+}
+
 .shell .socials a:focus-visible .socialMark {
-  width: var(--mark);
-  margin-right: 8px;
   opacity: 1;
-  transform: scale(1);
+  transform: translateY(-50%) scale(1);
 }
 
 .shell .socials a {
@@ -294,11 +300,12 @@ img.socialMarkArt {
     color: var(--hover-color, var(--ink));
     font-weight: 500;
   }
+  .shell .socials a:hover .socialLabel {
+    transform: translateX(var(--slide));
+  }
   .shell .socials a:hover .socialMark {
-    width: var(--mark);
-    margin-right: 8px;
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(-50%) scale(1);
   }
   /* Hovered links take on their icon's most abundant colour (set per link as --hover-color);
      icons without a colour of their own fall back to ink. */
@@ -411,8 +418,13 @@ img.socialMarkArt {
 }
 
 .book {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   width: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
   container-type: inline-size; /* cqw below = % of the book's width */
   margin: 0;
   padding: 0;
@@ -501,6 +513,27 @@ img.socialMarkArt {
   color: #a3a8ae;
   font-size: 18cqw;
   line-height: 1;
+}
+
+/* The writing's name and date sit under the book. */
+.bookCaption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bookCaptionTitle {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.bookCaptionDate {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.3;
 }
 
 .books:has(.rowActive) .book:not(.rowActive) {
@@ -765,7 +798,8 @@ img.socialMarkArt {
 @media (prefers-reduced-motion: reduce) {
   .menuLabel,
   .menuIcon,
-  .socialMark {
+  .socialMark,
+  .socialLabel {
     transition: none;
   }
   .bioFold,

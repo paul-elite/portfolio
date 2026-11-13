@@ -15,6 +15,13 @@ type SocialLink = NavLink & { image?: string };
 // The hand-drawn scribble marks (public/social-*.svg), revealed on hover/focus like the menu
 // icons. They are used as a stencil filled with the link's current colour, so the scribble
 // darkens with its label. An image uploaded for the network in the admin (socialImages) wins.
+// Networks hover in their brand colour (scribble and label together). Anything else, including
+// an uploaded image, takes its icon's most abundant colour.
+const BRAND_HOVER: Record<string, string> = {
+  linkedin: '#0A66C2',
+  instagram: '#E1306C',
+};
+
 const SCRIBBLES: Record<string, string> = {
   twitter: '/social-x.svg',
   linkedin: '/social-linkedin.svg',
@@ -91,17 +98,21 @@ function MenuItem({ item, current }: { item: MenuLink; current: boolean }) {
 }
 
 function SocialItem({ link }: { link: SocialLink }) {
-  const { iconRef, style } = useIconHoverColor(link.image ?? link.id);
+  const { iconRef, style: measured } = useIconHoverColor(link.image ?? link.id);
+  const brand = !link.image ? BRAND_HOVER[link.id] : undefined;
+  const style = brand ? ({ '--hover-color': brand } as CSSProperties) : measured;
   return (
-    <a href={link.href} target="_blank" rel="noreferrer" style={style}>
-      <span
-        ref={iconRef}
-        className={`${styles.socialMark} ${link.id === 'linkedin' ? styles.socialMarkLarge : ''}`}
-        aria-hidden="true"
-      >
+    <a
+      href={link.href}
+      target="_blank"
+      rel="noreferrer"
+      style={style}
+      className={link.id === 'linkedin' ? styles.socialLinkLarge : undefined}
+    >
+      <span ref={iconRef} className={styles.socialMark} aria-hidden="true">
         <SocialMark link={link} />
       </span>
-      <span className={styles.weightStable} data-text={link.label}>{link.label}</span>
+      <span className={`${styles.socialLabel} ${styles.weightStable}`} data-text={link.label}>{link.label}</span>
     </a>
   );
 }

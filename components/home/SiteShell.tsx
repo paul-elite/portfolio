@@ -13,7 +13,19 @@ const interTight = Inter_Tight({
 const SOCIAL = [
   { id: 'twitter', label: 'X/Twitter' },
   { id: 'linkedin', label: 'LinkedIn' },
+  { id: 'instagram', label: 'Instagram' },
 ] as const;
+
+// A bare network homepage (the built-in placeholder) isn't a profile.
+function isProfileUrl(url: string | undefined) {
+  if (!url) return false;
+  try {
+    const { pathname } = new URL(url);
+    return pathname.replace(/\/+$/, '') !== '';
+  } catch {
+    return false;
+  }
+}
 
 type Props = {
   config: SiteConfig;
@@ -37,7 +49,10 @@ export default function SiteShell({ config, children }: Props) {
       icon: item.icon || undefined,
     })),
   ];
-  const social = SOCIAL.filter((s) => config.social[s.id]).map((s) => ({
+  const social = SOCIAL.filter((s) =>
+    // Instagram is new here: show it only once a real profile is saved in admin.
+    s.id === 'instagram' ? isProfileUrl(config.social.instagram) : !!config.social[s.id],
+  ).map((s) => ({
     id: s.id,
     label: s.label,
     href: config.social[s.id],
