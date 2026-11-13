@@ -5,7 +5,8 @@
   --page: #f7f7f7; /* 97% brightness */
   --surface: #fff;
   --border: #e4e4e7;
-  --ink: rgba(7, 6, 6, 0.9);
+  /* Two greys: ink for primary text (name, menu, socials), muted for secondary (bio, meta). */
+  --ink: #2a2a2a;
   --muted: #8d8d8d;
   --divider: rgba(0, 0, 0, 0.07);
 
@@ -32,7 +33,7 @@
 
 .shell a:focus-visible,
 .shell button:focus-visible {
-  outline: 2px solid rgba(7, 6, 6, 0.9);
+  outline: 2px solid var(--ink);
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -88,12 +89,12 @@
 
 .shell .menu a {
   text-decoration: none;
-  transition: opacity 150ms ease;
+  transition: opacity 150ms ease, color 150ms ease;
 }
 
-/* With a section open, the other items step back so the current one reads as selected. */
-.menu:has(.menuCurrent) a:not(.menuCurrent) {
-  opacity: 0.4;
+/* With a section open, the other items drop to the muted grey so the current one reads as selected. */
+.shell .menu:has(.menuCurrent) a:not(.menuCurrent) {
+  color: var(--muted);
 }
 
 .socials {
@@ -115,8 +116,9 @@
   .shell .socials a:hover {
     opacity: 0.55;
   }
-  .menu:has(.menuCurrent) a:not(.menuCurrent):hover {
-    opacity: 0.75;
+  .shell .menu:has(.menuCurrent) a:not(.menuCurrent):hover {
+    opacity: 1;
+    color: var(--ink);
   }
 }
 
@@ -315,7 +317,7 @@
   flex-direction: column;
   gap: 18px;
   margin-top: 20px;
-  color: rgba(7, 6, 6, 0.8);
+  color: var(--muted);
   font-size: 18px;
   line-height: 1.5;
   letter-spacing: 0.015em;
@@ -343,7 +345,7 @@
 }
 
 .infoDescription {
-  color: rgba(7, 6, 6, 0.7);
+  color: var(--muted);
   font-size: 15px;
   line-height: 1.45;
 }
