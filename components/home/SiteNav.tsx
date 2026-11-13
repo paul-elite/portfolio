@@ -1,7 +1,9 @@
 'use client';
 
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { iconColor } from '@/lib/icon-color';
 import type { PortfolioNavTarget } from '@/lib/content-model';
 import PortfolioNavigationIcon from '@/components/experience/PortfolioNavigationIcon';
 import styles from './shell.module.css';
@@ -47,15 +49,58 @@ function LobbyIcon({ className }: { className?: string }) {
 }
 
 // Hidden until hover/focus: the uploaded navigation icon, or the matching line icon.
-function MenuIcon({ item }: { item: MenuLink }) {
+function MenuIcon({ item, iconRef }: { item: MenuLink; iconRef?: React.Ref<HTMLSpanElement> }) {
   return (
-    <span className={styles.menuIcon} aria-hidden="true">
+    <span ref={iconRef} className={styles.menuIcon} aria-hidden="true">
       {item.target ? (
         <PortfolioNavigationIcon target={item.target} src={item.icon} className={styles.menuIconArt} imageFit="cover" />
       ) : (
         <LobbyIcon className={styles.menuIconArt} />
       )}
     </span>
+  );
+}
+
+// On hover/focus a link takes on its icon's most abundant colour (see lib/icon-color). Measured
+// once per icon after mount, so any icon uploaded later is picked up automatically.
+function useIconHoverColor(iconKey: string | undefined) {
+  const iconRef = useRef<HTMLSpanElement>(null);
+  const [color, setColor] = useState<string | null>(null);
+  useEffect(() => {
+    let live = true;
+    iconColor(iconRef.current).then((c) => {
+      if (live) setColor(c);
+    });
+    return () => {
+      live = false;
+    };
+  }, [iconKey]);
+  const style = color ? ({ '--hover-color': color } as CSSProperties) : undefined;
+  return { iconRef, style };
+}
+
+function MenuItem({ item, current }: { item: MenuLink; current: boolean }) {
+  const { iconRef, style } = useIconHoverColor(item.icon ?? item.id);
+  return (
+    <Link
+      href={item.href}
+      aria-current={current ? 'page' : undefined}
+      className={current ? styles.menuCurrent : undefined}
+      style={style}
+    >
+      <MenuIcon item={item} iconRef={iconRef} />
+      <span className={`${styles.menuLabel} ${styles.weightStable}`} data-text={item.label}>{item.label}</span>
+    </Link>
+  );
+}
+
+function SocialItem({ link }: { link: SocialLink }) {
+  const { iconRef, style } = useIconHoverColor(link.image ?? link.id);
+  return (
+    <a href={link.href} target="_blank" rel="noreferrer" style={style}>
+      <span ref={iconRef} className={styles.socialMark} aria-hidden="true"><SocialMark link={link} /></span>
+      <span className={styles.weightStable} data-text={link.label}>{link.label}</span>
+    </a>
   );
 }
 
@@ -108,14 +153,7 @@ export default function SiteNav({ name, bio, menu, social }: Props) {
               const current = isCurrent(pathname, item.href);
               return (
                 <li key={item.id}>
-                  <Link
-                    href={item.href}
-                    aria-current={current ? 'page' : undefined}
-                    className={current ? styles.menuCurrent : undefined}
-                  >
-                    <MenuIcon item={item} />
-                    <span className={`${styles.menuLabel} ${styles.weightStable}`} data-text={item.label}>{item.label}</span>
-                  </Link>
+                  <MenuItem item={item} current={current} />
                 </li>
               );
             })}
@@ -125,10 +163,7 @@ export default function SiteNav({ name, bio, menu, social }: Props) {
         {social.length > 0 && (
           <nav className={styles.socials} aria-label="Elsewhere">
             {social.map((s) => (
-              <a key={s.id} href={s.href} target="_blank" rel="noreferrer">
-                <span className={styles.socialMark} aria-hidden="true"><SocialMark link={s} /></span>
-                <span className={styles.weightStable} data-text={s.label}>{s.label}</span>
-              </a>
+              <SocialItem key={s.id} link={s} />
             ))}
           </nav>
         )}
