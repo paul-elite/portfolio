@@ -12,32 +12,28 @@ type NavLink = { id: string; label: string; href: string };
 type MenuLink = NavLink & { target?: PortfolioNavTarget; icon?: string };
 type SocialLink = NavLink & { image?: string };
 
-// Brand marks in their own colours, revealed on hover/focus like the menu icons.
-// An image uploaded for the network in the admin (socialImages) wins over these.
+// The hand-drawn scribble marks (public/social-*.svg), revealed on hover/focus like the menu
+// icons. They are used as a stencil filled with the link's current colour, so the scribble
+// darkens with its label. An image uploaded for the network in the admin (socialImages) wins.
+const SCRIBBLES: Record<string, string> = {
+  twitter: '/social-x.svg',
+  linkedin: '/social-linkedin.svg',
+  instagram: '/social-instagram.svg',
+};
+
 function SocialMark({ link }: { link: SocialLink }) {
   if (link.image) {
     // eslint-disable-next-line @next/next/no-img-element
     return <img className={styles.socialMarkArt} src={link.image} alt="" />;
   }
-  if (link.id === 'linkedin') {
-    return (
-      <svg className={styles.socialMarkArt} viewBox="0 0 24 24" aria-hidden="true">
-        <rect width="24" height="24" rx="5" fill="#0A66C2" />
-        <circle cx="7.1" cy="7.2" r="1.7" fill="#fff" />
-        <rect x="5.6" y="9.7" width="3" height="8.8" rx="0.4" fill="#fff" />
-        <path d="M10.9 9.7h2.9v1.3c.45-.8 1.5-1.5 3-1.5 3 0 3.6 1.95 3.6 4.5v4.5h-3v-4c0-.95-.02-2.2-1.4-2.2-1.4 0-1.6 1.05-1.6 2.13v4.07h-3z" fill="#fff" />
-      </svg>
-    );
-  }
-  if (link.id === 'twitter') {
-    return (
-      <svg className={styles.socialMarkArt} viewBox="0 0 24 24" aria-hidden="true">
-        <rect width="24" height="24" rx="5" fill="#000" />
-        <path d="M16.6 5.5h2.2l-4.8 5.5 5.6 7.5h-4.4l-3.5-4.5-4 4.5H5.5l5.1-5.9L5.2 5.5h4.5l3.1 4.1zm-.8 11.7h1.2L8.9 6.7H7.6z" fill="#fff" />
-      </svg>
-    );
-  }
-  return null;
+  const scribble = SCRIBBLES[link.id];
+  if (!scribble) return null;
+  return (
+    <span
+      className={`${styles.socialMarkArt} ${styles.scribble}`}
+      style={{ '--scribble': `url(${scribble})` } as CSSProperties}
+    />
+  );
 }
 
 function LobbyIcon({ className }: { className?: string }) {
@@ -98,7 +94,13 @@ function SocialItem({ link }: { link: SocialLink }) {
   const { iconRef, style } = useIconHoverColor(link.image ?? link.id);
   return (
     <a href={link.href} target="_blank" rel="noreferrer" style={style}>
-      <span ref={iconRef} className={styles.socialMark} aria-hidden="true"><SocialMark link={link} /></span>
+      <span
+        ref={iconRef}
+        className={`${styles.socialMark} ${link.id === 'linkedin' ? styles.socialMarkLarge : ''}`}
+        aria-hidden="true"
+      >
+        <SocialMark link={link} />
+      </span>
       <span className={styles.weightStable} data-text={link.label}>{link.label}</span>
     </a>
   );
