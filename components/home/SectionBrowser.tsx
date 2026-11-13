@@ -9,6 +9,10 @@ export type BrowserItem = {
   description?: string;
   /** Short value on the right of a list row, e.g. the year. */
   meta?: string;
+  /** Line under a book's title, e.g. the full date. */
+  subtitle?: string;
+  /** Cover details for the "books" layout. */
+  book?: { issue: string; letter: string; isNew?: boolean; tag?: { label: string; color?: string } };
   image?: string;
   href?: string;
   hrefLabel?: string;
@@ -17,7 +21,7 @@ export type BrowserItem = {
 
 type Props = {
   title: string;
-  layout: 'list' | 'grid';
+  layout: 'list' | 'grid' | 'books';
   items: BrowserItem[];
 };
 
@@ -73,6 +77,22 @@ export default function SectionBrowser({ title, layout, items }: Props) {
                   <button {...itemProps(item)} className={`${styles.row} ${item.id === pinnedId ? styles.rowActive : ''}`}>
                     <span className={styles.rowTitle}>{item.title}</span>
                     {item.meta && <span className={styles.rowMeta}>{item.meta}</span>}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {items.length > 0 && layout === 'books' && (
+            <ul className={styles.books} onPointerLeave={() => setHoverId(null)}>
+              {items.map((item, index) => (
+                <li key={item.id}>
+                  <button {...itemProps(item)} className={`${styles.book} ${item.id === pinnedId ? styles.rowActive : ''}`}>
+                    <BookCover item={item} index={index} />
+                    <span className={styles.bookLines}>
+                      <span className={styles.bookTitle}>{item.title}</span>
+                      {item.subtitle && <span className={styles.bookSub}>{item.subtitle}</span>}
+                    </span>
                   </button>
                 </li>
               ))}
@@ -141,5 +161,46 @@ export default function SectionBrowser({ title, layout, items }: Props) {
         </aside>
       )}
     </>
+  );
+}
+
+// Rule widths vary book to book so the covers don't read as copies.
+const RULES = [
+  ['100%', '74%', '88%'],
+  ['100%', '86%', '62%'],
+  ['100%', '68%', '80%'],
+];
+
+// A magazine-style cover, after the cohort dashboard's session cards ("How Humans Read"):
+// an issue pill, a serif letter specimen over three hairline rules.
+function BookCover({ item, index }: { item: BrowserItem; index: number }) {
+  const book = item.book ?? { issue: '', letter: item.title.trim()[0]?.toUpperCase() || 'A' };
+  const rules = RULES[index % RULES.length];
+  return (
+    <span className={styles.bookCover}>
+      <span className={styles.bookTop}>
+        {book.isNew ? <span className={styles.bookBadge}>New</span> : <span />}
+        {book.issue && <span className={styles.bookIssue}>{book.issue}</span>}
+      </span>
+      <span className={styles.bookArt} aria-hidden="true">
+        <span className={styles.bookLetter}>
+          {book.letter}
+          {book.letter.toLowerCase()}
+        </span>
+        <span className={styles.bookRules}>
+          {rules.map((width, i) => (
+            <i key={i} style={{ width }} />
+          ))}
+        </span>
+      </span>
+      {book.tag && (
+        <span className={styles.bookTags}>
+          <span className={styles.bookTag}>
+            <i style={book.tag.color ? { background: book.tag.color } : undefined} />
+            {book.tag.label}
+          </span>
+        </span>
+      )}
+    </span>
   );
 }
