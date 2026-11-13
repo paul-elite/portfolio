@@ -98,20 +98,20 @@
 .menu ul {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/* Menu: 24px regular. Every page has a current item (the landing page is "Lobby").
+/* Menu: 18px medium. Every page has a current item (the landing page is "Lobby").
    States: rest = muted grey · hover = ink · pressed = dimmed · current = ink (no underline;
    the darker text alone marks it) · keyboard focus = the shell's ring. */
 .menu {
-  font-size: 24px;
-  font-weight: 400;
-  line-height: 1.2;
-  letter-spacing: 0.03em;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
 }
 
 .shell .menu a {
