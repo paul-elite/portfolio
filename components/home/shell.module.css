@@ -124,26 +124,27 @@
 
 /* ---------- middle: content pane ---------- */
 
+/* The pane's right padding mirrors the nav's width, so whatever sits centred in it is centred
+   on the viewport, not just the pane. */
 .pane {
   grid-column: 2;
   box-sizing: border-box;
   min-height: 0;
   overflow-y: auto;
-  padding: clamp(28px, 2.6vw, 44px) clamp(24px, 3vw, 56px) 64px;
+  padding: clamp(28px, 2.6vw, 44px) calc(var(--side) + clamp(24px, 3vw, 56px)) 64px clamp(24px, 3vw, 56px);
 }
 
-/* Centred on the viewport, not the pane: the extra right padding mirrors the nav's width. */
 .paneCentered {
   display: grid;
   place-items: center;
   padding-block: clamp(28px, 2.6vw, 44px);
-  padding-right: calc(var(--side) + clamp(24px, 3vw, 56px));
 }
 
-/* Left-aligned and kept clear of the right edge, so the info sidebar slides into empty space
-   instead of covering the list. */
+/* Page content: 600px wide, centred on the viewport (see .pane). */
 .section {
-  max-width: min(760px, calc(100% - var(--side) + clamp(24px, 3vw, 56px)));
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
   font-size: 17px;
 }
 
@@ -407,7 +408,6 @@
 
   .paneCentered {
     min-height: 70svh;
-    padding-right: 24px;
   }
 
   .info {
@@ -416,7 +416,7 @@
   }
 
   .section {
-    max-width: none;
+    max-width: 600px;
   }
 
   .bio {
