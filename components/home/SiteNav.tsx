@@ -2,14 +2,38 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import type { PortfolioNavTarget } from '@/lib/content-model';
+import PortfolioNavigationIcon from '@/components/experience/PortfolioNavigationIcon';
 import styles from './shell.module.css';
 
 type NavLink = { id: string; label: string; href: string };
+type MenuLink = NavLink & { target?: PortfolioNavTarget; icon?: string };
+
+function LobbyIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 10l7-6 7 6v7.5a.5.5 0 0 1-.5.5H13v-5H9v5H4.5a.5.5 0 0 1-.5-.5z" />
+    </svg>
+  );
+}
+
+// Hidden until hover/focus: the uploaded navigation icon, or the matching line icon.
+function MenuIcon({ item }: { item: MenuLink }) {
+  return (
+    <span className={styles.menuIcon} aria-hidden="true">
+      {item.target ? (
+        <PortfolioNavigationIcon target={item.target} src={item.icon} className={styles.menuIconArt} imageFit="cover" />
+      ) : (
+        <LobbyIcon className={styles.menuIconArt} />
+      )}
+    </span>
+  );
+}
 
 type Props = {
   name: string;
   bio: string[];
-  menu: NavLink[];
+  menu: MenuLink[];
   social: NavLink[];
 };
 
@@ -60,7 +84,8 @@ export default function SiteNav({ name, bio, menu, social }: Props) {
                     aria-current={current ? 'page' : undefined}
                     className={current ? styles.menuCurrent : undefined}
                   >
-                    {item.label}
+                    <MenuIcon item={item} />
+                    <span className={styles.menuLabel}>{item.label}</span>
                   </Link>
                 </li>
               );

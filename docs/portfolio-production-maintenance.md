@@ -17,7 +17,7 @@ If the Vercel CLI times out after the build, check the deployment by ID before r
 
 ## Current UI Rules
 
-- Main navigation labels are text-only. Do not place icons beside the labels.
+- Main navigation labels are text-only at rest. On hover/keyboard focus a label slides 36px right and its 24px navigation icon (uploaded, or the fallback line icon; Lobby uses a house icon) fades into the gap. Do not show icons beside labels at rest.
 - The active navigation icon appears in the avatar-roll circle only.
 - The active navigation icon circle matches the settings icon size: `h-10 w-10`, rounded full, overflow hidden.
 - Uploaded active navigation icons should fill/crop the circle with cover behavior.

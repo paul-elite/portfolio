@@ -33,6 +33,8 @@ export default function SiteShell({ config, children }: Props) {
       id: item.id,
       label: item.label,
       href: sectionHref(item.target),
+      target: item.target,
+      icon: item.icon || undefined,
     })),
   ];
   const social = SOCIAL.filter((s) => config.social[s.id]).map((s) => ({

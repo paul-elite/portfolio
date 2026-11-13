@@ -4,6 +4,14 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import styles from '@/app/home.module.css';
 
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
+/** The reel plays a little faster than it was recorded. */
+const PLAYBACK_RATE = 1.33;
+
+// Browsers reset playbackRate whenever a source loads, so set it (and the default) each time.
+function applyRate(video: HTMLVideoElement) {
+  video.defaultPlaybackRate = PLAYBACK_RATE;
+  video.playbackRate = PLAYBACK_RATE;
+}
 
 function subscribeToReducedMotion(onChange: () => void) {
   const query = window.matchMedia(REDUCED_MOTION);
@@ -39,6 +47,7 @@ export default function PhoneReel({ label }: { label: string }) {
     if (!video) return;
 
     video.muted = true;
+    applyRate(video);
 
     if (reduceMotion) {
       video.pause();
@@ -101,6 +110,7 @@ export default function PhoneReel({ label }: { label: string }) {
           onLoadedData={() => setReady(true)}
           onLoadedMetadata={(event) => {
             const video = event.currentTarget;
+            applyRate(video);
             setLandscape(video.videoWidth > video.videoHeight * 1.15);
           }}
           onVolumeChange={(event) => setMuted(event.currentTarget.muted)}

@@ -134,6 +134,60 @@
   font-weight: 500;
 }
 
+/* Hover / keyboard focus: the label glides 36px right and a 24px icon fades into the gap.
+   At rest the labels stay text-only. */
+.shell .menu a {
+  position: relative;
+}
+
+.menuLabel {
+  display: inline-block;
+  transition: transform var(--fast) var(--ease);
+}
+
+.menuIcon {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 24px;
+  height: 24px;
+  overflow: hidden;
+  border-radius: 6px;
+  opacity: 0;
+  transform: translate(-4px, -50%) scale(0.85);
+  transition: opacity var(--fast) var(--ease), transform var(--fast) var(--ease);
+  pointer-events: none;
+}
+
+.menuIconArt {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+img.menuIconArt {
+  object-fit: cover;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .shell .menu a:hover .menuLabel {
+    transform: translateX(36px);
+  }
+  .shell .menu a:hover .menuIcon {
+    opacity: 1;
+    transform: translate(0, -50%) scale(1);
+  }
+}
+
+.shell .menu a:focus-visible .menuLabel {
+  transform: translateX(36px);
+}
+
+.shell .menu a:focus-visible .menuIcon {
+  opacity: 1;
+  transform: translate(0, -50%) scale(1);
+}
+
 .socials {
   display: flex;
   flex-wrap: wrap;
@@ -486,6 +540,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .menuLabel,
+  .menuIcon {
+    transition: none;
+  }
   .bioFold,
   .bioFolded {
     transition: none;
