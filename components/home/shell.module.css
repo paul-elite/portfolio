@@ -376,181 +376,134 @@ img.menuIconArt {
   }
 }
 
-/* writings: a three-up shelf of magazine-style covers, after the cohort dashboard's session
-   cards ("How Humans Read"). */
+/* writings: three books per row, after the Figma book component (node 1616:304208, 66.29 × 80).
+   Inside the cover every size is in cqw (percent of the cover's width), converted from the
+   Figma frame, so the proportions hold at any column width. */
 .books {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 28px 16px;
+  gap: 32px 24px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .book {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: block;
   width: 100%;
+  container-type: inline-size; /* cqw below = % of the book's width */
   margin: 0;
   padding: 0;
   border: 0;
   background: none;
-  color: inherit;
-  font: inherit;
-  text-align: left;
   cursor: pointer;
   -webkit-touch-callout: none;
-  transition: opacity var(--fast) var(--ease);
+  transition: opacity var(--fast) var(--ease), transform var(--fast) var(--ease);
 }
 
 .bookCover {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  box-sizing: border-box;
+  display: block;
   width: 100%;
-  aspect-ratio: 0.87;
-  padding: 12px;
-  border: 1px solid #e2e2ea;
-  border-radius: 12px;
-  background: #fff;
-  container-type: inline-size;
-  transition: border-color var(--fast) var(--ease), box-shadow var(--fast) var(--ease);
+  aspect-ratio: 66.286 / 80;
+  overflow: hidden;
+  border-radius: 1.22cqw; /* 0.808 */
+  background: linear-gradient(to bottom, #f6f6f7, #fff 50%, #edeff0);
+  box-shadow: 0 0.294cqw 0.883cqw rgba(0, 0, 0, 0.66); /* 0 0.195 0.585 */
+  transition: box-shadow var(--fast) var(--ease);
 }
 
-.bookTop {
+/* Two hairlines near the left edge read as the spine's hinge. */
+.bookSpine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3.45cqw; /* 2.286 */
+  width: 1px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.bookSpineInner {
+  left: 5.75cqw; /* 3.81 */
+}
+
+.bookFace {
+  position: absolute;
+  top: 15.8cqw; /* 10.476 */
+  left: 20.3cqw; /* 13.456 */
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  min-height: 22px;
-}
-
-.bookIssue,
-.bookBadge {
-  display: inline-flex;
-  align-items: center;
-  height: 22px;
-  padding: 0 9px;
-  border-radius: 999px;
-  font-size: 11px;
-  white-space: nowrap;
-}
-
-.bookIssue {
-  border: 1px solid #e2e2ea;
-  background: #fff;
-  color: var(--muted);
-}
-
-.bookBadge {
-  background: #eaf2ff;
-  color: #0a6cff;
-  font-weight: 500;
-}
-
-.bookArt {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 5cqw;
-  color: var(--ink);
-}
-
-.bookLetter {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 26cqw;
-  line-height: 1;
-  letter-spacing: -0.03em;
-}
-
-.bookRules {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 66%;
-}
-
-.bookRules i {
-  display: block;
-  height: 2px;
-  border-radius: 2px;
-  background: #f1f1f6;
-}
-
-.bookRules i:first-child {
-  background: var(--ink);
-  opacity: 0.7;
-}
-
-.bookTags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 12px;
-}
-
-.bookTag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.bookTag i {
-  flex: none;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--muted);
-}
-
-.bookLines {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  width: 60.34cqw; /* 40 */
+  height: 91.95cqw; /* 60.952 */
 }
 
 .bookTitle {
-  font-size: 15px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  max-width: 100%;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  color: #595f65;
+  font-size: 13.25cqw; /* 8.78 */
   font-weight: 500;
+  line-height: 1;
   letter-spacing: -0.01em;
-  line-height: 1.3;
-  color: var(--ink);
+  text-align: center;
+  text-wrap: balance;
+  text-box: trim-both cap alphabetic;
 }
 
-.bookSub {
-  font-size: 13px;
-  color: var(--muted);
+/* Longer titles than the design's two-word example step down a size and may take a 4th line. */
+.bookTitleLong {
+  -webkit-line-clamp: 4;
+  font-size: 10.5cqw;
 }
 
-.book.rowActive .bookCover {
-  border-color: #cfd0dc;
-  box-shadow: 0 8px 24px rgba(25, 26, 44, 0.07);
+.bookArt {
+  flex: none;
+  display: block;
+  width: 48.26cqw; /* 31.99 */
+  height: 48.26cqw;
+  object-fit: contain;
+}
+
+.bookMonogram {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  border: 1px solid #dfe1e4;
+  border-radius: 50%;
+  color: #a3a8ae;
+  font-size: 18cqw;
+  line-height: 1;
 }
 
 .books:has(.rowActive) .book:not(.rowActive) {
   opacity: 0.4;
 }
 
+.book.rowActive {
+  transform: translateY(-3px);
+}
+
+.book.rowActive .bookCover {
+  box-shadow: 0 0.294cqw 0.883cqw rgba(0, 0, 0, 0.5), 0 10px 20px rgba(25, 26, 44, 0.08);
+}
+
 @media (hover: hover) and (pointer: fine) {
+  .book:hover {
+    transform: translateY(-3px);
+  }
   .book:hover .bookCover {
-    border-color: #cfd0dc;
-    box-shadow: 0 8px 24px rgba(25, 26, 44, 0.07);
+    box-shadow: 0 0.294cqw 0.883cqw rgba(0, 0, 0, 0.5), 0 10px 20px rgba(25, 26, 44, 0.08);
   }
 }
 
 @media (max-width: 520px) {
   .books {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px 14px;
   }
 }

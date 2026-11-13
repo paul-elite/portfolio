@@ -20,13 +20,11 @@ function formatDate(value?: string) {
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 }
 
-const NEW_FOR_DAYS = 45;
-
 function props(entries: [string, string | undefined][]) {
   return entries.filter((e): e is [string, string] => !!e[1]).map(([label, value]) => ({ label, value }));
 }
 
-function itemsFor(target: PortfolioNavTarget, content: PortfolioContent, accent?: string): BrowserItem[] {
+function itemsFor(target: PortfolioNavTarget, content: PortfolioContent): BrowserItem[] {
   switch (target) {
     case 'projects':
       return content.projects.map((p) => ({
@@ -40,23 +38,13 @@ function itemsFor(target: PortfolioNavTarget, content: PortfolioContent, accent?
         properties: props([['Year', p.year], ['Role', p.role], ['Tags', p.tags?.join(', ')]]),
       }));
     case 'writings': {
-      // Newest first; issue numbers count up from the oldest piece, like a magazine run.
       const sorted = [...content.writings].sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''));
-      const newest = sorted[0];
-      const newestIsRecent =
-        !!newest?.date && Date.now() - new Date(newest.date).getTime() < NEW_FOR_DAYS * 864e5;
-      return sorted.map((w, index) => ({
+      return sorted.map((w) => ({
         id: w.id,
         title: w.title,
         description: w.description,
         meta: w.date ? String(new Date(w.date).getUTCFullYear()) : undefined,
         subtitle: formatDate(w.date),
-        book: {
-          issue: `No. ${String(sorted.length - index).padStart(2, '0')}`,
-          letter: (w.title.trim()[0] || 'A').toUpperCase(),
-          isNew: newestIsRecent && w === newest,
-          tag: w.date ? { label: String(new Date(w.date).getUTCFullYear()), color: accent } : undefined,
-        },
         image: w.cover || w.avatar,
         href: w.link,
         hrefLabel: 'Read',
@@ -99,7 +87,7 @@ export default async function SectionPage({ target }: { target: PortfolioNavTarg
     <SectionBrowser
       title={item.label}
       layout={target === 'illustration' ? 'grid' : target === 'writings' ? 'books' : 'list'}
-      items={itemsFor(target, content, item.accentColor)}
+      items={itemsFor(target, content)}
     />
   );
 }

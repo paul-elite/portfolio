@@ -1,7 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Inter } from 'next/font/google';
 import styles from './shell.module.css';
+
+// The book covers set their titles in Inter Medium, as in the Figma book component.
+const bookFont = Inter({ subsets: ['latin'], weight: ['500'], display: 'swap' });
 
 export type BrowserItem = {
   id: string;
@@ -9,10 +13,8 @@ export type BrowserItem = {
   description?: string;
   /** Short value on the right of a list row, e.g. the year. */
   meta?: string;
-  /** Line under a book's title, e.g. the full date. */
+  /** Extra context for a book's accessible name, e.g. the full date. */
   subtitle?: string;
-  /** Cover details for the "books" layout. */
-  book?: { issue: string; letter: string; isNew?: boolean; tag?: { label: string; color?: string } };
   image?: string;
   href?: string;
   hrefLabel?: string;
@@ -85,14 +87,14 @@ export default function SectionBrowser({ title, layout, items }: Props) {
 
           {items.length > 0 && layout === 'books' && (
             <ul className={styles.books} onPointerLeave={() => setHoverId(null)}>
-              {items.map((item, index) => (
+              {items.map((item) => (
                 <li key={item.id}>
-                  <button {...itemProps(item)} className={`${styles.book} ${item.id === pinnedId ? styles.rowActive : ''}`}>
-                    <BookCover item={item} index={index} />
-                    <span className={styles.bookLines}>
-                      <span className={styles.bookTitle}>{item.title}</span>
-                      {item.subtitle && <span className={styles.bookSub}>{item.subtitle}</span>}
-                    </span>
+                  <button
+                    {...itemProps(item)}
+                    aria-label={item.subtitle ? `${item.title}, ${item.subtitle}` : item.title}
+                    className={`${styles.book} ${item.id === pinnedId ? styles.rowActive : ''}`}
+                  >
+                    <BookCover item={item} />
                   </button>
                 </li>
               ))}
@@ -164,43 +166,27 @@ export default function SectionBrowser({ title, layout, items }: Props) {
   );
 }
 
-// Rule widths vary book to book so the covers don't read as copies.
-const RULES = [
-  ['100%', '74%', '88%'],
-  ['100%', '86%', '62%'],
-  ['100%', '68%', '80%'],
-];
-
-// A magazine-style cover, after the cohort dashboard's session cards ("How Humans Read"):
-// an issue pill, a serif letter specimen over three hairline rules.
-function BookCover({ item, index }: { item: BrowserItem; index: number }) {
-  const book = item.book ?? { issue: '', letter: item.title.trim()[0]?.toUpperCase() || 'A' };
-  const rules = RULES[index % RULES.length];
+// A small printed book, after the Figma book component ("Thinking in Colors", node 1616:304208):
+// a soft white gradient cover with two spine hairlines, the title set small at the top and an
+// illustration below. Every measurement is a fraction of the cover's width (cqw), so the book
+// keeps the design's proportions at any size. The illustration is the writing's own image;
+// writings without one get a quiet monogram.
+function BookCover({ item }: { item: BrowserItem }) {
   return (
-    <span className={styles.bookCover}>
-      <span className={styles.bookTop}>
-        {book.isNew ? <span className={styles.bookBadge}>New</span> : <span />}
-        {book.issue && <span className={styles.bookIssue}>{book.issue}</span>}
-      </span>
-      <span className={styles.bookArt} aria-hidden="true">
-        <span className={styles.bookLetter}>
-          {book.letter}
-          {book.letter.toLowerCase()}
-        </span>
-        <span className={styles.bookRules}>
-          {rules.map((width, i) => (
-            <i key={i} style={{ width }} />
-          ))}
-        </span>
-      </span>
-      {book.tag && (
-        <span className={styles.bookTags}>
-          <span className={styles.bookTag}>
-            <i style={book.tag.color ? { background: book.tag.color } : undefined} />
-            {book.tag.label}
+    <span className={`${styles.bookCover} ${bookFont.className}`}>
+      <span className={styles.bookSpine} aria-hidden="true" />
+      <span className={`${styles.bookSpine} ${styles.bookSpineInner}`} aria-hidden="true" />
+      <span className={styles.bookFace}>
+        <span className={`${styles.bookTitle} ${item.title.length > 20 ? styles.bookTitleLong : ''}`}>{item.title}</span>
+        {item.image ? (
+          /* eslint-disable-next-line @next/next/no-img-element -- admin uploads can live on any host */
+          <img className={styles.bookArt} src={item.image} alt="" />
+        ) : (
+          <span className={`${styles.bookArt} ${styles.bookMonogram}`} aria-hidden="true">
+            {item.title.trim()[0]?.toUpperCase()}
           </span>
-        </span>
-      )}
+        )}
+      </span>
     </span>
   );
 }
