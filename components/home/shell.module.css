@@ -1,7 +1,7 @@
 /* ---------- three-column shell: nav | pane | info ---------- */
 
 .shell {
-  --side: clamp(240px, 20vw, 360px);
+  --side: clamp(264px, 22vw, 400px);
   --page: #f7f7f7; /* 97% brightness */
   --surface: #fff;
   --border: #e4e4e7;
@@ -81,6 +81,7 @@
 
 .menu {
   font-size: 24px;
+  font-weight: 400;
   line-height: 1.2;
   letter-spacing: 0.015em;
 }
@@ -312,11 +313,11 @@
 .bio {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-top: 16px;
+  gap: 18px;
+  margin-top: 20px;
   color: rgba(7, 6, 6, 0.8);
   font-size: 18px;
-  line-height: 1.2;
+  line-height: 1.5;
   letter-spacing: 0.015em;
 }
 
@@ -388,10 +389,6 @@
     padding: 28px 24px;
     border-right: 0;
     border-bottom: 1px solid var(--border);
-  }
-
-  .menu {
-    font-size: 20px;
   }
 
   .pane {
