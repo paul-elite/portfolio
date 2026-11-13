@@ -19,27 +19,37 @@ type Props = {
   config: SiteConfig;
   /** The section being viewed; leave unset on the home page. */
   active?: PortfolioNavTarget;
-  /** The middle pane and, when there is something to show, the right info sidebar. */
+  /** The content pane, plus an info sidebar when the page has one open. */
   children: React.ReactNode;
 };
 
-// Three columns on desktop: the main navigation always on the left, the page's content in the
-// middle, and an info/properties sidebar on the right that pages add only when they need it.
+// The main navigation is always on the left (with the bio on the home page) and the page's content
+// fills the rest. Pages that need it slide an info/properties sidebar in from the right on demand.
 export default function SiteShell({ config, active, children }: Props) {
   const name = config.name || 'Paul Elite';
   const social = SOCIAL.filter((s) => config.social[s.id]);
   const menu = enabledNavigationItems(config);
+  const paragraphs = active ? [] : config.bio.split(/\n\s*\n/).filter(Boolean);
 
   return (
     <main className={`${interTight.className} ${styles.shell}`}>
       <header className={styles.nav}>
-        {active ? (
-          <p className={styles.name}>
-            <Link href="/" className={styles.nameLink}>{name}</Link>
-          </p>
-        ) : (
-          <h1 className={styles.name}>{name}</h1>
-        )}
+        <div>
+          {active ? (
+            <p className={styles.name}>
+              <Link href="/" className={styles.nameLink}>{name}</Link>
+            </p>
+          ) : (
+            <h1 className={styles.name}>{name}</h1>
+          )}
+          {paragraphs.length > 0 && (
+            <div className={styles.bio}>
+              {paragraphs.map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
+            </div>
+          )}
+        </div>
 
         <div className={styles.navBottom}>
           {menu.length > 0 && (

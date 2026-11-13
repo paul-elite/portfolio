@@ -10,7 +10,7 @@
   --divider: rgba(0, 0, 0, 0.07);
 
   display: grid;
-  grid-template-columns: var(--side) minmax(0, 1fr) var(--side);
+  grid-template-columns: var(--side) minmax(0, 1fr);
   height: 100svh;
   overflow: hidden;
   background: var(--page);
@@ -134,9 +134,10 @@
   place-items: center;
 }
 
+/* Left-aligned and kept clear of the right edge, so the info sidebar slides into empty space
+   instead of covering the list. */
 .section {
-  max-width: 760px;
-  margin: 0 auto;
+  max-width: min(760px, calc(100% - var(--side) + clamp(24px, 3vw, 56px)));
   font-size: 17px;
 }
 
@@ -247,10 +248,14 @@
   }
 }
 
-/* ---------- right: info & properties ---------- */
+/* ---------- right: info & properties, only when needed ---------- */
 
+/* It slides in over the pane, so showing or hiding it never reflows the content. */
 .info {
-  grid-column: 3;
+  position: fixed;
+  inset: 0 0 0 auto;
+  z-index: 10;
+  width: var(--side);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -305,6 +310,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  margin-top: 16px;
   color: rgba(7, 6, 6, 0.8);
   font-size: 24px;
   line-height: 1.2;
@@ -400,12 +406,12 @@
   }
 
   .info {
-    order: 1;
-    overflow: visible;
+    width: auto;
     padding: 24px;
-    border-left: 0;
-    border-bottom: 1px solid var(--border);
-    animation: none;
+  }
+
+  .section {
+    max-width: none;
   }
 
   .bio {

@@ -9,7 +9,6 @@ export const revalidate = 60;
 export default async function Home() {
   const { config } = await getHomeData();
   const label = `${config.name || 'Paul Elite'} showreel`;
-  const paragraphs = config.bio.split(/\n\s*\n/).filter(Boolean);
 
   return (
     <SiteShell config={config}>
@@ -20,17 +19,6 @@ export default async function Home() {
           </div>
         </div>
       </section>
-
-      {paragraphs.length > 0 && (
-        <aside className={shell.info} aria-label="About">
-          <div className={shell.infoHeader}>About</div>
-          <div className={shell.bio}>
-            {paragraphs.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-          </div>
-        </aside>
-      )}
     </SiteShell>
   );
 }
