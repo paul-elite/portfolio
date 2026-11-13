@@ -41,6 +41,7 @@ export default function SiteShell({ config, children }: Props) {
     id: s.id,
     label: s.label,
     href: config.social[s.id],
+    image: config.socialImages?.[s.id] || undefined,
   }));
   const bio = config.bio.split(/\n\s*\n/).filter(Boolean);
 
