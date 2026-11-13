@@ -4,3 +4,8 @@ html, body {
   background: #fff;
   color: #000;
 }
+
+/* Balance every paragraph's line lengths so no line is left with a lone word. */
+p {
+  text-wrap: balance;
+}

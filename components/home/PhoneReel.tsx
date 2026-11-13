@@ -26,8 +26,35 @@ export default function PhoneReel({ label }: { label: string }) {
     () => false,
   );
 
+  // Start the reel once the component mounts. The server-rendered <video> can
+  // load before hydration, so its loadeddata/playing events may already have
+  // fired; read the element's state directly instead of waiting for them.
+  // React also doesn't reliably emit the `muted` attribute, and browsers only
+  // autoplay muted video, so set the property explicitly before calling play().
   useEffect(() => {
-    if (reduceMotion) videoRef.current?.pause();
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = true;
+
+    if (reduceMotion) {
+      video.pause();
+    } else {
+      // play() resolves at once if the reel is already running, and plays it
+      // if autoplay was blocked or never kicked in.
+      video.play().then(() => setPlaying(true)).catch(() => {});
+    }
+
+    // Catch up on anything that happened before hydration.
+    let cancelled = false;
+    Promise.resolve().then(() => {
+      if (cancelled) return;
+      if (video.error) setFailed(true);
+      else if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) setReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [reduceMotion]);
 
   const toggle = () => {
