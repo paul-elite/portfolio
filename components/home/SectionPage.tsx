@@ -1,19 +1,79 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import type { PortfolioNavTarget } from '@/lib/content-model';
+import type { PortfolioContent, PortfolioNavTarget } from '@/lib/content-model';
 import { getHomeData, getSiteConfig } from '@/lib/content-service';
 import { enabledNavigationItems } from '@/lib/site-navigation';
+import { ILLUSTRATION_CATEGORIES } from '@/lib/portfolio-options';
 import SiteShell from './SiteShell';
-import WritingList from './WritingList';
-import styles from '@/app/home.module.css';
-
-type Row = { id: string; title: string; description?: string; meta?: string; href?: string };
+import SectionBrowser, { type BrowserItem } from './SectionBrowser';
 
 export async function sectionMetadata(target: PortfolioNavTarget): Promise<Metadata> {
   const config = await getSiteConfig();
   const item = enabledNavigationItems(config).find((i) => i.target === target);
   const name = config.name || 'Paul Elite';
   return { title: item ? `${item.label} - ${name}` : name };
+}
+
+function formatDate(value?: string) {
+  if (!value) return undefined;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+}
+
+function props(entries: [string, string | undefined][]) {
+  return entries.filter((e): e is [string, string] => !!e[1]).map(([label, value]) => ({ label, value }));
+}
+
+function itemsFor(target: PortfolioNavTarget, content: PortfolioContent): BrowserItem[] {
+  switch (target) {
+    case 'projects':
+      return content.projects.map((p) => ({
+        id: p.id,
+        title: p.title,
+        description: p.description,
+        meta: p.year,
+        image: p.avatar || p.preview || p.previewImages?.[0],
+        href: p.link,
+        hrefLabel: 'Visit project',
+        properties: props([['Year', p.year], ['Role', p.role], ['Tags', p.tags?.join(', ')]]),
+      }));
+    case 'writings':
+      return [...content.writings]
+        .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))
+        .map((w) => ({
+          id: w.id,
+          title: w.title,
+          description: w.description,
+          meta: w.date ? String(new Date(w.date).getUTCFullYear()) : undefined,
+          image: w.cover || w.avatar,
+          href: w.link,
+          hrefLabel: 'Read',
+          properties: props([['Published', formatDate(w.date)]]),
+        }));
+    case 'interaction':
+      return content.interactions.map((i) => ({
+        id: i.id,
+        title: i.title,
+        description: i.description,
+        image: i.avatar,
+        href: i.link,
+        hrefLabel: 'Open',
+        properties: [],
+      }));
+    case 'illustration':
+      return content.illustrations
+        .filter((i) => i.thumbnail)
+        .map((i) => ({
+          id: i.id,
+          title: i.title,
+          description: i.description,
+          image: i.thumbnail,
+          href: i.youtubeUrl,
+          hrefLabel: 'Watch animation',
+          properties: props([['Category', ILLUSTRATION_CATEGORIES.find((c) => c.key === i.category)?.label]]),
+        }));
+  }
 }
 
 // One page per menu item. A section switched off in admin returns a 404.
@@ -23,71 +83,12 @@ export default async function SectionPage({ target }: { target: PortfolioNavTarg
   if (!item) notFound();
 
   return (
-    <SiteShell config={config} active={target} panel="content" panelLabel={item.label}>
-      <div className={styles.section}>
-        <h1 className={styles.sectionTitle}>{item.label}</h1>
-        {target === 'writings' && (content.writings.length > 0 ? <WritingList items={content.writings} /> : <Empty label={item.label} />)}
-        {target === 'projects' && (
-          <Rows
-            label={item.label}
-            rows={content.projects.map((p) => ({ id: p.id, title: p.title, description: p.description, meta: p.year, href: p.link }))}
-          />
-        )}
-        {target === 'interaction' && (
-          <Rows
-            label={item.label}
-            rows={content.interactions.map((i) => ({ id: i.id, title: i.title, description: i.description, href: i.link }))}
-          />
-        )}
-        {target === 'illustration' && <Gallery label={item.label} items={content.illustrations} />}
-      </div>
+    <SiteShell config={config} active={target}>
+      <SectionBrowser
+        title={item.label}
+        layout={target === 'illustration' ? 'grid' : 'list'}
+        items={itemsFor(target, content)}
+      />
     </SiteShell>
-  );
-}
-
-function Empty({ label }: { label: string }) {
-  return <p className={styles.sectionEmpty}>{label} will appear here soon.</p>;
-}
-
-function Rows({ rows, label }: { rows: Row[]; label: string }) {
-  if (rows.length === 0) return <Empty label={label} />;
-  return (
-    <ul className={styles.rows}>
-      {rows.map((row) => {
-        const inner = (
-          <>
-            <span className={styles.rowText}>
-              <span className={styles.rowTitle}>{row.title}</span>
-              {row.description && <span className={styles.rowDescription}>{row.description}</span>}
-            </span>
-            {row.meta && <span className={styles.rowMeta}>{row.meta}</span>}
-          </>
-        );
-        return (
-          <li key={row.id} className={styles.row}>
-            {row.href ? <a href={row.href} target="_blank" rel="noreferrer">{inner}</a> : <div>{inner}</div>}
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
-
-type GalleryItem = { id: string; title: string; thumbnail?: string; youtubeUrl?: string };
-
-function Gallery({ items, label }: { items: GalleryItem[]; label: string }) {
-  const shown = items.filter((i) => i.thumbnail);
-  if (shown.length === 0) return <Empty label={label} />;
-  return (
-    <ul className={styles.gallery}>
-      {shown.map((item) => (
-        <li key={item.id}>
-          <a href={item.youtubeUrl || item.thumbnail} target="_blank" rel="noreferrer" aria-label={item.title}>
-            {/* eslint-disable-next-line @next/next/no-img-element -- admin uploads can live on any host */}
-            <img src={item.thumbnail} alt={item.title} loading="lazy" />
-          </a>
-        </li>
-      ))}
-    </ul>
   );
 }
