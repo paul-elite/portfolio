@@ -28,7 +28,13 @@ type Props = {
 export default function SiteShell({ config, active, children }: Props) {
   const name = config.name || 'Paul Elite';
   const social = SOCIAL.filter((s) => config.social[s.id]);
-  const menu = enabledNavigationItems(config);
+  // The landing page is a menu item too ("Lobby"), so every page has a current item.
+  const menu = [
+    { id: 'lobby', label: 'Lobby', href: '/', current: !active },
+    ...enabledNavigationItems(config).map((item) => ({
+      id: item.id, label: item.label, href: sectionHref(item.target), current: item.target === active,
+    })),
+  ];
   const paragraphs = active ? [] : config.bio.split(/\n\s*\n/).filter(Boolean);
 
   return (
@@ -52,26 +58,21 @@ export default function SiteShell({ config, active, children }: Props) {
         </div>
 
         <div className={styles.navBottom}>
-          {menu.length > 0 && (
-            <nav className={styles.menu} aria-label="Sections">
-              <ul>
-                {menu.map((item) => {
-                  const current = item.target === active;
-                  return (
-                    <li key={item.id}>
-                      <Link
-                        href={sectionHref(item.target)}
-                        aria-current={current ? 'page' : undefined}
-                        className={current ? styles.menuCurrent : undefined}
-                      >
-                        {item.label}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
-          )}
+          <nav className={styles.menu} aria-label="Sections">
+            <ul>
+              {menu.map((item) => (
+                <li key={item.id}>
+                  <Link
+                    href={item.href}
+                    aria-current={item.current ? 'page' : undefined}
+                    className={item.current ? styles.menuCurrent : undefined}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
           {social.length > 0 && (
             <nav className={styles.socials} aria-label="Elsewhere">
