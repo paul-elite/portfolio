@@ -732,10 +732,15 @@ img.socialMarkArt {
 
 /* ---------- mobile: stacked, info as a bottom sheet ---------- */
 
-/* The drawer toggle and backdrop exist only on phones. */
+/* The drawer toggle, its backdrop and the Lobby's own intro exist only on phones. */
 .drawerToggle,
-.drawerBackdrop {
+.drawerBackdrop,
+.lobbyIntro {
   display: none;
+}
+
+.lobbyReel {
+  display: contents;
 }
 
 /* ---------- phones: the October layout ----------
@@ -823,12 +828,32 @@ img.socialMarkArt {
     padding: 84px 24px 48px;
   }
 
-  /* The Lobby: the showreel sits in the middle of the screen. */
+  /* The Lobby: name and bio at the top (beside the plus), the showreel centred in the rest. */
   .paneCentered {
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
     height: 100svh;
     min-height: 0;
-    padding: 24px;
+    padding: 84px 24px 24px;
+  }
+
+  .lobbyIntro {
+    display: block;
+    flex: none;
+  }
+
+  .lobbyIntro .bio {
+    margin-top: 12px;
+  }
+
+  .lobbyReel {
+    display: grid;
+    flex: 1;
+    min-height: 0;
+    place-items: center;
+    padding-top: 16px;
   }
 
   .info {

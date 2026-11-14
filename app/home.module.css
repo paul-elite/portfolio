@@ -511,7 +511,7 @@
 
 @media (max-width: 860px) {
   .device {
-    width: min(320px, 78vw, calc(62svh * 0.4823));
+    width: min(320px, 78vw, calc(48svh * 0.4823));
   }
 }
 
