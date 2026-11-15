@@ -1,32 +1,136 @@
-import { getSiteConfig } from '@/lib/content-service';
-import PhoneReel from '@/components/home/PhoneReel';
-import shell from '@/components/home/shell.module.css';
+import Link from 'next/link';
+import { getSiteConfig, getPortfolioContent } from '@/lib/content-service';
+import LocalClock from '@/components/home/LocalClock';
+import s from '@/components/home/benji.module.css';
 
 export const revalidate = 60;
 
-// The Lobby: the showreel, centred on the screen. On phones the sidebar is a drawer, so the name
-// and bio also sit at the top of the page there (desktop already shows them in the sidebar).
+type Row = { key: string; title: string; year: string; date: string; href: string; external?: boolean };
+
+function monthDay(iso: string) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+function yearOf(iso: string) {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? (iso.match(/\d{4}/)?.[0] ?? '') : String(d.getFullYear());
+}
+
+function groupByYear(rows: Row[]) {
+  const map = new Map<string, Row[]>();
+  for (const r of rows) {
+    const arr = map.get(r.year) || [];
+    arr.push(r);
+    map.set(r.year, arr);
+  }
+  return [...map.entries()].sort((a, b) => Number(b[0]) - Number(a[0]));
+}
+
+function List({ label, rows, newKey }: { label: string; rows: Row[]; newKey?: string }) {
+  if (rows.length === 0) return null;
+  const groups = groupByYear(rows);
+  return (
+    <section className={s.section}>
+      <p className={s.sectionLabel}>{label}</p>
+      {groups.map(([year, items]) => (
+        <div className={s.group} key={year}>
+          <div className={s.groupYear}>{year}</div>
+          <ul className={s.rows}>
+            {items.map((r) => (
+              <li className={s.row} key={r.key}>
+                <Link
+                  className={s.rowLink}
+                  href={r.href}
+                  {...(r.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                >
+                  <span className={s.rowTitle}>
+                    {r.title}
+                    {r.key === newKey && <span className={s.new}>New</span>}
+                  </span>
+                  <span className={s.rowDate}>{r.date}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </section>
+  );
+}
+
 export default async function Home() {
-  const config = await getSiteConfig();
+  const [config, content] = await Promise.all([getSiteConfig(), getPortfolioContent()]);
   const name = config.name || 'Paul Elite';
-  const label = `${name} showreel`;
-  const bio = config.bio.split(/\n\s*\n/).filter(Boolean);
+  const bio = config.bio.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+
+  const writings: Row[] = content.writings
+    .filter((w) => w.date)
+    .map((w) => ({
+      key: `w-${w.slug}`,
+      title: w.title,
+      year: yearOf(w.date!),
+      date: monthDay(w.date!),
+      href: w.link || '/writings',
+      external: !!w.link,
+    }))
+    .sort((a, b) => (a.year === b.year ? b.date.localeCompare(a.date) : Number(b.year) - Number(a.year)));
+
+  const projects: Row[] = content.projects
+    .map((p) => ({
+      key: `p-${p.slug}`,
+      title: p.title,
+      year: p.year || '',
+      date: '',
+      href: p.link || '/projects',
+      external: !!p.link,
+    }))
+    .filter((r) => r.year);
+
+  const newestWriting = writings[0]?.key;
+
+  const socialBits: React.ReactNode[] = [];
+  if (config.social.twitter) socialBits.push(<a key="x" className={s.link} href={config.social.twitter} target="_blank" rel="noopener noreferrer">X</a>);
+  if (config.social.instagram) socialBits.push(<a key="ig" className={s.link} href={config.social.instagram} target="_blank" rel="noopener noreferrer">Instagram</a>);
+  if (config.social.email) socialBits.push(<a key="em" className={s.link} href={`mailto:${config.social.email}`}>email</a>);
+
+  const updated = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
   return (
-    <section className={`${shell.pane} ${shell.paneCentered}`} aria-label={label}>
-      <div className={shell.lobbyIntro}>
-        <p className={shell.name}>{name}</p>
-        {bio.length > 0 && (
-          <div className={shell.bio}>
-            {bio.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-          </div>
-        )}
+    <main className={s.page}>
+      <div className={s.col}>
+        <h1 className={s.name}>{name}</h1>
+        <time className={s.updated}>Updated {updated}</time>
+
+        <div className={s.bio}>
+          {bio.map((p, i) => <p key={i}>{p}</p>)}
+          <p>
+            You can see my work across{' '}
+            <Link className={s.link} href="/projects">Projects</Link>,{' '}
+            <Link className={s.link} href="/illustration">Illustration</Link>, and{' '}
+            <Link className={s.link} href="/interaction">Interaction</Link>.
+          </p>
+          {socialBits.length > 0 && (
+            <p>
+              You can find me on{' '}
+              {socialBits.map((node, i) => (
+                <span key={i}>
+                  {node}
+                  {i < socialBits.length - 2 ? ', ' : i === socialBits.length - 2 ? ', or ' : ''}
+                </span>
+              ))}
+              .
+            </p>
+          )}
+        </div>
+
+        <List label="Work" rows={projects} />
+        <List label="Writing" rows={writings} newKey={newestWriting} />
+
+        <footer className={s.footer}>
+          <LocalClock />
+        </footer>
       </div>
-      <div className={shell.lobbyReel}>
-        <PhoneReel label={label} />
-      </div>
-    </section>
+    </main>
   );
 }

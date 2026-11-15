@@ -1,0 +1,163 @@
+/* A centered single-column editorial home, in the spirit of benji.org:
+   tiny precise type, soft grey on warm off-white, hairline dividers, a
+   year-grouped list with a spotlight hover, and a live local-time footer. */
+
+.page {
+  min-height: 100svh;
+  background: #fdfdfc;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+  line-height: 1.45rem;
+  letter-spacing: -0.006em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* soft top fade as content scrolls under the viewport edge */
+.page::before {
+  content: '';
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 7rem;
+  background: linear-gradient(#fdfdfc, rgba(253, 253, 252, 0));
+  pointer-events: none;
+  z-index: 9;
+}
+
+.col {
+  max-width: 36.375rem;
+  margin: 0 auto;
+  padding: 5rem 1.5rem 3rem;
+  box-sizing: border-box;
+}
+
+/* staggered entrance on first paint */
+.col > * {
+  animation: benjiIn 0.5s ease both;
+}
+.col > *:nth-child(1) { animation-delay: 0s; }
+.col > *:nth-child(2) { animation-delay: 0.05s; }
+.col > *:nth-child(3) { animation-delay: 0.1s; }
+.col > *:nth-child(4) { animation-delay: 0.15s; }
+.col > *:nth-child(5) { animation-delay: 0.2s; }
+.col > *:nth-child(6) { animation-delay: 0.25s; }
+.col > *:nth-child(n + 7) { animation-delay: 0.3s; }
+@keyframes benjiIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .col > * { animation: none; }
+}
+
+.name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111;
+}
+.updated {
+  display: block;
+  margin: 0 0 1.75rem;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.bio p { margin: 0; padding-top: 1rem; }
+.bio strong { color: #000; font-weight: 500; }
+
+/* inline links: same colour as text, a thin underline that darkens on hover */
+.link {
+  color: inherit;
+  text-decoration: none;
+  position: relative;
+}
+.link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  border-radius: 2px;
+  background: #d9d9d9;
+  transition: background 0.2s ease;
+}
+.link:hover::before { background: #666; }
+
+/* ---- a year-grouped list (Writing / Work) ---- */
+.section { padding-top: 3rem; }
+.sectionLabel {
+  margin: 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f2f2f2;
+  color: rgba(0, 0, 0, 0.4);
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.group {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  column-gap: 1.25rem;
+}
+.groupYear {
+  color: rgba(0, 0, 0, 0.3);
+  padding-top: 0.75rem;
+}
+.rows { list-style: none; margin: 0; padding: 0; }
+
+.row { border-top: 1px solid #f2f2f2; }
+.group:first-of-type .rows > li:first-child .row { border-top: none; }
+.rowLink {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 0.18s ease;
+}
+.rows:hover .rowLink { opacity: 0.3; }
+.rows .rowLink:hover { opacity: 1; }
+
+.rowTitle { color: #111; display: inline-flex; align-items: center; gap: 0.5rem; }
+.rowTitle::after {
+  content: '↗';
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transform: translateX(-0.15rem);
+  transition: opacity 0.14s ease, transform 0.14s ease;
+}
+.rowLink:hover .rowTitle::after { opacity: 1; transform: translateX(0); }
+.rowDate { color: rgba(0, 0, 0, 0.35); white-space: nowrap; }
+
+.new {
+  color: rgb(255, 0, 170);
+  border: 1px solid rgb(255, 0, 170);
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 1;
+  padding: 2px 7px 3px;
+}
+
+/* ---- footer ---- */
+.footer {
+  margin-top: 3rem;
+  padding: 2.5rem 0 1rem;
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 13px;
+}
+.footer::before {
+  content: '';
+  display: block;
+  width: 3.125rem;
+  height: 1px;
+  background: #ededed;
+  margin-bottom: 2.25rem;
+}
+
+@media (max-width: 520px) {
+  .group { grid-template-columns: 3rem 1fr; column-gap: 0.75rem; }
+}

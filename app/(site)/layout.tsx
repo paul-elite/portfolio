@@ -1,10 +1,11 @@
-import { getSiteConfig } from '@/lib/content-service';
-import SiteShell from '@/components/home/SiteShell';
+import { Hedvig_Letters_Sans } from 'next/font/google';
 
 export const revalidate = 60;
 
-// Every public page shares this shell, so the left navigation stays mounted across page changes.
-export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const config = await getSiteConfig();
-  return <SiteShell config={config}>{children}</SiteShell>;
+const hedvig = Hedvig_Letters_Sans({ subsets: ['latin'], weight: '400', display: 'swap' });
+
+// The public site. The landing page renders its own single-column layout here;
+// the section pages re-introduce the three-column shell via the (main) group.
+export default function SiteLayout({ children }: { children: React.ReactNode }) {
+  return <div className={hedvig.className}>{children}</div>;
 }
