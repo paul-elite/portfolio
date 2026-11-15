@@ -2,7 +2,7 @@
 
 .shell {
   --side: clamp(264px, 22vw, 400px);
-  --page: #f7f7f7; /* 97% brightness */
+  --page: #e3ece9; /* soft sage */
   --surface: #fff;
   --border: #e4e4e7;
   /* Two blue-leaning greys: ink for primary text (name, current menu item, socials), muted for
