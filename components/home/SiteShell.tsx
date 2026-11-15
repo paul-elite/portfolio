@@ -1,12 +1,12 @@
-import { Inter_Tight } from 'next/font/google';
+import { Hedvig_Letters_Sans } from 'next/font/google';
 import type { SiteConfig } from '@/lib/content-model';
 import { enabledNavigationItems, sectionHref } from '@/lib/site-navigation';
 import SiteNav from './SiteNav';
 import styles from './shell.module.css';
 
-const interTight = Inter_Tight({
+const hedvig = Hedvig_Letters_Sans({
   subsets: ['latin'],
-  weight: ['400', '500'],
+  weight: '400',
   display: 'swap',
 });
 
@@ -61,7 +61,7 @@ export default function SiteShell({ config, children }: Props) {
   const bio = config.bio.split(/\n\s*\n/).filter(Boolean);
 
   return (
-    <main className={`${interTight.className} ${styles.shell}`}>
+    <main className={`${hedvig.className} ${styles.shell}`}>
       <SiteNav name={name} bio={bio} menu={menu} social={social} />
       {children}
     </main>

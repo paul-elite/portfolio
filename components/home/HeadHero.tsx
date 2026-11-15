@@ -28,7 +28,6 @@ export default function HeadHero({ label = 'Portrait' }: { label?: string }) {
       <div className={styles.headCanvas}>
         <HeadModel animate={animate} />
       </div>
-      <span className={styles.headHint} aria-hidden="true">drag to turn</span>
     </div>
   );
 }

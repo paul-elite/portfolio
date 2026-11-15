@@ -1,5 +1,5 @@
 import { getSiteConfig } from '@/lib/content-service';
-import PhoneReel from '@/components/home/PhoneReel';
+import HeadHero from '@/components/home/HeadHero';
 import shell from '@/components/home/shell.module.css';
 
 export const revalidate = 60;
@@ -9,7 +9,7 @@ export const revalidate = 60;
 export default async function Home() {
   const config = await getSiteConfig();
   const name = config.name || 'Paul Elite';
-  const label = `${name} showreel`;
+  const label = name;
   const bio = config.bio.split(/\n\s*\n/).filter(Boolean);
 
   return (
@@ -25,7 +25,7 @@ export default async function Home() {
         )}
       </div>
       <div className={shell.lobbyReel}>
-        <PhoneReel label={label} />
+        <HeadHero label={label} />
       </div>
     </section>
   );

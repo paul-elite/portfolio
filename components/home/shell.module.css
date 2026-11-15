@@ -746,10 +746,9 @@ img.socialMarkArt {
 /* ---------- the 3D rotating head: the centrepiece ---------- */
 .head {
   position: relative;
-  height: min(76vh, 680px);
+  height: min(42vh, 360px);
   aspect-ratio: 760 / 900;
-  max-width: 92vw;
-  touch-action: none;
+  max-width: 88vw;
 }
 .headStill,
 .headCanvas {
@@ -765,10 +764,6 @@ img.socialMarkArt {
 }
 .headCanvas {
   z-index: 1;
-  filter: contrast(1.06);
-}
-.headStill {
-  filter: contrast(1.06);
 }
 /* a quiet affordance that fades out once you grab the head */
 .headHint {
