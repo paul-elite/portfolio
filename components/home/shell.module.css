@@ -743,6 +743,32 @@ img.socialMarkArt {
   display: contents;
 }
 
+/* ---------- the 3D rotating head: the centrepiece ---------- */
+.head {
+  position: relative;
+  height: min(72vh, 660px);
+  aspect-ratio: 1200 / 1670;
+  max-width: 92vw;
+  touch-action: pan-y;
+}
+.headStill,
+.headCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+/* scaled to match the canvas head (plane fills ~97% of the camera frame) */
+.headStill {
+  object-fit: contain;
+  transform: scale(0.97);
+  pointer-events: none;
+  user-select: none;
+}
+.headCanvas {
+  z-index: 1;
+}
+
 /* ---------- phones: the October layout ----------
    One background everywhere, the content on its own (the showreel anchored in the middle of
    the screen on the Lobby), and the whole sidebar tucked into a drawer behind a hand-drawn plus
