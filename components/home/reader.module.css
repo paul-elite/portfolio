@@ -57,7 +57,7 @@
   max-width: 40rem;
   font-family: var(--font-serif), Georgia, "Times New Roman", serif;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.52; /* 1.6 - 5% */
   letter-spacing: 0.3px;
   color: #222;
 }
