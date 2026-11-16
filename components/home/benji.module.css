@@ -152,6 +152,16 @@
 }
 .workCat { color: rgba(0, 0, 0, 0.3); }
 .section > .rows > li:first-child { border-top: none; }
+/* Featured dividers start at the title column, like the rule under the label */
+.section > .rows > .row { position: relative; border-top: none; }
+.section > .rows > .row + .row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--indent);
+  right: 0;
+  border-top: 0.5px solid rgba(130, 100, 20, 0.13);
+}
 
 .rowTitle { color: #111; display: inline-flex; align-items: center; gap: 0.5rem; }
 .rowTitle::after {
