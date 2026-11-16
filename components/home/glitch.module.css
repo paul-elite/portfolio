@@ -11,43 +11,12 @@
   position: absolute;
   inset: 0;
   white-space: pre;
-  will-change: transform;
 }
 
-/* Unlocked cells: pixel blocks / code glyphs in a dim mono, so they read as machine noise */
+/* Letters still decoding: dimmer, no stroke, so locked letters read as "found" */
 .glyph {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.82em;
-  color: rgba(0, 0, 0, 0.38);
+  color: rgba(0, 0, 0, 0.4);
   -webkit-text-stroke: 0;
-}
-
-.cursor {
-  display: inline-block;
-  width: 0.5em;
-  height: 0.95em;
-  margin-left: 1px;
-  vertical-align: -0.12em;
-  background: currentColor;
-  opacity: 0.85;
-}
-
-/* One short burst once every letter has locked: stepped horizontal slices
-   jump sideways with a pink/cyan channel split, then the name settles. */
-.root[data-phase='burst'] .overlay {
-  animation: slice 420ms steps(1, end) both;
-  text-shadow: -1px 0 rgba(255, 0, 170, 0.55), 1px 0 rgba(0, 190, 255, 0.55);
-}
-
-@keyframes slice {
-  0%   { clip-path: inset(0 0 62% 0);  transform: translateX(-2px); }
-  12%  { clip-path: inset(40% 0 22% 0); transform: translateX(3px); }
-  24%  { clip-path: inset(70% 0 0 0);   transform: translateX(-1px); }
-  36%  { clip-path: inset(0 0 0 0);     transform: translateX(1px); }
-  48%  { clip-path: inset(18% 0 50% 0); transform: translateX(-3px); }
-  60%  { clip-path: inset(0 0 0 0);     transform: translateX(0); text-shadow: -0.5px 0 rgba(255, 0, 170, 0.4), 0.5px 0 rgba(0, 190, 255, 0.4); }
-  80%  { clip-path: inset(55% 0 10% 0); transform: translateX(1px); }
-  100% { clip-path: inset(0 0 0 0);     transform: none; text-shadow: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
