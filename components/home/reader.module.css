@@ -1,6 +1,6 @@
 /* A benji.org/agentation-style reading page: a sticky table-of-contents rail
-   on the left and a single reading column on the right. Hedvig serif body,
-   Hedvig sans headers. */
+   on the left and a single reading column on the right. Hedvig sans body,
+   Hedvig serif title and headings. */
 
 .topbar {
   max-width: 62rem;
@@ -55,16 +55,17 @@
 /* ---- right: the article ---- */
 .article {
   max-width: 40rem;
-  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 14px;
   line-height: 1.6;
   letter-spacing: 0.3px;
   color: #222;
 }
 .title {
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
   font-size: 19px;
-  font-weight: 700;
+  font-weight: 400;
+  -webkit-text-stroke: 0.35px currentColor; /* Medium look, same as the home name (Hedvig Serif is 400-only) */
   color: #111;
   margin: 0;
   letter-spacing: -0.006em;
@@ -79,7 +80,7 @@
 
 .article p { margin: 1.1rem 0; }
 .article p, .article li { text-wrap: pretty; }
-/* Hedvig Serif ships only at 400. A hairline stroke reads half a step heavier
+/* Hedvig ships only at 400. A hairline stroke reads half a step heavier
    (between Regular and Medium) without faux-bold smear; the colour eases from
    #222 to #3b3b3b so the page doesn't darken overall. */
 .article :where(p, li, blockquote) {
