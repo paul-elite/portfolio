@@ -71,7 +71,7 @@
 }
 .date {
   display: block;
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
   font-size: 14px;
   color: rgba(0, 0, 0, 0.4);
   margin: 0.35rem 0 2.5rem;
