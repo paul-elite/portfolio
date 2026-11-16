@@ -25,8 +25,11 @@
 }
 
 .col {
-  max-width: 36.375rem;
+  max-width: 40rem;
   margin: 0 auto;
+  --rail: 80px;
+  --rg: 24px;
+  --indent: calc(var(--rail) + var(--rg));
   padding: 5rem 1.5rem 3rem;
   box-sizing: border-box;
 }
@@ -50,6 +53,24 @@
   .col > * { animation: none; }
 }
 
+/* header: portrait in the left rail, name/role in the content column */
+.header {
+  display: grid;
+  grid-template-columns: var(--rail) 1fr;
+  column-gap: var(--rg);
+  align-items: center;
+  margin-bottom: 2.5rem;
+}
+.portrait {
+  width: var(--rail);
+  height: var(--rail);
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
+  background: #fff;
+}
+.headText { min-width: 0; }
+
 .name {
   margin: 0;
   font-size: 15px; /* 1px larger than the role/title line below */
@@ -58,10 +79,11 @@
 }
 .updated {
   display: block;
-  margin: 0 0 1.75rem;
+  margin: 0;
   color: rgba(0, 0, 0, 0.4);
 }
 
+.bio { margin-left: var(--indent); }
 .bio p { margin: 0; padding-top: 1rem; }
 .bio strong { color: #000; font-weight: 500; }
 
@@ -76,7 +98,7 @@
 /* ---- a year-grouped list (Writing / Work) ---- */
 .section { padding-top: 3rem; }
 .sectionLabel {
-  margin: 0;
+  margin: 0 0 0 var(--indent);
   padding-bottom: 0.75rem;
   border-bottom: 0.5px solid rgba(130, 100, 20, 0.13);
   color: rgba(0, 0, 0, 0.4);
@@ -86,8 +108,8 @@
 
 .group {
   display: grid;
-  grid-template-columns: 4.5rem 1fr;
-  column-gap: calc(1.25rem + 70px); /* push the titles right of the grey label */
+  grid-template-columns: var(--rail) 1fr;
+  column-gap: var(--rg);
 }
 .groupYear {
   color: rgba(0, 0, 0, 0.3);
@@ -115,8 +137,8 @@
 /* Work rows: category label on the left instead of a year/date */
 .workLink {
   display: grid;
-  grid-template-columns: 4.5rem 1fr; /* matches the Writing year column so titles align */
-  column-gap: calc(1.25rem + 70px);
+  grid-template-columns: var(--rail) 1fr; /* matches the Writing year column so titles align */
+  column-gap: var(--rg);
   align-items: baseline;
   padding: 0.75rem 0;
   color: inherit;
@@ -157,12 +179,12 @@
 /* now-playing widget */
 .spw {
   display: grid;
-  grid-template-columns: 4.5rem 1fr;
-  column-gap: calc(1.25rem + 70px);
+  grid-template-columns: var(--rail) 1fr;
+  column-gap: var(--rg);
   align-items: center;
 }
 @media (max-width: 520px) {
-  .spw { grid-template-columns: 3rem 1fr; column-gap: 0.75rem; }
+  .col { --rail: 56px; --rg: 16px; }
 }
 .spwDisc {
   position: relative;
@@ -216,6 +238,4 @@ a.spwTitle:hover { color: rgba(0, 0, 0, 0.7); }
 }
 
 @media (max-width: 520px) {
-  .group { grid-template-columns: 3rem 1fr; column-gap: 0.75rem; }
-  .workLink { grid-template-columns: 3rem 1fr; column-gap: 0.75rem; }
 }

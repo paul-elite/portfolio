@@ -109,8 +109,14 @@ export default async function Home() {
   return (
     <main className={s.page}>
       <div className={s.col}>
-        <h1 className={s.name}>{name}</h1>
-        <p className={s.updated}>Designeeer</p>
+        <header className={s.header}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className={s.portrait} src="/portrait.jpg" alt={name} />
+          <div className={s.headText}>
+            <h1 className={s.name}>{name}</h1>
+            <p className={s.updated}>Designeeer</p>
+          </div>
+        </header>
 
         <div className={s.bio}>
           {bio.map((p, i) => <p key={i}>{p}</p>)}
