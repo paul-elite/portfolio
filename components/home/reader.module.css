@@ -76,6 +76,11 @@
 
 .article p { margin: 1.1rem 0; }
 .article p, .article li { text-wrap: pretty; }
+/* Hedvig Serif ships only at 400; a hairline stroke reads one step heavier
+   (~Medium) without the smear of browser faux-bold. */
+.article :where(p, li, blockquote) {
+  -webkit-text-stroke: 0.25px currentColor;
+}
 .article :where(h2, h3) {
   font-family: var(--font-serif), Georgia, "Times New Roman", serif;
   font-weight: 600;
