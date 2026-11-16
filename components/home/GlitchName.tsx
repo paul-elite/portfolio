@@ -14,13 +14,21 @@ const TICK_MS = 45; // how often unlocked letters change
 const MIN_SETTLE_MS = 168; // 250ms x 0.67
 const MAX_SETTLE_MS = 637; // 950ms x 0.67
 
+// Saturated accents (navy, orange, sky, yellow) that flash on some scrambling characters.
+const ACCENTS = ['#185277', '#f5561f', '#92d3f9', '#fdd339'];
+const ACCENT_CHANCE = 0.3; // per scrambling character, per tick
+
 function randomChar() {
   return POOL[Math.floor(Math.random() * POOL.length)];
 }
 
+function randomAccent() {
+  return Math.random() < ACCENT_CHANCE ? ACCENTS[Math.floor(Math.random() * ACCENTS.length)] : undefined;
+}
+
 export default function GlitchName({ name, className }: { name: string; className?: string }) {
   const [done, setDone] = useState(false);
-  const [cells, setCells] = useState<{ ch: string; locked: boolean }[]>([]);
+  const [cells, setCells] = useState<{ ch: string; color?: string }[]>([]);
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -40,7 +48,7 @@ export default function GlitchName({ name, className }: { name: string; classNam
         last = now;
         setCells(
           chars.map((ch, i) =>
-            ch === ' ' || t >= settleAt[i] ? { ch, locked: true } : { ch: randomChar(), locked: false },
+            ch === ' ' || t >= settleAt[i] ? { ch } : { ch: randomChar(), color: randomAccent() },
           ),
         );
       }
@@ -61,7 +69,7 @@ export default function GlitchName({ name, className }: { name: string; classNam
         {!done && (
           <span className={g.overlay} aria-hidden="true">
             {cells.map((c, i) => (
-              <span key={i}>
+              <span key={i} style={c.color ? { color: c.color } : undefined}>
                 {c.ch}
               </span>
             ))}
