@@ -98,7 +98,7 @@
 .group {
   display: grid;
   grid-template-columns: 4.5rem 1fr;
-  column-gap: calc(1.25rem + 50px); /* push the titles right of the grey label */
+  column-gap: calc(1.25rem + 70px); /* push the titles right of the grey label */
 }
 .groupYear {
   color: rgba(0, 0, 0, 0.3);
@@ -127,7 +127,7 @@
 .workLink {
   display: grid;
   grid-template-columns: 4.5rem 1fr; /* matches the Writing year column so titles align */
-  column-gap: calc(1.25rem + 50px);
+  column-gap: calc(1.25rem + 70px);
   align-items: baseline;
   padding: 0.75rem 0;
   color: inherit;
