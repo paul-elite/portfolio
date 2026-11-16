@@ -7,7 +7,7 @@
   --border: rgba(130, 100, 20, 0.13);
   /* Two blue-leaning greys: ink for primary text (name, current menu item, socials), muted for
      secondary (bio, resting menu items, meta). */
-  --ink: #052e16; /* deep green ink */
+  --ink: #1e432d; /* deep green ink */
   --muted: rgba(5, 46, 22, 0.55);
   /* One motion language for every hover/press/current change. */
   --ease: cubic-bezier(0.2, 0, 0, 1);

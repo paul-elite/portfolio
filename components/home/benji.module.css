@@ -76,9 +76,9 @@
 
 .name {
   margin: 0;
-  font-size: 19px;
+  font-size: 17px;
   font-weight: 700;
-  color: #052e16;
+  color: #052e16; /* renders as ~#1e432d in faux-bold; other dark text uses #1e432d to match */
 }
 .updated {
   display: block;
@@ -88,11 +88,11 @@
 
 .bio { margin-left: var(--indent); }
 .bio p { margin: 0; padding-top: 1rem; }
-.bio strong { color: #052e16; font-weight: 500; }
+.bio strong { color: #1e432d; font-weight: 500; }
 
 /* inline links: same colour as text, a thin underline that darkens on hover */
 .link {
-  color: #052e16;
+  color: #1e432d;
   text-decoration: none;
   transition: color 0.2s ease;
 }
@@ -161,7 +161,7 @@
   border-top: 0.5px solid rgba(130, 100, 20, 0.13);
 }
 
-.rowTitle { color: #052e16; display: inline-flex; align-items: center; gap: 0.5rem; }
+.rowTitle { color: #1e432d; display: inline-flex; align-items: center; gap: 0.5rem; }
 .rowTitle::after {
   content: '↗';
   font-size: 11px;

@@ -10,7 +10,7 @@
 .page {
   min-height: 100svh;
   background: #fbf8ef;
-  color: #052e16;
+  color: #1e432d;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -50,7 +50,7 @@
   text-decoration: none;
   transition: color 0.18s ease, transform 0.15s ease-out;
 }
-.back:hover { color: #052e16; }
+.back:hover { color: #1e432d; }
 .back:active { transform: scale(0.97); }
 .tocNav { display: flex; flex-direction: column; gap: 0.55rem; }
 .tocLink {
@@ -58,7 +58,7 @@
   text-decoration: none;
   transition: color 0.18s ease;
 }
-.tocLink:hover { color: #052e16; }
+.tocLink:hover { color: #1e432d; }
 
 /* ---- right: the article ---- */
 .article {
@@ -67,7 +67,7 @@
   font-size: 14px;
   line-height: 1.52; /* 1.6 - 5% */
   letter-spacing: 0.45px;
-  color: #052e16;
+  color: #1e432d;
 }
 /* Title + date mirror the home header: the name (.name) and the line under it (.updated) */
 .title {
@@ -76,7 +76,7 @@
   font-weight: 400;
   -webkit-text-stroke: 0.35px currentColor; /* Medium look (Hedvig is 400-only) */
   letter-spacing: 0.5px;
-  color: #052e16;
+  color: #1e432d;
   margin: 0;
 }
 .date {
@@ -100,7 +100,7 @@
 .article :where(h2, h3) {
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-weight: 600;
-  color: #052e16;
+  color: #1e432d;
   font-size: 15px;
   letter-spacing: 0.5px;
   margin: 2.5rem 0 0.25rem;
