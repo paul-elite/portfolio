@@ -78,6 +78,7 @@
   margin: 0;
   font-size: 19px; /* same size as the writing title */
   font-weight: 700;
+  letter-spacing: 1px;
   color: #111;
 }
 .updated {
