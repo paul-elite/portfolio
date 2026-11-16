@@ -7,11 +7,6 @@ export const revalidate = 60;
 
 type Row = { key: string; title: string; year: string; date: string; href: string; external?: boolean };
 
-function monthDay(iso: string) {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '';
-  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
-}
 function yearOf(iso: string) {
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? (iso.match(/\d{4}/)?.[0] ?? '') : String(d.getFullYear());
@@ -78,21 +73,10 @@ export default async function Home() {
   const name = config.name || 'Paul Elite';
   const bio = config.bio.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
 
-  const writings: Row[] = content.writings
-    .filter((w) => w.date)
-    .map((w) => ({
-      key: `w-${w.slug}`,
-      title: w.title,
-      year: yearOf(w.date!),
-      date: monthDay(w.date!),
-      href: w.link || `/writings/${w.slug}`,
-      external: !!w.link,
-    }))
-    .sort((a, b) => (a.year === b.year ? b.date.localeCompare(a.date) : Number(b.year) - Number(a.year)));
-
-  // Featured work: same layout as Writing, but the right-hand meta is the
-  // design category ("study", "design") instead of a date.
-  const featured: Row[] = content.projects
+  // Everything is a "Featured" entry now — projects and writings together,
+  // each with its category on the right (projects: study/design; writings: essay).
+  type Item = Row & { ts: number };
+  const projectItems: Item[] = content.projects
     .filter((p) => p.year)
     .map((p) => ({
       key: `p-${p.slug}`,
@@ -101,10 +85,21 @@ export default async function Home() {
       date: formatCategory((p.tags && p.tags[0]) || p.role || ''),
       href: p.link || `/projects/${p.slug}`,
       external: !!p.link,
-    }))
-    .sort((a, b) => Number(b.year) - Number(a.year));
-
-  const newestWriting = writings[0]?.key;
+      ts: new Date(`${p.year}-01-01T00:00:00Z`).getTime(),
+    }));
+  const writingItems: Item[] = content.writings
+    .filter((w) => w.date)
+    .map((w) => ({
+      key: `w-${w.slug}`,
+      title: w.title,
+      year: yearOf(w.date!),
+      date: 'essay',
+      href: w.link || `/writings/${w.slug}`,
+      external: !!w.link,
+      ts: new Date(w.date!).getTime(),
+    }));
+  const featured: Row[] = [...projectItems, ...writingItems].sort((a, b) => b.ts - a.ts);
+  const newestKey = featured[0]?.key;
 
   const socialBits: React.ReactNode[] = [];
   if (config.social.twitter) socialBits.push(<a key="x" className={s.link} href={config.social.twitter} target="_blank" rel="noopener noreferrer">X</a>);
@@ -139,8 +134,7 @@ export default async function Home() {
           )}
         </div>
 
-        <List label="Featured" rows={featured} />
-        <List label="Writing" rows={writings} newKey={newestWriting} />
+        <List label="Featured" rows={featured} newKey={newestKey} />
 
         <footer className={s.footer}>
           <SpotifyNow />

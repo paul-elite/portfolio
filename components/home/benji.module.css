@@ -156,9 +156,13 @@
 }
 /* now-playing widget */
 .spw {
-  display: flex;
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  column-gap: calc(1.25rem + 70px);
   align-items: center;
-  gap: 12px;
+}
+@media (max-width: 520px) {
+  .spw { grid-template-columns: 3rem 1fr; column-gap: 0.75rem; }
 }
 .spwDisc {
   position: relative;
