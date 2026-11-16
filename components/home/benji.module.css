@@ -68,6 +68,9 @@
   border-radius: 50%;
   display: block;
   background: #fff;
+  box-shadow:
+    0 0 0 0.5px rgba(140, 110, 30, 0.22), /* 0.5px warm ring border */
+    0 2px 7px rgba(140, 110, 30, 0.14);   /* soft shadow beneath */
 }
 .headText { min-width: 0; }
 
