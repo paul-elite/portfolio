@@ -25,7 +25,7 @@ export default function ArticleReader({
     <main className={`${serif.variable} ${sans.variable} ${r.page}`}>
       <div className={r.topbar}>
         <Link href="/" className={r.back}>
-          <HugeiconsIcon icon={ArrowTurnBackwardIcon} size={15} strokeWidth={1.6} aria-hidden="true" />
+          <HugeiconsIcon icon={ArrowTurnBackwardIcon} size={13} strokeWidth={1.6} aria-hidden="true" />
           Back
         </Link>
       </div>

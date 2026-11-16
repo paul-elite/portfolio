@@ -41,7 +41,7 @@
   gap: 6px;
   padding: 4px;
   border-radius: 8px;
-  background: #fff;
+  font-size: 14px;
   /* 0.5px hairline frame + a soft lift, same recipe as the home portrait */
   box-shadow:
     0 0 0 0.5px rgba(140, 110, 30, 0.13),
