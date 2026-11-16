@@ -49,8 +49,8 @@
 .article {
   max-width: 40rem;
   font-family: var(--font-serif), Georgia, "Times New Roman", serif;
-  font-size: 18px;
-  line-height: 1.62;
+  font-size: 15px;
+  line-height: 1.6;
   color: #222;
 }
 .title {
