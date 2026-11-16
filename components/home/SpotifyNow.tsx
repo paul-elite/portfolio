@@ -3,35 +3,37 @@
 import { useNowPlaying } from '@/components/NowPlaying';
 import s from './benji.module.css';
 
-/* A quiet footer now-playing line, in the benji.org register: one small grey
-   line, the track linked to Spotify. Falls back gracefully when nothing is
-   playing or Spotify isn't configured. */
+/* A self-contained now-playing widget for the footer: a spinning album disc
+   plus the track and artist. Styled with the page's CSS module (no Tailwind
+   dependency), fed by the /api/spotify poll. */
 export default function SpotifyNow() {
   const data = useNowPlaying();
+  const playing = Boolean(data?.isPlaying);
+  const art = playing && data?.albumImageUrl ? data.albumImageUrl : '/music-icon.svg';
 
-  if (!data) return <span className={s.spotify}>{' '}</span>;
-
-  if (data.isPlaying && data.title) {
-    return (
-      <span className={s.spotify} suppressHydrationWarning>
-        <span className={s.spotifyDot} aria-hidden="true" />
-        Listening to{' '}
-        <a className={s.link} href={data.songUrl} target="_blank" rel="noopener noreferrer">
-          {data.title}
-        </a>
-        {data.artist ? ` — ${data.artist}` : ''}
+  return (
+    <div className={s.spw}>
+      <span className={`${s.spwDisc} ${playing ? s.spwSpin : ''}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={art} alt="" />
       </span>
-    );
-  }
-
-  if (data.lastPlayed?.title) {
-    return (
-      <span className={s.spotify} suppressHydrationWarning>
-        Last listened to {data.lastPlayed.title}
-        {data.lastPlayed.artist ? ` — ${data.lastPlayed.artist}` : ''}
-      </span>
-    );
-  }
-
-  return <span className={s.spotify} suppressHydrationWarning>Not listening right now</span>;
+      <div className={s.spwText}>
+        {playing ? (
+          <>
+            <a className={s.spwTitle} href={data?.songUrl} target="_blank" rel="noopener noreferrer">
+              {data?.title}
+            </a>
+            {data?.artist && <span className={s.spwArtist}>{data.artist}</span>}
+          </>
+        ) : (
+          <>
+            <span className={s.spwTitle}>Not listening right now</span>
+            <span className={s.spwArtist}>
+              {data?.lastPlayed?.title ? `last listened to ${data.lastPlayed.title}` : 'check again shortly'}
+            </span>
+          </>
+        )}
+      </div>
+    </div>
+  );
 }

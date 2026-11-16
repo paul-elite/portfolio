@@ -86,7 +86,7 @@ export default async function Home() {
       title: w.title,
       year: yearOf(w.date!),
       date: monthDay(w.date!),
-      href: w.link || '/writings',
+      href: w.link || `/writings/${w.slug}`,
       external: !!w.link,
     }))
     .sort((a, b) => (a.year === b.year ? b.date.localeCompare(a.date) : Number(b.year) - Number(a.year)));
@@ -95,7 +95,7 @@ export default async function Home() {
     key: `p-${p.slug}`,
     title: p.title,
     cat: formatCategory((p.tags && p.tags[0]) || p.role || ''),
-    href: p.link || '/projects',
+    href: p.link || `/projects/${p.slug}`,
     external: !!p.link,
   }));
 

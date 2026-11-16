@@ -173,17 +173,61 @@
   background: #ededed;
   margin-bottom: 2.25rem;
 }
-.spotify {
-  display: inline-flex;
+/* now-playing widget */
+.spw {
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 12px;
 }
-.spotifyDot {
-  width: 6px;
-  height: 6px;
+.spwDisc {
+  position: relative;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: #1db954;
+  overflow: hidden;
   flex: 0 0 auto;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+.spwDisc img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.spwSpin img {
+  animation: spwSpin 9s linear infinite;
+}
+.spwSpin::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin: -5px;
+  border-radius: 50%;
+  background: #fafafa;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+@keyframes spwSpin { to { transform: rotate(360deg); } }
+.spwText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 1px;
+}
+.spwTitle {
+  color: #111;
+  text-decoration: none;
+  font-size: 14px;
+}
+a.spwTitle:hover { color: #555; }
+.spwArtist {
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 13px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .spwSpin img { animation: none; }
 }
 
 @media (max-width: 520px) {
