@@ -5,6 +5,7 @@ import { getHomeData, getSiteConfig } from '@/lib/content-service';
 import { enabledNavigationItems } from '@/lib/site-navigation';
 import { ILLUSTRATION_CATEGORIES } from '@/lib/portfolio-options';
 import SectionBrowser, { type BrowserItem } from './SectionBrowser';
+import SiteShell from './SiteShell';
 
 export async function sectionMetadata(target: PortfolioNavTarget): Promise<Metadata> {
   const config = await getSiteConfig();
@@ -84,10 +85,12 @@ export default async function SectionPage({ target }: { target: PortfolioNavTarg
   if (!item) notFound();
 
   return (
-    <SectionBrowser
-      title={item.label}
-      layout={target === 'illustration' ? 'grid' : target === 'writings' ? 'books' : 'list'}
-      items={itemsFor(target, content)}
-    />
+    <SiteShell config={config}>
+      <SectionBrowser
+        title={item.label}
+        layout={target === 'illustration' ? 'grid' : target === 'writings' ? 'books' : 'list'}
+        items={itemsFor(target, content)}
+      />
+    </SiteShell>
   );
 }

@@ -1,0 +1,43 @@
+import Link from 'next/link';
+import { Hedvig_Letters_Serif, Hedvig_Letters_Sans } from 'next/font/google';
+import r from './reader.module.css';
+
+// Hedvig serif for the body, Hedvig sans for headers (exposed as CSS vars).
+const serif = Hedvig_Letters_Serif({ subsets: ['latin'], weight: '400', variable: '--font-serif', display: 'swap' });
+const sans = Hedvig_Letters_Sans({ subsets: ['latin'], weight: '400', variable: '--font-sans', display: 'swap' });
+
+type Toc = { id: string; label: string }[];
+
+export default function ArticleReader({
+  title,
+  date,
+  toc = [],
+  children,
+}: {
+  title: string;
+  date?: string;
+  toc?: Toc;
+  children: React.ReactNode;
+}) {
+  return (
+    <main className={`${serif.variable} ${sans.variable} ${r.page}`}>
+      <div className={r.wrap}>
+        <aside className={r.toc}>
+          <Link href="/" className={r.back}>← Index</Link>
+          {toc.length > 0 && (
+            <nav className={r.tocNav}>
+              {toc.map((h) => (
+                <a key={h.id} href={`#${h.id}`} className={r.tocLink}>{h.label}</a>
+              ))}
+            </nav>
+          )}
+        </aside>
+        <article className={r.article}>
+          <h1 className={r.title}>{title}</h1>
+          {date && <time className={r.date}>{date}</time>}
+          {children}
+        </article>
+      </div>
+    </main>
+  );
+}
