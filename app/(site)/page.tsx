@@ -6,6 +6,7 @@ import s from '@/components/home/benji.module.css';
 export const revalidate = 60;
 
 type Row = { key: string; title: string; year: string; date: string; href: string; external?: boolean };
+type WorkRow = { key: string; title: string; cat: string; href: string; external?: boolean };
 
 function monthDay(iso: string) {
   const d = new Date(iso);
@@ -76,16 +77,13 @@ export default async function Home() {
     }))
     .sort((a, b) => (a.year === b.year ? b.date.localeCompare(a.date) : Number(b.year) - Number(a.year)));
 
-  const projects: Row[] = content.projects
-    .map((p) => ({
-      key: `p-${p.slug}`,
-      title: p.title,
-      year: p.year || '',
-      date: '',
-      href: p.link || '/projects',
-      external: !!p.link,
-    }))
-    .filter((r) => r.year);
+  const projects: WorkRow[] = content.projects.map((p) => ({
+    key: `p-${p.slug}`,
+    title: p.title,
+    cat: (p.tags && p.tags[0]) || p.role || '',
+    href: p.link || '/projects',
+    external: !!p.link,
+  }));
 
   const newestWriting = writings[0]?.key;
 
@@ -124,7 +122,26 @@ export default async function Home() {
           )}
         </div>
 
-        <List label="Work" rows={projects} />
+        {projects.length > 0 && (
+          <section className={s.section}>
+            <p className={s.sectionLabel}>Work</p>
+            <ul className={s.rows}>
+              {projects.map((r) => (
+                <li className={s.row} key={r.key}>
+                  <Link
+                    className={s.workLink}
+                    href={r.href}
+                    {...(r.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                  >
+                    <span className={s.workCat}>{r.cat}</span>
+                    <span className={s.rowTitle}>{r.title}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         <List label="Writing" rows={writings} newKey={newestWriting} />
 
         <footer className={s.footer}>
