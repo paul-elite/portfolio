@@ -84,10 +84,10 @@
 .article p, .article li { text-wrap: pretty; }
 /* Hedvig ships only at 400. A hairline stroke reads half a step heavier
    (between Regular and Medium) without faux-bold smear; the colour eases from
-   #222 to #3b3b3b so the page doesn't darken overall. */
+   #222 to #545454 for a lighter page. */
 .article :where(p, li, blockquote) {
   -webkit-text-stroke: 0.125px currentColor;
-  color: #3b3b3b;
+  color: #545454;
 }
 .article :where(h2, h3) {
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
