@@ -155,14 +155,6 @@
   color: rgba(0, 0, 0, 0.4);
   font-size: 13px;
 }
-.footer::before {
-  content: '';
-  display: block;
-  width: 3.125rem;
-  height: 1px;
-  background: #ededed;
-  margin-bottom: 2.25rem;
-}
 /* now-playing widget */
 .spw {
   display: flex;
