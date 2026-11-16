@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getSiteConfig, getPortfolioContent } from '@/lib/content-service';
-import LocalClock from '@/components/home/LocalClock';
+import SpotifyNow from '@/components/home/SpotifyNow';
 import s from '@/components/home/benji.module.css';
 
 export const revalidate = 60;
@@ -89,7 +89,7 @@ export default async function Home() {
 
   const socialBits: React.ReactNode[] = [];
   if (config.social.twitter) socialBits.push(<a key="x" className={s.link} href={config.social.twitter} target="_blank" rel="noopener noreferrer">X</a>);
-  if (config.social.instagram) socialBits.push(<a key="ig" className={s.link} href={config.social.instagram} target="_blank" rel="noopener noreferrer">Instagram</a>);
+  if (config.social.linkedin) socialBits.push(<a key="li" className={s.link} href={config.social.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>);
   if (config.social.email) socialBits.push(<a key="em" className={s.link} href={`mailto:${config.social.email}`}>email</a>);
 
   return (
@@ -143,7 +143,7 @@ export default async function Home() {
         <List label="Writing" rows={writings} newKey={newestWriting} />
 
         <footer className={s.footer}>
-          <LocalClock />
+          <SpotifyNow />
         </footer>
       </div>
     </main>
