@@ -97,7 +97,7 @@ export default async function Home() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className={s.portrait} src="/portrait.jpg" alt={name} />
           <div className={s.headText}>
-            <GlitchName name={name} className={`${s.name} ${serif.className}`} />
+            <GlitchName name={name} className={s.name} />
             <p className={s.updated}>Designeeer</p>
           </div>
         </header>
