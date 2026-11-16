@@ -21,9 +21,11 @@ export default function ArticleReader({
 }) {
   return (
     <main className={`${serif.variable} ${sans.variable} ${r.page}`}>
+      <div className={r.topbar}>
+        <Link href="/" className={r.back}>← Back</Link>
+      </div>
       <div className={r.wrap}>
         <aside className={r.toc}>
-          <Link href="/" className={r.back}>← Index</Link>
           {toc.length > 0 && (
             <nav className={r.tocNav}>
               {toc.map((h) => (
