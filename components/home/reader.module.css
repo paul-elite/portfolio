@@ -39,11 +39,19 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  padding: 4px;
+  border-radius: 8px;
+  background: #fff;
+  /* 0.5px hairline frame + a soft lift, same recipe as the home portrait */
+  box-shadow:
+    0 0 0 0.5px rgba(140, 110, 30, 0.13),
+    0 1px 4px rgba(140, 110, 30, 0.1);
   color: rgba(0, 0, 0, 0.4);
   text-decoration: none;
-  transition: color 0.18s ease;
+  transition: color 0.18s ease, transform 0.15s ease-out;
 }
 .back:hover { color: #111; }
+.back:active { transform: scale(0.97); }
 .tocNav { display: flex; flex-direction: column; gap: 0.55rem; }
 .tocLink {
   color: rgba(0, 0, 0, 0.4);
