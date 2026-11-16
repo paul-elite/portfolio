@@ -1,6 +1,6 @@
 /* A benji.org/agentation-style reading page: a sticky table-of-contents rail
-   on the left and a single reading column on the right. Hedvig serif body,
-   Hedvig sans title and headings. */
+   on the left and a single reading column on the right. Hedvig serif body
+   and headings, Hedvig sans title. */
 
 .topbar {
   max-width: 62rem;
@@ -98,7 +98,7 @@
   color: #545454;
 }
 .article :where(h2, h3) {
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
   font-weight: 600;
   color: #111;
   font-size: 15px;
