@@ -7,16 +7,11 @@
   visibility: hidden;
 }
 
+/* Scrambling glyphs share the name's font, weight and colour */
 .overlay {
   position: absolute;
   inset: 0;
   white-space: pre;
-}
-
-/* Letters still decoding: dimmer, no stroke, so locked letters read as "found" */
-.glyph {
-  color: rgba(0, 0, 0, 0.4);
-  -webkit-text-stroke: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {

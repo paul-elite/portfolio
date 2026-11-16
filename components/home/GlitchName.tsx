@@ -3,19 +3,19 @@
 import { useEffect, useState } from 'react';
 import g from './glitch.module.css';
 
-// The home name decodes itself: every letter shuffles through random letters
-// and special symbols, then each one locks in at its own random moment, so the
+// The home name decodes itself: every letter shuffles through random
+// characters, then each one locks in at its own random moment, so the
 // characters and the settle order differ on every load.
-const SYMBOLS = '#%&@$§¶†‡※¤∆∑∂√∞≈≠±×÷<>{}[]/\\|~^*!?¿¡°•◊∫Ω≡';
-const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+// Pool = glyphs of roughly one width at the name's own weight (mid-width
+// lowercase, tabular digits, a few same-width symbols), so the word keeps its
+// shape and colour while it scrambles. No i/l/j/t/f/r (narrow) or m/w (wide).
+const POOL = 'abcdeghknopqsuvxyz0123456789#$?';
 const TICK_MS = 45; // how often unlocked letters change
-const MIN_SETTLE_MS = 250;
-const MAX_SETTLE_MS = 950;
+const MIN_SETTLE_MS = 168; // 250ms x 0.67
+const MAX_SETTLE_MS = 637; // 950ms x 0.67
 
 function randomChar() {
-  // Lean on symbols so it reads as a decode, with letters mixed in.
-  const pool = Math.random() < 0.65 ? SYMBOLS : LETTERS;
-  return pool[Math.floor(Math.random() * pool.length)];
+  return POOL[Math.floor(Math.random() * POOL.length)];
 }
 
 export default function GlitchName({ name, className }: { name: string; className?: string }) {
@@ -61,7 +61,7 @@ export default function GlitchName({ name, className }: { name: string; classNam
         {!done && (
           <span className={g.overlay} aria-hidden="true">
             {cells.map((c, i) => (
-              <span key={i} className={c.locked ? undefined : g.glyph}>
+              <span key={i}>
                 {c.ch}
               </span>
             ))}

@@ -76,10 +76,8 @@
 
 .name {
   margin: 0;
-  font-size: 17px;
-  font-weight: 400;
-  -webkit-text-stroke: 0.35px currentColor; /* Hedvig is 400-only: a Medium look, lighter than faux-bold */
-  letter-spacing: 0.5px;
+  font-size: 19px;
+  font-weight: 700;
   color: #111;
 }
 .updated {
