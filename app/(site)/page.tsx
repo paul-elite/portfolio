@@ -12,18 +12,10 @@ function yearOf(iso: string) {
   return Number.isNaN(d.getTime()) ? (iso.match(/\d{4}/)?.[0] ?? '') : String(d.getFullYear());
 }
 
-// Short, lowercase design category for the Work list's grey label.
-const CATEGORY_ALIASES: Record<string, string> = {
-  'case-study': 'study',
-  'case study': 'study',
-  'lead designer': 'design',
-  designer: 'design',
-  'design & development': 'design',
-};
-function formatCategory(raw: string) {
-  const c = raw.trim().toLowerCase();
-  if (CATEGORY_ALIASES[c]) return CATEGORY_ALIASES[c];
-  return c.split(/[\s-]+/).pop() || c; // fall back to the last word
+function monthDay(iso: string) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
 }
 
 function groupByYear(rows: Row[]) {
@@ -82,7 +74,7 @@ export default async function Home() {
       key: `p-${p.slug}`,
       title: p.title,
       year: p.year!,
-      date: formatCategory((p.tags && p.tags[0]) || p.role || ''),
+      date: p.year!,
       href: p.link || `/projects/${p.slug}`,
       external: !!p.link,
       ts: new Date(`${p.year}-01-01T00:00:00Z`).getTime(),
@@ -93,7 +85,7 @@ export default async function Home() {
       key: `w-${w.slug}`,
       title: w.title,
       year: yearOf(w.date!),
-      date: 'essay',
+      date: monthDay(w.date!),
       href: w.link || `/writings/${w.slug}`,
       external: !!w.link,
       ts: new Date(w.date!).getTime(),
