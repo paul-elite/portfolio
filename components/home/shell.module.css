@@ -7,8 +7,8 @@
   --border: rgba(130, 100, 20, 0.13);
   /* Two blue-leaning greys: ink for primary text (name, current menu item, socials), muted for
      secondary (bio, resting menu items, meta). */
-  --ink: #1e432d; /* deep green ink */
-  --muted: rgba(5, 46, 22, 0.55);
+  --ink: #11271a; /* deep green ink */
+  --muted: rgba(5, 46, 22, 0.64);
   /* One motion language for every hover/press/current change. */
   --ease: cubic-bezier(0.2, 0, 0, 1);
   --fast: 200ms;
@@ -480,7 +480,7 @@ img.socialMarkArt {
   max-width: 100%;
   overflow: hidden;
   overflow-wrap: anywhere;
-  color: rgba(5, 46, 22, 0.72);
+  color: rgba(5, 46, 22, 0.81);
   font-size: 13.25cqw; /* 8.78 */
   font-weight: 500;
   line-height: 1;
@@ -510,7 +510,7 @@ img.socialMarkArt {
   box-sizing: border-box;
   border: 1px solid #dfe1e4;
   border-radius: 50%;
-  color: rgba(5, 46, 22, 0.4);
+  color: rgba(5, 46, 22, 0.49);
   font-size: 18cqw;
   line-height: 1;
 }

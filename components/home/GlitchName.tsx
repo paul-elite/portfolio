@@ -23,7 +23,7 @@ const ACCENTS = [
 const ACCENT_CHANCE = 0.3; // per scrambling character, per tick
 // Every other scrambling character is a light neutral (the theme's muted ink);
 // the dark ink only appears once a letter settles.
-const NEUTRAL = 'rgba(5, 46, 22, 0.3)';
+const NEUTRAL = 'rgba(5, 46, 22, 0.39)';
 
 function randomChar() {
   return POOL[Math.floor(Math.random() * POOL.length)];
