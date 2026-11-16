@@ -14,8 +14,12 @@ const TICK_MS = 45; // how often unlocked letters change
 const MIN_SETTLE_MS = 168; // 250ms x 0.67
 const MAX_SETTLE_MS = 637; // 950ms x 0.67
 
-// Saturated accents (navy, orange, sky, yellow) that flash on some scrambling characters.
-const ACCENTS = ['#185277', '#f5561f', '#92d3f9', '#fdd339'];
+// Saturated accents that flash on some scrambling characters:
+// navy, orange, sky, yellow, then purple, lime, magenta, vivid yellow, sage, slate.
+const ACCENTS = [
+  '#185277', '#f5561f', '#92d3f9', '#fdd339',
+  '#ba90fe', '#9fe000', '#ff4af1', '#ffe401', '#a3ac77', '#695f84',
+];
 const ACCENT_CHANCE = 0.3; // per scrambling character, per tick
 
 function randomChar() {
