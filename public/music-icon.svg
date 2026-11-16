@@ -25,7 +25,7 @@
 <g id="Ellipse 150" filter="url(#filter4_i_7_12)">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M38.9271 45.9718C42.8171 45.9718 45.9713 42.8181 45.9713 38.9276C45.9713 35.037 42.8171 31.8833 38.9271 31.8833C35.037 31.8833 31.8828 35.037 31.8828 38.9276C31.8828 42.8181 35.037 45.9718 38.9271 45.9718ZM45.4495 38.9276C45.4495 42.5297 42.5297 45.45 38.9271 45.45C35.3244 45.45 32.4046 42.5297 32.4046 38.9276C32.4046 35.3254 35.3244 32.4051 38.9271 32.4051C42.5297 32.4051 45.4495 35.3254 45.4495 38.9276Z" fill="#F7F5F0"/>
 </g>
-<circle id="Hole" cx="38.9271" cy="38.9276" r="4.07" fill="#FBF8EF" stroke="#8A7B52" stroke-width="0.6"/>
+<circle id="Hole" cx="38.9271" cy="38.9276" r="4.07" fill="#FAF6EB" stroke="#8A7B52" stroke-width="0.6"/>
 </g>
 <defs>
 <filter id="filter0_d_7_12" x="0" y="0" width="77.486" height="77.487" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
