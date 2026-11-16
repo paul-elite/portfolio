@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Hedvig_Letters_Serif } from 'next/font/google';
 import { getSiteConfig, getPortfolioContent } from '@/lib/content-service';
 import SpotifyNow from '@/components/home/SpotifyNow';
+import GlitchName from '@/components/home/GlitchName';
 import s from '@/components/home/benji.module.css';
 
 const serif = Hedvig_Letters_Serif({ subsets: ['latin'], weight: '400', display: 'swap' });
@@ -96,7 +97,7 @@ export default async function Home() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className={s.portrait} src="/portrait.jpg" alt={name} />
           <div className={s.headText}>
-            <h1 className={`${s.name} ${serif.className}`}>{name}</h1>
+            <GlitchName name={name} className={`${s.name} ${serif.className}`} />
             <p className={s.updated}>Designeeer</p>
           </div>
         </header>

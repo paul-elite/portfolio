@@ -1,6 +1,6 @@
 /* A benji.org/agentation-style reading page: a sticky table-of-contents rail
-   on the left and a single reading column on the right. Hedvig sans body,
-   Hedvig serif title and headings. */
+   on the left and a single reading column on the right. Hedvig serif body and
+   title, Hedvig sans headings. */
 
 .topbar {
   max-width: 62rem;
@@ -55,27 +55,29 @@
 /* ---- right: the article ---- */
 .article {
   max-width: 40rem;
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
   font-size: 14px;
   line-height: 1.6;
   letter-spacing: 0.3px;
   color: #222;
 }
+/* Title + date mirror the home header: the name (.name) and the line under it (.updated) */
 .title {
   font-family: var(--font-serif), Georgia, "Times New Roman", serif;
-  font-size: 19px;
+  font-size: 17px;
   font-weight: 400;
-  -webkit-text-stroke: 0.35px currentColor; /* Medium look, same as the home name (Hedvig Serif is 400-only) */
+  -webkit-text-stroke: 0.35px currentColor; /* Medium look (Hedvig Serif is 400-only) */
+  letter-spacing: 0.5px;
   color: #111;
   margin: 0;
-  letter-spacing: -0.006em;
 }
 .date {
   display: block;
-  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 14px;
+  letter-spacing: -0.006em;
   color: rgba(0, 0, 0, 0.4);
-  margin: 0.35rem 0 2.5rem;
+  margin: 0 0 2.5rem;
 }
 
 .article p { margin: 1.1rem 0; }
@@ -88,7 +90,7 @@
   color: #3b3b3b;
 }
 .article :where(h2, h3) {
-  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-weight: 600;
   color: #111;
   font-size: 15px;
