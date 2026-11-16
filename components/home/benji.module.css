@@ -226,15 +226,11 @@
   min-width: 0;
   gap: 1px;
 }
-.spwTitle {
-  color: rgba(0, 0, 0, 0.4);
-  text-decoration: none;
-  font-size: 13px;
-}
-a.spwTitle:hover { color: rgba(0, 0, 0, 0.7); }
+.spwTitle,
 .spwArtist {
   color: rgba(0, 0, 0, 0.4);
   font-size: 13px;
+  text-decoration: none;
 }
 @media (prefers-reduced-motion: reduce) {
   .spwSpin img { animation: none; }

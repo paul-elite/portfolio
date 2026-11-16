@@ -51,7 +51,7 @@
   font-family: var(--font-serif), Georgia, "Times New Roman", serif;
   font-size: 14px;
   line-height: 1.6;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   color: #222;
 }
 .title {
