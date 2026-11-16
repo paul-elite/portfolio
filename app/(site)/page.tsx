@@ -32,7 +32,7 @@ function FeaturedList({ items, newKey }: { items: Row[]; newKey?: string }) {
   if (items.length === 0) return null;
   return (
     <section className={s.section}>
-      <p className={s.sectionLabel}>Featured</p>
+      <p className={`${s.sectionLabel} ${serif.className}`}>Featured</p>
       <ul className={s.rows}>
         {items.map((r) => (
           <li className={s.row} key={r.key}>
