@@ -6,7 +6,6 @@ import s from '@/components/home/benji.module.css';
 export const revalidate = 60;
 
 type Row = { key: string; title: string; year: string; date: string; href: string; external?: boolean };
-type WorkRow = { key: string; title: string; cat: string; href: string; external?: boolean };
 
 function monthDay(iso: string) {
   const d = new Date(iso);
@@ -91,13 +90,19 @@ export default async function Home() {
     }))
     .sort((a, b) => (a.year === b.year ? b.date.localeCompare(a.date) : Number(b.year) - Number(a.year)));
 
-  const projects: WorkRow[] = content.projects.map((p) => ({
-    key: `p-${p.slug}`,
-    title: p.title,
-    cat: formatCategory((p.tags && p.tags[0]) || p.role || ''),
-    href: p.link || `/projects/${p.slug}`,
-    external: !!p.link,
-  }));
+  // Featured work: same layout as Writing, but the right-hand meta is the
+  // design category ("study", "design") instead of a date.
+  const featured: Row[] = content.projects
+    .filter((p) => p.year)
+    .map((p) => ({
+      key: `p-${p.slug}`,
+      title: p.title,
+      year: p.year!,
+      date: formatCategory((p.tags && p.tags[0]) || p.role || ''),
+      href: p.link || `/projects/${p.slug}`,
+      external: !!p.link,
+    }))
+    .sort((a, b) => Number(b.year) - Number(a.year));
 
   const newestWriting = writings[0]?.key;
 
@@ -110,7 +115,7 @@ export default async function Home() {
     <main className={s.page}>
       <div className={s.col}>
         <h1 className={s.name}>{name}</h1>
-        <p className={s.updated}>Designer</p>
+        <p className={s.updated}>Designeeer</p>
 
         <div className={s.bio}>
           {bio.map((p, i) => <p key={i}>{p}</p>)}
@@ -134,26 +139,7 @@ export default async function Home() {
           )}
         </div>
 
-        {projects.length > 0 && (
-          <section className={s.section}>
-            <p className={s.sectionLabel}>Work</p>
-            <ul className={s.rows}>
-              {projects.map((r) => (
-                <li className={s.row} key={r.key}>
-                  <Link
-                    className={s.workLink}
-                    href={r.href}
-                    {...(r.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                  >
-                    <span className={s.workCat}>{r.cat}</span>
-                    <span className={s.rowTitle}>{r.title}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
+        <List label="Featured" rows={featured} />
         <List label="Writing" rows={writings} newKey={newestWriting} />
 
         <footer className={s.footer}>

@@ -206,11 +206,11 @@
   gap: 1px;
 }
 .spwTitle {
-  color: #111;
+  color: rgba(0, 0, 0, 0.45);
   text-decoration: none;
   font-size: 14px;
 }
-a.spwTitle:hover { color: #555; }
+a.spwTitle:hover { color: rgba(0, 0, 0, 0.7); }
 .spwArtist {
   color: rgba(0, 0, 0, 0.4);
   font-size: 13px;
