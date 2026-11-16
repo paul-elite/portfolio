@@ -53,14 +53,14 @@
 .article {
   max-width: 40rem;
   font-family: var(--font-serif), Georgia, "Times New Roman", serif;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.6;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   color: #222;
 }
 .title {
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-  font-size: 15px;
+  font-size: 19px;
   font-weight: 700;
   color: #111;
   margin: 0;
@@ -77,8 +77,8 @@
 .article p { margin: 1.1rem 0; }
 .article p, .article li { text-wrap: pretty; }
 .article :where(h2, h3) {
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 400;
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+  font-weight: 600;
   color: #111;
   font-size: 16px;
   letter-spacing: -0.01em;
