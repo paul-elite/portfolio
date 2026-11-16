@@ -4,7 +4,7 @@
 
 .page {
   min-height: 100svh;
-  background: #fafafa;
+  background: #fbf8ef;
   color: #1f1f1f;
   -webkit-font-smoothing: antialiased;
 }
@@ -70,6 +70,7 @@
 }
 
 .article p { margin: 1.1rem 0; }
+.article p, .article li { text-wrap: pretty; }
 .article :where(h2, h3) {
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-weight: 400;
@@ -110,6 +111,7 @@
 }
 
 @media (max-width: 860px) {
-  .wrap { grid-template-columns: 1fr; gap: 2rem; }
+  .wrap { grid-template-columns: 1fr; gap: 2rem; padding: 2.5rem 1.25rem 5rem; }
   .toc { display: none; }
+  .article { max-width: none; }
 }
