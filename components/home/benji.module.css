@@ -249,3 +249,45 @@
 
 @media (max-width: 520px) {
 }
+
+/* ---- press / keyboard focus: a white card drawn out around the item (no blue ring, no movement) ---- */
+.workLink, .rowLink {
+  position: relative;
+  isolation: isolate;
+}
+.workLink::before, .rowLink::before {
+  content: '';
+  position: absolute;
+  inset: 2px -14px;
+  z-index: -1;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow:
+    0 0 0 0.5px rgba(130, 100, 20, 0.16),
+    0 2px 10px rgba(130, 100, 20, 0.1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease-out;
+}
+.workLink:active::before, .workLink:focus-visible::before, .rowLink:active::before, .rowLink:focus-visible::before {
+  opacity: 1;
+  transition-duration: 60ms;
+}
+.workLink:focus-visible, .rowLink:focus-visible { outline: none; }
+.link {
+  border-radius: 6px;
+  transition: color 0.2s ease, background-color 160ms ease-out, box-shadow 160ms ease-out;
+}
+/* Drawn on the link itself (not a positioned layer) so neighbouring commas stay on top */
+.link:active,
+.link:focus-visible {
+  outline: none;
+  background-color: #fff;
+  box-shadow:
+    0 0 0 4px #fff,
+    0 0 0 4.5px rgba(130, 100, 20, 0.16),
+    0 2px 10px 4px rgba(130, 100, 20, 0.1);
+  transition-duration: 60ms;
+}
+/* the pressed row stays fully visible even while the list dims the others */
+.rows .workLink:active, .rows .rowLink:active { opacity: 1; }

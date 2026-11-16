@@ -2,7 +2,14 @@ html, body {
   margin: 0;
   min-height: 100%;
   background: #fbf8ef;
-  color: #000;
+  color: #11271a;
+  /* No grey/blue flash when tapping links on phones; presses get the white card instead */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mouse/touch clicks never leave the browser's blue focus ring; keyboard focus keeps a visible state */
+:where(a, button, [tabindex]):focus:not(:focus-visible) {
+  outline: none;
 }
 
 /* Balance every paragraph's line lengths so no line is left with a lone word. */
