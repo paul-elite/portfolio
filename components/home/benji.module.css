@@ -210,6 +210,8 @@
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
   will-change: transform; /* turned by scroll in SpotifyNow */
 }
+/* Nothing playing: the idle disc sits back a little */
+.spwIdle { opacity: 0.66; }
 .spwDisc img {
   width: 100%;
   height: 100%;

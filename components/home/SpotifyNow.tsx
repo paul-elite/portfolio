@@ -65,7 +65,7 @@ export default function SpotifyNow() {
 
   return (
     <div className={s.spw}>
-      <span ref={discRef} className={`${s.spwDisc} ${playing ? s.spwSpin : ''}`}>
+      <span ref={discRef} className={`${s.spwDisc} ${playing ? s.spwSpin : s.spwIdle}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={art} alt="" />
       </span>
