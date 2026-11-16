@@ -2,7 +2,7 @@
 
 .shell {
   --side: clamp(264px, 22vw, 400px);
-  --page: #faf6eb; /* grey, 98% brightness */
+  --page: #fbf8ef; /* grey, 98% brightness */
   --surface: #fff;
   --border: rgba(130, 100, 20, 0.13);
   /* Two blue-leaning greys: ink for primary text (name, current menu item, socials), muted for
@@ -41,7 +41,7 @@
   outline: none;
   border-radius: 6px;
   box-shadow:
-    0 0 0 4px #fdfcf7,
+    0 0 0 4px #fefdfb,
     0 0 0 4.5px rgba(130, 100, 20, 0.18),
     0 2px 10px rgba(130, 100, 20, 0.1);
 }
@@ -983,7 +983,7 @@ img.socialMarkArt {
   inset: 2px -14px;
   z-index: -1;
   border-radius: 12px;
-  background: #fdfcf7;
+  background: #fefdfb;
   box-shadow:
     0 0 0 0.5px rgba(130, 100, 20, 0.16),
     0 2px 10px rgba(130, 100, 20, 0.1);
