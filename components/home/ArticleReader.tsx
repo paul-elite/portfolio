@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { Hedvig_Letters_Serif, Hedvig_Letters_Sans } from 'next/font/google';
 import r from './reader.module.css';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ArrowTurnBackwardIcon } from '@hugeicons/core-free-icons';
 
 // Hedvig serif for the body, Hedvig sans for headers (exposed as CSS vars).
 const serif = Hedvig_Letters_Serif({ subsets: ['latin'], weight: '400', variable: '--font-serif', display: 'swap' });
@@ -22,7 +24,10 @@ export default function ArticleReader({
   return (
     <main className={`${serif.variable} ${sans.variable} ${r.page}`}>
       <div className={r.topbar}>
-        <Link href="/" className={r.back}>← Back</Link>
+        <Link href="/" className={r.back}>
+          <HugeiconsIcon icon={ArrowTurnBackwardIcon} size={15} strokeWidth={1.6} aria-hidden="true" />
+          Back
+        </Link>
       </div>
       <div className={r.wrap}>
         <aside className={r.toc}>

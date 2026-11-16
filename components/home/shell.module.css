@@ -722,6 +722,9 @@ img.socialMarkArt {
 
 .shell .infoLink {
   align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 8px 14px;
   border-radius: 999px;
   background: var(--ink);

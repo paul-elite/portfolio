@@ -4,6 +4,8 @@ import { getProjectBySlug, getSiteConfig } from '@/lib/content-service';
 import { tocFromBlocks, headingId } from '@/lib/toc';
 import ContentBlocks from '@/components/content/ContentBlocks';
 import ArticleReader from '@/components/home/ArticleReader';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ArrowUpRight01Icon } from '@hugeicons/core-free-icons';
 
 export const revalidate = 60;
 
@@ -45,7 +47,7 @@ export default async function ProjectContent({ params }: { params: Promise<{ slu
       <ContentBlocks blocks={project.blocks} />
       {project.link && (
         <p>
-          <a href={project.link} target="_blank" rel="noopener noreferrer">Visit the project ↗</a>
+          <a href={project.link} target="_blank" rel="noopener noreferrer">Visit the project <HugeiconsIcon icon={ArrowUpRight01Icon} size={13} strokeWidth={1.8} aria-hidden="true" style={{ display: 'inline', verticalAlign: '-2px' }} /></a>
         </p>
       )}
     </ArticleReader>

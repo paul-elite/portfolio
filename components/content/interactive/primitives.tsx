@@ -1,6 +1,8 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react';
+import { Search01Icon, Clock01Icon, Cancel01Icon, ArrowRight02Icon, SquareLock01Icon } from '@hugeicons/core-free-icons';
 
 // Shared pieces for the interactive essay demos: a quiet frame, icons and small controls in the
 // site's grey palette, sized for the ~450px reading column.
@@ -76,23 +78,16 @@ export function Highlight({ text, query }: { text: string; query: string }) {
 }
 
 type IconProps = { className?: string };
-const stroke = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+const icon = (svg: IconSvgElement, size: number) =>
+  function Icon({ className }: IconProps) {
+    return <HugeiconsIcon icon={svg} size={size} strokeWidth={1.75} className={className} aria-hidden="true" />;
+  };
 
-export const SearchIcon = ({ className }: IconProps) => (
-  <svg width="14" height="14" viewBox="0 0 24 24" {...stroke} className={className} aria-hidden><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-);
-export const ClockIcon = ({ className }: IconProps) => (
-  <svg width="14" height="14" viewBox="0 0 24 24" {...stroke} className={className} aria-hidden><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
-);
-export const XIcon = ({ className }: IconProps) => (
-  <svg width="12" height="12" viewBox="0 0 24 24" {...stroke} className={className} aria-hidden><path d="M18 6 6 18M6 6l12 12" /></svg>
-);
-export const ArrowIcon = ({ className }: IconProps) => (
-  <svg width="12" height="12" viewBox="0 0 24 24" {...stroke} className={className} aria-hidden><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-);
-export const LockIcon = ({ className }: IconProps) => (
-  <svg width="14" height="14" viewBox="0 0 24 24" {...stroke} className={className} aria-hidden><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
-);
+export const SearchIcon = icon(Search01Icon, 14);
+export const ClockIcon = icon(Clock01Icon, 14);
+export const XIcon = icon(Cancel01Icon, 12);
+export const ArrowIcon = icon(ArrowRight02Icon, 12);
+export const LockIcon = icon(SquareLock01Icon, 14);
 
 /** A small product thumbnail: a tinted tile with a chair silhouette, so results have something to recognise */
 export function ChairThumb({ tone = '#e7e1d8', shape = 'lounge', size = 36 }: { tone?: string; shape?: 'lounge' | 'office' | 'dining' | 'arm' | 'sofa'; size?: number }) {

@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { Inter } from 'next/font/google';
 import styles from './shell.module.css';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Cancel01Icon, ArrowUpRight01Icon } from '@hugeicons/core-free-icons';
 
 // The book covers set their titles in Inter Medium, as in the Figma book component.
 const bookFont = Inter({ subsets: ['latin'], weight: ['500'], display: 'swap' });
@@ -134,7 +136,7 @@ export default function SectionBrowser({ title, layout, items }: Props) {
             <span>Info</span>
             {isPinned && (
               <button type="button" className={styles.close} onClick={() => setPinnedId(null)} aria-label="Close details">
-                ×
+                <HugeiconsIcon icon={Cancel01Icon} size={14} strokeWidth={1.8} aria-hidden="true" />
               </button>
             )}
           </div>
@@ -160,7 +162,8 @@ export default function SectionBrowser({ title, layout, items }: Props) {
 
           {shown.href && (
             <a className={styles.infoLink} href={shown.href} target="_blank" rel="noreferrer">
-              {shown.hrefLabel || 'Open'} ↗
+              {shown.hrefLabel || 'Open'}
+              <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} strokeWidth={1.8} aria-hidden="true" />
             </a>
           )}
         </aside>

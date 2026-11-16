@@ -4,6 +4,8 @@ import { getWritingBySlug, getSiteConfig } from '@/lib/content-service';
 import { tocFromBlocks } from '@/lib/toc';
 import ContentBlocks from '@/components/content/ContentBlocks';
 import ArticleReader from '@/components/home/ArticleReader';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ArrowUpRight01Icon } from '@hugeicons/core-free-icons';
 
 export const revalidate = 60;
 
@@ -36,7 +38,7 @@ export default async function WritingContent({ params }: { params: Promise<{ slu
       <ContentBlocks blocks={writing.blocks} />
       {writing.link && (
         <p>
-          <a href={writing.link} target="_blank" rel="noopener noreferrer">Read the original ↗</a>
+          <a href={writing.link} target="_blank" rel="noopener noreferrer">Read the original <HugeiconsIcon icon={ArrowUpRight01Icon} size={13} strokeWidth={1.8} aria-hidden="true" style={{ display: 'inline', verticalAlign: '-2px' }} /></a>
         </p>
       )}
     </ArticleReader>

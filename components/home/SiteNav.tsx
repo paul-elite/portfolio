@@ -7,6 +7,8 @@ import { iconColor } from '@/lib/icon-color';
 import type { PortfolioNavTarget } from '@/lib/content-model';
 import PortfolioNavigationIcon from '@/components/experience/PortfolioNavigationIcon';
 import styles from './shell.module.css';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Home03Icon } from '@hugeicons/core-free-icons';
 
 type NavLink = { id: string; label: string; href: string };
 type MenuLink = NavLink & { target?: PortfolioNavTarget; icon?: string };
@@ -45,9 +47,7 @@ function SocialMark({ link }: { link: SocialLink }) {
 
 function LobbyIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M4 10l7-6 7 6v7.5a.5.5 0 0 1-.5.5H13v-5H9v5H4.5a.5.5 0 0 1-.5-.5z" />
-    </svg>
+    <HugeiconsIcon icon={Home03Icon} className={className} strokeWidth={1.6} aria-hidden="true" />
   );
 }
 
