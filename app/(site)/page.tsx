@@ -5,57 +5,47 @@ import s from '@/components/home/benji.module.css';
 
 export const revalidate = 60;
 
-type Row = { key: string; title: string; year: string; date: string; href: string; external?: boolean };
+type Row = { key: string; title: string; cat: string; href: string; external?: boolean };
 
-function yearOf(iso: string) {
-  const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? (iso.match(/\d{4}/)?.[0] ?? '') : String(d.getFullYear());
+// The category/type label shown in the left rail: Essay (writings), Study / Design (projects).
+const CATEGORY_ALIASES: Record<string, string> = {
+  'case-study': 'Study',
+  'case study': 'Study',
+  'lead designer': 'Design',
+  designer: 'Design',
+  'design & development': 'Design',
+};
+function cap(x: string) {
+  return x ? x[0].toUpperCase() + x.slice(1) : x;
+}
+function formatCategory(raw: string) {
+  const c = raw.trim().toLowerCase();
+  if (CATEGORY_ALIASES[c]) return CATEGORY_ALIASES[c];
+  return cap(c.split(/[\s-]+/).pop() || c);
 }
 
-function monthDay(iso: string) {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '';
-  return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
-}
-
-function groupByYear(rows: Row[]) {
-  const map = new Map<string, Row[]>();
-  for (const r of rows) {
-    const arr = map.get(r.year) || [];
-    arr.push(r);
-    map.set(r.year, arr);
-  }
-  return [...map.entries()].sort((a, b) => Number(b[0]) - Number(a[0]));
-}
-
-function List({ label, rows, newKey }: { label: string; rows: Row[]; newKey?: string }) {
-  if (rows.length === 0) return null;
-  const groups = groupByYear(rows);
+function FeaturedList({ items, newKey }: { items: Row[]; newKey?: string }) {
+  if (items.length === 0) return null;
   return (
     <section className={s.section}>
-      <p className={s.sectionLabel}>{label}</p>
-      {groups.map(([year, items]) => (
-        <div className={s.group} key={year}>
-          <div className={s.groupYear}>{year}</div>
-          <ul className={s.rows}>
-            {items.map((r) => (
-              <li className={s.row} key={r.key}>
-                <Link
-                  className={s.rowLink}
-                  href={r.href}
-                  {...(r.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                >
-                  <span className={s.rowTitle}>
-                    {r.title}
-                    {r.key === newKey && <span className={s.new}>New</span>}
-                  </span>
-                  <span className={s.rowDate}>{r.date}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
+      <p className={s.sectionLabel}>Featured</p>
+      <ul className={s.rows}>
+        {items.map((r) => (
+          <li className={s.row} key={r.key}>
+            <Link
+              className={s.workLink}
+              href={r.href}
+              {...(r.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+            >
+              <span className={s.workCat}>{r.cat}</span>
+              <span className={s.rowTitle}>
+                {r.title}
+                {r.key === newKey && <span className={s.new}>New</span>}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
@@ -65,16 +55,15 @@ export default async function Home() {
   const name = config.name || 'Paul Elite';
   const bio = config.bio.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
 
-  // Everything is a "Featured" entry now — projects and writings together,
-  // each with its category on the right (projects: study/design; writings: essay).
+  // Everything is a "Featured" entry — projects and writings together, each with
+  // its type on the left (Study / Design / Essay). No dates.
   type Item = Row & { ts: number };
   const projectItems: Item[] = content.projects
     .filter((p) => p.year)
     .map((p) => ({
       key: `p-${p.slug}`,
       title: p.title,
-      year: p.year!,
-      date: p.year!,
+      cat: formatCategory((p.tags && p.tags[0]) || p.role || ''),
       href: p.link || `/projects/${p.slug}`,
       external: !!p.link,
       ts: new Date(`${p.year}-01-01T00:00:00Z`).getTime(),
@@ -84,8 +73,7 @@ export default async function Home() {
     .map((w) => ({
       key: `w-${w.slug}`,
       title: w.title,
-      year: yearOf(w.date!),
-      date: monthDay(w.date!),
+      cat: 'Essay',
       href: w.link || `/writings/${w.slug}`,
       external: !!w.link,
       ts: new Date(w.date!).getTime(),
@@ -132,7 +120,7 @@ export default async function Home() {
           )}
         </div>
 
-        <List label="Featured" rows={featured} newKey={newestKey} />
+        <FeaturedList items={featured} newKey={newestKey} />
 
         <footer className={s.footer}>
           <SpotifyNow />
