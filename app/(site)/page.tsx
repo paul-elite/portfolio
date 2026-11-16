@@ -92,13 +92,11 @@ export default async function Home() {
   if (config.social.instagram) socialBits.push(<a key="ig" className={s.link} href={config.social.instagram} target="_blank" rel="noopener noreferrer">Instagram</a>);
   if (config.social.email) socialBits.push(<a key="em" className={s.link} href={`mailto:${config.social.email}`}>email</a>);
 
-  const updated = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
   return (
     <main className={s.page}>
       <div className={s.col}>
         <h1 className={s.name}>{name}</h1>
-        <time className={s.updated}>Updated {updated}</time>
+        <p className={s.updated}>Designer</p>
 
         <div className={s.bio}>
           {bio.map((p, i) => <p key={i}>{p}</p>)}
