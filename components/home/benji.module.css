@@ -67,7 +67,7 @@
 
 /* inline links: same colour as text, a thin underline that darkens on hover */
 .link {
-  color: inherit;
+  color: #111;
   text-decoration: none;
   position: relative;
 }
