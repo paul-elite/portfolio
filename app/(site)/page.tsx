@@ -18,6 +18,20 @@ function yearOf(iso: string) {
   return Number.isNaN(d.getTime()) ? (iso.match(/\d{4}/)?.[0] ?? '') : String(d.getFullYear());
 }
 
+// Short, lowercase design category for the Work list's grey label.
+const CATEGORY_ALIASES: Record<string, string> = {
+  'case-study': 'study',
+  'case study': 'study',
+  'lead designer': 'design',
+  designer: 'design',
+  'design & development': 'design',
+};
+function formatCategory(raw: string) {
+  const c = raw.trim().toLowerCase();
+  if (CATEGORY_ALIASES[c]) return CATEGORY_ALIASES[c];
+  return c.split(/[\s-]+/).pop() || c; // fall back to the last word
+}
+
 function groupByYear(rows: Row[]) {
   const map = new Map<string, Row[]>();
   for (const r of rows) {
@@ -80,7 +94,7 @@ export default async function Home() {
   const projects: WorkRow[] = content.projects.map((p) => ({
     key: `p-${p.slug}`,
     title: p.title,
-    cat: (p.tags && p.tags[0]) || p.role || '',
+    cat: formatCategory((p.tags && p.tags[0]) || p.role || ''),
     href: p.link || '/projects',
     external: !!p.link,
   }));
