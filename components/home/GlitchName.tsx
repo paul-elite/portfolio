@@ -10,7 +10,7 @@ import g from './glitch.module.css';
 // lowercase, tabular digits, a few same-width symbols), so the word keeps its
 // shape and colour while it scrambles. No i/l/j/t/f/r (narrow) or m/w (wide).
 const POOL = 'abcdeghknopqsuvxyz0123456789#$?';
-const TICK_MS = 45; // how often unlocked letters change
+const TICK_MS = 90; // how often unlocked letters change (half the original 45ms rate)
 const MIN_SETTLE_MS = 168; // 250ms x 0.67
 const MAX_SETTLE_MS = 637; // 950ms x 0.67
 
