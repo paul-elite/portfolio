@@ -21,13 +21,16 @@ const ACCENTS = [
   '#ba90fe', '#9fe000', '#ff4af1', '#ffe401', '#a3ac77', '#695f84',
 ];
 const ACCENT_CHANCE = 0.3; // per scrambling character, per tick
+// Every other scrambling character is a light neutral (the theme's muted ink);
+// the dark ink only appears once a letter settles.
+const NEUTRAL = 'rgba(5, 46, 22, 0.3)';
 
 function randomChar() {
   return POOL[Math.floor(Math.random() * POOL.length)];
 }
 
-function randomAccent() {
-  return Math.random() < ACCENT_CHANCE ? ACCENTS[Math.floor(Math.random() * ACCENTS.length)] : undefined;
+function scrambleColor() {
+  return Math.random() < ACCENT_CHANCE ? ACCENTS[Math.floor(Math.random() * ACCENTS.length)] : NEUTRAL;
 }
 
 export default function GlitchName({ name, className }: { name: string; className?: string }) {
@@ -52,7 +55,7 @@ export default function GlitchName({ name, className }: { name: string; classNam
         last = now;
         setCells(
           chars.map((ch, i) =>
-            ch === ' ' || t >= settleAt[i] ? { ch } : { ch: randomChar(), color: randomAccent() },
+            ch === ' ' || t >= settleAt[i] ? { ch } : { ch: randomChar(), color: scrambleColor() },
           ),
         );
       }
