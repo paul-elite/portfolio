@@ -10,7 +10,7 @@
 .page {
   min-height: 100svh;
   background: #fbf8ef;
-  color: #11271a;
+  color: #1f1f1f;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -46,19 +46,19 @@
   box-shadow:
     0 0 0 0.5px rgba(140, 110, 30, 0.13),
     0 1px 4px rgba(140, 110, 30, 0.1);
-  color: rgba(5, 46, 22, 0.49);
+  color: rgba(0, 0, 0, 0.4);
   text-decoration: none;
   transition: color 0.18s ease, transform 0.15s ease-out;
 }
-.back:hover { color: #11271a; }
+.back:hover { color: #111; }
 .back:active { transform: scale(0.97); }
 .tocNav { display: flex; flex-direction: column; gap: 0.55rem; }
 .tocLink {
-  color: rgba(5, 46, 22, 0.49);
+  color: rgba(0, 0, 0, 0.4);
   text-decoration: none;
   transition: color 0.18s ease;
 }
-.tocLink:hover { color: #11271a; }
+.tocLink:hover { color: #111; }
 
 /* ---- right: the article ---- */
 .article {
@@ -67,7 +67,7 @@
   font-size: 14px;
   line-height: 1.52; /* 1.6 - 5% */
   letter-spacing: 0.45px;
-  color: #11271a;
+  color: #222;
 }
 /* Title + date mirror the home header: the name (.name) and the line under it (.updated) */
 .title {
@@ -76,7 +76,7 @@
   font-weight: 400;
   -webkit-text-stroke: 0.35px currentColor; /* Medium look (Hedvig is 400-only) */
   letter-spacing: 0.5px;
-  color: #11271a;
+  color: #111;
   margin: 0;
 }
 .date {
@@ -84,7 +84,7 @@
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 14px;
   letter-spacing: -0.006em;
-  color: rgba(5, 46, 22, 0.49);
+  color: rgba(0, 0, 0, 0.4);
   margin: 0 0 2.5rem;
 }
 
@@ -95,12 +95,12 @@
    #222 to #545454 for a lighter page. */
 .article :where(p, li, blockquote) {
   -webkit-text-stroke: 0.125px currentColor;
-  color: rgba(5, 46, 22, 0.87);
+  color: #545454;
 }
 .article :where(h2, h3) {
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-weight: 600;
-  color: #11271a;
+  color: #111;
   font-size: 15px;
   letter-spacing: 0.5px;
   margin: 2.5rem 0 0.25rem;
@@ -111,13 +111,13 @@
 .article :where(ul, ol) { padding-left: 1.3rem; margin: 1.1rem 0; }
 .article li { margin: 0.35rem 0; }
 .article a { color: inherit; text-decoration: underline; text-decoration-color: #cfcfcf; text-underline-offset: 2px; }
-.article a:hover { text-decoration-color: rgba(5, 46, 22, 0.69); }
+.article a:hover { text-decoration-color: #666; }
 .article :where(figure, img) { margin: 1.75rem 0; }
 .article img { width: 100%; height: auto; display: block; border-radius: 10px; }
 .article figcaption {
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 13px;
-  color: rgba(5, 46, 22, 0.49);
+  color: rgba(0, 0, 0, 0.4);
   margin-top: 0.6rem;
   text-align: center;
 }
@@ -125,7 +125,7 @@
   margin: 1.5rem 0;
   padding-left: 1rem;
   border-left: 2px solid #d9cdaa;
-  color: rgba(5, 46, 22, 0.89);
+  color: #444;
 }
 .article pre {
   background: #f1f1f1;

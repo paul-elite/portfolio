@@ -5,7 +5,7 @@
 .page {
   min-height: 100svh;
   background: #fbf8ef;
-  color: rgba(5, 46, 22, 0.54);
+  color: rgba(0, 0, 0, 0.45);
   font-size: 14px;
   line-height: 1.45rem;
   letter-spacing: -0.006em;
@@ -79,25 +79,25 @@
   font-size: 17px;
   font-weight: 400;
   -webkit-text-stroke: 0.35px currentColor; /* one step under bold: Hedvig is 400-only, so a Medium look */
-  color: #04140a; /* the stroke renders lighter and slightly greyer; this lands closest to the #11271a dark text */
+  color: #111;
 }
 .updated {
   display: block;
   margin: 0;
-  color: rgba(5, 46, 22, 0.49);
+  color: rgba(0, 0, 0, 0.4);
 }
 
 .bio { margin-left: var(--indent); }
 .bio p { margin: 0; padding-top: 1rem; }
-.bio strong { color: #11271a; font-weight: 500; }
+.bio strong { color: #000; font-weight: 500; }
 
 /* inline links: same colour as text, a thin underline that darkens on hover */
 .link {
-  color: #11271a;
+  color: #111;
   text-decoration: none;
   transition: color 0.2s ease;
 }
-.link:hover { color: rgba(5, 46, 22, 0.84); }
+.link:hover { color: #555; }
 
 /* ---- a year-grouped list (Writing / Work) ---- */
 .section { padding-top: 3rem; }
@@ -105,7 +105,7 @@
   margin: 0 0 0 var(--indent);
   padding-bottom: 0.75rem;
   border-bottom: 0.5px solid rgba(130, 100, 20, 0.13);
-  color: rgba(5, 46, 22, 0.49);
+  color: rgba(0, 0, 0, 0.4);
   font-weight: 400;
   font-size: 14px;
 }
@@ -116,7 +116,7 @@
   column-gap: var(--rg);
 }
 .groupYear {
-  color: rgba(5, 46, 22, 0.39);
+  color: rgba(0, 0, 0, 0.3);
   padding-top: 0.75rem;
 }
 .rows { list-style: none; margin: 0; padding: 0; }
@@ -149,7 +149,7 @@
   text-decoration: none;
   transition: opacity 0.18s ease;
 }
-.workCat { color: rgba(5, 46, 22, 0.39); }
+.workCat { color: rgba(0, 0, 0, 0.3); }
 .section > .rows > li:first-child { border-top: none; }
 /* Featured dividers start at the title column, like the rule under the label */
 .section > .rows > .row { position: relative; border-top: none; }
@@ -162,17 +162,17 @@
   border-top: 0.5px solid rgba(130, 100, 20, 0.13);
 }
 
-.rowTitle { color: #11271a; display: inline-flex; align-items: center; gap: 0.5rem; }
+.rowTitle { color: #111; display: inline-flex; align-items: center; gap: 0.5rem; }
 .rowTitle::after {
   content: '↗';
   font-size: 11px;
-  color: rgba(5, 46, 22, 0.44);
+  color: rgba(0, 0, 0, 0.35);
   opacity: 0;
   transform: translateX(-0.15rem);
   transition: opacity 0.14s ease, transform 0.14s ease;
 }
 .rowLink:hover .rowTitle::after { opacity: 1; transform: translateX(0); }
-.rowDate { color: rgba(5, 46, 22, 0.44); white-space: nowrap; }
+.rowDate { color: rgba(0, 0, 0, 0.35); white-space: nowrap; }
 
 .new {
   color: rgb(255, 0, 170);
@@ -187,7 +187,7 @@
 .footer {
   margin-top: 3rem;
   padding: 2.5rem 0 1rem;
-  color: rgba(5, 46, 22, 0.49);
+  color: rgba(0, 0, 0, 0.4);
   font-size: 13px;
 }
 /* now-playing widget */
@@ -239,7 +239,7 @@
 }
 .spwTitle,
 .spwArtist {
-  color: rgba(5, 46, 22, 0.49);
+  color: rgba(0, 0, 0, 0.4);
   font-size: 13px;
   text-decoration: none;
 }
