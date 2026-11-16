@@ -1,11 +1,8 @@
 import Link from 'next/link';
-import { Hedvig_Letters_Serif } from 'next/font/google';
 import { getSiteConfig, getPortfolioContent } from '@/lib/content-service';
 import SpotifyNow from '@/components/home/SpotifyNow';
 import GlitchName from '@/components/home/GlitchName';
 import s from '@/components/home/benji.module.css';
-
-const serif = Hedvig_Letters_Serif({ subsets: ['latin'], weight: '400', display: 'swap' });
 
 export const revalidate = 60;
 
@@ -32,7 +29,7 @@ function FeaturedList({ items, newKey }: { items: Row[]; newKey?: string }) {
   if (items.length === 0) return null;
   return (
     <section className={s.section}>
-      <p className={`${s.sectionLabel} ${serif.className}`}>Featured</p>
+      <p className={s.sectionLabel}>Featured</p>
       <ul className={s.rows}>
         {items.map((r) => (
           <li className={s.row} key={r.key}>
