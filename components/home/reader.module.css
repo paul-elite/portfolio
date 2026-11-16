@@ -62,7 +62,7 @@
 
 /* ---- right: the article ---- */
 .article {
-  max-width: 620px; /* 40rem - 20px; mobile goes full width below */
+  max-width: 470px; /* ~65-70 characters a line in Hedvig serif 14px; mobile goes full width below */
   font-family: var(--font-serif), Georgia, "Times New Roman", serif;
   font-size: 14px;
   line-height: 1.52; /* 1.6 - 5% */
