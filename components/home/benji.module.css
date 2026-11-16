@@ -52,7 +52,7 @@
 
 .name {
   margin: 0;
-  font-size: 14px;
+  font-size: 15px; /* 1px larger than the role/title line below */
   font-weight: 700;
   color: #111;
 }
