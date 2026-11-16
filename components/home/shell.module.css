@@ -4,7 +4,7 @@
   --side: clamp(264px, 22vw, 400px);
   --page: #fbf8ef; /* grey, 98% brightness */
   --surface: #fff;
-  --border: #e6ddc2;
+  --border: rgba(130, 100, 20, 0.13);
   /* Two blue-leaning greys: ink for primary text (name, current menu item, socials), muted for
      secondary (bio, resting menu items, meta). */
   --ink: #262b36;
@@ -12,7 +12,7 @@
   /* One motion language for every hover/press/current change. */
   --ease: cubic-bezier(0.2, 0, 0, 1);
   --fast: 200ms;
-  --divider: rgba(150, 120, 40, 0.16);
+  --divider: rgba(130, 100, 20, 0.1);
 
   display: grid;
   grid-template-columns: var(--side) minmax(0, 1fr);

@@ -79,7 +79,7 @@
   letter-spacing: -0.01em;
   margin: 2.5rem 0 0.25rem;
   padding-top: 1.25rem;
-  border-top: 0.5px solid #e6ddc2;
+  border-top: 0.5px solid rgba(130, 100, 20, 0.13);
   scroll-margin-top: 4.5rem;
 }
 .article :where(ul, ol) { padding-left: 1.3rem; margin: 1.1rem 0; }

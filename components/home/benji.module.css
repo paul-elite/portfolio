@@ -78,7 +78,7 @@
 .sectionLabel {
   margin: 0;
   padding-bottom: 0.75rem;
-  border-bottom: 0.5px solid #e6ddc2;
+  border-bottom: 0.5px solid rgba(130, 100, 20, 0.13);
   color: rgba(0, 0, 0, 0.4);
   font-weight: 400;
   font-size: 14px;
@@ -95,7 +95,7 @@
 }
 .rows { list-style: none; margin: 0; padding: 0; }
 
-.row { border-top: 0.5px solid #e6ddc2; }
+.row { border-top: 0.5px solid rgba(130, 100, 20, 0.13); }
 .group:first-of-type .rows > li:first-child .row { border-top: none; }
 .rowLink {
   display: flex;
