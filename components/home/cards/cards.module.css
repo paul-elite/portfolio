@@ -139,66 +139,10 @@
 .cursorLayer .cursorX,
 .cursorLayer .cursorY { width: 100%; height: 100%; }
 
-/* ================= 2. search ================= */
-.stageSearch { display: grid; place-items: start center; padding-top: 34px; }
-.searchWrap { position: relative; width: 300px; max-width: calc(100% - 36px); }
-.field {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 38px;
-  padding: 0 12px;
-  border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12), 0 2px 6px -2px rgba(130, 100, 20, 0.18);
-  font-size: 13px;
-  transition: box-shadow 180ms ease;
-}
-.fieldFocus { box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55), 0 0 0 4px rgba(0, 0, 0, 0.06); }
-.fieldIcon { color: rgba(0, 0, 0, 0.45); flex: none; }
-.fieldText { color: #111; display: inline-flex; align-items: center; white-space: pre; }
-.fieldPlaceholder { color: rgba(0, 0, 0, 0.35); display: inline-flex; align-items: center; }
-.caret {
-  display: inline-block;
-  width: 1px;
-  height: 15px;
-  margin-left: 1px;
-  background: #111;
-  animation: caret 1s steps(1) infinite;
-}
-@keyframes caret { 50% { opacity: 0; } }
-.panel {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 44px;
-  padding: 5px;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 14px 30px -12px rgba(130, 100, 20, 0.3);
-  transform-origin: top center;
-  opacity: 0;
-  transform: scale(0.96) translateY(-4px);
-  transition: opacity 180ms ease-out, transform 200ms ease-out;
-}
-.panelOpen { opacity: 1; transform: none; }
-.suggestion {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  height: 32px;
-  padding: 0 8px;
-  border-radius: 8px;
-  font-size: 12.5px;
-  color: rgba(0, 0, 0, 0.6);
-  transition: background-color 120ms ease;
-}
-.suggestion b { color: #111; font-weight: 500; }
-.suggestionOn { background: #f4efe3; }
-.sgIcon { color: rgba(0, 0, 0, 0.35); flex: none; }
-.sgLabel { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sgAction { font-size: 11px; color: rgba(0, 0, 0, 0.35); }
-.suggestionOn .sgAction { color: rgba(0, 0, 0, 0.6); }
+/* ================= 2. search (Stageshow kit) ================= */
+/* The kit's Stage scales its 400 × 300 design to this frame and switches to its compact design on narrow cards */
+.stageKit { display: block; }
+.stageKit > * { width: 100%; }
 
 /* ================= 3. phone ================= */
 .stagePhone { display: grid; place-items: start center; padding-top: 26px; }
@@ -248,6 +192,5 @@
 .tapOn { opacity: 1; transform: scale(0.9); }
 
 @media (prefers-reduced-motion: reduce) {
-  .cursorX, .cursorY, .rollStrip, .scrub, .scrubDot, .panel, .phoneImg, .tap { transition: none; }
-  .caret { animation: none; }
+  .cursorX, .cursorY, .rollStrip, .scrub, .scrubDot, .phoneImg, .tap { transition: none; }
 }

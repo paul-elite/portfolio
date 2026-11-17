@@ -42,3 +42,7 @@ next-env.d.ts
 
 # Local data
 /data/
+
+# Agent skill working files (preview installs, filmed contact sheets)
+/.agents/skills/*/node_modules
+/.agents/skills/*/shots

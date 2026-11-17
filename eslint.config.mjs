@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Third-party agent skills (npx skills add …): not site code.
     ".agents/**",
+    // Vendored Stageshow kit (MIT, benjitaylor/skills): kept as shipped.
+    "components/stageshow/kit/**",
   ]),
 ]);
 

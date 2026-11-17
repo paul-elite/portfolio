@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { SearchIcon, ChairThumb } from '@/components/content/interactive/primitives';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import DesigningSearch from '@/components/stageshow/designing-search';
 import c from './cards.module.css';
 
 /* Stageshow-style feature cards: each card plays one short, looping piece of
@@ -162,57 +162,12 @@ function ChartDemo() {
   );
 }
 
-/* ---------- 2. Study: click the field, type, suggestions say what they'll do, pick one ---------- */
-
-const QUERY = 'lounge ch';
-const SUGGESTIONS: { label: ReactNode; action: 'Search' | 'Open'; thumb?: boolean }[] = [
-  { label: <><b>lounge ch</b>air</>, action: 'Search' },
-  { label: 'Lounge chair, oak', action: 'Open', thumb: true },
-  { label: <><b>lounge ch</b>airs outdoor</>, action: 'Search' },
-];
-// 0 rest, 1 move to field, 2 press, 3..(3+Q-1) type, then panel, hl0, hl1, press, chosen, reset
-const T0 = 3;
-const SEARCH_STEPS = [600, 700, 220, ...[...QUERY].map(() => 95), 380, 520, 520, 200, 1300, 500];
+/* ---------- 2. Study: Designing Search, built with the Stageshow kit ---------- */
 
 function SearchDemo() {
-  const { ref, step } = useLoop(SEARCH_STEPS, T0 + QUERY.length + 1);
-  const typed = step >= T0 ? QUERY.slice(0, Math.min(QUERY.length, step - T0 + 1)) : '';
-  const afterType = T0 + QUERY.length; // panel opens
-  const open = step >= afterType && step < afterType + 4;
-  const hl = step === afterType + 1 ? 0 : step === afterType + 2 || step === afterType + 3 ? 1 : -1;
-  const chosen = step === afterType + 4;
-  const focused = step >= 2 && step < SEARCH_STEPS.length - 1;
-  const value = chosen ? 'Lounge chair, oak' : typed;
-
-  // cursor positions (px within the 300-wide stage window)
-  let cur = { x: 250, y: 150, ms: 600, pressed: false, hidden: true };
-  if (step === 1 || step === 2) cur = { x: 112, y: 30, ms: 700, pressed: step === 2, hidden: false };
-  else if (step > 2 && step < afterType + 1) cur = { x: 112, y: 30, ms: 300, pressed: false, hidden: false };
-  else if (hl === 0) cur = { x: 150, y: 73, ms: 420, pressed: false, hidden: false };
-  else if (hl === 1) cur = { x: 150, y: 105, ms: 420, pressed: step === afterType + 3, hidden: false };
-  else if (chosen) cur = { x: 170, y: 118, ms: 500, pressed: false, hidden: false };
-
   return (
-    <div ref={ref} className={`${c.stage} ${c.stageSearch}`}>
-      <div className={c.searchWrap}>
-        <div className={`${c.field} ${focused ? c.fieldFocus : ''}`}>
-          <SearchIcon className={c.fieldIcon} />
-          <span className={value ? c.fieldText : c.fieldPlaceholder}>
-            {value || 'Search chairs'}
-            {focused && !chosen && <span className={c.caret} />}
-          </span>
-        </div>
-        <div className={`${c.panel} ${open ? c.panelOpen : ''}`} aria-hidden={!open}>
-          {SUGGESTIONS.map((sg, i) => (
-            <div key={i} className={`${c.suggestion} ${hl === i ? c.suggestionOn : ''}`}>
-              {sg.thumb ? <ChairThumb size={22} tone="#ece4d6" /> : <SearchIcon className={c.sgIcon} />}
-              <span className={c.sgLabel}>{sg.label}</span>
-              <span className={c.sgAction}>{sg.action}</span>
-            </div>
-          ))}
-        </div>
-        <Cursor {...cur} />
-      </div>
+    <div className={`${c.stage} ${c.stageKit}`}>
+      <DesigningSearch />
     </div>
   );
 }

@@ -2,28 +2,12 @@ import Link from 'next/link';
 import { getSiteConfig, getPortfolioContent } from '@/lib/content-service';
 import SpotifyNow from '@/components/home/SpotifyNow';
 import GlitchName from '@/components/home/GlitchName';
+import { getFeatured, newestKey } from '@/lib/featured';
 import s from '@/components/home/benji.module.css';
 
 export const revalidate = 60;
 
 type Row = { key: string; title: string; cat: string; href: string; external?: boolean };
-
-// The category/type label shown in the left rail: Essay (writings), Study / Design (projects).
-const CATEGORY_ALIASES: Record<string, string> = {
-  'case-study': 'Study',
-  'case study': 'Study',
-  'lead designer': 'Design',
-  designer: 'Design',
-  'design & development': 'Design',
-};
-function cap(x: string) {
-  return x ? x[0].toUpperCase() + x.slice(1) : x;
-}
-function formatCategory(raw: string) {
-  const c = raw.trim().toLowerCase();
-  if (CATEGORY_ALIASES[c]) return CATEGORY_ALIASES[c];
-  return cap(c.split(/[\s-]+/).pop() || c);
-}
 
 function FeaturedList({ items, newKey }: { items: Row[]; newKey?: string }) {
   if (items.length === 0) return null;
@@ -56,31 +40,11 @@ export default async function Home() {
   const name = config.name || 'Paul Elite';
   const bio = config.bio.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
 
-  // Everything is a "Featured" entry — projects and writings together, each with
-  // its type on the left (Study / Design / Essay). No dates.
-  type Item = Row & { ts: number };
-  const projectItems: Item[] = content.projects
-    .filter((p) => p.year)
-    .map((p) => ({
-      key: `p-${p.slug}`,
-      title: p.title,
-      cat: formatCategory((p.tags && p.tags[0]) || p.role || ''),
-      href: p.link || `/projects/${p.slug}`,
-      external: !!p.link,
-      ts: new Date(`${p.year}-01-01T00:00:00Z`).getTime(),
-    }));
-  const writingItems: Item[] = content.writings
-    .filter((w) => w.date)
-    .map((w) => ({
-      key: `w-${w.slug}`,
-      title: w.title,
-      cat: 'Essay',
-      href: w.link || `/writings/${w.slug}`,
-      external: !!w.link,
-      ts: new Date(w.date!).getTime(),
-    }));
-  const featured: Row[] = [...projectItems, ...writingItems].sort((a, b) => b.ts - a.ts);
-  const newestKey = featured[0]?.key;
+  // Everything is a "Featured" entry (projects and writings together, pinned first),
+  // each with its type on the left (Study / Design / Essay). No dates.
+  const featuredItems = getFeatured(content);
+  const featured: Row[] = featuredItems;
+  const newest = newestKey(featuredItems);
 
   const socialBits: React.ReactNode[] = [];
   if (config.social.twitter) socialBits.push(<a key="x" className={s.link} href={config.social.twitter} target="_blank" rel="noopener noreferrer">X</a>);
@@ -121,7 +85,7 @@ export default async function Home() {
           )}
         </div>
 
-        <FeaturedList items={featured} newKey={newestKey} />
+        <FeaturedList items={featured} newKey={newest} />
 
         <footer className={s.footer}>
           <SpotifyNow />
