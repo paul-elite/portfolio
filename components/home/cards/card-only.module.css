@@ -1,0 +1,11 @@
+/* A project page that is only its feature card, centered on the page ground */
+.page {
+  display: grid;
+  place-items: center;
+  min-height: 100svh;
+  padding: 24px 16px;
+  background: #fbf8ef;
+}
+.card {
+  width: min(480px, 100%);
+}

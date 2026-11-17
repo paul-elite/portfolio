@@ -4,10 +4,14 @@ import { getProjectBySlug, getSiteConfig } from '@/lib/content-service';
 import { tocFromBlocks, headingId } from '@/lib/toc';
 import ContentBlocks from '@/components/content/ContentBlocks';
 import ArticleReader from '@/components/home/ArticleReader';
+import { SearchDemo } from '@/components/home/cards/FeatureCards';
+import only from '@/components/home/cards/card-only.module.css';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { ArrowUpRight01Icon } from '@hugeicons/core-free-icons';
 
 export const revalidate = 60;
+
+const CARD_ONLY = 'search-interfaces';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -21,6 +25,18 @@ export default async function ProjectContent({ params }: { params: Promise<{ slu
   const { slug } = await params;
   const project = await getProjectBySlug(slug);
   if (!project) notFound();
+
+  // For now the Designing Search page is only its feature card, nothing else.
+  // Its case study stays in the database and comes back by removing this.
+  if (slug === CARD_ONLY) {
+    return (
+      <main className={only.page}>
+        <div className={only.card} data-ss-fill>
+          <SearchDemo />
+        </div>
+      </main>
+    );
+  }
 
   const cs = project.caseStudy;
   const csSections: [string, string | undefined][] = [

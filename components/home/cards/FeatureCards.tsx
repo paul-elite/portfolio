@@ -164,7 +164,7 @@ function ChartDemo() {
 
 /* ---------- 2. Study: Designing Search, built with the Stageshow kit ---------- */
 
-function SearchDemo() {
+export function SearchDemo() {
   return (
     <div className={`${c.stage} ${c.stageKit}`}>
       <DesigningSearch />
