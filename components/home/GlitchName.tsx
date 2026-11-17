@@ -11,8 +11,8 @@ import g from './glitch.module.css';
 // shape and colour while it scrambles. No i/l/j/t/f/r (narrow) or m/w (wide).
 const POOL = 'abcdeghknopqsuvxyz0123456789#$?';
 const TICK_MS = 60; // how often unlocked letters change
-const MIN_SETTLE_MS = 168; // 250ms x 0.67
-const MAX_SETTLE_MS = 637; // 950ms x 0.67
+const MIN_SETTLE_MS = 252; // 168ms x 1.5
+const MAX_SETTLE_MS = 956; // 637ms x 1.5
 
 // Saturated accents that flash on some scrambling characters:
 // navy, orange, sky, yellow, then purple, lime, magenta, vivid yellow, sage, slate.
