@@ -4,7 +4,8 @@ import { supabase, Settings, defaultSettings } from '@/lib/supabase';
 import { mapIllustration, mapProject, mapSettings } from '@/lib/content-adapters';
 import { withSettingsIconFallbacks } from '@/lib/settings-icon-assets';
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+// No fallback: without ADMIN_PASSWORD configured, every admin request is refused.
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 async function loadSettings(): Promise<Settings> {
   try {
@@ -89,6 +90,7 @@ async function saveSettings(settings: Settings): Promise<Settings> {
 }
 
 function checkAuth(request: NextRequest): boolean {
+  if (!ADMIN_PASSWORD) return false;
   const authHeader = request.headers.get('authorization');
   if (!authHeader) return false;
   const password = authHeader.replace('Bearer ', '');

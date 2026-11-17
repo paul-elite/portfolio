@@ -3,9 +3,11 @@ import { supabase } from '@/lib/supabase';
 
 // Using Supabase Storage for file uploads
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+// No fallback: without ADMIN_PASSWORD configured, every admin request is refused.
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 function checkAuth(request: NextRequest): boolean {
+  if (!ADMIN_PASSWORD) return false;
   const authHeader = request.headers.get('authorization');
   if (!authHeader) return false;
   const password = authHeader.replace('Bearer ', '');
