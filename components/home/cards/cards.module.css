@@ -1,0 +1,253 @@
+/* Feature cards: quiet off-white cards under a long, soft shadow on the cream page. */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 28px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 18px;
+  -webkit-tap-highlight-color: transparent;
+}
+.card:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px #fbf8ef, 0 0 0 5px rgba(130, 100, 20, 0.35);
+}
+
+/* ---- stage: the card face where the demo plays ---- */
+.stage,
+.stage * {
+  box-sizing: border-box;
+}
+.stage {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  min-height: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #fefdfb;
+  box-shadow:
+    0 0 0 0.5px rgba(130, 100, 20, 0.16),
+    0 1px 2px rgba(130, 100, 20, 0.06),
+    0 18px 40px -18px rgba(130, 100, 20, 0.28);
+  transition: box-shadow 200ms ease;
+  isolation: isolate;
+}
+.card:hover .stage {
+  box-shadow:
+    0 0 0 0.5px rgba(130, 100, 20, 0.2),
+    0 1px 2px rgba(130, 100, 20, 0.08),
+    0 24px 48px -18px rgba(130, 100, 20, 0.34);
+}
+
+/* ---- caption ---- */
+.caption {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  padding: 0 4px;
+  font-size: 14px;
+}
+.cat { color: rgba(0, 0, 0, 0.35); flex: none; }
+.title {
+  color: #111;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- cursor ---- */
+.cursorX,
+.cursorY {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+}
+.cursorX {
+  z-index: 5;
+  pointer-events: none;
+  transition-property: transform, opacity;
+  transition-timing-function: cubic-bezier(0.45, 0, 0.25, 1);
+}
+.cursorY {
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); /* y leads x: a shallow arc */
+}
+.cursor {
+  display: block;
+  filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.25));
+  transform-origin: 3px 2px;
+  transition: transform 120ms ease-out;
+}
+.cursorPressed { transform: scale(0.82); }
+
+/* ---- rolling digits ---- */
+.roll { display: inline-flex; font-variant-numeric: tabular-nums; line-height: 1.15; white-space: pre; }
+.rollCol { display: inline-block; height: 1.15em; line-height: 1.15; overflow: hidden; vertical-align: top; }
+.rollStrip {
+  display: flex;
+  flex-direction: column;
+  transition: transform 320ms cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+/* rows are taller than the 1.15em window, so neighbouring digits never peek in */
+.rollStrip > span { height: 1.8em; line-height: 1.8; }
+
+/* ================= 1. chart ================= */
+.stageChart {
+  display: grid;
+  place-items: end center;
+  padding: 26px 0 0 26px;
+}
+.window {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px 0 0 0;
+  background: #fff;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.08), 0 10px 30px -12px rgba(130, 100, 20, 0.25);
+  padding: 18px 0 0 18px;
+  display: flex;
+  flex-direction: column;
+}
+.chartHead { display: flex; flex-direction: column; gap: 4px; padding-right: 18px; }
+.chartLabel { font-size: 11px; color: rgba(0, 0, 0, 0.4); }
+.chartValue { font-size: 26px; font-weight: 600; color: #111; letter-spacing: -0.01em; line-height: 1; white-space: pre; }
+.chartSub { font-size: 11px; color: rgba(0, 0, 0, 0.35); transition: opacity 200ms ease; }
+.chartArea { position: relative; flex: 1; margin-top: 10px; }
+.chart { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; }
+.scrub { transition: transform 240ms cubic-bezier(0.45, 0, 0.25, 1), opacity 200ms ease; }
+.scrubDot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: -4px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 1.6px #f5561f;
+  transition: left 240ms cubic-bezier(0.45, 0, 0.25, 1), top 240ms cubic-bezier(0.45, 0, 0.25, 1), opacity 200ms ease;
+}
+/* Percent-driven cursor: full-size wrappers so translate(%) maps to the chart area */
+.cursorLayer { position: absolute; inset: 0; pointer-events: none; }
+.cursorLayer .cursorX,
+.cursorLayer .cursorY { width: 100%; height: 100%; }
+
+/* ================= 2. search ================= */
+.stageSearch { display: grid; place-items: start center; padding-top: 34px; }
+.searchWrap { position: relative; width: 300px; max-width: calc(100% - 36px); }
+.field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12), 0 2px 6px -2px rgba(130, 100, 20, 0.18);
+  font-size: 13px;
+  transition: box-shadow 180ms ease;
+}
+.fieldFocus { box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55), 0 0 0 4px rgba(0, 0, 0, 0.06); }
+.fieldIcon { color: rgba(0, 0, 0, 0.45); flex: none; }
+.fieldText { color: #111; display: inline-flex; align-items: center; white-space: pre; }
+.fieldPlaceholder { color: rgba(0, 0, 0, 0.35); display: inline-flex; align-items: center; }
+.caret {
+  display: inline-block;
+  width: 1px;
+  height: 15px;
+  margin-left: 1px;
+  background: #111;
+  animation: caret 1s steps(1) infinite;
+}
+@keyframes caret { 50% { opacity: 0; } }
+.panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 44px;
+  padding: 5px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 14px 30px -12px rgba(130, 100, 20, 0.3);
+  transform-origin: top center;
+  opacity: 0;
+  transform: scale(0.96) translateY(-4px);
+  transition: opacity 180ms ease-out, transform 200ms ease-out;
+}
+.panelOpen { opacity: 1; transform: none; }
+.suggestion {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  color: rgba(0, 0, 0, 0.6);
+  transition: background-color 120ms ease;
+}
+.suggestion b { color: #111; font-weight: 500; }
+.suggestionOn { background: #f4efe3; }
+.sgIcon { color: rgba(0, 0, 0, 0.35); flex: none; }
+.sgLabel { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sgAction { font-size: 11px; color: rgba(0, 0, 0, 0.35); }
+.suggestionOn .sgAction { color: rgba(0, 0, 0, 0.6); }
+
+/* ================= 3. phone ================= */
+.stagePhone { display: grid; place-items: start center; padding-top: 26px; }
+.phone {
+  width: 54%;
+  max-width: 190px;
+  aspect-ratio: 9 / 19.5;
+  padding: 6px;
+  border-radius: 34px;
+  background: #1b1b1d;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.4), 0 20px 40px -14px rgba(60, 40, 10, 0.45);
+  /* runs off the bottom edge of the card: only the top is ever shown */
+}
+.phoneScreen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #fff;
+}
+.phoneImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  transition: transform 520ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms ease;
+  will-change: transform;
+}
+.tap {
+  position: absolute;
+  right: 22%;
+  bottom: 48%;
+  width: 34px;
+  height: 34px;
+  margin: -17px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transform: scale(1.25);
+  transition: opacity 160ms ease-out, transform 180ms ease-out;
+  pointer-events: none;
+}
+.tapOn { opacity: 1; transform: scale(0.9); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cursorX, .cursorY, .rollStrip, .scrub, .scrubDot, .panel, .phoneImg, .tap { transition: none; }
+  .caret { animation: none; }
+}
