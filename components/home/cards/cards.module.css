@@ -139,9 +139,14 @@
 .cursorLayer .cursorX,
 .cursorLayer .cursorY { width: 100%; height: 100%; }
 
-/* ================= 2. search (Stageshow kit) ================= */
-/* The kit's Stage scales its 400 × 300 design to this frame and switches to its compact design on narrow cards */
-.stageKit { display: block; }
+/* ================= 2. Designing Search (Stageshow kit) ================= */
+/* The kit's Stage scales the 552 × 305 design down to this frame */
+.stageKit {
+  display: grid;
+  place-items: center;
+  /* The card's own grey plate, so its wider shape sits in the 4:3 frame */
+  background: #efeff0;
+}
 .stageKit > * { width: 100%; }
 
 /* ================= 3. phone ================= */

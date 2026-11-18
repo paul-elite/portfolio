@@ -1,0 +1,293 @@
+/* All rules belong to this example. Values are Paul's Figma (Frame 22 / 26). */
+.mt-card {
+  & .ss-stage {
+    overflow: hidden;
+    border-radius: 12px;
+    background: #efeff0;
+    /* The host page's type (Hedvig Letters Sans on the site) */
+    font-family: inherit;
+  }
+
+  .mt-plate {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+  }
+
+  .mt-window {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 12px 24px rgb(53 69 90 / 0.25), 0 0 0 0.5px rgb(22 38 50 / 0.2);
+    transform: translateY(-0.5px);
+  }
+
+  /* ---- Sidebar ---- */
+  .mt-sidebar {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    gap: 22px;
+    width: 103px;
+    height: 246px;
+    padding: 16px 14px;
+    border-right: 0.5px solid #e8e7e6;
+    background: #f6f5f4;
+    box-sizing: border-box;
+  }
+  .mt-lights {
+    display: flex;
+    gap: 7px;
+  }
+  .mt-lights span {
+    width: 9px;
+    height: 9px;
+    border-radius: 100px;
+  }
+  .mt-lights [data-c="r"] { background: #ff4f4e; box-shadow: inset 0 0 0.5px 0.2px rgb(66 1 5 / 0.4); }
+  .mt-lights [data-c="y"] { background: #ffb900; box-shadow: inset 0 0 0.5px 0.2px rgb(66 17 1 / 0.4); }
+  .mt-lights [data-c="g"] { background: #00cc1a; box-shadow: inset 0 0 0.5px 0.2px rgb(15 48 1 / 0.4); }
+
+  .mt-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .mt-nav__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .mt-nav__icon,
+  .mt-nav__bar {
+    background: #e8e7e6;
+  }
+  .mt-nav__item[data-on] .mt-nav__icon,
+  .mt-nav__item[data-on] .mt-nav__bar {
+    background: #dddcdb;
+  }
+  .mt-nav__icon {
+    width: 12px;
+    height: 12px;
+    border-radius: 4px;
+  }
+  .mt-nav__bar {
+    width: 49px;
+    height: 5px;
+    border-radius: 2px;
+  }
+
+  /* ---- Main ---- */
+  .mt-main {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    gap: 16px;
+    width: 391px;
+    height: 244px;
+  }
+
+  .mt-toolbar {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 37px;
+    padding: 10px 16px;
+    border-bottom: 0.5px solid #e8e7e6;
+    box-sizing: border-box;
+  }
+  .mt-url {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 20px;
+    padding: 0 2px;
+    border-radius: 4px;
+    background: #f6f5f4;
+    box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.06);
+  }
+  .mt-url__text {
+    padding: 0 6px;
+    color: #c2bfbc;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  .mt-star {
+    position: relative;
+    display: block;
+    width: 14px;
+    height: 14px;
+    margin-right: 3px;
+  }
+  .mt-star > span,
+  .mt-star svg {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 14px;
+    height: 14px;
+  }
+  .mt-star__on {
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity 0.18s ease-out, transform 0.28s cubic-bezier(0.3, 1.4, 0.5, 1);
+  }
+  .mt-star[data-on] .mt-star__on {
+    opacity: 1;
+    transform: none;
+  }
+  .mt-star[data-pressed] {
+    transform: scale(0.88);
+  }
+
+  .mt-content {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    height: 198px;
+    padding: 0 12px;
+  }
+
+  .mt-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .mt-title {
+    padding: 0 8px;
+    color: #000;
+    font-size: 15px;
+    white-space: nowrap;
+  }
+  .mt-add {
+    display: grid;
+    place-items: center;
+    width: 91px;
+    height: 25px;
+    border-radius: 8px;
+    background: #1084fe;
+    color: #fff;
+    font-size: 12px;
+  }
+
+  /* ---- List: 1px gaps on a warm grey read as hairlines between white rows ---- */
+  .mt-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: #f6f5f4;
+  }
+  .mt-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+    padding: 0 8px;
+    background: #fff;
+  }
+  .mt-row__lead {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 14px;
+    width: 141px;
+  }
+  .mt-avatar,
+  .mt-avatar svg {
+    display: block;
+    width: 22px;
+    height: 22px;
+  }
+  .mt-row__name {
+    color: #000;
+    font-size: 12px;
+  }
+  .mt-row__col {
+    flex: none;
+    width: 88px;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  .mt-row__col--status {
+    width: 59px;
+  }
+  .mt-row__muted {
+    color: #7e7e81;
+    font-size: 12px;
+  }
+
+  .mt-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    height: 16px;
+    padding: 0 6px;
+    border-radius: 100px;
+    background: #e4faeb;
+    transition: background-color 0.12s ease-out;
+  }
+  /* Pressed: one step darker on its own surface; no scale, so the label never hops */
+  .mt-pill[data-pressed] {
+    background: #cdf3d8;
+  }
+  .mt-pill__dot,
+  .mt-pill__dot svg {
+    display: block;
+    width: 4px;
+    height: 4px;
+  }
+  .mt-pill__label {
+    padding: 0 2px;
+    color: #008234;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  .mt-row__end {
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+    min-width: 0;
+  }
+  .mt-delete {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 100px;
+    background: #ff4f4e;
+  }
+  .mt-delete__icon,
+  .mt-delete__icon svg {
+    display: block;
+    width: 14px;
+    height: 14px;
+  }
+
+  .mt-skel-lead,
+  .mt-skel-lead svg {
+    display: block;
+    flex: none;
+    width: 141px;
+    height: 22px;
+  }
+  .mt-skel-bar {
+    display: block;
+    width: 49px;
+    height: 6px;
+    border-radius: 2px;
+    background: #ebebeb;
+  }
+  .mt-skel-pill {
+    display: block;
+    width: 100%;
+    height: 18px;
+    border-radius: 100px;
+    background: #f5f5f5;
+  }
+}

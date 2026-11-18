@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import DesigningSearch from '@/components/stageshow/designing-search';
+import MyTasks from '@/components/stageshow/mytasks';
 import c from './cards.module.css';
 
 /* Stageshow-style feature cards: each card plays one short, looping piece of
@@ -162,12 +162,12 @@ function ChartDemo() {
   );
 }
 
-/* ---------- 2. Study: Designing Search, built with the Stageshow kit ---------- */
+/* ---------- 2. Study: Designing Search, Paul's card from Figma (Stageshow kit) ---------- */
 
 export function SearchDemo() {
   return (
     <div className={`${c.stage} ${c.stageKit}`}>
-      <DesigningSearch />
+      <MyTasks />
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { getProjectBySlug, getSiteConfig } from '@/lib/content-service';
 import { tocFromBlocks, headingId } from '@/lib/toc';
 import ContentBlocks from '@/components/content/ContentBlocks';
 import ArticleReader from '@/components/home/ArticleReader';
-import { SearchDemo } from '@/components/home/cards/FeatureCards';
+import MyTasks from '@/components/stageshow/mytasks';
 import only from '@/components/home/cards/card-only.module.css';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { ArrowUpRight01Icon } from '@hugeicons/core-free-icons';
@@ -31,8 +31,8 @@ export default async function ProjectContent({ params }: { params: Promise<{ slu
   if (slug === CARD_ONLY) {
     return (
       <main className={only.page}>
-        <div className={only.card} data-ss-fill>
-          <SearchDemo />
+        <div className={only.card}>
+          <MyTasks />
         </div>
       </main>
     );
