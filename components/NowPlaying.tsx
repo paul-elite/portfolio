@@ -3,8 +3,12 @@
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 
-interface SpotifyData {
+export type MusicSource = 'spotify' | 'youtube-music';
+
+export interface SpotifyData {
   isPlaying: boolean;
+  /** Where the music is playing: Spotify, or YouTube Music (via Last.fm). */
+  source?: MusicSource;
   title?: string;
   artist?: string;
   album?: string;
@@ -16,7 +20,30 @@ interface SpotifyData {
   lastPlayed?: {
     title: string;
     artist: string;
+    source?: MusicSource;
   };
+}
+
+export const MUSIC_SOURCES: Record<MusicSource, { label: string; color: string }> = {
+  spotify: { label: 'Spotify', color: '#1DB954' },
+  'youtube-music': { label: 'YouTube Music', color: '#FF0033' },
+};
+
+/** A quiet "· Spotify" / "· YouTube Music" tag with a small brand-colored dot. */
+export function MusicSourceTag({ source, prefix = '·' }: { source?: MusicSource; prefix?: string }) {
+  if (!source) return null;
+  const { label, color } = MUSIC_SOURCES[source];
+  return (
+    <span className="whitespace-nowrap">
+      {` ${prefix} `}
+      <span
+        aria-hidden="true"
+        className="mr-1 inline-block h-1.5 w-1.5 -translate-y-px rounded-full align-middle"
+        style={{ backgroundColor: color }}
+      />
+      {label}
+    </span>
+  );
 }
 
 export function useNowPlaying() {
@@ -339,7 +366,10 @@ export function NowPlayingContent({ data, showImage = true }: { data: SpotifyDat
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-400 whitespace-normal break-words line-clamp-2">{data.artist}</p>
+              <p className="text-sm text-gray-400 whitespace-normal break-words line-clamp-2">
+                {data.artist}
+                <MusicSourceTag source={data.source} />
+              </p>
             </>
           ) : (
             <>
@@ -347,6 +377,8 @@ export function NowPlayingContent({ data, showImage = true }: { data: SpotifyDat
               {data?.lastPlayed ? (
                 <p className="text-sm text-gray-400 truncate">
                   last listened to {data.lastPlayed.title}
+          <MusicSourceTag source={data.lastPlayed.source} prefix="on" />
+                  <MusicSourceTag source={data.lastPlayed.source} prefix="on" />
                 </p>
               ) : (
                 <p className="text-sm text-gray-400">check again shortly</p>
@@ -381,7 +413,10 @@ export function NowPlayingText({ data }: { data: SpotifyData | null }) {
             </span>
           )}
         </div>
-        <p className="text-sm text-gray-400 whitespace-normal break-words line-clamp-2">{data.artist}</p>
+        <p className="text-sm text-gray-400 whitespace-normal break-words line-clamp-2">
+          {data.artist}
+          <MusicSourceTag source={data.source} />
+        </p>
       </>
     );
   }
@@ -392,6 +427,7 @@ export function NowPlayingText({ data }: { data: SpotifyData | null }) {
       {data?.lastPlayed ? (
         <p className="text-sm text-gray-400 truncate">
           last listened to {data.lastPlayed.title}
+          <MusicSourceTag source={data.lastPlayed.source} prefix="on" />
         </p>
       ) : (
         <p className="text-sm text-gray-400">check again shortly</p>

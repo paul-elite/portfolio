@@ -246,6 +246,16 @@
   font-size: 13px;
   text-decoration: none;
 }
+.spwSource { white-space: nowrap; }
+.spwDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 4px;
+  border-radius: 50%;
+  vertical-align: middle;
+  transform: translateY(-1px);
+}
 @media (prefers-reduced-motion: reduce) {
   .spwSpin img { animation: none; }
 }

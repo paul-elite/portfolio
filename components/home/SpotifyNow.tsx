@@ -1,17 +1,22 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useNowPlaying } from '@/components/NowPlaying';
+import { useNowPlaying, MUSIC_SOURCES } from '@/components/NowPlaying';
 import s from './benji.module.css';
 
 /* A self-contained now-playing widget for the footer: a spinning album disc
    plus the track and artist. Styled with the page's CSS module (no Tailwind
-   dependency), fed by the /api/spotify poll. */
+   dependency), fed by the /api/spotify poll (Spotify, or YouTube Music via Last.fm). */
 export default function SpotifyNow() {
   const data = useNowPlaying();
   const playing = Boolean(data?.isPlaying);
   const art = playing && data?.albumImageUrl ? data.albumImageUrl : '/music-icon.svg';
   const discRef = useRef<HTMLSpanElement>(null);
+  const source = playing ? data?.source : data?.lastPlayed?.source;
+  const sourceInfo = source ? MUSIC_SOURCES[source] : null;
+  const sourceDot = sourceInfo ? (
+    <span aria-hidden="true" className={s.spwDot} style={{ backgroundColor: sourceInfo.color }} />
+  ) : null;
 
   // Scrolling turns the disc: down = clockwise, up = anticlockwise. Driven by page scroll,
   // or by wheel/touch movement when the page is too short to scroll. Eases toward the target.
@@ -75,13 +80,37 @@ export default function SpotifyNow() {
             <a className={s.spwTitle} href={data?.songUrl} target="_blank" rel="noopener noreferrer">
               {data?.title}
             </a>
-            {data?.artist && <span className={s.spwArtist}>{data.artist}</span>}
+            {(data?.artist || sourceInfo) && (
+              <span className={s.spwArtist}>
+                {data?.artist}
+                {sourceInfo && (
+                  <span className={s.spwSource}>
+                    {data?.artist ? ' · ' : ''}
+                    {sourceDot}
+                    {sourceInfo.label}
+                  </span>
+                )}
+              </span>
+            )}
           </>
         ) : (
           <>
             <span className={s.spwTitle}>Not listening right now</span>
             <span className={s.spwArtist}>
-              {data?.lastPlayed?.title ? `last listened to ${data.lastPlayed.title}` : 'check again shortly'}
+              {data?.lastPlayed?.title ? (
+                <>
+                  last listened to {data.lastPlayed.title}
+                  {sourceInfo && (
+                    <span className={s.spwSource}>
+                      {' on '}
+                      {sourceDot}
+                      {sourceInfo.label}
+                    </span>
+                  )}
+                </>
+              ) : (
+                'check again shortly'
+              )}
             </span>
           </>
         )}
