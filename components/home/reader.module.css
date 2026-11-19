@@ -53,13 +53,51 @@
 }
 .back:hover { color: #111; }
 .back:active { transform: scale(0.97); }
-.tocNav { display: flex; flex-direction: column; gap: 0.55rem; }
+.tocNav { position: relative; display: flex; flex-direction: column; gap: 0.55rem; padding-left: 22px; }
 .tocLink {
   color: rgba(0, 0, 0, 0.4);
   text-decoration: none;
   transition: color 0.18s ease;
 }
 .tocLink:hover { color: #111; }
+.tocLink[data-state="read"] { color: rgba(0, 0, 0, 0.55); }
+.tocLink[data-state="current"] { color: #111; }
+
+/* The ruler beside the labels: fine ticks every 5px, a longer tick level with each label, and a
+   marker that slides with the reading position */
+.ruler {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  background: repeating-linear-gradient(to bottom, rgba(130, 110, 60, 0.26) 0 1px, transparent 1px 5px);
+  pointer-events: none;
+}
+.tocLink::after {
+  content: '';
+  position: absolute;
+  left: -22px;
+  top: 50%;
+  width: 8px;
+  height: 1px;
+  background: rgba(130, 110, 60, 0.28);
+  transition: background-color 0.18s ease, width 0.18s ease-out;
+}
+.tocLink[data-state="read"]::after { background: rgba(0, 0, 0, 0.35); }
+.tocLink[data-state="current"]::after { width: 10px; background: #111; }
+.marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 1.5px;
+  margin-top: -0.75px;
+  border-radius: 1px;
+  background: #111;
+  will-change: transform;
+  pointer-events: none;
+}
 
 /* ---- right: the article ---- */
 .article {
