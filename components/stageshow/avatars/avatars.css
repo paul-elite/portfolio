@@ -169,8 +169,8 @@
     z-index: 1;
     height: 34px;
     border-radius: 10.8px;
-    background: #21201f;
-    box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.25), 0 3px 3px rgb(82 78 72 / 0.07);
+    background: var(--under);
+    box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.1), 0 3px 3px rgb(82 78 72 / 0.06);
     opacity: 0;
     transform: translateX(-50%) translateY(-6px);
     transition: opacity calc(120ms * var(--t, 1)) ease-out, transform calc(220ms * var(--t, 1)) cubic-bezier(0.2, 0, 0, 1), width calc(150ms * var(--t, 1)) ease;
@@ -278,7 +278,13 @@
   .av-ind[data-on] { opacity: 1; }
 
   /* ---- The bar under the top one: drawn, but quiet ---- */
-  .av-bar[data-muted] { box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.16), 0 2px 4px rgb(82 78 72 / 0.05); }
+  /* Anything stacked underneath is one grey card, whatever it was on top: the white bar you came
+     from and the black main bar folded into the tray alike */
+  & .ss-stage { --under: #e4e3e0; }
+  .av-bar[data-muted] { background: var(--under); box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.1), 0 2px 4px rgb(82 78 72 / 0.05); }
+  .av-bar[data-muted] .av-tabs { background: rgb(0 0 0 / 0.035); }
+  .av-bar[data-muted] .av-tab[data-on] { background: rgb(255 255 255 / 0.5); box-shadow: none; }
+  .av-bar[data-muted] .av-more[data-on] { background: rgb(255 255 255 / 0.5); }
   .av-bar[data-muted] .av-opt > *,
   .av-bar[data-muted] .av-tab:not([data-on]) .av-tab__art { filter: grayscale(1) brightness(1.2) contrast(0.6); opacity: 0.55; }
   .av-bar[data-muted] .av-tab[data-on] .av-tab__art { filter: grayscale(0.6); opacity: 0.8; }
