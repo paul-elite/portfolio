@@ -20,7 +20,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const name = config.name || 'Paul Elite';
   // A draft (tagged 'draft') can be read by its URL but isn't for search engines yet
   const draft = !!p?.tags?.includes('draft');
-  return { title: p ? `${p.title} - ${name}` : name, ...(draft ? { robots: { index: false, follow: false } } : {}) };
+  // A project with its own icon shows it in the tab; the rest keep the site's (the portrait)
+  const icons = p?.avatar ? { icon: p.avatar, shortcut: p.avatar, apple: p.avatar } : undefined;
+  return { title: p ? `${p.title} - ${name}` : name, ...(icons ? { icons } : {}), ...(draft ? { robots: { index: false, follow: false } } : {}) };
 }
 
 export default async function ProjectContent({ params }: { params: Promise<{ slug: string }> }) {

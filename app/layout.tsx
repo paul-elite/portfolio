@@ -10,13 +10,10 @@ export async function generateMetadata(): Promise<Metadata> {
     description: settings.title || "Personal portfolio",
   };
 
-  if (settings.faviconImage) {
-    metadata.icons = {
-      icon: settings.faviconImage,
-      shortcut: settings.faviconImage,
-      apple: settings.faviconImage,
-    };
-  }
+  // The portrait by default (public/icon.png, favicon.ico, apple-icon.png); a project page swaps in its own icon
+  metadata.icons = settings.faviconImage
+    ? { icon: settings.faviconImage, shortcut: settings.faviconImage, apple: settings.faviconImage }
+    : { icon: '/icon.png', shortcut: '/favicon.ico', apple: '/apple-icon.png' };
 
   if (settings.metaImage) {
     metadata.openGraph = {

@@ -194,7 +194,8 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
 }
 
 // Rest in the top-right gutter, clear of every target
-const REST = { wide: { x: 680, y: 40 }, compact: { x: 334, y: 18 } }
+// Off the stage, past its bottom-right corner: the cursor comes in to act and goes back out, never parked in view
+const REST = { wide: { x: 700, y: 410 }, compact: { x: 400, y: 300 } }
 
 // A phone gets a finger (a dot where it taps), never the macOS arrow
 function useTouch() {
@@ -214,11 +215,10 @@ type FrameProps = {
   slow?: number // plays this many times slower (script and CSS alike), to show the motion
   reduced?: boolean // shows the reduced-motion version
   caption?: string
-  crop?: Framing // a fixed close crop (the camera held in on part of the stack)
   cursor?: boolean // false: the camera tells it, nothing is pressed
 }
 type Framing = { wide: Rect; compact: Rect }
-function Frame({ initial, poster, script, still, label, slow = 1, reduced, caption, crop, cursor = true }: FrameProps) {
+function Frame({ initial, poster, script, still, label, slow = 1, reduced, caption, cursor = true }: FrameProps) {
   const touch = useTouch()
   const [run, setRun] = useState(0)
   // Nothing loops: a scene plays once while the pointer is over it (once when seen, on a phone),
@@ -228,7 +228,7 @@ function Frame({ initial, poster, script, still, label, slow = 1, reduced, capti
     <figure className="av-figure" aria-label={label} style={{ '--t': slow } as CSSProperties}>
       <Stage
         key={run}
-        width={720}
+        width={648}
         height={360}
         compact={{ below: 480, width: 358, height: 260 }}
         initial={initial}
@@ -240,8 +240,8 @@ function Frame({ initial, poster, script, still, label, slow = 1, reduced, capti
         className={'av-card' + (reduced ? ' av-reduced' : '')}
       >
         {(s, _rect, layout) => (
-          // The camera crops and pushes in; the cursor stays outside it, in stage pixels
-          <Camera focus={s.focus ?? (crop ? crop[layout] : null)} max={2} pad={16} duration={1000} feather={24}>
+          // At rest every scene is at 1x; the camera pushes in only while it moves. The cursor stays outside it, in stage pixels
+          <Camera focus={s.focus} max={2} pad={16} duration={1000} feather={24}>
             <Scene s={s} compact={layout === 'compact'} />
           </Camera>
         )}
@@ -258,16 +258,16 @@ function Frame({ initial, poster, script, still, label, slow = 1, reduced, capti
   )
 }
 
-// Where the camera looks in each scene, in stage pixels (wide 720×360, compact 358×260)
+// Where the camera looks in each scene, in stage pixels (wide 648×360, compact 358×260)
 const VIEW = {
   // the seam where Hair comes out from behind the main bar: the left of both bars
-  seam: { wide: { x: 130, y: 100, width: 300, height: 156 }, compact: { x: 8, y: 50, width: 210, height: 150 } },
+  seam: { wide: { x: 94, y: 100, width: 300, height: 156 }, compact: { x: 8, y: 50, width: 210, height: 150 } },
   // the muted bar's options and its lit Colour tile
-  muted: { wide: { x: 250, y: 174, width: 330, height: 84 }, compact: { x: 110, y: 122, width: 236, height: 80 } },
+  muted: { wide: { x: 214, y: 174, width: 330, height: 84 }, compact: { x: 110, y: 122, width: 236, height: 80 } },
   // the Colour tile on the Hair bar, before it opens anything
-  colourTile: { wide: { x: 380, y: 98, width: 200, height: 92 }, compact: { x: 176, y: 48, width: 172, height: 88 } },
+  colourTile: { wide: { x: 344, y: 98, width: 200, height: 92 }, compact: { x: 176, y: 48, width: 172, height: 88 } },
   // the Hair bar, cropped close while its width eases
-  hairBar: { wide: { x: 138, y: 102, width: 444, height: 86 }, compact: { x: 16, y: 50, width: 326, height: 84 } },
+  hairBar: { wide: { x: 102, y: 102, width: 444, height: 86 }, compact: { x: 16, y: 50, width: 326, height: 84 } },
 } satisfies Record<string, Framing>
 const at = (a: Act<S>, v: Framing) => (a.layout === 'compact' ? v.compact : v.wide)
 
@@ -275,6 +275,7 @@ const at = (a: Act<S>, v: Framing) => (a.layout === 'compact' ? v.compact : v.wi
 async function stack(a: Act<S>) {
   await a.wait(700)
   a.mark('open hair')
+  await a.enter({ at: 'main-hair', x: 0.5, y: 0.3 })
   await a.click({ at: 'main-hair', x: 0.5, y: 0.3 })
   await a.set({ level: 1, enter: 'hair' })
   await a.wait(800)
@@ -298,8 +299,12 @@ export function AvatarsStack() {
 /* ---- Tabs switching in place (about 9s) ---- */
 const tabsStart: S = { ...base, level: 1, hair: 'spiky' }
 async function tabs(a: Act<S>) {
-  await a.wait(900)
+  await a.wait(500)
+  a.mark('push in')
+  await a.set({ focus: at(a, VIEW.hairBar) })
+  await a.wait(700)
   a.mark('wear')
+  await a.enter({ at: 'tab-wear', x: 0.5, y: 0.3 })
   await a.click({ at: 'tab-wear', x: 0.5, y: 0.3 })
   await a.set({ tab: 'wear' })
   await a.wait(700)
@@ -313,11 +318,14 @@ async function tabs(a: Act<S>) {
   await a.wait(500)
   await a.click({ at: 'tab-style', x: 0.5, y: 0.3 })
   await a.set({ tab: 'style' })
+  await a.wait(500)
+  a.mark('pull out')
   await a.move(REST)
+  await a.set({ focus: null })
   await a.wait(1100)
 }
 export function AvatarsTabs() {
-  return <Frame label="Switching between Style and Wear inside the Hair bar, cropped close" initial={tabsStart} poster={{ ...tabsStart, tab: 'wear', cap: true }} script={tabs} crop={VIEW.hairBar} caption="Cropped to the Hair bar" />
+  return <Frame label="Switching between Style and Wear inside the Hair bar, up close" initial={tabsStart} poster={{ ...tabsStart, tab: 'wear', cap: true }} script={tabs} caption="Zooms in on the Hair bar" />
 }
 
 /* ---- A still of the three levels ---- */
@@ -339,6 +347,7 @@ export function AvatarsMuted() {
 /* ---- The bar at rest: tap Hair and it lights and opens; tap it again and both go (about 5s) ---- */
 async function rest(a: Act<S>) {
   await a.wait(900)
+  await a.enter({ at: 'main-hair', x: 0.5, y: 0.3 })
   await a.click({ at: 'main-hair', x: 0.5, y: 0.3 })
   await a.set({ level: 1, enter: 'hair' })
   await a.wait(1500)
@@ -358,6 +367,7 @@ async function rise(a: Act<S>) {
   await a.set({ focus: at(a, VIEW.seam) })
   await a.wait(500)
   a.mark('rise')
+  await a.enter({ at: 'main-hair', x: 0.5, y: 0.3 })
   await a.click({ at: 'main-hair', x: 0.5, y: 0.3 })
   await a.set({ level: 1, enter: 'hair' })
   await a.wait(900)
@@ -375,12 +385,15 @@ export function AvatarsRise() {
 }
 
 /* ---- The stack makes room: start close on the Colour tile, then pull out as Colour rises, Hair slides down and the
-   main bar folds into the tray (slowed 3×); closing, the camera goes back in ---- */
+   main bar folds into the tray (slowed 3×); it ends back at full view ---- */
 const roomStart: S = { ...base, level: 1, hair: 'spiky' }
 async function room(a: Act<S>) {
-  await a.snap({ focus: at(a, VIEW.colourTile) })
-  await a.wait(500)
+  await a.wait(300)
+  a.mark('push in')
+  await a.set({ focus: at(a, VIEW.colourTile) })
+  await a.wait(1100)
   a.mark('open colour')
+  await a.enter({ at: 'colour', x: 0.5, y: 0.3 })
   await a.click({ at: 'colour', x: 0.5, y: 0.3 })
   await a.set({ level: 2, enter: 'colour', focus: null })
   await a.wait(1300)
@@ -389,7 +402,6 @@ async function room(a: Act<S>) {
   await a.set({ level: 1, enter: null })
   await a.wait(400)
   await a.move(REST)
-  await a.set({ focus: at(a, VIEW.colourTile) })
   await a.wait(800)
 }
 export function AvatarsRoom() {
@@ -400,6 +412,7 @@ export function AvatarsRoom() {
 const closeStart: S = { ...base, level: 2, hair: 'spiky', green: true }
 async function closing(a: Act<S>) {
   await a.wait(700)
+  await a.enter({ at: 'close-colour', x: 0.5, y: 0.5 })
   await a.click({ at: 'close-colour', x: 0.5, y: 0.5 })
   await a.set({ level: 1, enter: null })
   await a.wait(500)
@@ -422,6 +435,7 @@ export function AvatarsClose() {
 /* ---- With reduced motion: the same stack, fades only ---- */
 async function reducedRun(a: Act<S>) {
   await a.wait(700)
+  await a.enter({ at: 'main-hair', x: 0.5, y: 0.3 })
   await a.click({ at: 'main-hair', x: 0.5, y: 0.3 })
   await a.set({ level: 1, enter: 'hair' })
   await a.wait(800)

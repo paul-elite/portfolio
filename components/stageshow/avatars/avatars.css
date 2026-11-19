@@ -1,12 +1,8 @@
 /* The Avatars scenes. Values are the editor's (avatars.paulelite.com) and its Figma (113:9122). */
 .av-figure { position: relative; margin: 2.25rem 0; }
-/* Wide screens: the stage breaks out of the 600px text column, centred on it, so the bars have
-   room around them. figure.av-figure outranks the article's own figure margins. */
+/* Wide screens: the stage is the text column plus 24px on each side */
 @media (min-width: 861px) {
-  figure.av-figure { width: calc(100% + 32px); margin-left: -16px; margin-right: -16px; }
-}
-@media (min-width: 1180px) {
-  figure.av-figure { width: 720px; margin-left: -60px; margin-right: -60px; }
+  figure.av-figure { width: calc(100% + 48px); margin-left: -24px; margin-right: -24px; }
 }
 .av-foot { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
 /* Replay sits centred under the stage; the caption follows it */
@@ -33,7 +29,7 @@
 .av-card {
   & .ss-stage {
     overflow: hidden;
-    border-radius: 12px;
+    border-radius: 20px;
     background: #fff;
     isolation: isolate;
     /* The editor's labels are sans, like the site's interface (the article around it is serif) */
