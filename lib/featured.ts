@@ -3,6 +3,8 @@ import type { PortfolioContent } from '@/lib/content-model';
 // The Featured list, shared by the home page and /cards: every project with a year and
 // every writing with a date, newest first, except pinned items, which lead in this order.
 const PINNED = ['p-search-interfaces'];
+// When set, Featured shows only these items, in this order (for now: just the Avatars write-up)
+const ONLY: string[] = ['p-avatars'];
 
 export type FeaturedItem = {
   key: string;
@@ -62,7 +64,9 @@ export function getFeatured(content: PortfolioContent): FeaturedItem[] {
     const i = PINNED.indexOf(k);
     return i < 0 ? PINNED.length : i;
   };
-  return [...projects, ...writings].sort((a, b) => rank(a.key) - rank(b.key) || b.ts - a.ts);
+  const all = [...projects, ...writings];
+  if (ONLY.length) return ONLY.map((k) => all.find((i) => i.key === k)).filter((i): i is FeaturedItem => Boolean(i));
+  return all.sort((a, b) => rank(a.key) - rank(b.key) || b.ts - a.ts);
 }
 
 // The "New" badge marks the most recent item by date, not the pinned one.
