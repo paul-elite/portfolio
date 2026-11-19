@@ -27,8 +27,10 @@
 .av-replay:active { transform: scale(0.97); }
 
 .av-card {
-  /* The rounded arrow, a little larger than its 22px so it reads on a wide stage */
-  & .ss-cursor[data-style="arrow"] { --ss-cursor-size: 1.3; }
+  /* The rounded arrow: near its own 22px while it travels, and it swells a little over something it can
+     press (data-kind is "hand" there, though the arrow style keeps the arrow); the glyph eases between */
+  & .ss-cursor[data-style="arrow"] { --ss-cursor-size: 1.05; }
+  & .ss-cursor[data-style="arrow"][data-kind="hand"] { --ss-cursor-size: 1.3; }
   /* A white rim, as the macOS arrow has, so the black arrow still reads over the black main bar */
   & .ss-cursor__arrow {
     filter: drop-shadow(1.2px 0 0 #fff) drop-shadow(-1.2px 0 0 #fff) drop-shadow(0 1.2px 0 #fff) drop-shadow(0 -1.2px 0 #fff)
