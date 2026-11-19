@@ -209,8 +209,6 @@ function useTouch() {
   return touch
 }
 
-const ReplayIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden><path d="M4 12a8 8 0 1 0 2.35-5.65M4 4v4.5h4.5" {...LINE} /></svg>
-
 type FrameProps = {
   initial: S; poster: S; script?: (a: Act<S>) => Promise<void>; still?: boolean; play?: 'loop' | 'once'; label: string
   slow?: number // plays this many times slower (script and CSS alike), to show the motion
@@ -250,7 +248,7 @@ function Frame({ initial, poster, script, still, play = 'loop', label, slow = 1,
           {caption && <figcaption className="av-caption">{caption}</figcaption>}
           {play === 'once' && !still && (
             // Plays once as it comes into view and holds on the result; this plays it again
-            <button type="button" className="av-replay" onClick={() => setRun((n) => n + 1)}><ReplayIcon />Replay</button>
+            <button type="button" className="av-replay" onClick={() => setRun((n) => n + 1)}>Replay</button>
           )}
         </div>
       )}
