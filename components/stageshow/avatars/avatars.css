@@ -1,16 +1,41 @@
 /* The Avatars scenes. Values are the editor's (avatars.paulelite.com) and its Figma (113:9122). */
-.av-figure { margin: 2.25rem 0; }
+.av-figure { position: relative; margin: 2.25rem 0; }
+/* The scenes are wider than the text column on a wide screen, so the bars get room to breathe
+   (about 12% of the stage on each side); narrower, they fit the column */
+@media (min-width: 861px) {
+  .av-figure { width: 560px; margin-left: -45px; margin-right: -45px; }
+}
+.av-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 28px; margin-top: 8px; }
+.av-caption { color: #9a9a95; font: 12px/1.4 var(--font-sans), ui-sans-serif, system-ui, sans-serif; }
+.av-replay {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 100px;
+  background: #fff;
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.12), 0 1px 2px rgb(0 0 0 / 0.06);
+  color: #5b5e66;
+  font: 12px/1 var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  cursor: pointer;
+  transition: color 140ms ease, transform 120ms ease-out;
+}
+.av-replay:hover { color: #0b0c0e; }
+.av-replay:active { transform: scale(0.97); }
 
 .av-card {
   & .ss-stage {
     overflow: hidden;
     border-radius: 12px;
-    background: #f3f3f2;
+    background: #f6f0dc; /* a soft warm yellow, of a piece with the page */
     /* The editor's labels are sans, like the site's interface (the article around it is serif) */
     font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
     /* Slots: A holds the bar in focus, B the one under it (the main bar on its own) */
-    --A: 28px;
-    --B: 100px;
+    --A: 56px;
+    --B: 128px;
     --tab: 54px;
     --gap: 10px;
     --more: 60px;
@@ -26,21 +51,23 @@
     --morebtn: 40px;
   }
   & .ss-stage[data-layout="compact"] {
-    --A: 28px;
-    --B: 100px;
-    --tab: 48px;
-    --gap: 8px;
-    --more: 56px;
+    --A: 32px;
+    --B: 104px;
+    --tab: 40px;
+    --gap: 6px;
+    --more: 52px;
+    --close: 24px;
     --sw: 30px;
     --swgap: 2px;
     --tool: 36px;
-    --padR: 12px;
+    --padR: 10px;
     --colpad: 10px;
-    --hist: 70px;
-    --cat: 52px;
-    --cat-wide: 56px;
+    --hist: 58px;
+    --cat: 44px;
+    --cat-wide: 48px;
     --catgap: 2px;
-    --morebtn: 30px;
+    --morebtn: 22px;
+    --maingap: 6px;
   }
 
   .av-scene { position: absolute; inset: 0; }
@@ -75,13 +102,13 @@
   .av-bar[data-pos="under"], .av-bar[data-pos="tray"] {
     opacity: 0;
     filter: blur(2px);
-    transition: transform 170ms ease-out, opacity 170ms ease-out, filter 170ms ease-out, width 150ms ease;
+    transition: transform calc(170ms * var(--t, 1)) ease-out, opacity calc(170ms * var(--t, 1)) ease-out, filter calc(170ms * var(--t, 1)) ease-out, width calc(150ms * var(--t, 1)) ease;
   }
   .av-hair { z-index: 2; }
   .av-colour { z-index: 1; }
   .av-hair[data-pos="top"] { transform: translateX(-50%); }
   .av-hair[data-pos="under"] { transform: translateX(-50%) translateY(calc(var(--B) - var(--A) + 8px)) scale(0.94); }
-  .av-hair[data-pos="below"] { transform: translateX(-50%) translateY(calc(var(--B) - var(--A))); transition-duration: 220ms, 160ms, 160ms, 150ms, 180ms; transition-timing-function: cubic-bezier(0.2, 0, 0, 1), ease-out, ease-out, ease, ease-out; }
+  .av-hair[data-pos="below"] { transform: translateX(-50%) translateY(calc(var(--B) - var(--A))); transition-duration: calc(220ms * var(--t, 1)), calc(160ms * var(--t, 1)), calc(160ms * var(--t, 1)), calc(150ms * var(--t, 1)), calc(180ms * var(--t, 1)); transition-timing-function: cubic-bezier(0.2, 0, 0, 1), ease-out, ease-out, ease, ease-out; }
   .av-colour[data-pos="top"] { transform: translateX(-50%); }
   .av-colour[data-pos="under"] { transform: translateX(-50%) translateY(16px) scale(0.94); }
 
@@ -90,7 +117,7 @@
   .av-main {
     top: var(--B);
     z-index: 3;
-    gap: 8px;
+    gap: var(--maingap, 8px);
     padding: 4px;
     background: #202123;
     transition:
@@ -100,7 +127,7 @@
       z-index 0s linear 220ms;
   }
   .av-main[data-pos="floor"] { transform: translateX(-50%); }
-  .av-main[data-pos="tray"] { z-index: 0; transform: translateX(-50%) translateY(12px) scale(0.9); transition: transform 220ms cubic-bezier(0.2, 0, 0, 1), opacity 140ms ease-out, filter 140ms ease-out, z-index 0s; }
+  .av-main[data-pos="tray"] { z-index: 0; transform: translateX(-50%) translateY(12px) scale(0.9); transition: transform calc(220ms * var(--t, 1)) cubic-bezier(0.2, 0, 0, 1), opacity calc(140ms * var(--t, 1)) ease-out, filter calc(140ms * var(--t, 1)) ease-out, z-index 0s; }
 
   .av-tray {
     position: absolute;
@@ -113,12 +140,12 @@
     box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.25), 0 3px 3px rgb(75 78 88 / 0.07);
     opacity: 0;
     transform: translateX(-50%) translateY(-6px);
-    transition: opacity 120ms ease-out, transform 220ms cubic-bezier(0.2, 0, 0, 1), width 150ms ease;
+    transition: opacity calc(120ms * var(--t, 1)) ease-out, transform calc(220ms * var(--t, 1)) cubic-bezier(0.2, 0, 0, 1), width calc(150ms * var(--t, 1)) ease;
   }
-  .av-tray[data-on] { opacity: 1; transform: translateX(-50%); transition-delay: 120ms, 60ms, 0ms; }
+  .av-tray[data-on] { opacity: 1; transform: translateX(-50%); transition-delay: calc(120ms * var(--t, 1)), calc(60ms * var(--t, 1)), calc(0ms * var(--t, 1)); }
 
   /* ---- Pieces ---- */
-  .av-label { font-size: 10.5px; line-height: normal; letter-spacing: 0.1px; color: #777c88; white-space: nowrap; transition: color 180ms ease-out; }
+  .av-label { font-size: 10.5px; line-height: normal; letter-spacing: 0.1px; color: #777c88; white-space: nowrap; transition: color calc(180ms * var(--t, 1)) ease-out; }
   .av-tabs { display: flex; flex: none; gap: 4px; padding: 2px; border-radius: 16px; background: #eff0f1; }
   .av-tab {
     display: grid;
@@ -129,7 +156,7 @@
     width: var(--tab);
     height: 52px;
     border-radius: 14px;
-    transition: background-color 160ms ease, box-shadow 160ms ease;
+    transition: background-color calc(160ms * var(--t, 1)) ease, box-shadow calc(160ms * var(--t, 1)) ease;
   }
   .av-tab[data-on] { background: #fff; box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 1px 3px rgb(75 78 88 / 0.12); }
   .av-tab[data-on] .av-label { color: #0b0c0e; }
@@ -139,16 +166,16 @@
   .av-row { display: flex; flex: none; align-items: center; gap: 9px; }
   /* Crossfading art: every version in one cell */
   .av-layers { display: grid; place-items: center; }
-  .av-layers > * { grid-area: 1 / 1; opacity: 0; transition: opacity 180ms ease-out; }
+  .av-layers > * { grid-area: 1 / 1; opacity: 0; transition: opacity calc(180ms * var(--t, 1)) ease-out; }
   .av-layers > [data-on] { opacity: 1; }
   .av-layers img, .av-layers svg { display: block; }
   /* The two tabs' rows in one cell: the chosen one crosses in, the other crosses out */
   .av-rows { display: grid; flex: none; }
-  .av-rows > .av-row { grid-area: 1 / 1; opacity: 0; transform: translateY(2px); pointer-events: none; transition: opacity 160ms ease-out, transform 160ms ease-out; }
+  .av-rows > .av-row { grid-area: 1 / 1; opacity: 0; transform: translateY(2px); pointer-events: none; transition: opacity calc(160ms * var(--t, 1)) ease-out, transform calc(160ms * var(--t, 1)) ease-out; }
   .av-rows > .av-row[data-on] { opacity: 1; transform: none; pointer-events: auto; }
-  .av-opt { display: grid; flex: none; place-items: center; width: 48px; height: 48px; border-radius: 14px; transition: background-color 140ms ease, box-shadow 140ms ease; }
+  .av-opt { display: grid; flex: none; place-items: center; width: 48px; height: 48px; border-radius: 14px; transition: background-color calc(140ms * var(--t, 1)) ease, box-shadow calc(140ms * var(--t, 1)) ease; }
   .av-opt svg { display: block; }
-  .av-opt > * { transition: filter 180ms ease-out, opacity 180ms ease-out; }
+  .av-opt > * { transition: filter calc(180ms * var(--t, 1)) ease-out, opacity calc(180ms * var(--t, 1)) ease-out; }
   .av-opt[data-on] { background: #f4f4f2; box-shadow: inset 0 0 0 1.5px #1a1a1a; }
 
   .av-more {
@@ -162,20 +189,20 @@
     height: 56px;
     border-radius: 14px;
     overflow: hidden;
-    transition: background-color 160ms ease, opacity 110ms ease-out 110ms, width 150ms cubic-bezier(0.45, 0, 0.1, 1), margin 150ms cubic-bezier(0.45, 0, 0.1, 1);
+    transition: background-color calc(160ms * var(--t, 1)) ease, opacity calc(110ms * var(--t, 1)) ease-out calc(110ms * var(--t, 1)), width calc(150ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1), margin calc(150ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1);
   }
   .av-more:not([data-show]) {
     width: 0;
     margin-left: calc(var(--gap) * -1);
     opacity: 0;
-    transition: background-color 160ms ease, opacity 70ms ease-out, width 150ms cubic-bezier(0.45, 0, 0.1, 1) 60ms, margin 150ms cubic-bezier(0.45, 0, 0.1, 1) 60ms;
+    transition: background-color calc(160ms * var(--t, 1)) ease, opacity calc(70ms * var(--t, 1)) ease-out, width calc(150ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1) calc(60ms * var(--t, 1)), margin calc(150ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1) calc(60ms * var(--t, 1));
   }
   .av-more[data-on] { background: #eff0f1; }
   .av-more[data-on] .av-label { color: #0b0c0e; }
   .av-more__art svg { width: 26px; height: 26px; }
 
   .av-sep { flex: none; width: 2px; height: 13px; border-radius: 1px; background: #eff0f1; }
-  .av-close { display: grid; flex: none; place-items: center; width: 28px; color: #9fa3b1; transition: color 180ms ease-out; }
+  .av-close { display: grid; flex: none; place-items: center; width: var(--close, 28px); color: #9fa3b1; transition: color calc(180ms * var(--t, 1)) ease-out; }
 
   .av-tools { display: flex; flex: none; gap: 6px; }
   .av-tool { display: grid; place-items: center; width: var(--tool); height: 48px; border-radius: 14px; }
@@ -197,7 +224,7 @@
     background: #26282b;
     box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.33);
   }
-  .av-hist { display: grid; place-items: center; color: #d8d9dd; transition: color 160ms ease-out; }
+  .av-hist { display: grid; place-items: center; color: #d8d9dd; transition: color calc(160ms * var(--t, 1)) ease-out; }
   .av-hist[data-off] { color: #62656e; }
   .av-more-btn { width: var(--morebtn); color: #d8d9dd; }
   .av-groove { flex: none; width: 2px; height: 24px; border-radius: 100px; background: #141415; box-shadow: inset -0.5px 0 0.5px rgb(205 210 215 / 0.25), inset 0 0 0.2px rgb(166 172 179 / 0.66); }
@@ -215,7 +242,7 @@
     border-radius: 14px;
     background: #fff;
     opacity: 0;
-    transition: opacity 120ms ease-out;
+    transition: opacity calc(120ms * var(--t, 1)) ease-out;
   }
   .av-ind[data-on] { opacity: 1; }
 
@@ -228,22 +255,33 @@
   .av-bar[data-muted] .av-more[data-on] .av-label { color: #0b0c0e; }
   .av-bar[data-muted] .av-opt[data-on] { box-shadow: inset 0 0 0 1.5px #c9cbd1; }
   .av-bar[data-muted] .av-close { color: #c9cbd1; }
-  .av-tab__art { transition: filter 180ms ease-out, opacity 180ms ease-out; }
+  .av-tab__art { transition: filter calc(180ms * var(--t, 1)) ease-out, opacity calc(180ms * var(--t, 1)) ease-out; }
 
   /* ---- A bar that just rose: its contents slide up from beneath, just after the surface ---- */
-  .av-bar[data-enter] > *, .av-bar[data-enter] .av-row[data-on] > *, .av-bar[data-enter] .av-swatches > * { animation: av-up 190ms cubic-bezier(0.2, 0, 0, 1) both; }
-  .av-bar[data-enter] .av-row > :nth-child(2), .av-bar[data-enter] .av-swatches > :nth-child(2) { animation-delay: 22ms; }
-  .av-bar[data-enter] .av-row > :nth-child(3), .av-bar[data-enter] .av-swatches > :nth-child(3) { animation-delay: 34ms; }
-  .av-bar[data-enter] .av-swatches > :nth-child(4) { animation-delay: 46ms; }
-  .av-bar[data-enter] .av-swatches > :nth-child(5) { animation-delay: 58ms; }
-  .av-bar[data-enter] .av-swatches > :nth-child(6) { animation-delay: 70ms; }
+  .av-bar[data-enter] > *, .av-bar[data-enter] .av-row[data-on] > *, .av-bar[data-enter] .av-swatches > * { animation: av-up calc(190ms * var(--t, 1)) cubic-bezier(0.2, 0, 0, 1) both; }
+  .av-bar[data-enter] .av-row > :nth-child(2), .av-bar[data-enter] .av-swatches > :nth-child(2) { animation-delay: calc(22ms * var(--t, 1)); }
+  .av-bar[data-enter] .av-row > :nth-child(3), .av-bar[data-enter] .av-swatches > :nth-child(3) { animation-delay: calc(34ms * var(--t, 1)); }
+  .av-bar[data-enter] .av-swatches > :nth-child(4) { animation-delay: calc(46ms * var(--t, 1)); }
+  .av-bar[data-enter] .av-swatches > :nth-child(5) { animation-delay: calc(58ms * var(--t, 1)); }
+  .av-bar[data-enter] .av-swatches > :nth-child(6) { animation-delay: calc(70ms * var(--t, 1)); }
 
   @media (prefers-reduced-motion: reduce) {
-    .av-bar, .av-tray, .av-more { transition: opacity 140ms ease-out !important; }
+    .av-bar, .av-tray, .av-more { transition: opacity calc(140ms * var(--t, 1)) ease-out !important; }
     .av-bar[data-pos="under"] { filter: none; }
     .av-bar[data-enter] > *, .av-bar[data-enter] .av-row > *, .av-bar[data-enter] .av-swatches > * { animation: none; }
-    .av-layers > *, .av-rows > .av-row { transition: opacity 140ms ease-out; transform: none; }
+    .av-layers > *, .av-rows > .av-row { transition: opacity calc(140ms * var(--t, 1)) ease-out; transform: none; }
   }
+}
+
+/* A scene showing reduced motion: bars fade in and out, nothing rises, slides, scales or blurs */
+.av-card.av-reduced {
+  & .av-bar, & .av-tray, & .av-more { transition: opacity 140ms ease-out !important; }
+  & .av-bar[data-pos="under"], & .av-bar[data-pos="tray"] { filter: none; }
+  & .av-hair[data-pos="under"], & .av-colour[data-pos="under"] { transform: translateX(-50%); }
+  & .av-hair[data-pos="under"] { transform: translateX(-50%) translateY(calc(var(--B) - var(--A))); }
+  & .av-main[data-pos="tray"] { transform: translateX(-50%); }
+  & .av-hair[data-pos="below"] { transition: opacity 140ms ease-out, transform 0s !important; }
+  & .av-bar[data-enter] > *, & .av-bar[data-enter] .av-row > *, & .av-bar[data-enter] .av-swatches > * { animation: none; }
 }
 
 @keyframes av-up { from { opacity: 0; transform: translateY(10px); } }

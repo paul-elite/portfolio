@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react'
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { Stage, type Act } from '../kit'
 import { A } from './assets'
 import './avatars.css'
@@ -32,8 +32,8 @@ const base: S = { level: 0, enter: null, hair: 'boy', green: false, tab: 'style'
 // stage can ease them like the editor does. ----
 type Z = ReturnType<typeof sizes>
 const sizes = (compact: boolean) => compact
-  ? { tab: 48, opt: 48, gap: 8, more: 56, sw: 30, swGap: 2, tool: 36, padL: 4, padR: 12, colPad: 10, close: 28, sep: 2, hairs: ['boy', 'spiky'] as Hair[], hats: ['cap'] as const, swatches: 5, main: 354 }
-  : { tab: 54, opt: 48, gap: 10, more: 60, sw: 32, swGap: 4, tool: 40, padL: 4, padR: 16, colPad: 12, close: 28, sep: 2, hairs: ['boy', 'spiky', 'curlytop'] as Hair[], hats: ['cap', 'beanie'] as const, swatches: 6, main: 422 }
+  ? { tab: 40, opt: 48, gap: 6, more: 52, sw: 30, swGap: 2, tool: 36, padL: 4, padR: 10, colPad: 10, close: 24, sep: 2, hairs: ['boy', 'spiky'] as Hair[], hats: ['cap'] as const, swatches: ['#1a1a1a', '#5a3620', '#50c810', '#f70492'], main: 306 }
+  : { tab: 54, opt: 48, gap: 10, more: 60, sw: 32, swGap: 4, tool: 40, padL: 4, padR: 16, colPad: 12, close: 28, sep: 2, hairs: ['boy', 'spiky', 'curlytop'] as Hair[], hats: ['cap', 'beanie'] as const, swatches: ['#1a1a1a', '#5a3620', '#a8693f', '#e8b04b', '#50c810', '#f70492'], main: 422 }
 // Bars are centred with translateX(-50%): an even width keeps them on whole pixels
 const even = (n: number) => Math.ceil(n / 2) * 2
 const sum = (n: number, size: number, gap: number) => n * size + Math.max(0, n - 1) * gap
@@ -44,7 +44,7 @@ function hairWidth(s: S, z: Z) {
   const colour = s.tab === 'style' || s.cap
   return even(z.padL + tabsW(z) + z.gap + sum(opts, z.opt, 9) + (colour ? z.gap + z.more : 0) + closeW(z) + z.padR)
 }
-const colourWidth = (z: Z) => even(z.colPad + 2 * z.tool + 6 + z.gap + z.sep + z.gap + sum(z.swatches, z.sw, z.swGap) + closeW(z) + z.colPad)
+const colourWidth = (z: Z) => even(z.colPad + 2 * z.tool + 6 + z.gap + z.sep + z.gap + sum(z.swatches.length, z.sw, z.swGap) + closeW(z) + z.colPad)
 
 const Svg = ({ src, className, ...rest }: { src: string; className?: string } & Record<`data-${string}`, unknown>) => <span className={className} aria-hidden dangerouslySetInnerHTML={{ __html: src }} {...rest} />
 
@@ -117,7 +117,7 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
         </div>
         <span className="av-sep" />
         <div className="av-row av-swatches">
-          {A.swatches.slice(0, z.swatches).map((c) => {
+          {z.swatches.map((c) => {
             const on = s.green ? c === '#50c810' : c === '#1a1a1a'
             const d = A.dot[c as keyof typeof A.dot]
             return (
@@ -192,33 +192,68 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
   )
 }
 
-// Rest above the bars, clear of every target
-const REST = { wide: { x: 452, y: 14 }, compact: { x: 344, y: 12 } }
+// Rest in the top-right gutter, clear of every target
+const REST = { wide: { x: 520, y: 30 }, compact: { x: 334, y: 18 } }
 
-function Frame({ initial, poster, script, still }: { initial: S; poster: S; script?: (a: Act<S>) => Promise<void>; still?: boolean }) {
+// A phone gets a finger (a dot where it taps), never the macOS arrow
+function useTouch() {
+  const [touch, setTouch] = useState(false)
+  useEffect(() => {
+    const m = window.matchMedia('(hover: none)')
+    const on = () => setTouch(m.matches)
+    on()
+    m.addEventListener('change', on)
+    return () => m.removeEventListener('change', on)
+  }, [])
+  return touch
+}
+
+const ReplayIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden><path d="M4 12a8 8 0 1 0 2.35-5.65M4 4v4.5h4.5" {...LINE} /></svg>
+
+type FrameProps = {
+  initial: S; poster: S; script?: (a: Act<S>) => Promise<void>; still?: boolean; play?: 'loop' | 'once'; label: string
+  slow?: number // plays this many times slower (script and CSS alike), to show the motion
+  reduced?: boolean // shows the reduced-motion version
+  caption?: string
+}
+function Frame({ initial, poster, script, still, play = 'loop', label, slow = 1, reduced, caption }: FrameProps) {
+  const touch = useTouch()
+  const [run, setRun] = useState(0)
   return (
-    <figure className="av-figure">
+    <figure className="av-figure" aria-label={label} style={{ '--t': slow } as CSSProperties}>
       <Stage
-        width={470}
-        height={200}
-        compact={{ below: 470, width: 358, height: 194 }}
+        key={run}
+        width={560}
+        height={248}
+        compact={{ below: 560, width: 358, height: 208 }}
         initial={initial}
         poster={poster}
         script={script}
-        cursor={still ? undefined : { at: REST }}
-        className="av-card"
+        play={still ? undefined : play}
+        speed={1 / slow}
+        cursor={still ? undefined : { at: REST, style: touch ? 'touch' : 'real', ripple: touch }}
+        className={'av-card' + (reduced ? ' av-reduced' : '')}
       >
         {(s, _rect, layout) => <Scene s={s} compact={layout === 'compact'} />}
       </Stage>
+      {(caption || (play === 'once' && !still)) && (
+        <div className="av-foot">
+          {caption && <figcaption className="av-caption">{caption}</figcaption>}
+          {play === 'once' && !still && (
+            // Plays once as it comes into view and holds on the result; this plays it again
+            <button type="button" className="av-replay" onClick={() => setRun((n) => n + 1)}><ReplayIcon />Replay</button>
+          )}
+        </div>
+      )}
     </figure>
   )
 }
 
-/* ---- The whole story (about 13s) ---- */
+/* ---- The whole story, once (about 6s), ending on the payoff ---- */
 async function stack(a: Act<S>) {
-  await a.wait(900)
+  await a.wait(700)
   a.mark('open hair')
-  await a.click({ at: 'main-hair', x: 0.5, y: 0.45 })
+  await a.click({ at: 'main-hair', x: 0.5, y: 0.3 })
   await a.set({ level: 1, enter: 'hair' })
   await a.wait(800)
   a.mark('pick style')
@@ -226,31 +261,16 @@ async function stack(a: Act<S>) {
   await a.set({ hair: 'spiky' })
   await a.wait(700)
   a.mark('open colour')
-  await a.click({ at: 'colour', x: 0.5, y: 0.45 })
+  await a.click({ at: 'colour', x: 0.5, y: 0.3 })
   await a.set({ level: 2, enter: 'colour' })
   await a.wait(800)
   a.mark('pick green')
   await a.click({ at: 'green', x: 0.5, y: 0.5 })
   await a.set({ green: true })
-  await a.wait(1800)
-  a.mark('close')
-  await a.click({ at: 'close-colour', x: 0.5, y: 0.5 })
-  await a.set({ level: 1, enter: null })
-  await a.wait(700)
-  await a.click({ at: 'close-hair', x: 0.5, y: 0.5 })
-  await a.set({ level: 0 })
-  await a.wait(600)
-  a.mark('undo')
-  await a.click({ at: 'undo', x: 0.5, y: 0.5 })
-  await a.set({ green: false })
-  await a.wait(450)
-  await a.click({ at: 'undo', x: 0.5, y: 0.5 })
-  await a.set({ hair: 'boy' })
   await a.move(REST)
-  await a.wait(1000)
 }
 export function AvatarsStack() {
-  return <Frame initial={base} poster={{ ...base, level: 2, hair: 'spiky', green: true }} script={stack} />
+  return <Frame label="The stack of bars: Hair rises from the main bar, then Colour rises from Hair" initial={base} poster={{ ...base, level: 2, hair: 'spiky', green: true }} script={stack} play="once" />
 }
 
 /* ---- Tabs switching in place (about 9s) ---- */
@@ -275,16 +295,111 @@ async function tabs(a: Act<S>) {
   await a.wait(1100)
 }
 export function AvatarsTabs() {
-  return <Frame initial={tabsStart} poster={{ ...tabsStart, tab: 'wear', cap: true }} script={tabs} />
+  return <Frame label="Switching between Style and Wear inside the Hair bar" initial={tabsStart} poster={{ ...tabsStart, tab: 'wear', cap: true }} script={tabs} />
 }
 
 /* ---- A still of the three levels ---- */
 export function AvatarsMuted() {
   const s: S = { ...base, level: 2, hair: 'spiky', green: true }
-  return <Frame initial={s} poster={s} still />
+  return <Frame label="Three levels: the bar in focus, the muted bar under it, the tray" initial={s} poster={s} still />
+}
+
+/* ---- The bar at rest: tap Hair and it lights and opens; tap it again and both go (about 5s) ---- */
+async function rest(a: Act<S>) {
+  await a.wait(900)
+  await a.click({ at: 'main-hair', x: 0.5, y: 0.3 })
+  await a.set({ level: 1, enter: 'hair' })
+  await a.wait(1500)
+  await a.click({ at: 'main-hair', x: 0.5, y: 0.3 })
+  await a.set({ level: 0, enter: null })
+  await a.move(REST)
+  await a.wait(1200)
+}
+export function AvatarsRest() {
+  return <Frame label="Tapping Hair opens its bar; tapping it again closes it" initial={base} poster={{ ...base, level: 1 }} script={rest} />
+}
+
+/* ---- Rising from behind, and sinking back, slowed 3× ---- */
+async function rise(a: Act<S>) {
+  await a.wait(500)
+  await a.click({ at: 'main-hair', x: 0.5, y: 0.3 })
+  await a.set({ level: 1, enter: 'hair' })
+  await a.wait(900)
+  await a.click({ at: 'close-hair', x: 0.5, y: 0.5 })
+  await a.set({ level: 0, enter: null })
+  await a.move(REST)
+  await a.wait(700)
+}
+export function AvatarsRise() {
+  return <Frame label="Hair rises from behind the main bar and sinks back, slowed down" initial={base} poster={{ ...base, level: 1 }} script={rise} slow={3} caption="Slowed down 3×" />
+}
+
+/* ---- The stack makes room: Colour rises from Hair while Hair slides down and the main bar folds, slowed 3× ---- */
+const roomStart: S = { ...base, level: 1, hair: 'spiky' }
+async function room(a: Act<S>) {
+  await a.wait(500)
+  await a.click({ at: 'colour', x: 0.5, y: 0.3 })
+  await a.set({ level: 2, enter: 'colour' })
+  await a.wait(1000)
+  await a.click({ at: 'close-colour', x: 0.5, y: 0.5 })
+  await a.set({ level: 1, enter: null })
+  await a.move(REST)
+  await a.wait(700)
+}
+export function AvatarsRoom() {
+  return <Frame label="Colour rises from Hair while Hair slides down and the main bar folds into the tray, slowed down" initial={roomStart} poster={{ ...roomStart, level: 2 }} script={room} slow={3} caption="Slowed down 3×" />
+}
+
+/* ---- Closing: both bars close, then open again, slowed 2× ---- */
+const closeStart: S = { ...base, level: 2, hair: 'spiky', green: true }
+async function closing(a: Act<S>) {
+  await a.wait(700)
+  await a.click({ at: 'close-colour', x: 0.5, y: 0.5 })
+  await a.set({ level: 1, enter: null })
+  await a.wait(500)
+  await a.click({ at: 'close-hair', x: 0.5, y: 0.5 })
+  await a.set({ level: 0 })
+  await a.wait(700)
+  // and back, so the loop ends where it began
+  await a.click({ at: 'main-hair', x: 0.5, y: 0.3 })
+  await a.set({ level: 1, enter: 'hair' })
+  await a.wait(450)
+  await a.click({ at: 'colour', x: 0.5, y: 0.3 })
+  await a.set({ level: 2, enter: 'colour' })
+  await a.move(REST)
+  await a.wait(900)
+}
+export function AvatarsClose() {
+  return <Frame label="Each bar sinks back behind the one under it as it closes, slowed down" initial={closeStart} poster={closeStart} script={closing} slow={2} caption="Slowed down 2×" />
+}
+
+/* ---- With reduced motion: the same stack, fades only ---- */
+async function reducedRun(a: Act<S>) {
+  await a.wait(700)
+  await a.click({ at: 'main-hair', x: 0.5, y: 0.3 })
+  await a.set({ level: 1, enter: 'hair' })
+  await a.wait(800)
+  await a.click({ at: 'colour', x: 0.5, y: 0.3 })
+  await a.set({ level: 2, enter: 'colour' })
+  await a.wait(1100)
+  await a.click({ at: 'close-colour', x: 0.5, y: 0.5 })
+  await a.set({ level: 1, enter: null })
+  await a.wait(500)
+  await a.click({ at: 'close-hair', x: 0.5, y: 0.5 })
+  await a.set({ level: 0 })
+  await a.move(REST)
+  await a.wait(900)
+}
+export function AvatarsReduced() {
+  return <Frame label="With reduced motion, bars fade in and out without moving" initial={{ ...base, hair: 'spiky' }} poster={{ ...base, hair: 'spiky', level: 2 }} script={reducedRun} reduced caption="With reduced motion on" />
 }
 
 export const AVATAR_DEMOS: Record<string, () => ReactNode> = {
+  'avatars-rest': AvatarsRest,
+  'avatars-rise': AvatarsRise,
+  'avatars-room': AvatarsRoom,
+  'avatars-close': AvatarsClose,
+  'avatars-reduced': AvatarsReduced,
   'avatars-stack': AvatarsStack,
   'avatars-tabs': AvatarsTabs,
   'avatars-muted': AvatarsMuted,
