@@ -33,8 +33,8 @@ const base: S = { level: 0, enter: null, hair: 'curls', green: false, tab: 'styl
 // stage can ease them like the editor does. ----
 type Z = ReturnType<typeof sizes>
 const sizes = (compact: boolean) => compact
-  ? { tab: 40, opt: 48, gap: 6, more: 52, sw: 30, swGap: 2, tool: 36, padL: 4, padR: 10, colPad: 10, close: 24, sep: 2, hairs: ['curls', 'waves'] as Hair[], hats: ['cap'] as const, swatches: ['#1a1a1a', '#5a3620', '#50c810', '#f70492'], main: 326 }
-  : { tab: 54, opt: 48, gap: 10, more: 60, sw: 32, swGap: 4, tool: 40, padL: 4, padR: 16, colPad: 12, close: 28, sep: 2, hairs: ['buns', 'curls', 'waves', 'long'] as Hair[], hats: ['cap', 'beanie'] as const, swatches: ['#1a1a1a', '#5a3620', '#a8693f', '#e8b04b', '#50c810', '#f70492'], main: 444 }
+  ? { tab: 40, opt: 48, gap: 6, more: 48, sw: 30, swGap: 2, tool: 36, padL: 4, padR: 10, colPad: 10, close: 24, sep: 2, hairs: ['curls', 'waves'] as Hair[], hats: ['cap'] as const, swatches: ['#1a1a1a', '#5a3620', '#50c810', '#f70492'], main: 326 }
+  : { tab: 54, opt: 48, gap: 10, more: 48, sw: 32, swGap: 4, tool: 40, padL: 4, padR: 16, colPad: 12, close: 28, sep: 2, hairs: ['buns', 'curls', 'waves', 'long'] as Hair[], hats: ['cap', 'beanie'] as const, swatches: ['#1a1a1a', '#5a3620', '#a8693f', '#e8b04b', '#50c810', '#f70492'], main: 444 }
 // Bars are centred with translateX(-50%): an even width keeps them on whole pixels
 const even = (n: number) => Math.ceil(n / 2) * 2
 const sum = (n: number, size: number, gap: number) => n * size + Math.max(0, n - 1) * gap
@@ -160,9 +160,9 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
             ))}
           </div>
         </div>
-        <span className="av-more" data-show={s.tab === 'style' || s.cap || undefined} data-on={s.level === 2 || undefined} data-target="colour" data-cursor="hand">
+        {/* No label: the options beside it are unlabelled icons, so the Colour tile matches them */}
+        <span className="av-more" aria-label="Colour" data-show={s.tab === 'style' || s.cap || undefined} data-on={s.level === 2 || undefined} data-target="colour" data-cursor="hand">
           <Layers className="av-more__art" show={s.tab === 'wear' ? 2 : g} items={[A.wheel.black, A.wheel.green, A.wheel.pink]} />
-          <span className="av-label">Colour</span>
         </span>
         <span className="av-sep" />
         <span className="av-close" data-target="close-hair" data-cursor="hand"><Close /></span>

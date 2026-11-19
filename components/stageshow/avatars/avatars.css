@@ -55,7 +55,7 @@
     --B: 184px;
     --tab: 54px;
     --gap: 10px;
-    --more: 60px;
+    --more: 48px;
     --sw: 32px;
     --swgap: 4px;
     --tool: 40px;
@@ -72,7 +72,7 @@
     --B: 130px;
     --tab: 40px;
     --gap: 6px;
-    --more: 52px;
+    --more: 48px;
     --close: 24px;
     --sw: 30px;
     --swgap: 2px;
@@ -214,12 +214,9 @@
   .av-more {
     display: grid;
     flex: none;
-    grid-template-rows: 28px auto;
     place-items: center;
-    align-content: center;
-    gap: 2px;
     width: var(--more);
-    height: 56px;
+    height: 48px;
     border-radius: 14px;
     overflow: hidden;
     transition: background-color calc(160ms * var(--t, 1)) ease, opacity calc(110ms * var(--t, 1)) ease-out calc(110ms * var(--t, 1)), width calc(150ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1), margin calc(150ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1);
