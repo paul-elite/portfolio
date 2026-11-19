@@ -30,7 +30,7 @@
   & .ss-stage {
     overflow: hidden;
     border-radius: 12px;
-    background: #f6f0dc; /* a soft warm yellow, of a piece with the page */
+    background: #fdfaf0; /* a pale warm yellow: #f6f0dc, 3% brighter at half the saturation */
     isolation: isolate;
     /* The editor's labels are sans, like the site's interface (the article around it is serif) */
     font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
@@ -80,7 +80,7 @@
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    background-image: radial-gradient(circle, #c8bb93 1px, transparent 1.4px);
+    background-image: radial-gradient(circle, #c8c2ad 1px, transparent 1.4px);
     background-size: 16px 16px;
     background-position: center;
     -webkit-mask-image: radial-gradient(ellipse 75% 80% at 50% 50%, #000 30%, transparent 85%);
