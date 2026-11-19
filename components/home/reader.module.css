@@ -23,7 +23,8 @@
   gap: 3.5rem;
 }
 
-/* ---- left: table of contents ---- */
+/* ---- left: table of contents, pinned to the far left of the window on wide screens
+   (its grid column stays, so the article doesn't move) ---- */
 .toc {
   position: sticky;
   top: 4rem;
@@ -34,9 +35,6 @@
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 13px;
   letter-spacing: -0.01em;
-  /* Labels hang off the rail's right edge, toward the article, not the page margin */
-  align-items: flex-end;
-  text-align: right;
 }
 .back {
   display: inline-flex;
@@ -55,7 +53,7 @@
 }
 .back:hover { color: #111; }
 .back:active { transform: scale(0.97); }
-.tocNav { display: flex; flex-direction: column; align-items: flex-end; gap: 0.55rem; }
+.tocNav { display: flex; flex-direction: column; gap: 0.55rem; }
 .tocLink {
   color: rgba(0, 0, 0, 0.4);
   text-decoration: none;
@@ -137,6 +135,17 @@
   overflow-x: auto;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 13px;
+}
+
+@media (min-width: 861px) {
+  .toc {
+    position: fixed;
+    top: 9.25rem; /* level with the article title */
+    left: 2rem;
+    width: 190px;
+  }
+  /* The rail is out of the grid now; the article keeps its column */
+  .article { grid-column: 2; }
 }
 
 @media (max-width: 860px) {
