@@ -6,7 +6,7 @@
 }
 .av-foot { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
 /* Replay sits centred under the stage; the caption follows it */
-.av-caption { color: #9a9a95; font: 12px/1.4 var(--font-sans), ui-sans-serif, system-ui, sans-serif; }
+.av-caption { color: #999996; font: 12px/1.4 var(--font-sans), ui-sans-serif, system-ui, sans-serif; }
 .av-replay {
   order: -1;
   align-self: center;
@@ -18,12 +18,12 @@
   border-radius: 100px;
   background: #fff;
   box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.12), 0 1px 2px rgb(0 0 0 / 0.06);
-  color: #5b5e66;
+  color: #5e5f63;
   font: 12px/1 var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   cursor: pointer;
   transition: color 140ms ease, transform 120ms ease-out;
 }
-.av-replay:hover { color: #0f0e0b; }
+.av-replay:hover { color: #0e0e0c; }
 .av-replay:active { transform: scale(0.97); }
 
 .av-card {
@@ -45,8 +45,8 @@
     background: #fff;
     /* Two shadows: a warm-grey edge that is only a 0.5px spread, and a larger, lighter drop beneath it */
     box-shadow:
-      0 0 0 0.5px rgb(150 138 105 / 0.27),
-      0 4px 14px rgb(150 138 105 / 0.1);
+      0 0 0 0.5px rgb(139 133 116 / 0.27),
+      0 4px 14px rgb(139 133 116 / 0.1);
     isolation: isolate;
     /* The editor's labels are sans, like the site's interface (the article around it is serif) */
     font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
@@ -96,7 +96,7 @@
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    background-image: radial-gradient(circle, #c2bca8 0.7px, transparent 1.1px);
+    background-image: radial-gradient(circle, #bbb8ae 0.7px, transparent 1.1px);
     background-size: 16px 16px;
     background-position: center;
     -webkit-mask-image: radial-gradient(ellipse 75% 80% at 50% 50%, #000 30%, transparent 85%);
@@ -117,7 +117,7 @@
     overflow: hidden;
     border-radius: 18px;
     background: #fff;
-    box-shadow: 0 1px 3px rgb(88 80 66 / 0.08), 0 5px 5px rgb(88 80 66 / 0.07), 0 12px 7px rgb(88 80 66 / 0.04), 0 0 0 0.5px rgb(0 0 0 / 0.25);
+    box-shadow: 0 1px 3px rgb(82 78 72 / 0.08), 0 5px 5px rgb(82 78 72 / 0.07), 0 12px 7px rgb(82 78 72 / 0.04), 0 0 0 0.5px rgb(0 0 0 / 0.25);
     transform-origin: center bottom;
     will-change: transform, opacity;
     /* Visible places: a little spring as a bar arrives or moves */
@@ -152,7 +152,7 @@
     z-index: 3;
     gap: var(--maingap, 8px);
     padding: 4px;
-    background: #22211e;
+    background: #21201f;
     transition:
       transform 220ms cubic-bezier(0.2, 0, 0, 1),
       opacity 160ms ease-out 40ms,
@@ -169,8 +169,8 @@
     z-index: 1;
     height: 34px;
     border-radius: 10.8px;
-    background: #22211e;
-    box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.25), 0 3px 3px rgb(88 80 66 / 0.07);
+    background: #21201f;
+    box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.25), 0 3px 3px rgb(82 78 72 / 0.07);
     opacity: 0;
     transform: translateX(-50%) translateY(-6px);
     transition: opacity calc(120ms * var(--t, 1)) ease-out, transform calc(220ms * var(--t, 1)) cubic-bezier(0.2, 0, 0, 1), width calc(150ms * var(--t, 1)) ease;
@@ -178,8 +178,8 @@
   .av-tray[data-on] { opacity: 1; transform: translateX(-50%); transition-delay: calc(120ms * var(--t, 1)), calc(60ms * var(--t, 1)), calc(0ms * var(--t, 1)); }
 
   /* ---- Pieces ---- */
-  .av-label { font-size: 10.5px; line-height: normal; letter-spacing: 0.1px; color: #857f70; white-space: nowrap; transition: color calc(180ms * var(--t, 1)) ease-out; }
-  .av-tabs { display: flex; flex: none; gap: 4px; padding: 2px; border-radius: 16px; background: #f2eee3; }
+  .av-label { font-size: 10.5px; line-height: normal; letter-spacing: 0.1px; color: #807d75; white-space: nowrap; transition: color calc(180ms * var(--t, 1)) ease-out; }
+  .av-tabs { display: flex; flex: none; gap: 4px; padding: 2px; border-radius: 16px; background: #eeece7; }
   .av-tab {
     display: grid;
     grid-template-rows: 28px auto;
@@ -191,8 +191,8 @@
     border-radius: 14px;
     transition: background-color calc(160ms * var(--t, 1)) ease, box-shadow calc(160ms * var(--t, 1)) ease;
   }
-  .av-tab[data-on] { background: #fff; box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 1px 3px rgb(88 80 66 / 0.12); }
-  .av-tab[data-on] .av-label { color: #0f0e0b; }
+  .av-tab[data-on] { background: #fff; box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 1px 3px rgb(82 78 72 / 0.12); }
+  .av-tab[data-on] .av-label { color: #0e0e0c; }
   .av-tab__art, .av-more__art, .av-cat__art { display: grid; place-items: center; height: 28px; }
   .av-tab__art svg, .av-cat__art svg { display: block; }
 
@@ -227,12 +227,12 @@
     opacity: 0;
     transition: background-color calc(160ms * var(--t, 1)) ease, opacity calc(70ms * var(--t, 1)) ease-out, width calc(150ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1) calc(60ms * var(--t, 1)), margin calc(150ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1) calc(60ms * var(--t, 1));
   }
-  .av-more[data-on] { background: #f2eee3; }
-  .av-more[data-on] .av-label { color: #0f0e0b; }
+  .av-more[data-on] { background: #eeece7; }
+  .av-more[data-on] .av-label { color: #0e0e0c; }
   .av-more__art svg { width: 26px; height: 26px; }
 
-  .av-sep { flex: none; width: 2px; height: 13px; border-radius: 1px; background: #f2eee3; }
-  .av-close { display: grid; flex: none; place-items: center; width: var(--close, 28px); color: #a9a495; transition: color calc(180ms * var(--t, 1)) ease-out; }
+  .av-sep { flex: none; width: 2px; height: 13px; border-radius: 1px; background: #eeece7; }
+  .av-close { display: grid; flex: none; place-items: center; width: var(--close, 28px); color: #a4a29a; transition: color calc(180ms * var(--t, 1)) ease-out; }
 
   .av-tools { display: flex; flex: none; gap: 6px; }
   .av-tool { display: grid; place-items: center; width: var(--tool); height: 48px; border-radius: 14px; }
@@ -250,19 +250,19 @@
     width: var(--hist);
     height: 56px;
     box-sizing: border-box;
-    border: 0.5px solid #46423b;
+    border: 0.5px solid #43413e;
     border-radius: 14px;
-    background: #2b2925;
+    background: #2a2826;
     box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.33);
   }
-  .av-hist { display: grid; place-items: center; color: #dedad0; transition: color calc(160ms * var(--t, 1)) ease-out; }
-  .av-hist[data-off] { color: #6b675c; }
-  .av-more-btn { width: var(--morebtn); color: #dedad0; }
-  .av-groove { flex: none; width: 2px; height: 24px; border-radius: 100px; background: #161513; box-shadow: inset -0.5px 0 0.5px rgb(205 210 215 / 0.25), inset 0 0 0.2px rgb(166 172 179 / 0.66); }
+  .av-hist { display: grid; place-items: center; color: #dad8d4; transition: color calc(160ms * var(--t, 1)) ease-out; }
+  .av-hist[data-off] { color: #676560; }
+  .av-more-btn { width: var(--morebtn); color: #dad8d4; }
+  .av-groove { flex: none; width: 2px; height: 24px; border-radius: 100px; background: #151514; box-shadow: inset -0.5px 0 0.5px rgb(207 210 212 / 0.25), inset 0 0 0.2px rgb(169 172 176 / 0.66); }
   .av-cats { position: relative; display: flex; gap: var(--catgap); }
   .av-cat { position: relative; z-index: 1; display: grid; grid-template-rows: 28px auto; place-items: center; align-content: center; width: var(--cat); height: 56px; }
   .av-cat[data-k="outfit"], .av-cat[data-k="color"] { width: var(--cat-wide); gap: 2px; }
-  .av-cat[data-on] .av-label { color: #0f0e0b; }
+  .av-cat[data-on] .av-label { color: #0e0e0c; }
   /* The white selection behind the chosen tab */
   .av-ind {
     position: absolute;
@@ -278,14 +278,14 @@
   .av-ind[data-on] { opacity: 1; }
 
   /* ---- The bar under the top one: drawn, but quiet ---- */
-  .av-bar[data-muted] { box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.16), 0 2px 4px rgb(88 80 66 / 0.05); }
+  .av-bar[data-muted] { box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.16), 0 2px 4px rgb(82 78 72 / 0.05); }
   .av-bar[data-muted] .av-opt > *,
   .av-bar[data-muted] .av-tab:not([data-on]) .av-tab__art { filter: grayscale(1) brightness(1.2) contrast(0.6); opacity: 0.55; }
   .av-bar[data-muted] .av-tab[data-on] .av-tab__art { filter: grayscale(0.6); opacity: 0.8; }
-  .av-bar[data-muted] .av-label { color: #c4beaf; }
-  .av-bar[data-muted] .av-more[data-on] .av-label { color: #0f0e0b; }
-  .av-bar[data-muted] .av-opt[data-on] { box-shadow: inset 0 0 0 1.5px #cec8ba; }
-  .av-bar[data-muted] .av-close { color: #cec8ba; }
+  .av-bar[data-muted] .av-label { color: #bfbcb4; }
+  .av-bar[data-muted] .av-more[data-on] .av-label { color: #0e0e0c; }
+  .av-bar[data-muted] .av-opt[data-on] { box-shadow: inset 0 0 0 1.5px #c9c6bf; }
+  .av-bar[data-muted] .av-close { color: #c9c6bf; }
   .av-tab__art { transition: filter calc(180ms * var(--t, 1)) ease-out, opacity calc(180ms * var(--t, 1)) ease-out; }
 
   /* ---- A bar that just rose: its contents slide up from beneath, just after the surface ---- */

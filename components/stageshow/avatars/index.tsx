@@ -64,8 +64,8 @@ const More = () => (
 )
 const None = () => (
   <svg viewBox="0 0 40 40" width="40" height="40" aria-hidden>
-    <circle cx="20" cy="20" r="9" fill="none" stroke="#c9c9c6" strokeWidth="1.5" />
-    <path d="M13.6 26.4 26.4 13.6" stroke="#c9c9c6" strokeWidth="1.5" strokeLinecap="round" />
+    <circle cx="20" cy="20" r="9" fill="none" stroke="#c8c8c7" strokeWidth="1.5" />
+    <path d="M13.6 26.4 26.4 13.6" stroke="#c8c8c7" strokeWidth="1.5" strokeLinecap="round" />
   </svg>
 )
 // The shades and all-colours buttons: a ring of dots
