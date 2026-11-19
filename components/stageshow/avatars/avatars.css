@@ -320,19 +320,15 @@
   .av-ind[data-on] { opacity: 1; }
 
   /* ---- The bar under the top one: drawn, but quiet ---- */
-  /* Anything stacked underneath is one grey card, whatever it was on top: the white bar you came
-     from and the black main bar folded into the tray alike */
+  /* The black main bar, folded into the tray, turns grey; the white bar you came from stays white */
   & .ss-stage { --under: #e4e3e0; }
-  .av-bar[data-muted] { background: var(--under); box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.1), 0 2px 4px rgb(82 78 72 / 0.05); }
-  .av-bar[data-muted] .av-tabs { background: rgb(0 0 0 / 0.035); }
-  .av-bar[data-muted] .av-tab[data-on] { background: rgb(255 255 255 / 0.5); box-shadow: none; }
-  .av-bar[data-muted] .av-more[data-on] { background: rgb(255 255 255 / 0.5); }
+  .av-bar[data-muted] { box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.16), 0 2px 4px rgb(82 78 72 / 0.05); }
   .av-bar[data-muted] .av-opt > *,
   .av-bar[data-muted] .av-tab:not([data-on]) .av-tab__art { filter: grayscale(1) brightness(1.2) contrast(0.6); opacity: 0.55; }
   .av-bar[data-muted] .av-tab[data-on] .av-tab__art { filter: grayscale(0.6); opacity: 0.8; }
   .av-bar[data-muted] .av-label { color: #bfbcb4; }
   .av-bar[data-muted] .av-more[data-on] .av-label { color: #0e0e0c; }
-  .av-bar[data-muted] .av-opt[data-on] { background: rgb(255 255 255 / 0.5); }
+  .av-bar[data-muted] .av-opt[data-on] { background: #f6f6f4; }
   .av-bar[data-muted] .av-close { color: #c9c6bf; }
   .av-tab__art { transition: filter calc(180ms * var(--t, 1)) ease-out, opacity calc(180ms * var(--t, 1)) ease-out; }
 
