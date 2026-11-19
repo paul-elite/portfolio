@@ -252,8 +252,8 @@ function Frame({ initial, poster, script, still, label, slow = 1, reduced, capti
         className={'av-card' + (reduced ? ' av-reduced' : '')}
       >
         {(s, _rect, layout) => (
-          // At rest every scene is at 1x; the camera pushes in only while it moves. The cursor stays outside it, in stage pixels
-          <Camera focus={s.focus} max={2} pad={16} duration={1000} feather={24}>
+          // At rest every scene is at 1x; the camera pushes in only while it moves, snappy and mostly ease-out (fast start, long soft settle). The cursor stays outside it, in stage pixels
+          <Camera focus={s.focus} max={2} pad={16} duration={620} ease={[0.16, 1, 0.3, 1]} feather={24}>
             <Scene s={s} compact={layout === 'compact'} />
           </Camera>
         )}
