@@ -66,8 +66,7 @@
 .tocLink[data-state="read"] { color: rgba(0, 0, 0, 0.55); }
 .tocLink[data-state="current"] { color: #111; }
 
-/* The ruler beside the labels: fine ticks every 5px, a longer tick level with each label, and a
-   marker that slides with the reading position */
+/* The ruler beside the labels: fine ticks every 5px and a longer tick level with each label */
 .ruler {
   position: absolute;
   top: 0;
@@ -89,18 +88,6 @@
 }
 .tocLink[data-state="read"]::after { background: rgba(0, 0, 0, 0.35); }
 .tocLink[data-state="current"]::after { width: 10px; background: #111; }
-.marker {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 14px;
-  height: 1.5px;
-  margin-top: -0.75px;
-  border-radius: 1px;
-  background: #111;
-  will-change: transform;
-  pointer-events: none;
-}
 
 /* ---- right: the article ---- */
 .article {
