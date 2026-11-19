@@ -31,7 +31,7 @@
   & .ss-stage {
     overflow: hidden;
     border-radius: 12px;
-    background: #efece2; /* a soft warm ground: #f6f0dc, 3% darker at half the saturation */
+    background: #fff;
     isolation: isolate;
     /* The editor's labels are sans, like the site's interface (the article around it is serif) */
     font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
