@@ -114,7 +114,7 @@
   font-size: 21px;
   font-weight: 400;
   -webkit-text-stroke: 0.35px currentColor; /* Medium look (Hedvig is 400-only) */
-  letter-spacing: -1.5px;
+  letter-spacing: 0;
   color: #111;
   margin: 0;
 }
