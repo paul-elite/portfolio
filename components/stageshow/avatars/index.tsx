@@ -1,0 +1,282 @@
+'use client';
+
+import type { ReactNode } from 'react'
+import { Stage, type Act } from '../kit'
+import { A } from './assets'
+import './avatars.css'
+
+/* The Avatars write-up's scenes, built from the editor (avatars.paulelite.com) and its Figma
+   (Avatars file, frame 113:9122). The art is the editor's own: the avatar, the hair tiles, the
+   tab icons and the swatches are generated from its library into assets.ts.
+
+   One stack of bars, three ways to show it:
+     AvatarsStack   the whole story: Hair rises from behind the main bar, a style is picked,
+                    Colour rises from behind Hair (Hair slides down muted, the main bar folds into
+                    the tray), green is picked, both bars close, and undo puts the look back
+     AvatarsTabs    switching tabs in place: Style → Wear, a cap goes on (the Colour tile
+                    arrives and the bar widens), off again, back to Style
+     AvatarsMuted   a still of the three levels: the bar in focus, the muted bar, the tray      */
+
+type Hair = 'boy' | 'spiky'
+type S = {
+  level: 0 | 1 | 2 // the main bar · Hair over it · Colour over Hair
+  enter: 'hair' | 'colour' | null // the bar that just rose, so its options slide in
+  hair: Hair
+  green: boolean
+  tab: 'style' | 'wear'
+  cap: boolean
+}
+const base: S = { level: 0, enter: null, hair: 'boy', green: false, tab: 'style', cap: false }
+
+// ---- Sizes (px), wide and compact. Bars hug their contents; widths are worked out so the
+// stage can ease them like the editor does. ----
+type Z = ReturnType<typeof sizes>
+const sizes = (compact: boolean) => compact
+  ? { tab: 48, opt: 48, gap: 8, more: 56, sw: 30, swGap: 2, tool: 36, padL: 4, padR: 12, colPad: 10, close: 28, sep: 2, hairs: ['boy', 'spiky'] as Hair[], hats: ['cap'] as const, swatches: 5, main: 354 }
+  : { tab: 54, opt: 48, gap: 10, more: 60, sw: 32, swGap: 4, tool: 40, padL: 4, padR: 16, colPad: 12, close: 28, sep: 2, hairs: ['boy', 'spiky', 'curlytop'] as Hair[], hats: ['cap', 'beanie'] as const, swatches: 6, main: 421 }
+const sum = (n: number, size: number, gap: number) => n * size + Math.max(0, n - 1) * gap
+const closeW = (z: Z) => z.gap + z.sep + z.gap + z.close
+const tabsW = (z: Z) => 2 * z.tab + 4 + 4
+function hairWidth(s: S, z: Z) {
+  const opts = s.tab === 'style' ? z.hairs.length : 1 + z.hats.length
+  const colour = s.tab === 'style' || s.cap
+  return z.padL + tabsW(z) + z.gap + sum(opts, z.opt, 9) + (colour ? z.gap + z.more : 0) + closeW(z) + z.padR
+}
+const colourWidth = (z: Z) => z.colPad + 2 * z.tool + 6 + z.gap + z.sep + z.gap + sum(z.swatches, z.sw, z.swGap) + closeW(z) + z.colPad
+
+const Svg = ({ src, className, ...rest }: { src: string; className?: string } & Record<`data-${string}`, unknown>) => <span className={className} aria-hidden dangerouslySetInnerHTML={{ __html: src }} {...rest} />
+
+// ---- Icons the editor draws inline ----
+const LINE = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
+const Undo = ({ redo }: { redo?: boolean }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden style={redo ? undefined : { transform: 'scaleX(-1)' }}>
+    <path d="M20.99 8h-12a6 6 0 0 0 0 12h4M16.99 4l1.16.88C20.04 6.32 20.99 7.04 20.99 8s-.95 1.68-2.84 3.12L16.99 12" {...LINE} />
+  </svg>
+)
+const Close = () => <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden><path d="M18 6 6 18M6 6l12 12" {...LINE} /></svg>
+const More = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
+    {[6, 12, 18].map((y) => <circle key={y} cx="12" cy={y} r="1.1" fill="currentColor" />)}
+  </svg>
+)
+const None = () => (
+  <svg viewBox="0 0 40 40" width="40" height="40" aria-hidden>
+    <circle cx="20" cy="20" r="9" fill="none" stroke="#c9c9c6" strokeWidth="1.5" />
+    <path d="M13.6 26.4 26.4 13.6" stroke="#c9c9c6" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+)
+// The shades and all-colours buttons: a ring of dots
+const Cluster = ({ fills }: { fills: string[] }) => (
+  <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden>
+    {fills.map((f, i) => {
+      const a = (i / fills.length) * Math.PI * 2 - Math.PI / 2
+      return <circle key={i} cx={14 + Math.cos(a) * 8.5} cy={14 + Math.sin(a) * 8.5} r="3.6" fill={f} />
+    })}
+  </svg>
+)
+const SHADES_BLACK = ['#1a1a1a', '#3a3a3a', '#5a5a5a', '#7a7a7a', '#9a9a9a', '#bcbcbc', '#dedede']
+const SHADES_GREEN = ['#1c4a06', '#2c6f0a', '#3d950d', '#50c810', '#79da48', '#a5e886', '#d0f4c0']
+const RAINBOW = ['#ff4f4e', '#ffb900', '#00cc1a', '#14c8c8', '#1084fe', '#8b5cf6', '#f70492']
+
+// ---- The scene ----
+const LOOKS = [
+  { id: 'boy', src: A.avatar.boyBlack },
+  { id: 'spiky', src: A.avatar.spikyBlack },
+  { id: 'green', src: A.avatar.spikyGreen },
+  { id: 'cap', src: A.avatarCap },
+]
+function avatarFor(s: S) {
+  if (s.cap) return { id: 'cap', src: A.avatarCap }
+  if (s.hair === 'spiky') return s.green ? { id: 'green', src: A.avatar.spikyGreen } : { id: 'spiky', src: A.avatar.spikyBlack }
+  return { id: 'boy', src: A.avatar.boyBlack }
+}
+
+function Scene({ s, compact }: { s: S; compact: boolean }) {
+  const z = sizes(compact)
+  const av = avatarFor(s)
+  const hairPos = s.level === 0 ? 'under' : s.level === 1 ? 'top' : 'below'
+  const colourPos = s.level === 2 ? 'top' : 'under'
+  const mainPos = s.level === 2 ? 'tray' : 'floor'
+  const edits = (s.hair !== 'boy' ? 1 : 0) + (s.green ? 1 : 0) + (s.cap ? 1 : 0)
+  const hw = hairWidth(s, z)
+  return (
+    <div className="av-scene">
+      {/* The avatar never moves; a new look crossfades in place over the old one */}
+      <div className="av-avatar">
+        {LOOKS.map((l) => <Svg key={l.id} src={l.src} className="av-look" data-on={l.id === av.id || undefined} />)}
+      </div>
+
+      {/* The tray: the main bar folded under Hair */}
+      <div className="av-tray" data-on={s.level === 2 || undefined} style={{ width: hw - 64 }} />
+
+      {/* Colour: rises from behind Hair */}
+      <div className="av-bar av-colour" data-pos={colourPos} data-enter={s.enter === 'colour' || undefined} style={{ width: colourWidth(z) }}>
+        <div className="av-tools">
+          <span className="av-tool"><Cluster fills={s.green ? SHADES_GREEN : SHADES_BLACK} /></span>
+          <span className="av-tool"><Cluster fills={RAINBOW} /></span>
+        </div>
+        <span className="av-sep" />
+        <div className="av-row av-swatches">
+          {A.swatches.slice(0, z.swatches).map((c) => {
+            const on = s.green ? c === '#50c810' : c === '#1a1a1a'
+            const d = A.dot[c as keyof typeof A.dot]
+            return <span key={c} className="av-swatch" data-target={c === '#50c810' ? 'green' : undefined} data-cursor="pointer"><Svg src={on ? d.on : d.off} /></span>
+          })}
+        </div>
+        <span className="av-sep" />
+        <span className="av-close" data-target="close-colour" data-cursor="pointer"><Close /></span>
+      </div>
+
+      {/* Hair: rises from behind the main bar; slides down muted under Colour */}
+      <div className="av-bar av-hair" data-pos={hairPos} data-muted={s.level === 2 || undefined} data-enter={s.enter === 'hair' || undefined} style={{ width: hw }}>
+        <div className="av-tabs">
+          <span className="av-tab" data-on={s.tab === 'style' || undefined} data-target="tab-style" data-cursor="pointer">
+            <Svg src={s.tab === 'style' ? (s.green ? A.tab.styleGreen : A.tab.styleBlack) : A.tab.styleOff} className="av-tab__art" />
+            <span className="av-label">Style</span>
+          </span>
+          <span className="av-tab" data-on={s.tab === 'wear' || undefined} data-target="tab-wear" data-cursor="pointer">
+            <Svg src={s.tab === 'wear' && s.cap ? A.tab.wearOn : A.tab.wear} className="av-tab__art" />
+            <span className="av-label">Wear</span>
+          </span>
+        </div>
+        <div className="av-row" key={s.tab} data-swap={s.tab === 'wear' || undefined}>
+          {s.tab === 'style'
+            ? z.hairs.map((h) => (
+              <span key={h} className="av-opt" data-on={s.hair === h || undefined} data-target={'hair-' + h} data-cursor="pointer">
+                <Svg src={(s.green ? A.hairTiles.green : A.hairTiles.black)[h]} />
+              </span>
+            ))
+            : [
+              <span key="none" className="av-opt" data-on={!s.cap || undefined} data-target="hat-none" data-cursor="pointer"><None /></span>,
+              ...z.hats.map((h) => (
+                <span key={h} className="av-opt" data-on={(s.cap && h === 'cap') || undefined} data-target={'hat-' + h} data-cursor="pointer"><Svg src={A.hatTiles[h]} /></span>
+              )),
+            ]}
+        </div>
+        <span className="av-more" data-show={s.tab === 'style' || s.cap || undefined} data-on={s.level === 2 || undefined} data-target="colour" data-cursor="pointer">
+          <Svg src={s.tab === 'wear' ? A.wheel.pink : s.green ? A.wheel.green : A.wheel.black} className="av-more__art" />
+          <span className="av-label">Colour</span>
+        </span>
+        <span className="av-sep" />
+        <span className="av-close" data-target="close-hair" data-cursor="pointer"><Close /></span>
+      </div>
+
+      {/* The main bar: the floor */}
+      <div className="av-bar av-main" data-pos={mainPos} style={{ width: z.main }}>
+        <div className="av-history">
+          <span className="av-hist" data-off={!edits || undefined} data-target="undo" data-cursor="pointer"><Undo /></span>
+          <span className="av-hist" data-off><Undo redo /></span>
+        </div>
+        <span className="av-groove" />
+        <div className="av-cats">
+          <span className="av-ind" data-on={s.level > 0 || undefined} />
+          {(['face', 'hair', 'outfit', 'color'] as const).map((k) => (
+            <span key={k} className="av-cat" data-k={k} data-on={(s.level > 0 && k === 'hair') || undefined} data-target={k === 'hair' ? 'main-hair' : undefined} data-cursor="pointer">
+              <Svg src={k === 'hair' ? (s.level > 0 ? A.bar.hairOn : A.bar.hair) : A.bar[k]} className="av-cat__art" />
+              <span className="av-label">{k === 'color' ? 'Color' : k[0].toUpperCase() + k.slice(1)}</span>
+            </span>
+          ))}
+        </div>
+        <span className="av-groove" />
+        <span className="av-hist av-more-btn"><More /></span>
+      </div>
+    </div>
+  )
+}
+
+const REST = { wide: { x: 400, y: 120 }, compact: { x: 300, y: 110 } }
+
+function Frame({ initial, poster, script, still }: { initial: S; poster: S; script?: (a: Act<S>) => Promise<void>; still?: boolean }) {
+  return (
+    <figure className="av-figure">
+      <Stage
+        width={470}
+        height={360}
+        compact={{ below: 470, width: 358, height: 340 }}
+        initial={initial}
+        poster={poster}
+        script={script}
+        cursor={still ? undefined : { at: REST }}
+        className="av-card"
+      >
+        {(s, _rect, layout) => <Scene s={s} compact={layout === 'compact'} />}
+      </Stage>
+    </figure>
+  )
+}
+
+/* ---- The whole story (about 13s) ---- */
+async function stack(a: Act<S>) {
+  await a.wait(900)
+  a.mark('open hair')
+  await a.click({ at: 'main-hair', x: 0.5, y: 0.45 })
+  await a.set({ level: 1, enter: 'hair' })
+  await a.wait(800)
+  a.mark('pick style')
+  await a.click({ at: 'hair-spiky', x: 0.5, y: 0.5 })
+  await a.set({ hair: 'spiky' })
+  await a.wait(700)
+  a.mark('open colour')
+  await a.click({ at: 'colour', x: 0.5, y: 0.45 })
+  await a.set({ level: 2, enter: 'colour' })
+  await a.wait(800)
+  a.mark('pick green')
+  await a.click({ at: 'green', x: 0.5, y: 0.5 })
+  await a.set({ green: true })
+  await a.wait(1800)
+  a.mark('close')
+  await a.click({ at: 'close-colour', x: 0.5, y: 0.5 })
+  await a.set({ level: 1, enter: null })
+  await a.wait(700)
+  await a.click({ at: 'close-hair', x: 0.5, y: 0.5 })
+  await a.set({ level: 0 })
+  await a.wait(600)
+  a.mark('undo')
+  await a.click({ at: 'undo', x: 0.5, y: 0.5 })
+  await a.set({ green: false })
+  await a.wait(450)
+  await a.click({ at: 'undo', x: 0.5, y: 0.5 })
+  await a.set({ hair: 'boy' })
+  await a.move(REST)
+  await a.wait(1000)
+}
+export function AvatarsStack() {
+  return <Frame initial={base} poster={{ ...base, level: 2, hair: 'spiky', green: true }} script={stack} />
+}
+
+/* ---- Tabs switching in place (about 9s) ---- */
+const tabsStart: S = { ...base, level: 1, hair: 'spiky' }
+async function tabs(a: Act<S>) {
+  await a.wait(900)
+  a.mark('wear')
+  await a.click({ at: 'tab-wear', x: 0.5, y: 0.5 })
+  await a.set({ tab: 'wear' })
+  await a.wait(700)
+  a.mark('cap on')
+  await a.click({ at: 'hat-cap', x: 0.5, y: 0.5 })
+  await a.set({ cap: true })
+  await a.wait(1700)
+  a.mark('cap off')
+  await a.click({ at: 'hat-none', x: 0.5, y: 0.5 })
+  await a.set({ cap: false })
+  await a.wait(500)
+  await a.click({ at: 'tab-style', x: 0.5, y: 0.5 })
+  await a.set({ tab: 'style' })
+  await a.move(REST)
+  await a.wait(1100)
+}
+export function AvatarsTabs() {
+  return <Frame initial={tabsStart} poster={{ ...tabsStart, tab: 'wear', cap: true }} script={tabs} />
+}
+
+/* ---- A still of the three levels ---- */
+export function AvatarsMuted() {
+  const s: S = { ...base, level: 2, hair: 'spiky', green: true }
+  return <Frame initial={s} poster={s} still />
+}
+
+export const AVATAR_DEMOS: Record<string, () => ReactNode> = {
+  'avatars-stack': AvatarsStack,
+  'avatars-tabs': AvatarsTabs,
+  'avatars-muted': AvatarsMuted,
+}

@@ -1,0 +1,252 @@
+/* The Avatars scenes. Values are the editor's (avatars.paulelite.com) and its Figma (113:9122). */
+.av-figure { margin: 2.25rem 0; }
+
+.av-card {
+  & .ss-stage {
+    overflow: hidden;
+    border-radius: 12px;
+    background: #f3f3f2;
+    /* The editor's labels are sans, like the site's interface (the article around it is serif) */
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    /* Slots: A holds the bar in focus, B the one under it (the main bar on its own) */
+    --A: 204px;
+    --B: 276px;
+    --av: 186px;
+    --tab: 54px;
+    --gap: 10px;
+    --more: 60px;
+    --sw: 32px;
+    --swgap: 4px;
+    --tool: 40px;
+    --padR: 16px;
+    --colpad: 12px;
+    --hist: 93px;
+    --cat: 56px;
+    --cat-wide: 60px;
+    --catgap: 4px;
+    --morebtn: 40px;
+  }
+  & .ss-stage[data-layout="compact"] {
+    --A: 188px;
+    --B: 260px;
+    --av: 170px;
+    --tab: 48px;
+    --gap: 8px;
+    --more: 56px;
+    --sw: 30px;
+    --swgap: 2px;
+    --tool: 36px;
+    --padR: 12px;
+    --colpad: 10px;
+    --hist: 70px;
+    --cat: 52px;
+    --cat-wide: 56px;
+    --catgap: 2px;
+    --morebtn: 30px;
+  }
+
+  .av-scene { position: absolute; inset: 0; }
+
+  /* The avatar never moves; a new look crossfades in place */
+  .av-avatar {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: var(--av);
+    height: var(--av);
+    transform: translateX(-50%);
+  }
+  .av-look { position: absolute; inset: 0; opacity: 0; transition: opacity 220ms ease-out; }
+  .av-look[data-on] { opacity: 1; }
+  .av-avatar svg { display: block; width: 100%; height: 100%; }
+
+  /* ---- Bars ---- */
+  .av-bar {
+    position: absolute;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+    height: 64px;
+    box-sizing: border-box;
+    overflow: hidden;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 1px 3px rgb(75 78 88 / 0.08), 0 5px 5px rgb(75 78 88 / 0.07), 0 12px 7px rgb(75 78 88 / 0.04), 0 0 0 0.5px rgb(0 0 0 / 0.25);
+    transform-origin: center bottom;
+    will-change: transform, opacity;
+    /* Visible places: a little spring as a bar arrives or moves */
+    transition:
+      transform 260ms cubic-bezier(0.3, 1.2, 0.45, 1),
+      opacity 160ms ease-out,
+      filter 160ms ease-out,
+      width 150ms cubic-bezier(0.45, 0, 0.1, 1),
+      box-shadow 180ms ease-out;
+  }
+  .av-hair, .av-colour { top: var(--A); padding: 4px var(--padR) 4px 4px; }
+  .av-colour { padding: 4px var(--colpad); }
+
+  /* Hidden places: tucked behind the bar under it, slightly smaller, blurred; leaving is quicker and eases out */
+  .av-bar[data-pos="under"], .av-bar[data-pos="tray"] {
+    opacity: 0;
+    filter: blur(2px);
+    transition: transform 170ms ease-out, opacity 170ms ease-out, filter 170ms ease-out, width 150ms ease;
+  }
+  .av-hair { z-index: 2; }
+  .av-colour { z-index: 1; }
+  .av-hair[data-pos="top"] { transform: translateX(-50%); }
+  .av-hair[data-pos="under"] { transform: translateX(-50%) translateY(calc(var(--B) - var(--A) + 8px)) scale(0.94); }
+  .av-hair[data-pos="below"] { transform: translateX(-50%) translateY(calc(var(--B) - var(--A))); transition-duration: 220ms, 160ms, 160ms, 150ms, 180ms; transition-timing-function: cubic-bezier(0.2, 0, 0, 1), ease-out, ease-out, ease, ease-out; }
+  .av-colour[data-pos="top"] { transform: translateX(-50%); }
+  .av-colour[data-pos="under"] { transform: translateX(-50%) translateY(16px) scale(0.94); }
+
+  /* The main bar: the floor. Folding into the tray it drops behind Hair at once; coming back it
+     stays behind until it has landed, so it comes out from under Hair, never over it */
+  .av-main {
+    top: var(--B);
+    z-index: 3;
+    gap: 8px;
+    padding: 4px;
+    background: #202123;
+    transition:
+      transform 220ms cubic-bezier(0.2, 0, 0, 1),
+      opacity 160ms ease-out 40ms,
+      filter 160ms ease-out,
+      z-index 0s linear 220ms;
+  }
+  .av-main[data-pos="floor"] { transform: translateX(-50%); }
+  .av-main[data-pos="tray"] { z-index: 0; transform: translateX(-50%) translateY(12px) scale(0.9); transition: transform 220ms cubic-bezier(0.2, 0, 0, 1), opacity 140ms ease-out, filter 140ms ease-out, z-index 0s; }
+
+  .av-tray {
+    position: absolute;
+    top: calc(var(--B) + 39px);
+    left: 50%;
+    z-index: 1;
+    height: 34px;
+    border-radius: 10.8px;
+    background: #202123;
+    box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.25), 0 3px 3px rgb(75 78 88 / 0.07);
+    opacity: 0;
+    transform: translateX(-50%) translateY(-6px);
+    transition: opacity 120ms ease-out, transform 220ms cubic-bezier(0.2, 0, 0, 1), width 150ms ease;
+  }
+  .av-tray[data-on] { opacity: 1; transform: translateX(-50%); transition-delay: 120ms, 60ms, 0ms; }
+
+  /* ---- Pieces ---- */
+  .av-label { font-size: 10.5px; line-height: normal; letter-spacing: 0.1px; color: #777c88; white-space: nowrap; transition: color 180ms ease-out; }
+  .av-tabs { display: flex; flex: none; gap: 4px; padding: 2px; border-radius: 16px; background: #eff0f1; }
+  .av-tab {
+    display: grid;
+    grid-template-rows: 28px auto;
+    place-items: center;
+    align-content: center;
+    gap: 2px;
+    width: var(--tab);
+    height: 52px;
+    border-radius: 14px;
+    transition: background-color 160ms ease, box-shadow 160ms ease;
+  }
+  .av-tab[data-on] { background: #fff; box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 1px 3px rgb(75 78 88 / 0.12); }
+  .av-tab[data-on] .av-label { color: #0b0c0e; }
+  .av-tab__art, .av-more__art, .av-cat__art { display: grid; place-items: center; height: 28px; }
+  .av-tab__art svg, .av-cat__art svg { display: block; }
+
+  .av-row { display: flex; flex: none; align-items: center; gap: 9px; }
+  .av-opt { display: grid; flex: none; place-items: center; width: 48px; height: 48px; border-radius: 14px; transition: background-color 140ms ease, box-shadow 140ms ease; }
+  .av-opt svg { display: block; transition: filter 180ms ease-out, opacity 180ms ease-out; }
+  .av-opt[data-on] { background: #f4f4f2; box-shadow: inset 0 0 0 1.5px #1a1a1a; }
+
+  .av-more {
+    display: grid;
+    flex: none;
+    grid-template-rows: 28px auto;
+    place-items: center;
+    align-content: center;
+    gap: 2px;
+    width: var(--more);
+    height: 56px;
+    border-radius: 14px;
+    overflow: hidden;
+    transition: background-color 160ms ease, opacity 120ms ease-out, width 150ms cubic-bezier(0.45, 0, 0.1, 1), margin 150ms cubic-bezier(0.45, 0, 0.1, 1);
+  }
+  .av-more:not([data-show]) { width: 0; margin-left: calc(var(--gap) * -1); opacity: 0; }
+  .av-more[data-on] { background: #eff0f1; }
+  .av-more[data-on] .av-label { color: #0b0c0e; }
+  .av-more__art svg { width: 26px; height: 26px; }
+
+  .av-sep { flex: none; width: 2px; height: 13px; border-radius: 1px; background: #eff0f1; }
+  .av-close { display: grid; flex: none; place-items: center; width: 28px; color: #9fa3b1; transition: color 180ms ease-out; }
+
+  .av-tools { display: flex; flex: none; gap: 6px; }
+  .av-tool { display: grid; place-items: center; width: var(--tool); height: 48px; border-radius: 14px; }
+  .av-swatches { gap: var(--swgap); }
+  .av-swatch { display: grid; flex: none; place-items: center; width: var(--sw); height: 48px; }
+  .av-swatch svg { display: block; }
+
+  /* The main bar's pieces (the editor's dark bar) */
+  .av-history {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: space-around;
+    width: var(--hist);
+    height: 56px;
+    box-sizing: border-box;
+    border: 0.5px solid #3d4145;
+    border-radius: 14px;
+    background: #26282b;
+    box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.33);
+  }
+  .av-hist { display: grid; place-items: center; color: #d8d9dd; transition: color 160ms ease-out; }
+  .av-hist[data-off] { color: #62656e; }
+  .av-more-btn { width: var(--morebtn); color: #d8d9dd; }
+  .av-groove { flex: none; width: 2px; height: 24px; border-radius: 100px; background: #141415; box-shadow: inset -0.5px 0 0.5px rgb(205 210 215 / 0.25), inset 0 0 0.2px rgb(166 172 179 / 0.66); }
+  .av-cats { position: relative; display: flex; gap: var(--catgap); }
+  .av-cat { position: relative; z-index: 1; display: grid; grid-template-rows: 28px auto; place-items: center; align-content: center; width: var(--cat); height: 56px; }
+  .av-cat[data-k="outfit"], .av-cat[data-k="color"] { width: var(--cat-wide); gap: 2px; }
+  .av-cat[data-on] .av-label { color: #0b0c0e; }
+  /* The white selection behind the chosen tab */
+  .av-ind {
+    position: absolute;
+    top: 0;
+    left: calc(var(--cat) + var(--catgap));
+    width: var(--cat);
+    height: 56px;
+    border-radius: 14px;
+    background: #fff;
+    opacity: 0;
+    transition: opacity 120ms ease-out;
+  }
+  .av-ind[data-on] { opacity: 1; }
+
+  /* ---- The bar under the top one: drawn, but quiet ---- */
+  .av-bar[data-muted] { box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.16), 0 2px 4px rgb(75 78 88 / 0.05); }
+  .av-bar[data-muted] .av-opt svg,
+  .av-bar[data-muted] .av-tab:not([data-on]) .av-tab__art { filter: grayscale(1) brightness(1.2) contrast(0.6); opacity: 0.55; }
+  .av-bar[data-muted] .av-tab[data-on] .av-tab__art { filter: grayscale(0.6); opacity: 0.8; }
+  .av-bar[data-muted] .av-label { color: #b9bcc4; }
+  .av-bar[data-muted] .av-more[data-on] .av-label { color: #0b0c0e; }
+  .av-bar[data-muted] .av-opt[data-on] { box-shadow: inset 0 0 0 1.5px #c9cbd1; }
+  .av-bar[data-muted] .av-close { color: #c9cbd1; }
+  .av-tab__art { transition: filter 180ms ease-out, opacity 180ms ease-out; }
+
+  /* ---- A bar that just rose: its contents slide up from beneath, just after the surface ---- */
+  .av-bar[data-enter] > *, .av-bar[data-enter] .av-row > *, .av-bar[data-enter] .av-swatches > * { animation: av-up 190ms cubic-bezier(0.2, 0, 0, 1) both; }
+  .av-bar[data-enter] .av-row > :nth-child(2), .av-bar[data-enter] .av-swatches > :nth-child(2) { animation-delay: 22ms; }
+  .av-bar[data-enter] .av-row > :nth-child(3), .av-bar[data-enter] .av-swatches > :nth-child(3) { animation-delay: 34ms; }
+  .av-bar[data-enter] .av-swatches > :nth-child(4) { animation-delay: 46ms; }
+  .av-bar[data-enter] .av-swatches > :nth-child(5) { animation-delay: 58ms; }
+  .av-bar[data-enter] .av-swatches > :nth-child(6) { animation-delay: 70ms; }
+  /* Switching tabs: the bar stays, the new options cross in */
+  .av-hair:not([data-enter]) .av-row > * { animation: av-tab 160ms ease-out both; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .av-bar, .av-tray, .av-more { transition: opacity 140ms ease-out !important; }
+    .av-bar[data-pos="under"] { filter: none; }
+    .av-bar[data-enter] > *, .av-bar[data-enter] .av-row > *, .av-bar[data-enter] .av-swatches > *, .av-hair .av-row > * { animation: none; }
+  }
+}
+
+@keyframes av-up { from { opacity: 0; transform: translateY(10px); } }
+@keyframes av-tab { from { opacity: 0.25; transform: translateY(2px); } }
+@keyframes av-fade { from { opacity: 0; } }

@@ -1,10 +1,11 @@
 'use client';
 
 import { SEARCH_DEMOS } from './SearchDemos';
+import { AVATAR_DEMOS } from '@/components/stageshow/avatars';
 
 // Interactive blocks are referenced from content by id (block.content), so essays can place live demos
 // between paragraphs. Unknown ids render nothing.
-export const INTERACTIVE_COMPONENTS = { ...SEARCH_DEMOS } as const;
+export const INTERACTIVE_COMPONENTS = { ...SEARCH_DEMOS, ...AVATAR_DEMOS } as const;
 
 export type InteractiveId = keyof typeof INTERACTIVE_COMPONENTS;
 
