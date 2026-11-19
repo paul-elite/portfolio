@@ -210,9 +210,22 @@ function useTouch() {
   return touch
 }
 
+// A slowed scene slows the bars (CSS, via --t) and the beats between actions, but never the hand:
+// the cursor keeps real arcs, trip times and presses, as a person's would
+function slowed(script: (a: Act<S>) => Promise<void>, slow: number) {
+  return (a: Act<S>) =>
+    script(new Proxy(a, {
+      get(t, k) {
+        if (k === 'wait') return (ms: number) => t.wait(ms * slow)
+        const v = (t as unknown as Record<string | symbol, unknown>)[k]
+        return typeof v === 'function' ? (v as (...x: unknown[]) => unknown).bind(t) : v
+      },
+    }))
+}
+
 type FrameProps = {
   initial: S; poster: S; script?: (a: Act<S>) => Promise<void>; still?: boolean; label: string
-  slow?: number // plays this many times slower (script and CSS alike), to show the motion
+  slow?: number // the bars' motion and the pauses play this many times slower; the cursor doesn't
   reduced?: boolean // shows the reduced-motion version
   caption?: string
   cursor?: boolean // false: the camera tells it, nothing is pressed
@@ -233,10 +246,9 @@ function Frame({ initial, poster, script, still, label, slow = 1, reduced, capti
         compact={{ below: 480, width: 358, height: 260 }}
         initial={initial}
         poster={poster}
-        script={script}
+        script={script && slow !== 1 ? slowed(script, slow) : script}
         play={still ? undefined : play}
-        speed={1 / slow}
-        cursor={still || !cursor ? undefined : { at: REST, style: touch ? 'touch' : 'real', ripple: touch }}
+        cursor={still || !cursor ? undefined : { at: REST, style: touch ? 'touch' : 'large', ripple: touch }}
         className={'av-card' + (reduced ? ' av-reduced' : '')}
       >
         {(s, _rect, layout) => (
