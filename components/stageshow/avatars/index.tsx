@@ -33,16 +33,18 @@ const base: S = { level: 0, enter: null, hair: 'boy', green: false, tab: 'style'
 type Z = ReturnType<typeof sizes>
 const sizes = (compact: boolean) => compact
   ? { tab: 48, opt: 48, gap: 8, more: 56, sw: 30, swGap: 2, tool: 36, padL: 4, padR: 12, colPad: 10, close: 28, sep: 2, hairs: ['boy', 'spiky'] as Hair[], hats: ['cap'] as const, swatches: 5, main: 354 }
-  : { tab: 54, opt: 48, gap: 10, more: 60, sw: 32, swGap: 4, tool: 40, padL: 4, padR: 16, colPad: 12, close: 28, sep: 2, hairs: ['boy', 'spiky', 'curlytop'] as Hair[], hats: ['cap', 'beanie'] as const, swatches: 6, main: 421 }
+  : { tab: 54, opt: 48, gap: 10, more: 60, sw: 32, swGap: 4, tool: 40, padL: 4, padR: 16, colPad: 12, close: 28, sep: 2, hairs: ['boy', 'spiky', 'curlytop'] as Hair[], hats: ['cap', 'beanie'] as const, swatches: 6, main: 422 }
+// Bars are centred with translateX(-50%): an even width keeps them on whole pixels
+const even = (n: number) => Math.ceil(n / 2) * 2
 const sum = (n: number, size: number, gap: number) => n * size + Math.max(0, n - 1) * gap
 const closeW = (z: Z) => z.gap + z.sep + z.gap + z.close
 const tabsW = (z: Z) => 2 * z.tab + 4 + 4
 function hairWidth(s: S, z: Z) {
   const opts = s.tab === 'style' ? z.hairs.length : 1 + z.hats.length
   const colour = s.tab === 'style' || s.cap
-  return z.padL + tabsW(z) + z.gap + sum(opts, z.opt, 9) + (colour ? z.gap + z.more : 0) + closeW(z) + z.padR
+  return even(z.padL + tabsW(z) + z.gap + sum(opts, z.opt, 9) + (colour ? z.gap + z.more : 0) + closeW(z) + z.padR)
 }
-const colourWidth = (z: Z) => z.colPad + 2 * z.tool + 6 + z.gap + z.sep + z.gap + sum(z.swatches, z.sw, z.swGap) + closeW(z) + z.colPad
+const colourWidth = (z: Z) => even(z.colPad + 2 * z.tool + 6 + z.gap + z.sep + z.gap + sum(z.swatches, z.sw, z.swGap) + closeW(z) + z.colPad)
 
 const Svg = ({ src, className, ...rest }: { src: string; className?: string } & Record<`data-${string}`, unknown>) => <span className={className} aria-hidden dangerouslySetInnerHTML={{ __html: src }} {...rest} />
 
