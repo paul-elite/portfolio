@@ -6,7 +6,7 @@ import r from './reader.module.css';
 type Toc = { id: string; label: string }[];
 
 // The article's contents, kept in step with the scroll: a ruler runs beside the labels (fine ticks, a
-// longer one level with each label). The section being read is darkest, the ones already read are mid
+// longer one level with each label), each label's stretch of it coloured like the label. The section being read is darkest, the ones already read are mid
 // grey and the ones still to come are quietest.
 export default function TocRail({ toc }: { toc: Toc }) {
   const [active, setActive] = useState(-1);
@@ -49,7 +49,6 @@ export default function TocRail({ toc }: { toc: Toc }) {
 
   return (
     <nav className={r.tocNav} aria-label="Contents">
-      <span className={r.ruler} aria-hidden />
       {toc.map((h, i) => {
         const state = i === active ? 'current' : i < active ? 'read' : 'ahead';
         return (
@@ -62,6 +61,7 @@ export default function TocRail({ toc }: { toc: Toc }) {
             onClick={(e) => go(e, h.id)}
             className={r.tocLink}
           >
+            <span className={r.seg} aria-hidden />
             {h.label}
           </a>
         );

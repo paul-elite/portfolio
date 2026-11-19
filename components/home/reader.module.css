@@ -66,16 +66,21 @@
 .tocLink[data-state="read"] { color: rgba(0, 0, 0, 0.55); }
 .tocLink[data-state="current"] { color: #111; }
 
-/* The ruler beside the labels: fine ticks every 5px and a longer tick level with each label */
-.ruler {
+/* The ruler beside the labels: fine ticks every 5px and a longer tick level with each label. Each label
+   carries its own stretch of the ruler (half the gap above it to half the gap below), so the ticks
+   take the label's state: quietest still to come, mid grey once read, dark where you are */
+.seg {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
+  top: -0.275rem;
+  bottom: -0.275rem;
+  left: -22px;
   width: 4px;
-  background: repeating-linear-gradient(to bottom, rgba(130, 110, 60, 0.26) 0 1px, transparent 1px 5px);
+  --tick: rgba(130, 110, 60, 0.16);
+  background: repeating-linear-gradient(to bottom, var(--tick) 0 1px, transparent 1px 5px);
   pointer-events: none;
 }
+.tocLink[data-state="read"] .seg { --tick: rgba(0, 0, 0, 0.22); }
+.tocLink[data-state="current"] .seg { --tick: rgba(0, 0, 0, 0.55); }
 .tocLink::after {
   content: '';
   position: absolute;
