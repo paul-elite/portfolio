@@ -40,8 +40,10 @@
     overflow: hidden;
     border-radius: 20px;
     background: #fff;
-    /* A light warm-grey edge with a little drop: 0.5px spread */
-    box-shadow: 0 1px 2px 0.5px rgb(150 138 105 / 0.2);
+    /* Two shadows: a warm-grey edge that is only a 0.5px spread, and a larger, lighter drop beneath it */
+    box-shadow:
+      0 0 0 0.5px rgb(150 138 105 / 0.34),
+      0 4px 14px rgb(150 138 105 / 0.12);
     isolation: isolate;
     /* The editor's labels are sans, like the site's interface (the article around it is serif) */
     font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
