@@ -73,7 +73,7 @@
 /* Title + date mirror the home header: the name (.name) and the line under it (.updated) */
 .title {
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-  font-size: 17px;
+  font-size: 21px;
   font-weight: 400;
   -webkit-text-stroke: 0.35px currentColor; /* Medium look (Hedvig is 400-only) */
   letter-spacing: 0.5px;
