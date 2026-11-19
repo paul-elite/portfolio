@@ -60,6 +60,9 @@
   transition: color 0.18s ease;
 }
 .tocLink:hover { color: #111; }
+/* Still to come: quieter than what's been read */
+.tocLink[data-state="ahead"] { color: rgba(0, 0, 0, 0.26); }
+.tocLink[data-state="ahead"]:hover { color: rgba(0, 0, 0, 0.6); }
 .tocLink[data-state="read"] { color: rgba(0, 0, 0, 0.55); }
 .tocLink[data-state="current"] { color: #111; }
 
@@ -81,7 +84,7 @@
   top: 50%;
   width: 8px;
   height: 1px;
-  background: rgba(130, 110, 60, 0.28);
+  background: rgba(130, 110, 60, 0.18);
   transition: background-color 0.18s ease, width 0.18s ease-out;
 }
 .tocLink[data-state="read"]::after { background: rgba(0, 0, 0, 0.35); }
