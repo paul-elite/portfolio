@@ -5,9 +5,9 @@ import { Stage, type Act } from '../kit'
 import { A } from './assets'
 import './avatars.css'
 
-/* The Avatars write-up's scenes, built from the editor (avatars.paulelite.com) and its Figma
-   (Avatars file, frame 113:9122). The art is the editor's own: the avatar, the hair tiles, the
-   tab icons and the swatches are generated from its library into assets.ts.
+/* The Avatars write-up's scenes: the editor's tab bars on their own (no avatar), built from the
+   editor (avatars.paulelite.com) and its Figma (Avatars file, frame 113:9122). The art is the
+   editor's own: the hair tiles, tab icons and swatches are generated from its library into assets.ts.
 
    One stack of bars, three ways to show it:
      AvatarsStack   the whole story: Hair rises from behind the main bar, a style is picked,
@@ -79,40 +79,38 @@ const SHADES_GREEN = ['#1c4a06', '#2c6f0a', '#3d950d', '#50c810', '#79da48', '#a
 const RAINBOW = ['#ff4f4e', '#ffb900', '#00cc1a', '#14c8c8', '#1084fe', '#8b5cf6', '#f70492']
 
 // ---- The scene ----
-const LOOKS = [
-  { id: 'boy', src: A.avatar.boyBlack },
-  { id: 'spiky', src: A.avatar.spikyBlack },
-  { id: 'green', src: A.avatar.spikyGreen },
-  { id: 'cap', src: A.avatarCap },
-]
-function avatarFor(s: S) {
-  if (s.cap) return { id: 'cap', src: A.avatarCap }
-  if (s.hair === 'spiky') return s.green ? { id: 'green', src: A.avatar.spikyGreen } : { id: 'spiky', src: A.avatar.spikyBlack }
-  return { id: 'boy', src: A.avatar.boyBlack }
+// Art that changes (a colour, a tint, a selection) never swaps its markup: every version stays
+// mounted in one cell and they crossfade, so nothing snaps or vanishes mid-move.
+function Layers({ show, items, className }: { show: number; items: string[]; className?: string }) {
+  return (
+    <span className={'av-layers' + (className ? ' ' + className : '')} aria-hidden>
+      {items.map((src, i) => <Svg key={i} src={src} data-on={i === show || undefined} />)}
+    </span>
+  )
 }
 
 function Scene({ s, compact }: { s: S; compact: boolean }) {
   const z = sizes(compact)
-  const av = avatarFor(s)
   const hairPos = s.level === 0 ? 'under' : s.level === 1 ? 'top' : 'below'
   const colourPos = s.level === 2 ? 'top' : 'under'
   const mainPos = s.level === 2 ? 'tray' : 'floor'
   const edits = (s.hair !== 'boy' ? 1 : 0) + (s.green ? 1 : 0) + (s.cap ? 1 : 0)
   const hw = hairWidth(s, z)
+  const g = s.green ? 1 : 0
   return (
     <div className="av-scene">
-      {/* The avatar never moves; a new look crossfades in place over the old one */}
-      <div className="av-avatar">
-        {LOOKS.map((l) => <Svg key={l.id} src={l.src} className="av-look" data-on={l.id === av.id || undefined} />)}
-      </div>
-
       {/* The tray: the main bar folded under Hair */}
       <div className="av-tray" data-on={s.level === 2 || undefined} style={{ width: hw - 64 }} />
 
       {/* Colour: rises from behind Hair */}
       <div className="av-bar av-colour" data-pos={colourPos} data-enter={s.enter === 'colour' || undefined} style={{ width: colourWidth(z) }}>
         <div className="av-tools">
-          <span className="av-tool"><Cluster fills={s.green ? SHADES_GREEN : SHADES_BLACK} /></span>
+          <span className="av-tool">
+            <span className="av-layers" aria-hidden>
+              <span data-on={!s.green || undefined}><Cluster fills={SHADES_BLACK} /></span>
+              <span data-on={s.green || undefined}><Cluster fills={SHADES_GREEN} /></span>
+            </span>
+          </span>
           <span className="av-tool"><Cluster fills={RAINBOW} /></span>
         </div>
         <span className="av-sep" />
@@ -120,7 +118,11 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
           {A.swatches.slice(0, z.swatches).map((c) => {
             const on = s.green ? c === '#50c810' : c === '#1a1a1a'
             const d = A.dot[c as keyof typeof A.dot]
-            return <span key={c} className="av-swatch" data-target={c === '#50c810' ? 'green' : undefined} data-cursor="pointer"><Svg src={on ? d.on : d.off} /></span>
+            return (
+              <span key={c} className="av-swatch" data-target={c === '#50c810' ? 'green' : undefined} data-cursor="pointer">
+                <Layers show={on ? 1 : 0} items={[d.off, d.on]} />
+              </span>
+            )
           })}
         </div>
         <span className="av-sep" />
@@ -131,30 +133,32 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
       <div className="av-bar av-hair" data-pos={hairPos} data-muted={s.level === 2 || undefined} data-enter={s.enter === 'hair' || undefined} style={{ width: hw }}>
         <div className="av-tabs">
           <span className="av-tab" data-on={s.tab === 'style' || undefined} data-target="tab-style" data-cursor="pointer">
-            <Svg src={s.tab === 'style' ? (s.green ? A.tab.styleGreen : A.tab.styleBlack) : A.tab.styleOff} className="av-tab__art" />
+            <Layers className="av-tab__art" show={s.tab !== 'style' ? 0 : 1 + g} items={[A.tab.styleOff, A.tab.styleBlack, A.tab.styleGreen]} />
             <span className="av-label">Style</span>
           </span>
           <span className="av-tab" data-on={s.tab === 'wear' || undefined} data-target="tab-wear" data-cursor="pointer">
-            <Svg src={s.tab === 'wear' && s.cap ? A.tab.wearOn : A.tab.wear} className="av-tab__art" />
+            <Layers className="av-tab__art" show={s.tab === 'wear' && s.cap ? 1 : 0} items={[A.tab.wear, A.tab.wearOn]} />
             <span className="av-label">Wear</span>
           </span>
         </div>
-        <div className="av-row" key={s.tab} data-swap={s.tab === 'wear' || undefined}>
-          {s.tab === 'style'
-            ? z.hairs.map((h) => (
-              <span key={h} className="av-opt" data-on={s.hair === h || undefined} data-target={'hair-' + h} data-cursor="pointer">
-                <Svg src={(s.green ? A.hairTiles.green : A.hairTiles.black)[h]} />
+        {/* Both tabs' rows share one cell (they're the same width); the chosen one crosses in */}
+        <div className="av-rows">
+          <div className="av-row" data-on={s.tab === 'style' || undefined}>
+            {z.hairs.map((h) => (
+              <span key={h} className="av-opt" data-on={s.hair === h || undefined} data-target={s.tab === 'style' ? 'hair-' + h : undefined} data-cursor="pointer">
+                <Layers show={g} items={[A.hairTiles.black[h], A.hairTiles.green[h]]} />
               </span>
-            ))
-            : [
-              <span key="none" className="av-opt" data-on={!s.cap || undefined} data-target="hat-none" data-cursor="pointer"><None /></span>,
-              ...z.hats.map((h) => (
-                <span key={h} className="av-opt" data-on={(s.cap && h === 'cap') || undefined} data-target={'hat-' + h} data-cursor="pointer"><Svg src={A.hatTiles[h]} /></span>
-              )),
-            ]}
+            ))}
+          </div>
+          <div className="av-row" data-on={s.tab === 'wear' || undefined}>
+            <span className="av-opt" data-on={!s.cap || undefined} data-target={s.tab === 'wear' ? 'hat-none' : undefined} data-cursor="pointer"><None /></span>
+            {z.hats.map((h) => (
+              <span key={h} className="av-opt" data-on={(s.cap && h === 'cap') || undefined} data-target={s.tab === 'wear' ? 'hat-' + h : undefined} data-cursor="pointer"><Svg src={A.hatTiles[h]} /></span>
+            ))}
+          </div>
         </div>
         <span className="av-more" data-show={s.tab === 'style' || s.cap || undefined} data-on={s.level === 2 || undefined} data-target="colour" data-cursor="pointer">
-          <Svg src={s.tab === 'wear' ? A.wheel.pink : s.green ? A.wheel.green : A.wheel.black} className="av-more__art" />
+          <Layers className="av-more__art" show={s.tab === 'wear' ? 2 : g} items={[A.wheel.black, A.wheel.green, A.wheel.pink]} />
           <span className="av-label">Colour</span>
         </span>
         <span className="av-sep" />
@@ -172,7 +176,9 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
           <span className="av-ind" data-on={s.level > 0 || undefined} />
           {(['face', 'hair', 'outfit', 'color'] as const).map((k) => (
             <span key={k} className="av-cat" data-k={k} data-on={(s.level > 0 && k === 'hair') || undefined} data-target={k === 'hair' ? 'main-hair' : undefined} data-cursor="pointer">
-              <Svg src={k === 'hair' ? (s.level > 0 ? A.bar.hairOn : A.bar.hair) : A.bar[k]} className="av-cat__art" />
+              {k === 'hair'
+                ? <Layers className="av-cat__art" show={s.level > 0 ? 1 : 0} items={[A.bar.hair, A.bar.hairOn]} />
+                : <Svg src={A.bar[k]} className="av-cat__art" />}
               <span className="av-label">{k === 'color' ? 'Color' : k[0].toUpperCase() + k.slice(1)}</span>
             </span>
           ))}
@@ -184,15 +190,16 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
   )
 }
 
-const REST = { wide: { x: 400, y: 120 }, compact: { x: 300, y: 110 } }
+// Rest above the bars, clear of every target
+const REST = { wide: { x: 452, y: 14 }, compact: { x: 344, y: 12 } }
 
 function Frame({ initial, poster, script, still }: { initial: S; poster: S; script?: (a: Act<S>) => Promise<void>; still?: boolean }) {
   return (
     <figure className="av-figure">
       <Stage
         width={470}
-        height={360}
-        compact={{ below: 470, width: 358, height: 340 }}
+        height={200}
+        compact={{ below: 470, width: 358, height: 194 }}
         initial={initial}
         poster={poster}
         script={script}
@@ -249,7 +256,7 @@ const tabsStart: S = { ...base, level: 1, hair: 'spiky' }
 async function tabs(a: Act<S>) {
   await a.wait(900)
   a.mark('wear')
-  await a.click({ at: 'tab-wear', x: 0.5, y: 0.5 })
+  await a.click({ at: 'tab-wear', x: 0.5, y: 0.3 })
   await a.set({ tab: 'wear' })
   await a.wait(700)
   a.mark('cap on')
@@ -260,7 +267,7 @@ async function tabs(a: Act<S>) {
   await a.click({ at: 'hat-none', x: 0.5, y: 0.5 })
   await a.set({ cap: false })
   await a.wait(500)
-  await a.click({ at: 'tab-style', x: 0.5, y: 0.5 })
+  await a.click({ at: 'tab-style', x: 0.5, y: 0.3 })
   await a.set({ tab: 'style' })
   await a.move(REST)
   await a.wait(1100)
