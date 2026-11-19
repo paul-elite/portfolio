@@ -17,7 +17,8 @@ import './avatars.css'
                     arrives and the bar widens), off again, back to Style
      AvatarsMuted   a still of the three levels: the bar in focus, the muted bar, the tray      */
 
-type Hair = 'boy' | 'spiky'
+// The hairstyle tiles are the ones drawn in Figma 113:10104 (buns, curls, waves, long)
+type Hair = 'buns' | 'curls' | 'waves' | 'long'
 type S = {
   level: 0 | 1 | 2 // the main bar · Hair over it · Colour over Hair
   enter: 'hair' | 'colour' | null // the bar that just rose, so its options slide in
@@ -26,14 +27,14 @@ type S = {
   tab: 'style' | 'wear'
   cap: boolean
 }
-const base: S = { level: 0, enter: null, hair: 'boy', green: false, tab: 'style', cap: false }
+const base: S = { level: 0, enter: null, hair: 'curls', green: false, tab: 'style', cap: false }
 
 // ---- Sizes (px), wide and compact. Bars hug their contents; widths are worked out so the
 // stage can ease them like the editor does. ----
 type Z = ReturnType<typeof sizes>
 const sizes = (compact: boolean) => compact
-  ? { tab: 40, opt: 48, gap: 6, more: 52, sw: 30, swGap: 2, tool: 36, padL: 4, padR: 10, colPad: 10, close: 24, sep: 2, hairs: ['boy', 'spiky'] as Hair[], hats: ['cap'] as const, swatches: ['#1a1a1a', '#5a3620', '#50c810', '#f70492'], main: 326 }
-  : { tab: 54, opt: 48, gap: 10, more: 60, sw: 32, swGap: 4, tool: 40, padL: 4, padR: 16, colPad: 12, close: 28, sep: 2, hairs: ['boy', 'spiky', 'curlytop'] as Hair[], hats: ['cap', 'beanie'] as const, swatches: ['#1a1a1a', '#5a3620', '#a8693f', '#e8b04b', '#50c810', '#f70492'], main: 444 }
+  ? { tab: 40, opt: 48, gap: 6, more: 52, sw: 30, swGap: 2, tool: 36, padL: 4, padR: 10, colPad: 10, close: 24, sep: 2, hairs: ['curls', 'waves'] as Hair[], hats: ['cap'] as const, swatches: ['#1a1a1a', '#5a3620', '#50c810', '#f70492'], main: 326 }
+  : { tab: 54, opt: 48, gap: 10, more: 60, sw: 32, swGap: 4, tool: 40, padL: 4, padR: 16, colPad: 12, close: 28, sep: 2, hairs: ['buns', 'curls', 'waves', 'long'] as Hair[], hats: ['cap', 'beanie'] as const, swatches: ['#1a1a1a', '#5a3620', '#a8693f', '#e8b04b', '#50c810', '#f70492'], main: 444 }
 // Bars are centred with translateX(-50%): an even width keeps them on whole pixels
 const even = (n: number) => Math.ceil(n / 2) * 2
 const sum = (n: number, size: number, gap: number) => n * size + Math.max(0, n - 1) * gap
@@ -96,7 +97,7 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
   const hairPos = s.level === 0 ? 'under' : s.level === 1 ? 'top' : 'below'
   const colourPos = s.level === 2 ? 'top' : 'under'
   const mainPos = s.level === 2 ? 'tray' : 'floor'
-  const edits = (s.hair !== 'boy' ? 1 : 0) + (s.green ? 1 : 0) + (s.cap ? 1 : 0)
+  const edits = (s.hair !== 'curls' ? 1 : 0) + (s.green ? 1 : 0) + (s.cap ? 1 : 0)
   const hw = hairWidth(s, z)
   const g = s.green ? 1 : 0
   return (
@@ -275,8 +276,8 @@ async function stack(a: Act<S>) {
   await a.set({ level: 1, enter: 'hair' })
   await a.wait(800)
   a.mark('pick style')
-  await a.click({ at: 'hair-spiky', x: 0.5, y: 0.5 })
-  await a.set({ hair: 'spiky' })
+  await a.click({ at: 'hair-waves', x: 0.5, y: 0.5 })
+  await a.set({ hair: 'waves' })
   await a.wait(700)
   a.mark('open colour')
   await a.click({ at: 'colour', x: 0.5, y: 0.3 })
@@ -288,11 +289,11 @@ async function stack(a: Act<S>) {
   await a.move(REST)
 }
 export function AvatarsStack() {
-  return <Frame label="The stack of bars: Hair rises from the main bar, then Colour rises from Hair" initial={base} poster={{ ...base, level: 2, hair: 'spiky', green: true }} script={stack} />
+  return <Frame label="The stack of bars: Hair rises from the main bar, then Colour rises from Hair" initial={base} poster={{ ...base, level: 2, hair: 'waves', green: true }} script={stack} />
 }
 
 /* ---- Tabs switching in place (about 9s) ---- */
-const tabsStart: S = { ...base, level: 1, hair: 'spiky' }
+const tabsStart: S = { ...base, level: 1, hair: 'waves' }
 async function tabs(a: Act<S>) {
   await a.wait(400)
   a.mark('wear')
@@ -319,7 +320,7 @@ export function AvatarsTabs() {
 }
 
 /* ---- A still of the three levels ---- */
-const mutedStart: S = { ...base, level: 2, hair: 'spiky', green: true }
+const mutedStart: S = { ...base, level: 2, hair: 'waves', green: true }
 export function AvatarsMuted() {
   return <Frame label="The bar in focus, the muted bar under it and the tray" initial={mutedStart} poster={mutedStart} still />
 }
@@ -360,7 +361,7 @@ export function AvatarsRise() {
 }
 
 /* ---- The stack makes room: Colour rises, Hair slides down and the main bar folds into the tray (slowed 3×) ---- */
-const roomStart: S = { ...base, level: 1, hair: 'spiky' }
+const roomStart: S = { ...base, level: 1, hair: 'waves' }
 async function room(a: Act<S>) {
   await a.wait(300)
   a.mark('open colour')
@@ -380,7 +381,7 @@ export function AvatarsRoom() {
 }
 
 /* ---- Closing: both bars close, then open again, slowed 2× ---- */
-const closeStart: S = { ...base, level: 2, hair: 'spiky', green: true }
+const closeStart: S = { ...base, level: 2, hair: 'waves', green: true }
 async function closing(a: Act<S>) {
   await a.wait(700)
   await a.enter({ at: 'close-colour', x: 0.5, y: 0.5 })
@@ -422,7 +423,7 @@ async function reducedRun(a: Act<S>) {
   await a.wait(900)
 }
 export function AvatarsReduced() {
-  return <Frame label="With reduced motion, bars fade in and out without moving" initial={{ ...base, hair: 'spiky' }} poster={{ ...base, hair: 'spiky', level: 2 }} script={reducedRun} reduced caption="With reduced motion on" />
+  return <Frame label="With reduced motion, bars fade in and out without moving" initial={{ ...base, hair: 'waves' }} poster={{ ...base, hair: 'waves', level: 2 }} script={reducedRun} reduced caption="With reduced motion on" />
 }
 
 export const AVATAR_DEMOS: Record<string, () => ReactNode> = {
