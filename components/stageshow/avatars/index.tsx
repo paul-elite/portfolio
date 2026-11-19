@@ -33,17 +33,16 @@ const base: S = { level: 0, enter: null, hair: 'curls', green: false, tab: 'styl
 // stage can ease them like the editor does. ----
 type Z = ReturnType<typeof sizes>
 const sizes = (compact: boolean) => compact
-  ? { tab: 40, opt: 48, gap: 6, more: 48, sw: 30, swGap: 2, tool: 36, padL: 4, padR: 10, colPad: 10, close: 24, sep: 2, hairs: ['curls', 'waves'] as Hair[], hats: ['cap'] as const, swatches: ['#1a1a1a', '#5a3620', '#50c810', '#f70492'], main: 326 }
+  ? { tab: 40, opt: 48, gap: 6, more: 48, sw: 30, swGap: 2, tool: 36, padL: 4, padR: 10, colPad: 10, close: 24, sep: 2, hairs: ['buns', 'curls', 'waves', 'long'] as Hair[], hats: ['cap'] as const, swatches: ['#1a1a1a', '#5a3620', '#50c810', '#f70492'], main: 326 }
   : { tab: 54, opt: 48, gap: 10, more: 48, sw: 32, swGap: 4, tool: 40, padL: 4, padR: 16, colPad: 12, close: 28, sep: 2, hairs: ['buns', 'curls', 'waves', 'long'] as Hair[], hats: ['cap', 'beanie'] as const, swatches: ['#1a1a1a', '#5a3620', '#a8693f', '#e8b04b', '#50c810', '#f70492'], main: 444 }
 // Bars are centred with translateX(-50%): an even width keeps them on whole pixels
 const even = (n: number) => Math.ceil(n / 2) * 2
 const sum = (n: number, size: number, gap: number) => n * size + Math.max(0, n - 1) * gap
 const closeW = (z: Z) => z.gap + z.sep + z.gap + z.close
-const tabsW = (z: Z) => 2 * z.tab + 4 + 4
 function hairWidth(s: S, z: Z) {
   const opts = s.tab === 'style' ? z.hairs.length : 1 + z.hats.length
   const colour = s.tab === 'style' || s.cap
-  return even(z.padL + tabsW(z) + z.gap + sum(opts, z.opt, 9) + (colour ? z.gap + z.more : 0) + closeW(z) + z.padR)
+  return even(z.padL + sum(opts, z.opt, 9) + (colour ? z.gap + z.more : 0) + closeW(z) + z.padR)
 }
 const colourWidth = (z: Z) => even(z.colPad + 2 * z.tool + 6 + z.gap + z.sep + z.gap + sum(z.swatches.length, z.sw, z.swGap) + closeW(z) + z.colPad)
 
@@ -132,18 +131,14 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
         <span className="av-close" data-target="close-colour" data-cursor="hand"><Close /></span>
       </div>
 
+      {/* Hair's tabs: a small pill over the bar in focus (Figma 156:17484), gone once Hair is under Colour */}
+      <div className="av-crumb" data-on={s.level === 1 || undefined} role="tablist">
+        <span className="av-crumb__tab" data-on={s.tab === 'style' || undefined} data-target="tab-style" data-cursor="hand">Style</span>
+        <span className="av-crumb__tab" data-on={s.tab === 'wear' || undefined} data-target="tab-wear" data-cursor="hand">Wear</span>
+      </div>
+
       {/* Hair: rises from behind the main bar; slides down muted under Colour */}
       <div className="av-bar av-hair" data-pos={hairPos} data-muted={s.level === 2 || undefined} data-enter={s.enter === 'hair' || undefined} style={{ width: hw }}>
-        <div className="av-tabs">
-          <span className="av-tab" data-on={s.tab === 'style' || undefined} data-target="tab-style" data-cursor="hand">
-            <Layers className="av-tab__art" show={s.tab !== 'style' ? 0 : 1 + g} items={[A.tab.styleOff, A.tab.styleBlack, A.tab.styleGreen]} />
-            <span className="av-label">Style</span>
-          </span>
-          <span className="av-tab" data-on={s.tab === 'wear' || undefined} data-target="tab-wear" data-cursor="hand">
-            <Layers className="av-tab__art" show={s.tab === 'wear' && s.cap ? 1 : 0} items={[A.tab.wear, A.tab.wearOn]} />
-            <span className="av-label">Wear</span>
-          </span>
-        </div>
         {/* Both tabs' rows share one cell (they're the same width); the chosen one crosses in */}
         <div className="av-rows">
           <div className="av-row" data-on={s.tab === 'style' || undefined}>
@@ -181,7 +176,9 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
             <span key={k} className="av-cat" data-k={k} data-on={(s.level > 0 && k === 'hair') || undefined} data-target={k === 'hair' ? 'main-hair' : undefined} data-cursor="hand">
               {k === 'hair'
                 ? <Layers className="av-cat__art" show={s.level > 0 ? 1 : 0} items={[A.bar.hair, A.bar.hairOn]} />
-                : <Svg src={A.bar[k]} className="av-cat__art" />}
+                : k === 'color'
+                  ? <span className="av-cat__art" aria-hidden><span className="av-rainbow" /></span>
+                  : <Svg src={A.bar[k]} className="av-cat__art" />}
               <span className="av-label">{k === 'color' ? 'Color' : k[0].toUpperCase() + k.slice(1)}</span>
             </span>
           ))}

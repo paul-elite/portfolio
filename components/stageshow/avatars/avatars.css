@@ -209,7 +209,58 @@
   .av-opt { display: grid; flex: none; place-items: center; width: 48px; height: 48px; border-radius: 14px; transition: background-color calc(140ms * var(--t, 1)) ease, box-shadow calc(140ms * var(--t, 1)) ease; }
   .av-opt svg { display: block; }
   .av-opt > * { transition: filter calc(180ms * var(--t, 1)) ease-out, opacity calc(180ms * var(--t, 1)) ease-out; }
-  .av-opt[data-on] { background: #f4f4f2; box-shadow: inset 0 0 0 1.5px #1a1a1a; }
+  /* The chosen option sits on a soft grey square, no outline (Figma 156:17484) */
+  .av-opt[data-on] { background: #f3f3f1; }
+
+  /* Hair's tabs, a pill 9px over the bar in focus. It arrives once the bar has risen and leaves first */
+  .av-crumb {
+    position: absolute;
+    top: calc(var(--A) - 33px);
+    left: 50%;
+    z-index: 4;
+    display: flex;
+    padding: 2px;
+    border-radius: 100px;
+    background: #fff;
+    box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.12), 0 2px 4px 1px rgb(0 0 0 / 0.05);
+    font-size: 12px;
+    line-height: 16px;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px) scale(0.96);
+    transition: opacity calc(110ms * var(--t, 1)) ease-out, transform calc(170ms * var(--t, 1)) ease-out;
+  }
+  .av-crumb[data-on] {
+    opacity: 1;
+    transform: translateX(-50%);
+    transition: opacity calc(150ms * var(--t, 1)) ease-out calc(160ms * var(--t, 1)), transform calc(220ms * var(--t, 1)) cubic-bezier(0.2, 0, 0, 1) calc(160ms * var(--t, 1));
+  }
+  .av-crumb__tab {
+    padding: 2px 8px;
+    border-radius: 100px;
+    color: #999996;
+    transition: background-color calc(150ms * var(--t, 1)) ease, color calc(150ms * var(--t, 1)) ease;
+  }
+  .av-crumb__tab[data-on] { background: #efefee; color: #151515; }
+
+  /* The main bar's Color tab: the rainbow wheel with a white hub */
+  .av-rainbow {
+    position: relative;
+    display: block;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: conic-gradient(from 90deg, #f00, #ff7f00 30deg, #ff0 60deg, #0f0 120deg, #0ff 180deg, #00f 240deg, #f0f 300deg, #ff007f 330deg, #f00);
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.12);
+  }
+  .av-rainbow::after {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.8), 0 0.5px 1.5px rgb(0 0 0 / 0.18);
+  }
 
   .av-more {
     display: grid;
@@ -290,7 +341,7 @@
   .av-bar[data-muted] .av-tab[data-on] .av-tab__art { filter: grayscale(0.6); opacity: 0.8; }
   .av-bar[data-muted] .av-label { color: #bfbcb4; }
   .av-bar[data-muted] .av-more[data-on] .av-label { color: #0e0e0c; }
-  .av-bar[data-muted] .av-opt[data-on] { box-shadow: inset 0 0 0 1.5px #c9c6bf; }
+  .av-bar[data-muted] .av-opt[data-on] { background: rgb(255 255 255 / 0.5); }
   .av-bar[data-muted] .av-close { color: #c9c6bf; }
   .av-tab__art { transition: filter calc(180ms * var(--t, 1)) ease-out, opacity calc(180ms * var(--t, 1)) ease-out; }
 
@@ -304,6 +355,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .av-bar, .av-tray, .av-more { transition: opacity calc(140ms * var(--t, 1)) ease-out !important; }
+    .av-crumb, .av-crumb[data-on] { transform: translateX(-50%); transition: opacity calc(140ms * var(--t, 1)) ease-out; }
     .av-bar[data-pos="under"] { filter: none; }
     .av-bar[data-enter] > *, .av-bar[data-enter] .av-row > *, .av-bar[data-enter] .av-swatches > * { animation: none; }
     .av-layers > *, .av-rows > .av-row { transition: opacity calc(140ms * var(--t, 1)) ease-out; transform: none; }
@@ -313,6 +365,7 @@
 /* A scene showing reduced motion: bars fade in and out, nothing rises, slides, scales or blurs */
 .av-card.av-reduced {
   & .av-bar, & .av-tray, & .av-more { transition: opacity 140ms ease-out !important; }
+  & .av-crumb, & .av-crumb[data-on] { transform: translateX(-50%); transition: opacity 140ms ease-out; }
   & .av-bar[data-pos="under"], & .av-bar[data-pos="tray"] { filter: none; }
   & .av-hair[data-pos="under"], & .av-colour[data-pos="under"] { transform: translateX(-50%); }
   & .av-hair[data-pos="under"] { transform: translateX(-50%) translateY(calc(var(--B) - var(--A))); }
