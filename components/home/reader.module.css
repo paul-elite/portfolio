@@ -34,6 +34,9 @@
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 13px;
   letter-spacing: -0.01em;
+  /* Labels hang off the rail's right edge, toward the article, not the page margin */
+  align-items: flex-end;
+  text-align: right;
 }
 .back {
   display: inline-flex;
@@ -52,7 +55,7 @@
 }
 .back:hover { color: #111; }
 .back:active { transform: scale(0.97); }
-.tocNav { display: flex; flex-direction: column; gap: 0.55rem; }
+.tocNav { display: flex; flex-direction: column; align-items: flex-end; gap: 0.55rem; }
 .tocLink {
   color: rgba(0, 0, 0, 0.4);
   text-decoration: none;
