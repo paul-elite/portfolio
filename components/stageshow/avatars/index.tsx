@@ -194,7 +194,7 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
 }
 
 // Rest in the top-right gutter, clear of every target
-const REST = { wide: { x: 520, y: 30 }, compact: { x: 334, y: 18 } }
+const REST = { wide: { x: 680, y: 40 }, compact: { x: 334, y: 18 } }
 
 // A phone gets a finger (a dot where it taps), never the macOS arrow
 function useTouch() {
@@ -210,7 +210,7 @@ function useTouch() {
 }
 
 type FrameProps = {
-  initial: S; poster: S; script?: (a: Act<S>) => Promise<void>; still?: boolean; play?: 'loop' | 'once'; label: string
+  initial: S; poster: S; script?: (a: Act<S>) => Promise<void>; still?: boolean; label: string
   slow?: number // plays this many times slower (script and CSS alike), to show the motion
   reduced?: boolean // shows the reduced-motion version
   caption?: string
@@ -218,16 +218,19 @@ type FrameProps = {
   cursor?: boolean // false: the camera tells it, nothing is pressed
 }
 type Framing = { wide: Rect; compact: Rect }
-function Frame({ initial, poster, script, still, play = 'loop', label, slow = 1, reduced, caption, crop, cursor = true }: FrameProps) {
+function Frame({ initial, poster, script, still, label, slow = 1, reduced, caption, crop, cursor = true }: FrameProps) {
   const touch = useTouch()
   const [run, setRun] = useState(0)
+  // Nothing loops: a scene plays once while the pointer is over it (once when seen, on a phone),
+  // and Replay plays it again straight away
+  const play = run > 0 ? 'once' : 'hover'
   return (
     <figure className="av-figure" aria-label={label} style={{ '--t': slow } as CSSProperties}>
       <Stage
         key={run}
-        width={560}
-        height={248}
-        compact={{ below: 560, width: 358, height: 208 }}
+        width={720}
+        height={360}
+        compact={{ below: 480, width: 358, height: 260 }}
         initial={initial}
         poster={poster}
         script={script}
@@ -243,11 +246,10 @@ function Frame({ initial, poster, script, still, play = 'loop', label, slow = 1,
           </Camera>
         )}
       </Stage>
-      {(caption || (play === 'once' && !still)) && (
+      {(caption || !still) && (
         <div className="av-foot">
           {caption && <figcaption className="av-caption">{caption}</figcaption>}
-          {play === 'once' && !still && (
-            // Plays once as it comes into view and holds on the result; this plays it again
+          {!still && (
             <button type="button" className="av-replay" onClick={() => setRun((n) => n + 1)}>Replay</button>
           )}
         </div>
@@ -256,16 +258,16 @@ function Frame({ initial, poster, script, still, play = 'loop', label, slow = 1,
   )
 }
 
-// Where the camera looks in each scene, in stage pixels (wide 560×248, compact 358×208)
+// Where the camera looks in each scene, in stage pixels (wide 720×360, compact 358×260)
 const VIEW = {
   // the seam where Hair comes out from behind the main bar: the left of both bars
-  seam: { wide: { x: 50, y: 44, width: 300, height: 156 }, compact: { x: 8, y: 24, width: 210, height: 150 } },
+  seam: { wide: { x: 130, y: 100, width: 300, height: 156 }, compact: { x: 8, y: 50, width: 210, height: 150 } },
   // the muted bar's options and its lit Colour tile
-  muted: { wide: { x: 170, y: 118, width: 330, height: 84 }, compact: { x: 110, y: 96, width: 236, height: 80 } },
+  muted: { wide: { x: 250, y: 174, width: 330, height: 84 }, compact: { x: 110, y: 122, width: 236, height: 80 } },
   // the Colour tile on the Hair bar, before it opens anything
-  colourTile: { wide: { x: 300, y: 42, width: 200, height: 92 }, compact: { x: 176, y: 22, width: 172, height: 88 } },
+  colourTile: { wide: { x: 380, y: 98, width: 200, height: 92 }, compact: { x: 176, y: 48, width: 172, height: 88 } },
   // the Hair bar, cropped close while its width eases
-  hairBar: { wide: { x: 58, y: 46, width: 444, height: 86 }, compact: { x: 16, y: 24, width: 326, height: 84 } },
+  hairBar: { wide: { x: 138, y: 102, width: 444, height: 86 }, compact: { x: 16, y: 50, width: 326, height: 84 } },
 } satisfies Record<string, Framing>
 const at = (a: Act<S>, v: Framing) => (a.layout === 'compact' ? v.compact : v.wide)
 
@@ -290,7 +292,7 @@ async function stack(a: Act<S>) {
   await a.move(REST)
 }
 export function AvatarsStack() {
-  return <Frame label="The stack of bars: Hair rises from the main bar, then Colour rises from Hair" initial={base} poster={{ ...base, level: 2, hair: 'spiky', green: true }} script={stack} play="once" />
+  return <Frame label="The stack of bars: Hair rises from the main bar, then Colour rises from Hair" initial={base} poster={{ ...base, level: 2, hair: 'spiky', green: true }} script={stack} />
 }
 
 /* ---- Tabs switching in place (about 9s) ---- */

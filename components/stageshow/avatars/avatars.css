@@ -1,9 +1,12 @@
 /* The Avatars scenes. Values are the editor's (avatars.paulelite.com) and its Figma (113:9122). */
 .av-figure { position: relative; margin: 2.25rem 0; }
-/* The scenes are wider than the text column on a wide screen, so the bars get room to breathe
-   (about 12% of the stage on each side); narrower, they fit the column */
+/* Wide screens: the stage breaks out of the 470px text column, centred on it, so the bars have
+   room around them. figure.av-figure outranks the article's own figure margins. */
 @media (min-width: 861px) {
-  .av-figure { width: 560px; margin-left: -45px; margin-right: -45px; }
+  figure.av-figure { width: calc(100% + 32px); margin-left: -16px; margin-right: -16px; }
+}
+@media (min-width: 1180px) {
+  figure.av-figure { width: 720px; margin-left: -125px; margin-right: -125px; }
 }
 .av-foot { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
 /* Replay sits centred under the stage; the caption follows it */
@@ -36,8 +39,8 @@
     /* The editor's labels are sans, like the site's interface (the article around it is serif) */
     font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
     /* Slots: A holds the bar in focus, B the one under it (the main bar on its own) */
-    --A: 56px;
-    --B: 128px;
+    --A: 112px;
+    --B: 184px;
     --tab: 54px;
     --gap: 10px;
     --more: 60px;
@@ -53,8 +56,8 @@
     --morebtn: 40px;
   }
   & .ss-stage[data-layout="compact"] {
-    --A: 32px;
-    --B: 104px;
+    --A: 58px;
+    --B: 130px;
     --tab: 40px;
     --gap: 6px;
     --more: 52px;
