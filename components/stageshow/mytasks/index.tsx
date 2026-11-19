@@ -2,6 +2,7 @@
 
 import { Stage, Swap, type Act } from '../kit'
 import * as svg from './assets'
+import '../cursor.css'
 import './mytasks.css'
 
 // The Designing Search card, built from Paul's Figma (portfolio file, page
@@ -48,7 +49,7 @@ const Svg = ({ src, className }: { src: string; className?: string }) => (
 
 export default function MyTasks() {
   return (
-    <Stage width={552} height={305} initial={initial} poster={{ starred: true, status: 'Paid' }} script={script} cursor={{ at: REST }} className="mt-card">
+    <Stage width={552} height={305} initial={initial} poster={{ starred: true, status: 'Paid' }} script={script} cursor={{ at: REST, style: 'arrow' }} className="mt-card">
       {(s) => <Scene s={s} />}
     </Stage>
   )

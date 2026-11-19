@@ -3,6 +3,7 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { Stage, type Act } from '../kit'
 import { A } from './assets'
+import '../cursor.css'
 import './avatars.css'
 
 /* The Avatars write-up's scenes: the editor's tab bars on their own (no avatar), built from the
@@ -207,17 +208,34 @@ function useTouch() {
   return touch
 }
 
-// A slowed scene slows the bars (CSS, via --t) and the beats between actions, but never the hand:
-// the cursor keeps real arcs, trip times and presses, as a person's would
-function slowed(script: (a: Act<S>) => Promise<void>, slow: number) {
-  return (a: Act<S>) =>
-    script(new Proxy(a, {
+// How every scene's hand moves. A slowed scene slows the bars (CSS, via --t) and the beats between
+// actions, but never the hand: it keeps real trip times and presses. Each trip dips deeper than the
+// kit's shallow arc, and the dip comes early and sharp, as a wrist flicks toward a target, then the
+// last stretch straightens out onto it.
+type Pt = { x: number; y: number }
+const dip = (e: number, from: Pt, end: Pt): Pt => {
+  const dx = end.x - from.x, dy = end.y - from.y
+  const dist = Math.hypot(dx, dy) || 1
+  const bow = Math.min(dist * 0.17, 46)
+  const lift = Math.sin(Math.PI * Math.pow(e, 0.6)) * bow
+  return { x: from.x + dx * e - (dy / dist) * lift, y: from.y + dy * e + (dx / dist) * lift }
+}
+function directed(script: (a: Act<S>) => Promise<void>, slow: number) {
+  return (a: Act<S>) => {
+    type Move = Act<S>['move']
+    const move = ((to, opts) => a.move(to, { ...opts, path: opts?.path ?? dip })) as Move
+    const proxy: Act<S> = new Proxy(a, {
       get(t, k) {
         if (k === 'wait') return (ms: number) => t.wait(ms * slow)
+        if (k === 'move') return move
+        // click travels with the same dip, then presses where it landed
+        if (k === 'click') return async (to?: Parameters<Act<S>['click']>[0], opts?: Parameters<Act<S>['click']>[1]) => { if (to !== undefined) await move(to); return t.click(to, opts) }
         const v = (t as unknown as Record<string | symbol, unknown>)[k]
         return typeof v === 'function' ? (v as (...x: unknown[]) => unknown).bind(t) : v
       },
-    }))
+    })
+    return script(proxy)
+  }
 }
 
 type FrameProps = {
@@ -242,7 +260,7 @@ function Frame({ initial, poster, script, still, label, slow = 1, reduced, capti
         compact={{ below: 480, width: 358, height: 260 }}
         initial={initial}
         poster={poster}
-        script={script && slow !== 1 ? slowed(script, slow) : script}
+        script={script ? directed(script, slow) : undefined}
         play={still ? undefined : play}
         cursor={still || !cursor ? undefined : { at: REST, style: touch ? 'touch' : 'arrow', ripple: touch }}
         className={'av-card' + (reduced ? ' av-reduced' : '')}
@@ -294,8 +312,8 @@ const tabsStart: S = { ...base, level: 1, hair: 'waves' }
 async function tabs(a: Act<S>) {
   await a.wait(400)
   a.mark('wear')
-  await a.enter({ at: 'tab-wear', x: 0.5, y: 0.3 })
-  await a.click({ at: 'tab-wear', x: 0.5, y: 0.3 })
+  await a.enter({ at: 'tab-wear', x: 0.85, y: 0.85 })
+  await a.click({ at: 'tab-wear', x: 0.85, y: 0.85 })
   await a.set({ tab: 'wear' })
   await a.wait(700)
   a.mark('cap on')
@@ -306,7 +324,7 @@ async function tabs(a: Act<S>) {
   await a.click({ at: 'hat-none', x: 0.5, y: 0.5 })
   await a.set({ cap: false })
   await a.wait(500)
-  await a.click({ at: 'tab-style', x: 0.5, y: 0.3 })
+  await a.click({ at: 'tab-style', x: 0.85, y: 0.85 })
   await a.set({ tab: 'style' })
   await a.wait(500)
   await a.move(REST)
