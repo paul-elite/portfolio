@@ -27,6 +27,8 @@
 .av-replay:active { transform: scale(0.97); }
 
 .av-card {
+  /* The rounded arrow, a little larger than its 22px so it reads on a wide stage */
+  & .ss-cursor[data-style="arrow"] { --ss-cursor-size: 1.3; }
   & .ss-stage {
     overflow: hidden;
     border-radius: 20px;

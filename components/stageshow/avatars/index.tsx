@@ -248,7 +248,7 @@ function Frame({ initial, poster, script, still, label, slow = 1, reduced, capti
         poster={poster}
         script={script && slow !== 1 ? slowed(script, slow) : script}
         play={still ? undefined : play}
-        cursor={still || !cursor ? undefined : { at: REST, style: touch ? 'touch' : 'large', ripple: touch }}
+        cursor={still || !cursor ? undefined : { at: REST, style: touch ? 'touch' : 'arrow', ripple: touch }}
         className={'av-card' + (reduced ? ' av-reduced' : '')}
       >
         {(s, _rect, layout) => (
