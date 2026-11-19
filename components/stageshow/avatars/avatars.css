@@ -1,12 +1,12 @@
 /* The Avatars scenes. Values are the editor's (avatars.paulelite.com) and its Figma (113:9122). */
 .av-figure { position: relative; margin: 2.25rem 0; }
-/* Wide screens: the stage breaks out of the 470px text column, centred on it, so the bars have
+/* Wide screens: the stage breaks out of the 600px text column, centred on it, so the bars have
    room around them. figure.av-figure outranks the article's own figure margins. */
 @media (min-width: 861px) {
   figure.av-figure { width: calc(100% + 32px); margin-left: -16px; margin-right: -16px; }
 }
 @media (min-width: 1180px) {
-  figure.av-figure { width: 720px; margin-left: -125px; margin-right: -125px; }
+  figure.av-figure { width: 720px; margin-left: -60px; margin-right: -60px; }
 }
 .av-foot { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
 /* Replay sits centred under the stage; the caption follows it */
