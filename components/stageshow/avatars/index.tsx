@@ -108,13 +108,13 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
       {/* Colour: rises from behind Hair */}
       <div className="av-bar av-colour" data-pos={colourPos} data-enter={s.enter === 'colour' || undefined} style={{ width: colourWidth(z) }}>
         <div className="av-tools">
-          <span className="av-tool">
+          <span className="av-tool" data-cursor="hand">
             <span className="av-layers" aria-hidden>
               <span data-on={!s.green || undefined}><Cluster fills={SHADES_BLACK} /></span>
               <span data-on={s.green || undefined}><Cluster fills={SHADES_GREEN} /></span>
             </span>
           </span>
-          <span className="av-tool"><Cluster fills={RAINBOW} /></span>
+          <span className="av-tool" data-cursor="hand"><Cluster fills={RAINBOW} /></span>
         </div>
         <span className="av-sep" />
         <div className="av-row av-swatches">
@@ -122,24 +122,24 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
             const on = s.green ? c === '#50c810' : c === '#1a1a1a'
             const d = A.dot[c as keyof typeof A.dot]
             return (
-              <span key={c} className="av-swatch" data-target={c === '#50c810' ? 'green' : undefined} data-cursor="pointer">
+              <span key={c} className="av-swatch" data-target={c === '#50c810' ? 'green' : undefined} data-cursor="hand">
                 <Layers show={on ? 1 : 0} items={[d.off, d.on]} />
               </span>
             )
           })}
         </div>
         <span className="av-sep" />
-        <span className="av-close" data-target="close-colour" data-cursor="pointer"><Close /></span>
+        <span className="av-close" data-target="close-colour" data-cursor="hand"><Close /></span>
       </div>
 
       {/* Hair: rises from behind the main bar; slides down muted under Colour */}
       <div className="av-bar av-hair" data-pos={hairPos} data-muted={s.level === 2 || undefined} data-enter={s.enter === 'hair' || undefined} style={{ width: hw }}>
         <div className="av-tabs">
-          <span className="av-tab" data-on={s.tab === 'style' || undefined} data-target="tab-style" data-cursor="pointer">
+          <span className="av-tab" data-on={s.tab === 'style' || undefined} data-target="tab-style" data-cursor="hand">
             <Layers className="av-tab__art" show={s.tab !== 'style' ? 0 : 1 + g} items={[A.tab.styleOff, A.tab.styleBlack, A.tab.styleGreen]} />
             <span className="av-label">Style</span>
           </span>
-          <span className="av-tab" data-on={s.tab === 'wear' || undefined} data-target="tab-wear" data-cursor="pointer">
+          <span className="av-tab" data-on={s.tab === 'wear' || undefined} data-target="tab-wear" data-cursor="hand">
             <Layers className="av-tab__art" show={s.tab === 'wear' && s.cap ? 1 : 0} items={[A.tab.wear, A.tab.wearOn]} />
             <span className="av-label">Wear</span>
           </span>
@@ -148,37 +148,37 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
         <div className="av-rows">
           <div className="av-row" data-on={s.tab === 'style' || undefined}>
             {z.hairs.map((h) => (
-              <span key={h} className="av-opt" data-on={s.hair === h || undefined} data-target={s.tab === 'style' ? 'hair-' + h : undefined} data-cursor="pointer">
+              <span key={h} className="av-opt" data-on={s.hair === h || undefined} data-target={s.tab === 'style' ? 'hair-' + h : undefined} data-cursor="hand">
                 <Layers show={g} items={[A.hairTiles.black[h], A.hairTiles.green[h]]} />
               </span>
             ))}
           </div>
           <div className="av-row" data-on={s.tab === 'wear' || undefined}>
-            <span className="av-opt" data-on={!s.cap || undefined} data-target={s.tab === 'wear' ? 'hat-none' : undefined} data-cursor="pointer"><None /></span>
+            <span className="av-opt" data-on={!s.cap || undefined} data-target={s.tab === 'wear' ? 'hat-none' : undefined} data-cursor="hand"><None /></span>
             {z.hats.map((h) => (
-              <span key={h} className="av-opt" data-on={(s.cap && h === 'cap') || undefined} data-target={s.tab === 'wear' ? 'hat-' + h : undefined} data-cursor="pointer"><Svg src={A.hatTiles[h]} /></span>
+              <span key={h} className="av-opt" data-on={(s.cap && h === 'cap') || undefined} data-target={s.tab === 'wear' ? 'hat-' + h : undefined} data-cursor="hand"><Svg src={A.hatTiles[h]} /></span>
             ))}
           </div>
         </div>
-        <span className="av-more" data-show={s.tab === 'style' || s.cap || undefined} data-on={s.level === 2 || undefined} data-target="colour" data-cursor="pointer">
+        <span className="av-more" data-show={s.tab === 'style' || s.cap || undefined} data-on={s.level === 2 || undefined} data-target="colour" data-cursor="hand">
           <Layers className="av-more__art" show={s.tab === 'wear' ? 2 : g} items={[A.wheel.black, A.wheel.green, A.wheel.pink]} />
           <span className="av-label">Colour</span>
         </span>
         <span className="av-sep" />
-        <span className="av-close" data-target="close-hair" data-cursor="pointer"><Close /></span>
+        <span className="av-close" data-target="close-hair" data-cursor="hand"><Close /></span>
       </div>
 
       {/* The main bar: the floor */}
       <div className="av-bar av-main" data-pos={mainPos} style={{ width: z.main }}>
         <div className="av-history">
-          <span className="av-hist" data-off={!edits || undefined} data-target="undo" data-cursor="pointer"><Undo /></span>
-          <span className="av-hist" data-off><Undo redo /></span>
+          <span className="av-hist" data-off={!edits || undefined} data-target="undo" data-cursor={edits ? 'hand' : 'pointer'}><Undo /></span>
+          <span className="av-hist" data-off data-cursor="pointer"><Undo redo /></span>
         </div>
         <span className="av-groove" />
         <div className="av-cats">
           <span className="av-ind" data-on={s.level > 0 || undefined} />
           {(['face', 'hair', 'outfit', 'color'] as const).map((k) => (
-            <span key={k} className="av-cat" data-k={k} data-on={(s.level > 0 && k === 'hair') || undefined} data-target={k === 'hair' ? 'main-hair' : undefined} data-cursor="pointer">
+            <span key={k} className="av-cat" data-k={k} data-on={(s.level > 0 && k === 'hair') || undefined} data-target={k === 'hair' ? 'main-hair' : undefined} data-cursor="hand">
               {k === 'hair'
                 ? <Layers className="av-cat__art" show={s.level > 0 ? 1 : 0} items={[A.bar.hair, A.bar.hairOn]} />
                 : <Svg src={A.bar[k]} className="av-cat__art" />}
@@ -187,7 +187,7 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
           ))}
         </div>
         <span className="av-groove" />
-        <span className="av-hist av-more-btn"><More /></span>
+        <span className="av-hist av-more-btn" data-cursor="hand"><More /></span>
       </div>
     </div>
   )
