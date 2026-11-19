@@ -46,6 +46,10 @@ export async function getSiteConfig(): Promise<SiteConfig> {
   }
 }
 
+// A project tagged 'draft' is being written: it stays out of every list and the navigation,
+// but its page opens by its URL so it can be read and edited in place
+const isDraft = (p: { tags?: string[] | null }) => Array.isArray(p.tags) && p.tags.includes('draft');
+
 // Projects only ever come from the database: no sample projects, even when it can't be reached
 export async function getPortfolioContent(): Promise<PortfolioContent> {
   if (!hasSupabaseConfig) {
@@ -66,7 +70,7 @@ export async function getPortfolioContent(): Promise<PortfolioContent> {
     ]);
 
     const content = mapPortfolioContent({
-      projects: projectsRes.data || [],
+      projects: (projectsRes.data || []).filter((p) => !isDraft(p)),
       writings: writingsRes.data || [],
       illustrations: illustrationsRes.data || [],
       interactions: interactionsRes.data || [],
@@ -99,14 +103,14 @@ export async function getProjectNavigation(): Promise<NavItem[]> {
   try {
     const { data, error } = await supabase
       .from('projects')
-      .select('slug, title')
+      .select('slug, title, tags')
       .order('created_at', { ascending: false });
 
     if (error || !data || data.length === 0) {
       return [];
     }
 
-    return data;
+    return data.filter((p) => !isDraft(p)).map(({ slug, title }) => ({ slug, title }));
   } catch {
     return [];
   }

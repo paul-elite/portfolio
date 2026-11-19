@@ -18,7 +18,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const p = await getProjectBySlug(slug);
   const config = await getSiteConfig();
   const name = config.name || 'Paul Elite';
-  return { title: p ? `${p.title} - ${name}` : name };
+  // A draft (tagged 'draft') can be read by its URL but isn't for search engines yet
+  const draft = !!p?.tags?.includes('draft');
+  return { title: p ? `${p.title} - ${name}` : name, ...(draft ? { robots: { index: false, follow: false } } : {}) };
 }
 
 export default async function ProjectContent({ params }: { params: Promise<{ slug: string }> }) {
