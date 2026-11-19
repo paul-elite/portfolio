@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { getSiteConfig, getPortfolioContent } from '@/lib/content-service';
 import SpotifyNow from '@/components/home/SpotifyNow';
 import GlitchName from '@/components/home/GlitchName';
-import { getFeatured, newestKey } from '@/lib/featured';
+import { getFeatured } from '@/lib/featured';
 import s from '@/components/home/benji.module.css';
 
 export const revalidate = 60;
@@ -44,7 +44,6 @@ export default async function Home() {
   // each with its type on the left (Study / Design / Essay). No dates.
   const featuredItems = getFeatured(content);
   const featured: Row[] = featuredItems;
-  const newest = newestKey(featuredItems);
 
   const socialBits: React.ReactNode[] = [];
   if (config.social.twitter) socialBits.push(<a key="x" className={s.link} href={config.social.twitter} target="_blank" rel="noopener noreferrer">X</a>);
@@ -85,7 +84,8 @@ export default async function Home() {
           )}
         </div>
 
-        <FeaturedList items={featured} newKey={newest} />
+        {/* No "New" badge for now */}
+        <FeaturedList items={featured} />
 
         <footer className={s.footer}>
           <SpotifyNow />
