@@ -2,6 +2,7 @@
 
 import { Stage, Swap, type Act } from '../kit'
 import * as svg from './assets'
+import { humanHand } from '../hand'
 import '../cursor.css'
 import './mytasks.css'
 
@@ -47,9 +48,12 @@ const Svg = ({ src, className }: { src: string; className?: string }) => (
   <span className={className} aria-hidden dangerouslySetInnerHTML={{ __html: src }} />
 )
 
+// The same hand as the Avatars scenes: deeper, earlier dips on every trip
+const feel = humanHand(script)
+
 export default function MyTasks() {
   return (
-    <Stage width={552} height={305} initial={initial} poster={{ starred: true, status: 'Paid' }} script={script} cursor={{ at: REST, style: 'arrow' }} className="mt-card">
+    <Stage width={552} height={305} initial={initial} poster={{ starred: true, status: 'Paid' }} script={feel} cursor={{ at: REST, style: 'arrow' }} className="mt-card">
       {(s) => <Scene s={s} />}
     </Stage>
   )

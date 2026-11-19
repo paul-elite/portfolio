@@ -9,7 +9,7 @@
       drop-shadow(0 1px 2px rgb(0 0 0 / 0.28));
   }
   /* Over anything that can be clicked the arrow becomes a rounded pointing hand (the arrow style alone
-     keeps the arrow everywhere). The two cross over in place, fingertip on the arrow's tip */
+     keeps the arrow everywhere): white, with a black outline. The two cross over in place, fingertip on the arrow's tip */
   .ss-cursor[data-style="arrow"] .ss-cursor__press::after {
     content: '';
     position: absolute;
@@ -17,7 +17,7 @@
     top: -2.6px;
     width: 24px;
     height: 24px;
-    background: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M8.6 13.2V4.4a1.8 1.8 0 0 1 3.6 0v6.1h.3V9.8a1.75 1.75 0 0 1 3.5 0v1.1h.3v-.5a1.75 1.75 0 0 1 3.5 0v1.3a1.65 1.65 0 0 1 2.4 1.5v3.1c0 3.7-3 6.7-6.7 6.7h-1.4a6.6 6.6 0 0 1-5.6-3.1l-2.8-4.3a1.8 1.8 0 0 1 2.9-2.1z%22 fill=%22%23111%22 stroke=%22%23fff%22 stroke-width=%221.5%22 stroke-linejoin=%22round%22 paint-order=%22stroke%22/%3E%3C/svg%3E") center / contain no-repeat;
+    background: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M8.6 13.2V4.4a1.8 1.8 0 0 1 3.6 0v6.1h.3V9.8a1.75 1.75 0 0 1 3.5 0v1.1h.3v-.5a1.75 1.75 0 0 1 3.5 0v1.3a1.65 1.65 0 0 1 2.4 1.5v3.1c0 3.7-3 6.7-6.7 6.7h-1.4a6.6 6.6 0 0 1-5.6-3.1l-2.8-4.3a1.8 1.8 0 0 1 2.9-2.1z%22 fill=%22%23fff%22 stroke=%22%23111%22 stroke-width=%221.3%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E") center / contain no-repeat;
     filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.28));
     transform-origin: 10.4px 2.6px;
     transform: scale(calc(var(--ss-cursor-size, 1) * 0.6));

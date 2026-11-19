@@ -3,6 +3,7 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { Stage, type Act } from '../kit'
 import { A } from './assets'
+import { humanHand } from '../hand'
 import '../cursor.css'
 import './avatars.css'
 
@@ -208,36 +209,6 @@ function useTouch() {
   return touch
 }
 
-// How every scene's hand moves. A slowed scene slows the bars (CSS, via --t) and the beats between
-// actions, but never the hand: it keeps real trip times and presses. Each trip dips deeper than the
-// kit's shallow arc, and the dip comes early and sharp, as a wrist flicks toward a target, then the
-// last stretch straightens out onto it.
-type Pt = { x: number; y: number }
-const dip = (e: number, from: Pt, end: Pt): Pt => {
-  const dx = end.x - from.x, dy = end.y - from.y
-  const dist = Math.hypot(dx, dy) || 1
-  const bow = Math.min(dist * 0.17, 46)
-  const lift = Math.sin(Math.PI * Math.pow(e, 0.6)) * bow
-  return { x: from.x + dx * e - (dy / dist) * lift, y: from.y + dy * e + (dx / dist) * lift }
-}
-function directed(script: (a: Act<S>) => Promise<void>, slow: number) {
-  return (a: Act<S>) => {
-    type Move = Act<S>['move']
-    const move = ((to, opts) => a.move(to, { ...opts, path: opts?.path ?? dip })) as Move
-    const proxy: Act<S> = new Proxy(a, {
-      get(t, k) {
-        if (k === 'wait') return (ms: number) => t.wait(ms * slow)
-        if (k === 'move') return move
-        // click travels with the same dip, then presses where it landed
-        if (k === 'click') return async (to?: Parameters<Act<S>['click']>[0], opts?: Parameters<Act<S>['click']>[1]) => { if (to !== undefined) await move(to); return t.click(to, opts) }
-        const v = (t as unknown as Record<string | symbol, unknown>)[k]
-        return typeof v === 'function' ? (v as (...x: unknown[]) => unknown).bind(t) : v
-      },
-    })
-    return script(proxy)
-  }
-}
-
 type FrameProps = {
   initial: S; poster: S; script?: (a: Act<S>) => Promise<void>; still?: boolean; label: string
   slow?: number // the bars' motion and the pauses play this many times slower; the cursor doesn't
@@ -260,7 +231,7 @@ function Frame({ initial, poster, script, still, label, slow = 1, reduced, capti
         compact={{ below: 480, width: 358, height: 260 }}
         initial={initial}
         poster={poster}
-        script={script ? directed(script, slow) : undefined}
+        script={script ? humanHand(script, slow) : undefined}
         play={still ? undefined : play}
         cursor={still || !cursor ? undefined : { at: REST, style: touch ? 'touch' : 'arrow', ripple: touch }}
         className={'av-card' + (reduced ? ' av-reduced' : '')}
