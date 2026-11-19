@@ -98,7 +98,8 @@
     background-position: center;
     -webkit-mask-image: radial-gradient(ellipse 75% 80% at 50% 50%, #000 30%, transparent 85%);
     mask-image: radial-gradient(ellipse 75% 80% at 50% 50%, #000 30%, transparent 85%);
-    opacity: 0.7;
+    /* Very light, so the dots sit behind the bars and never compete with them */
+    opacity: 0.32;
   }
 
   /* ---- Bars ---- */
