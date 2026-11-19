@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
-import { Stage, type Act } from '../kit'
+import { Stage, Camera, type Act, type Rect } from '../kit'
 import { A } from './assets'
 import './avatars.css'
 
@@ -25,8 +25,9 @@ type S = {
   green: boolean
   tab: 'style' | 'wear'
   cap: boolean
+  focus: Rect | null // where the camera is pushed in (null: the whole stage)
 }
-const base: S = { level: 0, enter: null, hair: 'boy', green: false, tab: 'style', cap: false }
+const base: S = { level: 0, enter: null, hair: 'boy', green: false, tab: 'style', cap: false, focus: null }
 
 // ---- Sizes (px), wide and compact. Bars hug their contents; widths are worked out so the
 // stage can ease them like the editor does. ----
@@ -215,8 +216,11 @@ type FrameProps = {
   slow?: number // plays this many times slower (script and CSS alike), to show the motion
   reduced?: boolean // shows the reduced-motion version
   caption?: string
+  crop?: Framing // a fixed close crop (the camera held in on part of the stack)
+  cursor?: boolean // false: the camera tells it, nothing is pressed
 }
-function Frame({ initial, poster, script, still, play = 'loop', label, slow = 1, reduced, caption }: FrameProps) {
+type Framing = { wide: Rect; compact: Rect }
+function Frame({ initial, poster, script, still, play = 'loop', label, slow = 1, reduced, caption, crop, cursor = true }: FrameProps) {
   const touch = useTouch()
   const [run, setRun] = useState(0)
   return (
@@ -231,10 +235,15 @@ function Frame({ initial, poster, script, still, play = 'loop', label, slow = 1,
         script={script}
         play={still ? undefined : play}
         speed={1 / slow}
-        cursor={still ? undefined : { at: REST, style: touch ? 'touch' : 'real', ripple: touch }}
+        cursor={still || !cursor ? undefined : { at: REST, style: touch ? 'touch' : 'real', ripple: touch }}
         className={'av-card' + (reduced ? ' av-reduced' : '')}
       >
-        {(s, _rect, layout) => <Scene s={s} compact={layout === 'compact'} />}
+        {(s, _rect, layout) => (
+          // The camera crops and pushes in; the cursor stays outside it, in stage pixels
+          <Camera focus={s.focus ?? (crop ? crop[layout] : null)} max={2} pad={16} duration={1000} feather={24}>
+            <Scene s={s} compact={layout === 'compact'} />
+          </Camera>
+        )}
       </Stage>
       {(caption || (play === 'once' && !still)) && (
         <div className="av-foot">
@@ -248,6 +257,19 @@ function Frame({ initial, poster, script, still, play = 'loop', label, slow = 1,
     </figure>
   )
 }
+
+// Where the camera looks in each scene, in stage pixels (wide 560×248, compact 358×208)
+const VIEW = {
+  // the seam where Hair comes out from behind the main bar: the left of both bars
+  seam: { wide: { x: 50, y: 44, width: 300, height: 156 }, compact: { x: 8, y: 24, width: 210, height: 150 } },
+  // the muted bar's options and its lit Colour tile
+  muted: { wide: { x: 170, y: 118, width: 330, height: 84 }, compact: { x: 110, y: 96, width: 236, height: 80 } },
+  // the Colour tile on the Hair bar, before it opens anything
+  colourTile: { wide: { x: 300, y: 42, width: 200, height: 92 }, compact: { x: 176, y: 22, width: 172, height: 88 } },
+  // the Hair bar, cropped close while its width eases
+  hairBar: { wide: { x: 58, y: 46, width: 444, height: 86 }, compact: { x: 16, y: 24, width: 326, height: 84 } },
+} satisfies Record<string, Framing>
+const at = (a: Act<S>, v: Framing) => (a.layout === 'compact' ? v.compact : v.wide)
 
 /* ---- The whole story, once (about 6s), ending on the payoff ---- */
 async function stack(a: Act<S>) {
@@ -295,13 +317,23 @@ async function tabs(a: Act<S>) {
   await a.wait(1100)
 }
 export function AvatarsTabs() {
-  return <Frame label="Switching between Style and Wear inside the Hair bar" initial={tabsStart} poster={{ ...tabsStart, tab: 'wear', cap: true }} script={tabs} />
+  return <Frame label="Switching between Style and Wear inside the Hair bar, cropped close" initial={tabsStart} poster={{ ...tabsStart, tab: 'wear', cap: true }} script={tabs} crop={VIEW.hairBar} caption="Cropped to the Hair bar" />
 }
 
 /* ---- A still of the three levels ---- */
+/* ---- The three levels, then the camera pushes in on the muted bar to show how it's quieted, and back out ---- */
+const mutedStart: S = { ...base, level: 2, hair: 'spiky', green: true }
+async function muted(a: Act<S>) {
+  await a.wait(1600)
+  a.mark('push in')
+  await a.set({ focus: at(a, VIEW.muted) })
+  await a.wait(2800)
+  a.mark('pull out')
+  await a.set({ focus: null })
+  await a.wait(1400)
+}
 export function AvatarsMuted() {
-  const s: S = { ...base, level: 2, hair: 'spiky', green: true }
-  return <Frame label="Three levels: the bar in focus, the muted bar under it, the tray" initial={s} poster={s} still />
+  return <Frame label="The bar in focus, the muted bar under it and the tray; then a closer look at the muted bar" initial={mutedStart} poster={mutedStart} script={muted} cursor={false} caption="Zooms in on the muted bar" />
 }
 
 /* ---- The bar at rest: tap Hair and it lights and opens; tap it again and both go (about 5s) ---- */
@@ -319,35 +351,49 @@ export function AvatarsRest() {
   return <Frame label="Tapping Hair opens its bar; tapping it again closes it" initial={base} poster={{ ...base, level: 1 }} script={rest} />
 }
 
-/* ---- Rising from behind, and sinking back, slowed 3× ---- */
+/* ---- Rising from behind: the camera pushes in on the seam, Hair rises and sinks back (slowed 3×), then out ---- */
 async function rise(a: Act<S>) {
+  await a.wait(400)
+  a.mark('push in')
+  await a.set({ focus: at(a, VIEW.seam) })
   await a.wait(500)
+  a.mark('rise')
   await a.click({ at: 'main-hair', x: 0.5, y: 0.3 })
   await a.set({ level: 1, enter: 'hair' })
   await a.wait(900)
+  a.mark('sink')
   await a.click({ at: 'close-hair', x: 0.5, y: 0.5 })
   await a.set({ level: 0, enter: null })
+  await a.wait(500)
+  a.mark('pull out')
   await a.move(REST)
-  await a.wait(700)
+  await a.set({ focus: null })
+  await a.wait(900)
 }
 export function AvatarsRise() {
-  return <Frame label="Hair rises from behind the main bar and sinks back, slowed down" initial={base} poster={{ ...base, level: 1 }} script={rise} slow={3} caption="Slowed down 3×" />
+  return <Frame label="A close look at Hair rising from behind the main bar and sinking back, slowed down" initial={base} poster={{ ...base, level: 1 }} script={rise} slow={3} caption="Zoomed in, slowed down 3×" />
 }
 
-/* ---- The stack makes room: Colour rises from Hair while Hair slides down and the main bar folds, slowed 3× ---- */
+/* ---- The stack makes room: start close on the Colour tile, then pull out as Colour rises, Hair slides down and the
+   main bar folds into the tray (slowed 3×); closing, the camera goes back in ---- */
 const roomStart: S = { ...base, level: 1, hair: 'spiky' }
 async function room(a: Act<S>) {
+  await a.snap({ focus: at(a, VIEW.colourTile) })
   await a.wait(500)
+  a.mark('open colour')
   await a.click({ at: 'colour', x: 0.5, y: 0.3 })
-  await a.set({ level: 2, enter: 'colour' })
-  await a.wait(1000)
+  await a.set({ level: 2, enter: 'colour', focus: null })
+  await a.wait(1300)
+  a.mark('close')
   await a.click({ at: 'close-colour', x: 0.5, y: 0.5 })
   await a.set({ level: 1, enter: null })
+  await a.wait(400)
   await a.move(REST)
-  await a.wait(700)
+  await a.set({ focus: at(a, VIEW.colourTile) })
+  await a.wait(800)
 }
 export function AvatarsRoom() {
-  return <Frame label="Colour rises from Hair while Hair slides down and the main bar folds into the tray, slowed down" initial={roomStart} poster={{ ...roomStart, level: 2 }} script={room} slow={3} caption="Slowed down 3×" />
+  return <Frame label="Pulling out from the Colour tile as Colour rises, Hair slides down and the main bar folds into the tray, slowed down" initial={roomStart} poster={{ ...roomStart, level: 2 }} script={room} slow={3} caption="Zooming out, slowed down 3×" />
 }
 
 /* ---- Closing: both bars close, then open again, slowed 2× ---- */
