@@ -6,10 +6,15 @@ import r from './reader.module.css';
 type Toc = { id: string; label: string }[];
 
 // The article's contents, kept in step with the scroll: a ruler runs beside the labels (fine ticks, a
-// longer one level with each label), each label's stretch of it coloured like the label. The section being read is darkest, the ones already read are mid
+// longer one level with each label). Each tick keeps its own state: the long one lights as you reach the
+// topic, the short one halfway through it. The section being read is darkest, the ones already read are mid
 // grey and the ones still to come are quietest.
+const tickState = (n: number, at: number) => (n === at ? 'current' : n < at ? 'read' : 'ahead');
+
 export default function TocRail({ toc }: { toc: Toc }) {
   const [active, setActive] = useState(-1);
+  // The ruler's own position, in ticks: the long tick of topic k is 2k, the short one after it 2k + 1
+  const [tick, setTick] = useState(-1);
 
   useEffect(() => {
     let raf = 0;
@@ -17,14 +22,19 @@ export default function TocRail({ toc }: { toc: Toc }) {
       raf = 0;
       // The section being read is the last heading past a line a third of the way down the window
       const line = window.innerHeight / 3;
+      const tops = toc.map(({ id }) => document.getElementById(id)?.getBoundingClientRect().top ?? Infinity);
       let k = -1;
-      toc.forEach(({ id }, i) => {
-        const h = document.getElementById(id);
-        if (h && h.getBoundingClientRect().top <= line) k = i;
-      });
+      tops.forEach((t, i) => { if (t <= line) k = i; });
+      // Halfway through a topic its short tick lights: how far the reading line is between this heading and the next
+      let half = false;
+      if (k >= 0) {
+        const next = k + 1 < tops.length ? tops[k + 1] : (document.querySelector('[data-reader] article')?.getBoundingClientRect().bottom ?? Infinity);
+        half = line - tops[k] >= (next - tops[k]) / 2;
+      }
       // Scrolled to the end: the last sections are short and their headings can't reach the line
-      if (document.documentElement.scrollHeight - window.innerHeight - window.scrollY < 2) k = toc.length - 1;
+      if (document.documentElement.scrollHeight - window.innerHeight - window.scrollY < 2) { k = toc.length - 1; half = false; }
       setActive(k);
+      setTick(k < 0 ? -1 : 2 * k + (half ? 1 : 0));
     };
     const queue = () => { if (!raf) raf = requestAnimationFrame(update); };
     update();
@@ -61,7 +71,8 @@ export default function TocRail({ toc }: { toc: Toc }) {
             onClick={(e) => go(e, h.id)}
             className={r.tocLink}
           >
-            <span className={r.seg} aria-hidden />
+            <span className={r.tickLong} data-state={tickState(2 * i, tick)} aria-hidden />
+            {i < toc.length - 1 && <span className={r.seg} data-state={tickState(2 * i + 1, tick)} aria-hidden />}
             {h.label}
           </a>
         );
