@@ -144,14 +144,14 @@
   border-top: 0.5px solid rgba(130, 100, 20, 0.13);
   scroll-margin-top: 4.5rem;
 }
-/* A highlighter mark: a warm yellow stroke with ragged ends behind the words, which are plain black */
+/* A highlighter mark: the hand-drawn marker stroke from Figma 140:9832 (#FFD200, round ends, a slight
+   wave), stretched behind the words, which are plain black. Each wrapped line gets its own stroke */
 .article mark {
   color: #000;
   -webkit-text-stroke: 0.125px #000;
-  padding: 0.05em 0.25em;
-  margin: 0 -0.1em;
-  border-radius: 0.8em 0.3em 0.9em 0.35em;
-  background: linear-gradient(100deg, rgb(255 214 10 / 0) 0.6%, rgb(255 214 10 / 0.55) 2.2%, rgb(255 214 10 / 0.4) 6%, rgb(255 214 10 / 0.32) 92%, rgb(255 214 10 / 0.6) 96.5%, rgb(255 214 10 / 0) 99%);
+  padding: 0.12em 0.4em;
+  margin: 0 -0.25em;
+  background: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 227 26%22 preserveAspectRatio=%22none%22%3E%3Cpath d=%22M10 13.1052C10.701 13.1052 11.4019 13.1052 16.1572 12.6334C20.9125 12.1615 29.7009 11.2178 37.0078 10.7317C44.3147 10.2455 49.8739 10.2455 52.9946 10.2125C56.1154 10.1795 56.6293 10.1135 65.4538 10.0458C74.2782 9.97813 91.3977 9.91077 103.39 10.4318C115.383 10.9528 121.729 12.0642 127.039 13.1275C132.348 14.1907 136.428 15.1721 141.627 15.6588C146.827 16.1456 153.021 16.1078 160.269 15.5691C167.517 15.0303 175.631 13.9916 182.365 13.3693C194.208 12.5726 201.637 12.0729 206.727 11.5881C209.652 11.4233 213.271 11.4233 217 11.4233%22 fill=%22none%22 stroke=%22%23FFD200%22 stroke-width=%2220%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E") center / 100% 100% no-repeat;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
