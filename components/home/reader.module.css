@@ -43,6 +43,8 @@
   padding: 4px;
   border-radius: 8px;
   font-size: 14px;
+  /* Pinned over the page as it scrolls, so it has the page's own ground under it */
+  background: #fefcf5;
   /* 0.5px hairline frame + a soft lift, same recipe as the home portrait */
   box-shadow:
     0 0 0 0.5px rgba(140, 110, 30, 0.13),
@@ -188,7 +190,11 @@
 }
 
 @media (max-width: 860px) {
-  .wrap { grid-template-columns: 1fr; gap: 2rem; padding: 7.5rem 1.25rem 5rem; }
+  /* Back stays pinned where it starts (top left) as the page scrolls; out of the flow, so the
+     article keeps its place */
+  .page { position: relative; }
+  .topbar { position: fixed; top: 2.5rem; left: 1.5rem; z-index: 5; max-width: none; margin: 0; padding: 0; }
+  .wrap { grid-template-columns: 1fr; gap: 2rem; padding: calc(7.5rem + 2.5rem + 26px) 1.25rem 5rem; }
   .toc { display: none; }
   .article { max-width: none; }
 }
