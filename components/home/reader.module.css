@@ -68,21 +68,21 @@
 .tocLink[data-state="read"] { color: rgba(0, 0, 0, 0.55); }
 .tocLink[data-state="current"] { color: #111; }
 
-/* The ruler beside the labels: fine ticks every 5px and a longer tick level with each label. Each label
-   carries its own stretch of the ruler (half the gap above it to half the gap below), so the ticks
-   take the label's state: quietest still to come, mid grey once read, dark where you are */
+/* The ruler beside the labels: one long tick level with each topic and one short tick halfway to the
+   next, each taking its topic's state: quietest still to come, mid grey once read, dark where you are */
 .seg {
   position: absolute;
-  top: -0.275rem;
-  bottom: -0.275rem;
   left: -22px;
+  bottom: calc(-0.275rem - 0.5px);
   width: 4px;
-  --tick: rgba(130, 110, 60, 0.16);
-  background: repeating-linear-gradient(to bottom, var(--tick) 0 1px, transparent 1px 5px);
+  height: 1px;
+  background: rgba(130, 110, 60, 0.18);
   pointer-events: none;
+  transition: background-color 0.18s ease;
 }
-.tocLink[data-state="read"] .seg { --tick: rgba(0, 0, 0, 0.22); }
-.tocLink[data-state="current"] .seg { --tick: rgba(0, 0, 0, 0.55); }
+.tocLink:last-child .seg { display: none; }
+.tocLink[data-state="read"] .seg { background: rgba(0, 0, 0, 0.22); }
+.tocLink[data-state="current"] .seg { background: rgba(0, 0, 0, 0.55); }
 .tocLink::after {
   content: '';
   position: absolute;
