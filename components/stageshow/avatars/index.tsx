@@ -331,7 +331,7 @@ export function AvatarsRest() {
   return <Frame label="Tapping Hair opens its bar; its × closes it again before it has settled" initial={base} poster={{ ...base, level: 1 }} script={rest} />
 }
 
-/* ---- Rising from behind: Hair rises and sinks back (slowed 3×) ---- */
+/* ---- Growing in place: Hair grows over the main bar and sinks back (slowed 3×) ---- */
 async function rise(a: Act<S>) {
   await a.wait(300)
   a.mark('rise')
@@ -347,7 +347,7 @@ async function rise(a: Act<S>) {
   await a.wait(900)
 }
 export function AvatarsRise() {
-  return <Frame label="Hair rising from behind the main bar and sinking back, slowed down" initial={base} poster={{ ...base, level: 1 }} script={rise} slow={3} caption="Slowed down 3×" />
+  return <Frame label="Hair growing in place over the main bar, then sinking back, slowed down" initial={base} poster={{ ...base, level: 1 }} script={rise} slow={3} caption="Slowed down 3×" />
 }
 
 /* ---- The stack makes room: Colour rises, Hair slides down and the main bar folds into the tray (slowed 3×) ---- */
