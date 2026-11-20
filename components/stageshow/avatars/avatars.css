@@ -135,11 +135,21 @@
   .av-colour[data-pos="top"] { transform: translateX(-50%); }
   .av-colour[data-pos="under"] { transform: translateX(-50%) translateY(16px) scale(0.94); }
 
+  /* A bar opening grows in place, the way the editor's first bars did: full height first while it's
+     still a narrow sliver at its centre, then it widens out to its full row (no slide up from behind).
+     Its options fill in once it has widened (--d) */
+  .av-bar[data-enter][data-pos="top"] {
+    --grow: calc(440ms * var(--t, 1));
+    --d: calc(300ms * var(--t, 1));
+    transition-property: width, box-shadow;
+    animation: av-grow var(--grow) cubic-bezier(0.2, 0, 0, 1) both;
+  }
+
   /* One bar at a time, never two moving together. Opening Colour: the main bar folds (0), Hair slides
      down (180ms), Colour rises (360ms). Closing it: Colour sinks (0), Hair goes back up (170ms), the main
      bar unfolds (340ms) */
   .av-scene[data-step="open"] .av-hair[data-pos="below"] { transition-delay: calc(180ms * var(--t, 1)); }
-  .av-scene[data-step="open"] .av-colour[data-pos="top"] { transition-delay: calc(360ms * var(--t, 1)); --d: calc(360ms * var(--t, 1)); }
+  .av-scene[data-step="open"] .av-colour[data-pos="top"] { transition-delay: calc(360ms * var(--t, 1)); --d: calc(660ms * var(--t, 1)); animation-delay: calc(360ms * var(--t, 1)); }
   .av-scene[data-step="return"] .av-hair[data-pos="top"] { transition-delay: calc(170ms * var(--t, 1)); }
   .av-scene[data-step="return"] .av-main[data-pos="floor"] { transition-delay: calc(340ms * var(--t, 1)), calc(380ms * var(--t, 1)), calc(340ms * var(--t, 1)), calc(560ms * var(--t, 1)); }
   .av-scene[data-step="return"] .av-tray:not([data-on]) { transition-delay: calc(340ms * var(--t, 1)); }
@@ -232,7 +242,7 @@
   .av-crumb[data-on] {
     opacity: 1;
     transform: translateX(-50%);
-    transition: opacity calc(150ms * var(--t, 1)) ease-out calc(160ms * var(--t, 1)), transform calc(220ms * var(--t, 1)) cubic-bezier(0.2, 0, 0, 1) calc(160ms * var(--t, 1));
+    transition: opacity calc(150ms * var(--t, 1)) ease-out calc(400ms * var(--t, 1)), transform calc(220ms * var(--t, 1)) cubic-bezier(0.2, 0, 0, 1) calc(400ms * var(--t, 1));
   }
   .av-crumb__tab {
     padding: 2px 8px;
@@ -362,6 +372,7 @@
   @media (prefers-reduced-motion: reduce) {
     .av-bar, .av-tray, .av-more { transition: opacity calc(140ms * var(--t, 1)) ease-out !important; }
     .av-crumb, .av-crumb[data-on] { transform: translateX(-50%); transition: opacity calc(140ms * var(--t, 1)) ease-out; }
+    .av-bar[data-enter][data-pos="top"] { animation: none; }
     .av-bar[data-pos="under"] { filter: none; }
     .av-bar[data-enter] > *, .av-bar[data-enter] .av-row > *, .av-bar[data-enter] .av-swatches > * { animation: none; }
     .av-layers > *, .av-rows > .av-row { transition: opacity calc(140ms * var(--t, 1)) ease-out; transform: none; }
@@ -372,6 +383,7 @@
 .av-card.av-reduced {
   & .av-bar, & .av-tray, & .av-more { transition: opacity 140ms ease-out !important; }
   & .av-crumb, & .av-crumb[data-on] { transform: translateX(-50%); transition: opacity 140ms ease-out; }
+  & .av-bar[data-enter][data-pos="top"] { animation: none; transition: opacity 140ms ease-out !important; }
   & .av-bar[data-pos="under"], & .av-bar[data-pos="tray"] { filter: none; }
   & .av-hair[data-pos="under"], & .av-colour[data-pos="under"] { transform: translateX(-50%); }
   & .av-hair[data-pos="under"] { transform: translateX(-50%) translateY(calc(var(--B) - var(--A))); }
@@ -380,6 +392,13 @@
   & .av-bar[data-enter] > *, & .av-bar[data-enter] .av-row > *, & .av-bar[data-enter] .av-swatches > * { animation: none; }
 }
 
+/* Height first (a small chip at the centre grows to full height), then width out to the bar's own width
+   (--w); the bar is real all the way, edge and shadow, its contents pinned left and revealed as it widens */
+@keyframes av-grow {
+  0% { max-width: 24px; height: 10px; margin-top: 27px; }
+  42% { max-width: 56px; height: 64px; margin-top: 0; }
+  100% { max-width: var(--w, 640px); height: 64px; margin-top: 0; }
+}
 @keyframes av-up { from { opacity: 0; transform: translateY(10px); } }
 @keyframes av-tab { from { opacity: 0.25; transform: translateY(2px); } }
 @keyframes av-fade { from { opacity: 0; } }

@@ -108,7 +108,7 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
       <div className="av-tray" data-on={s.level === 2 || undefined} style={{ width: hw - 64 }} />
 
       {/* Colour: rises from behind Hair */}
-      <div className="av-bar av-colour" data-pos={colourPos} data-enter={s.enter === 'colour' || undefined} style={{ width: colourWidth(z) }}>
+      <div className="av-bar av-colour" data-pos={colourPos} data-enter={s.enter === 'colour' || undefined} style={{ width: colourWidth(z), '--w': colourWidth(z) + 'px' } as CSSProperties}>
         <div className="av-tools">
           <span className="av-tool" data-cursor="hand">
             <span className="av-layers" aria-hidden>
@@ -141,7 +141,7 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
       </div>
 
       {/* Hair: rises from behind the main bar; slides down muted under Colour */}
-      <div className="av-bar av-hair" data-pos={hairPos} data-muted={s.level === 2 || undefined} data-enter={s.enter === 'hair' || undefined} style={{ width: hw }}>
+      <div className="av-bar av-hair" data-pos={hairPos} data-muted={s.level === 2 || undefined} data-enter={s.enter === 'hair' || undefined} style={{ width: hw, '--w': hw + 'px' } as CSSProperties}>
         {/* Both tabs' rows share one cell (they're the same width); the chosen one crosses in */}
         <div className="av-rows">
           <div className="av-row" data-on={s.tab === 'style' || undefined}>
