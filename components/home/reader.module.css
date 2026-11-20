@@ -180,9 +180,10 @@
   /* The rail is out of the grid now; the article keeps its column */
   .article { grid-column: 2; }
   /* Back sits at the far left with the rail, its arrow over the ruler, 40px above the first label
-     (Figma 140:9832); it's out of the flow, so the article keeps its place */
+     (Figma 140:9832). It stays put as the page scrolls, like the rail; it's out of the flow, so the
+     article keeps its place */
   .page { position: relative; }
-  .topbar { position: absolute; top: 81px; left: 27px; max-width: none; margin: 0; padding: 0; }
+  .topbar { position: fixed; top: 81px; left: 27px; z-index: 5; max-width: none; margin: 0; padding: 0; }
   .wrap { padding-top: calc(4.5rem + 2.5rem + 27px); }
 }
 
