@@ -42,7 +42,9 @@
   gap: 6px;
   padding: 4px;
   border-radius: 8px;
-  font-size: 14px;
+  /* The nav's own size, so Back reads as one of its items */
+  font-size: 13px;
+  letter-spacing: -0.01em;
   /* Pinned over the page as it scrolls, so it has the page's own ground under it */
   background: #fefcf5;
   color: rgba(0, 0, 0, 0.4);
@@ -192,7 +194,8 @@
      (Figma 140:9832). It stays put as the page scrolls, like the rail; it's out of the flow, so the
      article keeps its place */
   .page { position: relative; }
-  .topbar { position: fixed; top: 81px; left: 27px; z-index: 5; max-width: none; margin: 0; padding: 0; }
+  /* left 28px: its 4px padding, 16px arrow and 6px gap put the word at 54px, where the nav's labels start */
+  .topbar { position: fixed; top: 81px; left: 28px; z-index: 5; max-width: none; margin: 0; padding: 0; }
   .wrap { padding-top: calc(4.5rem + 2.5rem + 27px); }
 }
 
