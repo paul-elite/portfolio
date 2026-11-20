@@ -210,6 +210,20 @@ function useTouch() {
   return touch
 }
 
+// On hover a scene keeps going for as long as the pointer stays: it holds on its ending, the stack eases
+// back to where it began (the bars close the way they always do), and it plays again. Leaving stops it
+// at once. Replay and phones play it once.
+function whileHovered(script: (a: Act<S>) => Promise<void>, initial: S) {
+  return async (a: Act<S>) => {
+    for (;;) {
+      await script(a)
+      await a.wait(1400)
+      await a.set(initial)
+      await a.wait(900)
+    }
+  }
+}
+
 type FrameProps = {
   initial: S; poster: S; script?: (a: Act<S>) => Promise<void>; still?: boolean; label: string
   slow?: number // the bars' motion and the pauses play this many times slower; the cursor doesn't
@@ -232,7 +246,7 @@ function Frame({ initial, poster, script, still, label, slow = 1, reduced, capti
         compact={{ below: 480, width: 358, height: 260 }}
         initial={initial}
         poster={poster}
-        script={script ? humanHand(script, slow) : undefined}
+        script={script ? humanHand(play === 'hover' && !touch ? whileHovered(script, initial) : script, slow) : undefined}
         play={still ? undefined : play}
         cursor={still || !cursor ? undefined : { at: REST, style: touch ? 'touch' : 'arrow', ripple: touch }}
         className={'av-card' + (reduced ? ' av-reduced' : '')}
