@@ -147,7 +147,8 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
           <div className="av-row" data-on={s.tab === 'style' || undefined}>
             {z.hairs.map((h) => (
               <span key={h} className="av-opt" data-on={s.hair === h || undefined} data-target={s.tab === 'style' ? 'hair-' + h : undefined} data-cursor="hand">
-                <Layers show={g} items={[A.hairTiles.black[h], A.hairTiles.green[h]]} />
+                {/* only the chosen style wears the hair colour; the rest stay grey */}
+                <Layers show={s.hair === h ? 1 + g : 0} items={[A.hairTiles.black[h], A.hairTiles.ink[h], A.hairTiles.green[h]]} />
               </span>
             ))}
           </div>
