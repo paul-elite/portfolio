@@ -194,6 +194,10 @@
      article keeps its place */
   .page { position: relative; }
   .topbar { position: fixed; top: 2.5rem; left: 1.5rem; z-index: 5; max-width: none; margin: 0; padding: 0; }
+  /* Scrolling down tucks it up out of view; scrolling up brings it straight back */
+  .topbar { transition: transform 220ms cubic-bezier(0.2, 0, 0, 1), opacity 180ms ease-out; }
+  .topbar[data-hidden] { transform: translateY(calc(-100% - 2.5rem)); opacity: 0; pointer-events: none; transition-duration: 180ms, 140ms; transition-timing-function: ease-out, ease-out; }
+  @media (prefers-reduced-motion: reduce) { .topbar, .topbar[data-hidden] { transform: none; transition: opacity 140ms ease-out; } }
   .wrap { grid-template-columns: 1fr; gap: 2rem; padding: calc(7.5rem + 2.5rem + 26px) 1.25rem 5rem; }
   .toc { display: none; }
   .article { max-width: none; }

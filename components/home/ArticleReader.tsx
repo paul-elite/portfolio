@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Hedvig_Letters_Serif, Hedvig_Letters_Sans } from 'next/font/google';
 import r from './reader.module.css';
 import TocRail from './TocRail';
+import BackBar from './BackBar';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { ArrowTurnBackwardIcon } from '@hugeicons/core-free-icons';
 
@@ -24,12 +25,12 @@ export default function ArticleReader({
 }) {
   return (
     <main data-reader className={`${serif.variable} ${sans.variable} ${r.page}`}>
-      <div className={r.topbar}>
+      <BackBar>
         <Link href="/" className={r.back}>
           <HugeiconsIcon icon={ArrowTurnBackwardIcon} size={16} strokeWidth={1.5} aria-hidden="true" />
           Back
         </Link>
-      </div>
+      </BackBar>
       <div className={r.wrap}>
         <aside className={r.toc}>
           {toc.length > 0 && <TocRail toc={toc} />}
