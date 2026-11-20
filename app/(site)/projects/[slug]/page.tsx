@@ -57,7 +57,7 @@ export default async function ProjectContent({ params }: { params: Promise<{ slu
 
   return (
     <ArticleReader title={project.title} date={project.year} toc={toc}>
-      {project.description && <p>{project.description}</p>}
+      {/* The description is the project's card line; the article opens on its own text (Figma 140:9911) */}
       {csShown.map(([label, value]) => (
         <div key={label}>
           <h2 id={headingId(label)}>{label}</h2>

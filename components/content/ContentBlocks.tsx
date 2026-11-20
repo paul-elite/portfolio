@@ -5,6 +5,14 @@ import type { ContentBlock } from '@/lib/content-model';
 import { headingId } from '@/lib/toc';
 import InteractiveBlock from '@/components/content/interactive/InteractiveBlock';
 
+// ==like this== in a text block draws a highlighter mark behind those words
+function marked(text?: string) {
+  if (!text || !text.includes('==')) return text;
+  return text.split(/(==[^=]+==)/g).map((part, i) =>
+    part.startsWith('==') && part.endsWith('==') ? <mark key={i}>{part.slice(2, -2)}</mark> : part,
+  );
+}
+
 interface ContentBlocksProps {
   blocks?: ContentBlock[];
   /** 'essay': larger reading type for long-form case studies */
@@ -51,7 +59,7 @@ function ContentBlockView({ block, type }: { block: ContentBlock; type: (typeof 
     case 'text':
       return (
         <p className={type.text}>
-          {block.content}
+          {marked(block.content)}
         </p>
       );
     case 'image':
