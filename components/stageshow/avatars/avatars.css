@@ -135,6 +135,15 @@
   .av-colour[data-pos="top"] { transform: translateX(-50%); }
   .av-colour[data-pos="under"] { transform: translateX(-50%) translateY(16px) scale(0.94); }
 
+  /* One bar at a time, never two moving together. Opening Colour: the main bar folds (0), Hair slides
+     down (180ms), Colour rises (360ms). Closing it: Colour sinks (0), Hair goes back up (170ms), the main
+     bar unfolds (340ms) */
+  .av-scene[data-step="open"] .av-hair[data-pos="below"] { transition-delay: calc(180ms * var(--t, 1)); }
+  .av-scene[data-step="open"] .av-colour[data-pos="top"] { transition-delay: calc(360ms * var(--t, 1)); --d: calc(360ms * var(--t, 1)); }
+  .av-scene[data-step="return"] .av-hair[data-pos="top"] { transition-delay: calc(170ms * var(--t, 1)); }
+  .av-scene[data-step="return"] .av-main[data-pos="floor"] { transition-delay: calc(340ms * var(--t, 1)), calc(380ms * var(--t, 1)), calc(340ms * var(--t, 1)), calc(560ms * var(--t, 1)); }
+  .av-scene[data-step="return"] .av-tray:not([data-on]) { transition-delay: calc(340ms * var(--t, 1)); }
+
   /* The main bar: the floor. Folding into the tray it drops behind Hair at once; coming back it
      stays behind until it has landed, so it comes out from under Hair, never over it */
   .av-main {
@@ -343,12 +352,12 @@
   .av-tab__art { transition: filter calc(180ms * var(--t, 1)) ease-out, opacity calc(180ms * var(--t, 1)) ease-out; }
 
   /* ---- A bar that just rose: its contents slide up from beneath, just after the surface ---- */
-  .av-bar[data-enter] > *, .av-bar[data-enter] .av-row[data-on] > *, .av-bar[data-enter] .av-swatches > * { animation: av-up calc(190ms * var(--t, 1)) cubic-bezier(0.2, 0, 0, 1) both; }
-  .av-bar[data-enter] .av-row > :nth-child(2), .av-bar[data-enter] .av-swatches > :nth-child(2) { animation-delay: calc(22ms * var(--t, 1)); }
-  .av-bar[data-enter] .av-row > :nth-child(3), .av-bar[data-enter] .av-swatches > :nth-child(3) { animation-delay: calc(34ms * var(--t, 1)); }
-  .av-bar[data-enter] .av-swatches > :nth-child(4) { animation-delay: calc(46ms * var(--t, 1)); }
-  .av-bar[data-enter] .av-swatches > :nth-child(5) { animation-delay: calc(58ms * var(--t, 1)); }
-  .av-bar[data-enter] .av-swatches > :nth-child(6) { animation-delay: calc(70ms * var(--t, 1)); }
+  .av-bar[data-enter] > *, .av-bar[data-enter] .av-row[data-on] > *, .av-bar[data-enter] .av-swatches > * { animation: av-up calc(190ms * var(--t, 1)) cubic-bezier(0.2, 0, 0, 1) var(--d, 0ms) both; }
+  .av-bar[data-enter] .av-row > :nth-child(2), .av-bar[data-enter] .av-swatches > :nth-child(2) { animation-delay: calc(var(--d, 0ms) + 22ms * var(--t, 1)); }
+  .av-bar[data-enter] .av-row > :nth-child(3), .av-bar[data-enter] .av-swatches > :nth-child(3) { animation-delay: calc(var(--d, 0ms) + 34ms * var(--t, 1)); }
+  .av-bar[data-enter] .av-swatches > :nth-child(4) { animation-delay: calc(var(--d, 0ms) + 46ms * var(--t, 1)); }
+  .av-bar[data-enter] .av-swatches > :nth-child(5) { animation-delay: calc(var(--d, 0ms) + 58ms * var(--t, 1)); }
+  .av-bar[data-enter] .av-swatches > :nth-child(6) { animation-delay: calc(var(--d, 0ms) + 70ms * var(--t, 1)); }
 
   @media (prefers-reduced-motion: reduce) {
     .av-bar, .av-tray, .av-more { transition: opacity calc(140ms * var(--t, 1)) ease-out !important; }

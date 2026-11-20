@@ -101,7 +101,9 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
   const hw = hairWidth(s, z)
   const g = s.green ? 1 : 0
   return (
-    <div className="av-scene">
+    // Which way the stack is moving, so its bars can go one at a time: opening Colour, the main bar
+    // folds, then Hair slides down, then Colour rises; closing it, the same steps run backwards
+    <div className="av-scene" data-step={s.level === 2 ? 'open' : s.level === 1 && !s.enter ? 'return' : undefined}>
       {/* The tray: the main bar folded under Hair */}
       <div className="av-tray" data-on={s.level === 2 || undefined} style={{ width: hw - 64 }} />
 

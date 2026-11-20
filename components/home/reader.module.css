@@ -45,10 +45,6 @@
   font-size: 14px;
   /* Pinned over the page as it scrolls, so it has the page's own ground under it */
   background: #fefcf5;
-  /* 0.5px hairline frame + a soft lift, same recipe as the home portrait */
-  box-shadow:
-    0 0 0 0.5px rgba(140, 110, 30, 0.13),
-    0 1px 4px rgba(140, 110, 30, 0.1);
   color: rgba(0, 0, 0, 0.4);
   text-decoration: none;
   transition: color 0.18s ease, transform 0.15s ease-out;
