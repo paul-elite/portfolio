@@ -80,7 +80,6 @@ const Cluster = ({ fills }: { fills: string[] }) => (
 )
 const SHADES_BLACK = ['#1a1a1a', '#3a3a3a', '#5a5a5a', '#7a7a7a', '#9a9a9a', '#bcbcbc', '#dedede']
 const SHADES_GREEN = ['#1c4a06', '#2c6f0a', '#3d950d', '#50c810', '#79da48', '#a5e886', '#d0f4c0']
-const RAINBOW = ['#ff4f4e', '#ffb900', '#00cc1a', '#14c8c8', '#1084fe', '#8b5cf6', '#f70492']
 
 // ---- The scene ----
 // Art that changes (a colour, a tint, a selection) never swaps its markup: every version stays
@@ -115,7 +114,7 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
               <span data-on={s.green || undefined}><Cluster fills={SHADES_GREEN} /></span>
             </span>
           </span>
-          <span className="av-tool" data-cursor="hand"><Cluster fills={RAINBOW} /></span>
+          <span className="av-tool" data-cursor="hand"><span className="av-spectrum" aria-hidden /></span>
         </div>
         <span className="av-sep" />
         <div className="av-row av-swatches">
