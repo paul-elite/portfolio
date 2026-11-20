@@ -197,7 +197,8 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
 // Off the stage, past its bottom-right corner: the cursor comes in to act and goes back out, never parked in view
 const REST = { wide: { x: 700, y: 410 }, compact: { x: 400, y: 300 } }
 
-// A phone gets a finger (a dot where it taps), never the macOS arrow
+// A screen with no hover (a phone): scenes play once as they come into view instead of looping on hover.
+// The cursor is the same rounded arrow and hand everywhere, with no tap marks
 function useTouch() {
   const [touch, setTouch] = useState(false)
   useEffect(() => {
@@ -248,7 +249,7 @@ function Frame({ initial, poster, script, still, label, slow = 1, reduced, capti
         poster={poster}
         script={script ? humanHand(play === 'hover' && !touch ? whileHovered(script, initial) : script, slow) : undefined}
         play={still ? undefined : play}
-        cursor={still || !cursor ? undefined : { at: REST, style: touch ? 'touch' : 'arrow', ripple: touch }}
+        cursor={still || !cursor ? undefined : { at: REST, style: 'arrow' }}
         className={'av-card' + (reduced ? ' av-reduced' : '')}
       >
         {(s, _rect, layout) => (
