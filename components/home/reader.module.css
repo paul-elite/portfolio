@@ -196,7 +196,8 @@
   .page { position: relative; }
   /* left 28px: its 4px padding, 16px arrow and 6px gap put the word at 54px, where the nav's labels start */
   .topbar { position: fixed; top: 81px; left: 28px; z-index: 5; max-width: none; margin: 0; padding: 0; }
-  .wrap { padding-top: calc(4.5rem + 2.5rem + 27px); }
+  /* The title sits level with Back (their centres at 94px) */
+  .wrap { padding-top: 77px; }
 }
 
 @media (max-width: 860px) {
