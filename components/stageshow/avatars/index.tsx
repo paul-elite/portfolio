@@ -310,20 +310,23 @@ export function AvatarsMuted() {
   return <Frame label="The bar in focus, the muted bar under it and the tray" initial={mutedStart} poster={mutedStart} still />
 }
 
-/* ---- The bar at rest: tap Hair and it lights and opens; tap it again and both go (about 5s) ---- */
+/* ---- The bar at rest: tap Hair and it lights and opens; the × cancels it straight away (about 4s) ---- */
 async function rest(a: Act<S>) {
   await a.wait(900)
   await a.enter({ at: 'main-hair', x: 0.5, y: 0.3 })
   await a.click({ at: 'main-hair', x: 0.5, y: 0.3 })
   await a.set({ level: 1, enter: 'hair' })
-  await a.wait(1500)
-  await a.click({ at: 'main-hair', x: 0.5, y: 0.3 })
+  // no dwell: the hand heads straight for the bar's × and closes it while the row is still filling in
+  await a.wait(80)
+  a.mark('cancel')
+  await a.click({ at: 'close-hair', x: 0.5, y: 0.5 })
   await a.set({ level: 0, enter: null })
+  await a.wait(300)
   await a.move(REST)
   await a.wait(1200)
 }
 export function AvatarsRest() {
-  return <Frame label="Tapping Hair opens its bar; tapping it again closes it" initial={base} poster={{ ...base, level: 1 }} script={rest} />
+  return <Frame label="Tapping Hair opens its bar; its × closes it again before it has settled" initial={base} poster={{ ...base, level: 1 }} script={rest} />
 }
 
 /* ---- Rising from behind: Hair rises and sinks back (slowed 3×) ---- */
