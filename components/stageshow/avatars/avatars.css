@@ -248,7 +248,7 @@
     padding: 2px 8px;
     border-radius: 100px;
     color: #999996;
-    transition: background-color calc(150ms * var(--t, 1)) ease, color calc(150ms * var(--t, 1)) ease;
+    transition: background-color calc(150ms * var(--t, 1)) ease, color calc(150ms * var(--t, 1)) ease, scale calc(120ms * var(--t, 1)) ease-out;
   }
   .av-crumb__tab[data-on] { background: #efefee; color: #151515; }
 
@@ -279,13 +279,13 @@
     height: 48px;
     border-radius: 14px;
     overflow: hidden;
-    transition: background-color calc(160ms * var(--t, 1)) ease, opacity calc(110ms * var(--t, 1)) ease-out calc(110ms * var(--t, 1)), width calc(150ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1), margin calc(150ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1);
+    transition: background-color calc(160ms * var(--t, 1)) ease, opacity calc(110ms * var(--t, 1)) ease-out calc(110ms * var(--t, 1)), width calc(150ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1), margin calc(150ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1), scale calc(120ms * var(--t, 1)) ease-out;
   }
   .av-more:not([data-show]) {
     width: 0;
     margin-left: calc(var(--gap) * -1);
     opacity: 0;
-    transition: background-color calc(160ms * var(--t, 1)) ease, opacity calc(70ms * var(--t, 1)) ease-out, width calc(150ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1) calc(60ms * var(--t, 1)), margin calc(150ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1) calc(60ms * var(--t, 1));
+    transition: background-color calc(160ms * var(--t, 1)) ease, opacity calc(70ms * var(--t, 1)) ease-out, width calc(150ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1) calc(60ms * var(--t, 1)), margin calc(150ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1) calc(60ms * var(--t, 1)), scale calc(120ms * var(--t, 1)) ease-out;
   }
   .av-more[data-on] { background: #eeece7; }
   .av-more[data-on] .av-label { color: #0e0e0c; }
@@ -331,9 +331,11 @@
   .av-more-btn { width: var(--morebtn); color: #dad8d4; }
   .av-groove { flex: none; width: 2px; height: 24px; border-radius: 100px; background: #151514; box-shadow: inset -0.5px 0 0.5px rgb(207 210 212 / 0.25), inset 0 0 0.2px rgb(169 172 176 / 0.66); }
   .av-cats { position: relative; display: flex; gap: var(--catgap); }
-  .av-cat { position: relative; z-index: 1; display: grid; grid-template-rows: 28px auto; place-items: center; align-content: center; width: var(--cat); height: 56px; }
+  .av-cat { position: relative; z-index: 1; display: grid; grid-template-rows: 28px auto; place-items: center; align-content: center; width: var(--cat); height: 56px; transition: scale calc(120ms * var(--t, 1)) ease-out; }
   .av-cat[data-k="outfit"], .av-cat[data-k="color"] { width: var(--cat-wide); gap: 2px; }
   .av-cat[data-on] .av-label { color: #0e0e0c; }
+  /* A pressed tab gives a little, as the editor's do */
+  .av-cat[data-pressed], .av-crumb__tab[data-pressed], .av-more[data-pressed] { scale: 0.97; }
   /* The white selection behind the chosen tab */
   .av-ind {
     position: absolute;
