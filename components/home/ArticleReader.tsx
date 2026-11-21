@@ -3,6 +3,7 @@ import { Hedvig_Letters_Serif, Hedvig_Letters_Sans } from 'next/font/google';
 import r from './reader.module.css';
 import TocRail from './TocRail';
 import BackBar from './BackBar';
+import ArticleVisits from './ArticleVisits';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { ArrowTurnBackwardIcon } from '@hugeicons/core-free-icons';
 
@@ -37,7 +38,10 @@ export default function ArticleReader({
         </aside>
         <article className={r.article}>
           <h1 className={r.title}>{title}</h1>
-          {date && <time className={r.date}>{date}</time>}
+          <div className={r.date}>
+            {date && <time>{date}</time>}
+            <ArticleVisits lead={!!date} />
+          </div>
           {children}
         </article>
       </div>

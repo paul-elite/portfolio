@@ -507,8 +507,8 @@ export async function POST(request: NextRequest) {
       screen,
     };
 
-    // Local development shares the production database, so only production records visits there
-    if (hasSupabaseConfig && process.env.NODE_ENV === 'production' && await persistVisit(visit)) {
+    // Local development (and a local production build) shares the production database, so only Vercel records visits there
+    if (hasSupabaseConfig && process.env.NODE_ENV === 'production' && process.env.VERCEL && await persistVisit(visit)) {
       return NextResponse.json({ success: true, storage: 'supabase' });
     }
 

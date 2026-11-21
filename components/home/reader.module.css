@@ -119,7 +119,12 @@
   letter-spacing: -0.006em;
   color: rgba(0, 0, 0, 0.4);
   margin: 0 0 2.5rem;
+  min-height: 1.4em;
 }
+/* The visit count arrives a moment after the page: it fades in beside the date */
+.visits { font-variant-numeric: tabular-nums; animation: visits-in 200ms ease-out; }
+@keyframes visits-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .visits { animation: none; } }
 
 .article p { margin: 1.1rem 0; }
 .article p, .article li { text-wrap: pretty; }
