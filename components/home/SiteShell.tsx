@@ -11,7 +11,7 @@ const hedvig = Hedvig_Letters_Sans({
 });
 
 const SOCIAL = [
-  { id: 'twitter', label: 'X/Twitter' },
+  { id: 'twitter', label: 'Twitter/X' },
   { id: 'linkedin', label: 'LinkedIn' },
   { id: 'instagram', label: 'Instagram' },
 ] as const;

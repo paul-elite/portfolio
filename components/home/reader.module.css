@@ -49,7 +49,7 @@
   background: #fefcf5;
   color: rgba(0, 0, 0, 0.4);
   text-decoration: none;
-  transition: color 0.18s ease, transform 0.15s ease-out;
+  transition: color 0.18s ease, transform 0.15s ease-out, box-shadow 160ms ease;
 }
 .back:hover { color: #111; }
 .back:active { transform: scale(0.97); }
@@ -174,8 +174,26 @@
 }
 .article :where(ul, ol) { padding-left: 1.3rem; margin: 1.1rem 0; }
 .article li { margin: 0.35rem 0; }
-.article a { color: inherit; text-decoration: underline; text-decoration-color: #cfcfcf; text-underline-offset: 2px; }
+.article a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: #cfcfcf;
+  text-underline-offset: 2px;
+  border-radius: 6px;
+  transition: text-decoration-color 0.18s ease, background-color 160ms ease-out, box-shadow 160ms ease-out;
+}
 .article a:hover { text-decoration-color: #666; }
+/* Links in the text: the same white card as everywhere else, on press, keyboard focus and hover.
+   Drawn on the link itself so the words around it stay on top. */
+.article a:active, .article a:focus-visible {
+  outline: none;
+  background-color: #fefdfb;
+  box-shadow:
+    0 0 0 4px #fefdfb,
+    0 0 0 4.5px rgba(130, 100, 20, 0.16),
+    0 2px 10px 4px rgba(130, 100, 20, 0.1);
+  transition-duration: 60ms;
+}
 .article :where(figure, img) { margin: 1.75rem 0; }
 .article img { width: 100%; height: auto; display: block; border-radius: 10px; }
 .article figcaption {
@@ -258,3 +276,18 @@
 }
 .tocLink:focus-visible { outline: none; }
 .back:focus-visible { outline: none; box-shadow: 0 0 0 0.5px rgba(130, 100, 20, 0.2), 0 0 0 4px #fefdfb, 0 2px 10px rgba(130, 100, 20, 0.12); }
+
+/* Hovering shows the same white card as pressing (pointers that can hover only, so a tap on a phone
+   doesn't leave it stuck on): contents labels, Back and links in the text */
+@media (hover: hover) {
+  .tocLink:hover::before { opacity: 1; transition-timing-function: ease; }
+  .article a:hover {
+    background-color: #fefdfb;
+    box-shadow:
+      0 0 0 4px #fefdfb,
+      0 0 0 4.5px rgba(130, 100, 20, 0.16),
+      0 2px 10px 4px rgba(130, 100, 20, 0.1);
+  }
+  /* Back wears its focus card */
+  .back:hover { background: #fefdfb; box-shadow: 0 0 0 0.5px rgba(130, 100, 20, 0.2), 0 0 0 4px #fefdfb, 0 2px 10px rgba(130, 100, 20, 0.12); }
+}
