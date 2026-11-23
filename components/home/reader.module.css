@@ -119,10 +119,21 @@
   letter-spacing: -0.006em;
   color: rgba(0, 0, 0, 0.4);
   margin: 0 0 2.5rem;
-  min-height: 1.4em;
 }
-/* The visit count arrives a moment after the page: it fades in beside the date */
-.visits { font-variant-numeric: tabular-nums; animation: visits-in 200ms ease-out; }
+/* The visit count, in the nav's type and grey. It arrives a moment after the page, so it fades in.
+   Wide screens: pinned at the foot of the window under the contents, level with their labels.
+   Phones (no rail): a quiet line at the end of the article. */
+.visits {
+  margin: 0;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+  color: rgba(0, 0, 0, 0.4);
+  font-variant-numeric: tabular-nums;
+  animation: visits-in 200ms ease-out;
+}
+@media (min-width: 861px) { .visits { position: fixed; left: 54px; bottom: 2.5rem; } }
+@media (max-width: 860px) { .visits { padding: 0 1.25rem 3rem; margin-top: -2rem; } }
 @keyframes visits-in { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .visits { animation: none; } }
 

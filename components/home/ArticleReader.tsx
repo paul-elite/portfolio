@@ -38,13 +38,12 @@ export default function ArticleReader({
         </aside>
         <article className={r.article}>
           <h1 className={r.title}>{title}</h1>
-          <div className={r.date}>
-            {date && <time>{date}</time>}
-            <ArticleVisits lead={!!date} />
-          </div>
+          {date && <time className={r.date}>{date}</time>}
           {children}
         </article>
       </div>
+      {/* With the nav, under its contents at the foot of the window (the end of the article on phones) */}
+      <ArticleVisits />
     </main>
   );
 }

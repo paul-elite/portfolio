@@ -10,9 +10,9 @@ const id = (store: Storage, key: string) => {
   return v;
 };
 
-// The article's visit count, next to its date. Opening the article logs a visit (once per tab
+// The article's visit count, with the nav. Opening the article logs a visit (once per tab
 // session, so reloading doesn't add more), then the count is read back including it.
-export default function ArticleVisits({ lead }: { lead: boolean }) {
+export default function ArticleVisits() {
   const path = usePathname();
   const [visits, setVisits] = useState<number | null>(null);
 
@@ -49,9 +49,8 @@ export default function ArticleVisits({ lead }: { lead: boolean }) {
 
   if (visits === null) return null;
   return (
-    <span className={r.visits}>
-      {lead && ' · '}
+    <p className={r.visits}>
       {visits.toLocaleString('en-GB')} {visits === 1 ? 'visit' : 'visits'}
-    </span>
+    </p>
   );
 }
