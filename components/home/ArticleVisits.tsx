@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { FootprintsIcon } from '@hugeicons/core-free-icons';
 import r from './reader.module.css';
 
 const id = (store: Storage, key: string) => {
@@ -50,6 +52,8 @@ export default function ArticleVisits() {
   if (visits === null) return null;
   return (
     <p className={r.visits}>
+      {/* Footprints: the people who've passed through */}
+      <HugeiconsIcon icon={FootprintsIcon} size={16} strokeWidth={1.5} aria-hidden="true" />
       {visits.toLocaleString('en-GB')} {visits === 1 ? 'visit' : 'visits'}
     </p>
   );

@@ -125,6 +125,9 @@
    Phones (no rail): a quiet line at the end of the article. */
 .visits {
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 13px;
   letter-spacing: -0.01em;
@@ -132,7 +135,8 @@
   font-variant-numeric: tabular-nums;
   animation: visits-in 200ms ease-out;
 }
-@media (min-width: 861px) { .visits { position: fixed; left: 54px; bottom: 2.5rem; } }
+/* Like Back: the footprints over the ruler (x 32), the words where the labels start (54px) */
+@media (min-width: 861px) { .visits { position: fixed; left: 32px; bottom: 2.5rem; } }
 @media (max-width: 860px) { .visits { padding: 0 1.25rem 3rem; margin-top: -2rem; } }
 @keyframes visits-in { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .visits { animation: none; } }
