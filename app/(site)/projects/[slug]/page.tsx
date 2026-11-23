@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { getProjectBySlug, getSiteConfig } from '@/lib/content-service';
 import { tocFromBlocks, headingId } from '@/lib/toc';
 import ContentBlocks from '@/components/content/ContentBlocks';
+import { longDate } from '@/lib/dates';
 import ArticleReader from '@/components/home/ArticleReader';
 import MyTasks from '@/components/stageshow/mytasks';
 import only from '@/components/home/cards/card-only.module.css';
@@ -56,7 +57,7 @@ export default async function ProjectContent({ params }: { params: Promise<{ slu
   ];
 
   return (
-    <ArticleReader title={project.title} date={project.year} toc={toc}>
+    <ArticleReader title={project.title} date={longDate(project.published || project.year)} toc={toc}>
       {/* The description is the project's card line; the article opens on its own text (Figma 140:9911) */}
       {csShown.map(([label, value]) => (
         <div key={label}>

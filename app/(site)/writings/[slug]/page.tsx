@@ -3,19 +3,13 @@ import type { Metadata } from 'next';
 import { getWritingBySlug, getSiteConfig } from '@/lib/content-service';
 import { tocFromBlocks } from '@/lib/toc';
 import ContentBlocks from '@/components/content/ContentBlocks';
+import { longDate } from '@/lib/dates';
 import ArticleReader from '@/components/home/ArticleReader';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { ArrowUpRight01Icon } from '@hugeicons/core-free-icons';
 
 export const revalidate = 60;
 
-function longDate(iso?: string) {
-  if (!iso) return undefined;
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  const month = d.toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
-  return `${d.getUTCDate()} ${month}, ${d.getUTCFullYear()}`;
-}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;

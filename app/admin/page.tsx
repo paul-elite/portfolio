@@ -526,7 +526,7 @@ export default function AdminPage() {
     };
 
     if (activeTab === 'projects') {
-      data.year = (item.year as string) || '';
+      data.year = (item.published as string) || (item.year as string) || '';
       data.role = (item.role as string) || '';
       data.avatar = (item.avatar as string) || '';
       data.preview = (item.preview as string) || '';

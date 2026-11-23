@@ -24,6 +24,8 @@ export interface Project {
   link?: string;
   tags?: string[];
   year?: string;
+  /** The full publish date (YYYY-MM-DD), when the year field holds one */
+  published?: string;
   role?: string;
   caseStudy?: {
     overview: string;

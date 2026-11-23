@@ -72,7 +72,9 @@ export function mapProject(row: RecordLike): Project {
     description: asString(row.description),
     preview: asString(row.preview),
     link: asString(row.link),
-    year: asString(row.year),
+    // The year field can hold a full date (2026-11-01): lists show its year, the article the whole date
+    year: asString(row.year).slice(0, /^\d{4}-\d{2}-\d{2}$/.test(asString(row.year)) ? 4 : undefined),
+    published: /^\d{4}-\d{2}-\d{2}$/.test(asString(row.year)) ? asString(row.year) : undefined,
     role: asString(row.role),
     avatar: asString(row.avatar),
     tags: asArray<string>(row.tags),
