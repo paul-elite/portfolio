@@ -2,15 +2,16 @@
 
 import type { PortfolioTab } from '@/lib/portfolio-options';
 import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react';
-import { DashboardSquare01Icon, SparklesIcon, PencilEdit01Icon, Message01Icon } from '@hugeicons/core-free-icons';
+import { DashboardSquare01Icon, SparklesIcon, PencilEdit01Icon, Message01Icon, Mic01Icon } from '@hugeicons/core-free-icons';
 
-type FallbackIconName = 'grid' | 'spark' | 'write' | 'chat';
+type FallbackIconName = 'grid' | 'spark' | 'write' | 'chat' | 'mic';
 
 const fallbackIconByTarget: Record<PortfolioTab, FallbackIconName> = {
   projects: 'grid',
   illustration: 'spark',
   writings: 'write',
   interaction: 'chat',
+  appearances: 'mic',
 };
 
 const fallbackIcons: Record<FallbackIconName, IconSvgElement> = {
@@ -18,6 +19,7 @@ const fallbackIcons: Record<FallbackIconName, IconSvgElement> = {
   spark: SparklesIcon,
   write: PencilEdit01Icon,
   chat: Message01Icon,
+  mic: Mic01Icon,
 };
 
 function FallbackNavigationIcon({ icon, className }: { icon: FallbackIconName; className?: string }) {

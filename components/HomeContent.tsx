@@ -115,6 +115,7 @@ const radialTabMeta: Record<PortfolioTab, { shortcut: string }> = {
   illustration: { shortcut: 'I' },
   writings: { shortcut: 'W' },
   interaction: { shortcut: 'N' },
+  appearances: { shortcut: 'A' },
 };
 
 function ContactIcon({ name }: { name: ContactIconName }) {

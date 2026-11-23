@@ -29,7 +29,7 @@ function normalizeNavigationItems(value: unknown): PortfolioNavigationItem[] {
   const items = rows
     .map((item, index): PortfolioNavigationItem | null => {
       const target = asString(item.target);
-      if (!['projects', 'interaction', 'illustration', 'writings'].includes(target)) return null;
+      if (!['projects', 'interaction', 'illustration', 'writings', 'appearances'].includes(target)) return null;
 
       return {
         id: asString(item.id, `${target}-${index}`),
@@ -154,8 +154,12 @@ export function settingsToSiteConfig(settings?: Partial<Settings> | null): SiteC
   const settingsIcon = normalized.settingsIcon || '';
   const settingsIconSelected = normalized.settingsIconSelected || '';
   const settingsIconDeselected = normalized.settingsIconDeselected || '';
-  const navigationItems = normalized.navigationItems && normalized.navigationItems.length > 0
-    ? normalized.navigationItems
+  const saved = normalized.navigationItems && normalized.navigationItems.length > 0 ? normalized.navigationItems : null;
+  // A section added after the menu was saved (Appearances) joins the end of it, until admin moves or hides it
+  const navigationItems = saved
+    ? [...saved, ...DEFAULT_PORTFOLIO_NAVIGATION_ITEMS
+        .filter((d) => !saved.some((i) => i.target === d.target))
+        .map((d, k) => ({ ...d, order: Math.max(...saved.map((i) => i.order ?? 0)) + 1 + k }))]
     : DEFAULT_PORTFOLIO_NAVIGATION_ITEMS;
 
   return {

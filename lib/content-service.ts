@@ -14,6 +14,7 @@ import {
 import { mapPortfolioContent, mapProject, mapSettings, mapWriting, settingsToSiteConfig } from './content-adapters';
 import type { NavItem, PortfolioContent, Project, SiteConfig, Writing } from './content-model';
 import { withSettingsIconFallbacks } from './settings-icon-assets';
+import { publicStage, toAppearance, type Appearance } from './appearances';
 
 export async function getSettings() {
   if (!hasSupabaseConfig) {
@@ -180,6 +181,25 @@ export async function getWritingBySlug(slug: string): Promise<Writing | null> {
   } catch {
     const writing = staticWritings.find((item) => item.slug === slug);
     return writing ? { ...writing, blocks: [] } : null;
+  }
+}
+
+// The appearances a visitor may see, soonest upcoming first, then the most recent past ones.
+// Until the table exists (or if it can't be reached) there are simply none: never sample ones.
+export async function getPublicAppearances(): Promise<{ upcoming: Appearance[]; past: Appearance[] }> {
+  const none = { upcoming: [], past: [] };
+  if (!hasSupabaseConfig) return none;
+  try {
+    const { data, error } = await supabase.from('appearances').select('*').eq('visible', true);
+    if (error || !data) return none;
+    const all = data.map(toAppearance);
+    const byDate = (a: Appearance, b: Appearance) => (a.date ?? '9999').localeCompare(b.date ?? '9999');
+    return {
+      upcoming: all.filter((a) => publicStage(a) === 'upcoming').sort(byDate),
+      past: all.filter((a) => publicStage(a) === 'past').sort((a, b) => byDate(b, a)),
+    };
+  } catch {
+    return none;
   }
 }
 

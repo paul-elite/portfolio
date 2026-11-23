@@ -1,10 +1,11 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import type { PortfolioContent, PortfolioNavTarget } from '@/lib/content-model';
-import { getHomeData, getSiteConfig } from '@/lib/content-service';
+import { getHomeData, getPublicAppearances, getSiteConfig } from '@/lib/content-service';
+import { pendingNote, publicLinks, statusInfo, typeInfo, type Appearance } from '@/lib/appearances';
 import { enabledNavigationItems } from '@/lib/site-navigation';
 import { ILLUSTRATION_CATEGORIES } from '@/lib/portfolio-options';
-import SectionBrowser, { type BrowserItem } from './SectionBrowser';
+import SectionBrowser, { type BrowserGroup, type BrowserItem } from './SectionBrowser';
 import SiteShell from './SiteShell';
 
 export async function sectionMetadata(target: PortfolioNavTarget): Promise<Metadata> {
@@ -25,8 +26,36 @@ function props(entries: [string, string | undefined][]) {
   return entries.filter((e): e is [string, string] => !!e[1]).map(([label, value]) => ({ label, value }));
 }
 
+// One appearance as a row and its details. Its id is its slug, so /appearances#slug opens it.
+function appearanceItem(a: Appearance): BrowserItem {
+  const type = typeInfo(a.type).label;
+  const links = publicLinks(a);
+  return {
+    id: a.slug,
+    title: a.title,
+    byline: [a.organisation, type].filter(Boolean).join(' · '),
+    meta: a.date ? formatDate(a.date) : undefined,
+    image: a.cover,
+    thumb: true,
+    description: a.description,
+    body: a.body,
+    topics: a.topics,
+    links,
+    note: pendingNote(a),
+    properties: props([
+      ['Type', type],
+      [a.type === 'podcast' ? 'Show' : a.type === 'interview' ? 'Outlet' : 'Event', a.organisation],
+      [a.type === 'podcast' || a.type === 'interview' ? 'Host' : 'Organiser', a.host],
+      ['Date', formatDate(a.date)],
+      ['Status', statusInfo(a.status).label],
+    ]),
+  };
+}
+
 function itemsFor(target: PortfolioNavTarget, content: PortfolioContent): BrowserItem[] {
   switch (target) {
+    case 'appearances':
+      return [];
     case 'projects':
       return content.projects.map((p) => ({
         id: p.id,
@@ -80,9 +109,20 @@ function itemsFor(target: PortfolioNavTarget, content: PortfolioContent): Browse
 // One page per menu item, rendered inside the (site) layout's shell. A section switched off in
 // admin returns a 404.
 export default async function SectionPage({ target }: { target: PortfolioNavTarget }) {
-  const { config, content } = await getHomeData();
+  const [{ config, content }, appearances] = await Promise.all([
+    getHomeData(),
+    target === 'appearances' ? getPublicAppearances() : null,
+  ]);
   const item = enabledNavigationItems(config).find((i) => i.target === target);
   if (!item) notFound();
+
+  // Appearances come in two parts: what's ahead, then what's happened (with its recordings)
+  const groups: BrowserGroup[] | undefined = appearances
+    ? [
+        { label: 'Upcoming', items: appearances.upcoming.map(appearanceItem), empty: 'Nothing on the calendar right now.' },
+        { label: 'Past', items: appearances.past.map(appearanceItem), empty: 'Past appearances will be listed here.' },
+      ]
+    : undefined;
 
   return (
     <SiteShell config={config}>
@@ -90,6 +130,8 @@ export default async function SectionPage({ target }: { target: PortfolioNavTarg
         title={item.label}
         layout={target === 'illustration' ? 'grid' : target === 'writings' ? 'books' : 'list'}
         items={itemsFor(target, content)}
+        groups={groups}
+        deepLink={target === 'appearances'}
       />
     </SiteShell>
   );

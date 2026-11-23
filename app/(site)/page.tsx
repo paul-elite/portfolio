@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { getSiteConfig, getPortfolioContent } from '@/lib/content-service';
+import { getSiteConfig, getPortfolioContent, getPublicAppearances } from '@/lib/content-service';
+import { typeInfo } from '@/lib/appearances';
 import SpotifyNow from '@/components/home/SpotifyNow';
 import GlitchName from '@/components/home/GlitchName';
 import { getFeatured } from '@/lib/featured';
@@ -9,11 +10,11 @@ export const revalidate = 60;
 
 type Row = { key: string; title: string; cat: string; href: string; external?: boolean };
 
-function FeaturedList({ items, newKey }: { items: Row[]; newKey?: string }) {
+function FeaturedList({ items, newKey, label = 'Featured' }: { items: Row[]; newKey?: string; label?: string }) {
   if (items.length === 0) return null;
   return (
     <section className={s.section}>
-      <p className={s.sectionLabel}>Featured</p>
+      <p className={s.sectionLabel}>{label}</p>
       <ul className={s.rows}>
         {items.map((r) => (
           <li className={s.row} key={r.key}>
@@ -36,7 +37,7 @@ function FeaturedList({ items, newKey }: { items: Row[]; newKey?: string }) {
 }
 
 export default async function Home() {
-  const [config, content] = await Promise.all([getSiteConfig(), getPortfolioContent()]);
+  const [config, content, appearances] = await Promise.all([getSiteConfig(), getPortfolioContent(), getPublicAppearances()]);
   const name = config.name || 'Paul Elite';
   const bio = config.bio.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
 
@@ -44,6 +45,10 @@ export default async function Home() {
   // each with its type on the left (Study / Design / Essay). No dates.
   const featuredItems = getFeatured(content);
   const featured: Row[] = featuredItems;
+  // Appearances marked Featured in admin: upcoming first, then past; each opens on the Appearances page
+  const featuredAppearances: Row[] = [...appearances.upcoming, ...appearances.past]
+    .filter((a) => a.featured)
+    .map((a) => ({ key: `a-${a.slug}`, title: a.title, cat: typeInfo(a.type).label, href: `/appearances#${a.slug}` }));
 
   const socialBits: React.ReactNode[] = [];
   if (config.social.twitter) socialBits.push(<a key="x" className={s.link} href={config.social.twitter} target="_blank" rel="noopener noreferrer">Twitter/X</a>);
@@ -86,6 +91,7 @@ export default async function Home() {
 
         {/* No "New" badge for now */}
         <FeaturedList items={featured} />
+        <FeaturedList items={featuredAppearances} label="Appearances" />
 
         <footer className={s.footer}>
           <SpotifyNow />

@@ -17,6 +17,7 @@ export const DEFAULT_PORTFOLIO_NAVIGATION_ITEMS: PortfolioNavigationItem[] = [
   { id: 'illustration', label: 'Illustration', target: 'illustration', accentColor: '#f97316', enabled: true, order: 1 },
   { id: 'writings', label: 'Writings', target: 'writings', accentColor: '#8b5cf6', enabled: true, order: 2 },
   { id: 'interaction', label: 'Interaction', target: 'interaction', accentColor: '#16a34a', enabled: true, order: 3 },
+  { id: 'appearances', label: 'Appearances', target: 'appearances', accentColor: '#d97706', enabled: true, order: 4 },
 ];
 
 export const ILLUSTRATION_CATEGORIES: { key: IllustrationCategory; label: string; symbol: string }[] = [

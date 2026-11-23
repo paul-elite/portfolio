@@ -21,19 +21,50 @@ export type BrowserItem = {
   href?: string;
   hrefLabel?: string;
   properties: { label: string; value: string }[];
+  /** A second, quieter line under the title in a list row, e.g. the podcast's name */
+  byline?: string;
+  /** Show the image as a small cover at the start of a list row */
+  thumb?: boolean;
+  /** Longer text for the details, paragraphs split by blank lines */
+  body?: string;
+  topics?: string[];
+  /** Several links: the first is the main button, the rest quiet links under it */
+  links?: { label: string; href: string }[];
+  /** A short line about what's still to come, e.g. "Recorded, not out yet" */
+  note?: string;
 };
+
+export type BrowserGroup = { label: string; items: BrowserItem[]; empty: string };
 
 type Props = {
   title: string;
   layout: 'list' | 'grid' | 'books';
   items: BrowserItem[];
+  /** A list in labelled parts (Upcoming, Past), each with its own empty line */
+  groups?: BrowserGroup[];
+  /** Pinning an item puts its id in the address (#id), so a link can open it */
+  deepLink?: boolean;
 };
 
 // The middle pane's list plus the right info sidebar. Hovering an item with a mouse previews its
 // details; clicking or tapping pins them until closed (× or Escape) or another item is picked.
 // With nothing hovered or pinned, the right sidebar isn't rendered at all.
-export default function SectionBrowser({ title, layout, items }: Props) {
+export default function SectionBrowser({ title, layout, items: flat, groups, deepLink }: Props) {
+  const items = groups ? groups.flatMap((g) => g.items) : flat;
   const [pinnedId, setPinnedId] = useState<string | null>(null);
+
+  // Opening the page at #id pins that item; pinning one keeps the address in step
+  useEffect(() => {
+    if (!deepLink) return;
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    if (id && items.some((i) => i.id === id)) setPinnedId(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only on arrival
+  }, [deepLink]);
+  useEffect(() => {
+    if (!deepLink) return;
+    const url = pinnedId ? `#${encodeURIComponent(pinnedId)}` : window.location.pathname + window.location.search;
+    history.replaceState(null, '', url);
+  }, [deepLink, pinnedId]);
   const [hoverId, setHoverId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -66,26 +97,46 @@ export default function SectionBrowser({ title, layout, items }: Props) {
     },
   });
 
+  const listRows = (rows: BrowserItem[]) => (
+    <ul className={styles.rows} onPointerLeave={() => setHoverId(null)}>
+      {rows.map((item) => (
+        <li key={item.id}>
+          <button {...itemProps(item)} className={`${styles.row} ${item.byline || item.thumb ? styles.rowRich : ''} ${item.id === pinnedId ? styles.rowActive : ''}`}>
+            {item.thumb && (
+              <span className={styles.rowThumb} aria-hidden="true">
+                {item.image
+                  ? /* eslint-disable-next-line @next/next/no-img-element -- admin uploads can live on any host */
+                    <img src={item.image} alt="" loading="lazy" />
+                  : <span>{item.title.trim()[0]?.toUpperCase()}</span>}
+              </span>
+            )}
+            <span className={styles.rowText}>
+              <span className={styles.rowTitle}>{item.title}</span>
+              {item.byline && <span className={styles.rowByline}>{item.byline}</span>}
+            </span>
+            {item.meta && <span className={styles.rowMeta}>{item.meta}</span>}
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+
   return (
     <>
       <section className={styles.pane} aria-label={title}>
         <div className={styles.section}>
           <h1 className={styles.sectionTitle}>{title}</h1>
 
-          {items.length === 0 && <p className={styles.empty}>{title} will appear here soon.</p>}
+          {!groups && items.length === 0 && <p className={styles.empty}>{title} will appear here soon.</p>}
 
-          {items.length > 0 && layout === 'list' && (
-            <ul className={styles.rows} onPointerLeave={() => setHoverId(null)}>
-              {items.map((item) => (
-                <li key={item.id}>
-                  <button {...itemProps(item)} className={`${styles.row} ${item.id === pinnedId ? styles.rowActive : ''}`}>
-                    <span className={styles.rowTitle}>{item.title}</span>
-                    {item.meta && <span className={styles.rowMeta}>{item.meta}</span>}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+          {!groups && items.length > 0 && layout === 'list' && listRows(items)}
+
+          {groups?.map((g) => (
+            <section key={g.label} className={styles.group} aria-label={g.label}>
+              <h2 className={styles.groupLabel}>{g.label}</h2>
+              {g.items.length > 0 ? listRows(g.items) : <p className={styles.groupEmpty}>{g.empty}</p>}
+            </section>
+          ))}
 
           {items.length > 0 && layout === 'books' && (
             <ul className={styles.books} onPointerLeave={() => setHoverId(null)}>
@@ -143,11 +194,19 @@ export default function SectionBrowser({ title, layout, items }: Props) {
 
           {shown.image && (
             /* eslint-disable-next-line @next/next/no-img-element -- admin uploads can live on any host */
-            <img className={styles.infoImage} src={shown.image} alt="" />
+            <img className={`${styles.infoImage} ${shown.thumb ? styles.infoCover : ''}`} src={shown.image} alt="" />
           )}
 
           <h2 className={styles.infoTitle}>{shown.title}</h2>
+          {shown.byline && <p className={styles.infoByline}>{shown.byline}</p>}
           {shown.description && <p className={styles.infoDescription}>{shown.description}</p>}
+          {shown.body?.split(/\n\s*\n/).map((para, i) => <p key={i} className={styles.infoBody}>{para.trim()}</p>)}
+
+          {shown.topics && shown.topics.length > 0 && (
+            <ul className={styles.topics} aria-label="Topics">
+              {shown.topics.map((t) => <li key={t}>{t}</li>)}
+            </ul>
+          )}
 
           {shown.properties.length > 0 && (
             <dl className={styles.props}>
@@ -160,11 +219,24 @@ export default function SectionBrowser({ title, layout, items }: Props) {
             </dl>
           )}
 
+          {shown.note && <p className={styles.infoNote}>{shown.note}</p>}
+
           {shown.href && (
             <a className={styles.infoLink} href={shown.href} target="_blank" rel="noreferrer">
               {shown.hrefLabel || 'Open'}
               <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} strokeWidth={1.8} aria-hidden="true" />
             </a>
+          )}
+
+          {shown.links && shown.links.length > 0 && (
+            <div className={styles.infoLinks}>
+              {shown.links.map((l, i) => (
+                <a key={l.href} className={i === 0 ? styles.infoLink : styles.infoLinkQuiet} href={l.href} target="_blank" rel="noreferrer">
+                  {l.label}
+                  <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} strokeWidth={1.8} aria-hidden="true" />
+                </a>
+              ))}
+            </div>
           )}
         </aside>
       )}

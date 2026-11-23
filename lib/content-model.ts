@@ -49,7 +49,7 @@ export interface Writing {
 }
 
 export type IllustrationCategory = 'app-icons' | 'characters' | 'assets';
-export type PortfolioNavTarget = 'projects' | 'interaction' | 'illustration' | 'writings';
+export type PortfolioNavTarget = 'projects' | 'interaction' | 'illustration' | 'writings' | 'appearances';
 
 export interface PortfolioNavigationItem {
   id: string;

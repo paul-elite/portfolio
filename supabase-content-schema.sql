@@ -72,6 +72,35 @@ CREATE POLICY "Public read" ON illustrations FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Public read" ON interactions;
 CREATE POLICY "Public read" ON interactions FOR SELECT USING (true);
 
+-- Appearances: podcasts, talks, interviews, panels, lectures and workshops I've been invited to
+-- (lib/appearances.ts). `type` is plain text so new kinds need no migration; `status` is the fixed
+-- lifecycle. The public can only read visible ones that are confirmed or done, never an invitation.
+CREATE TABLE IF NOT EXISTS appearances (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  slug TEXT NOT NULL UNIQUE,
+  title TEXT NOT NULL DEFAULT '',
+  type TEXT NOT NULL DEFAULT 'podcast',
+  organisation TEXT NOT NULL DEFAULT '',
+  host TEXT DEFAULT '',
+  date DATE,
+  description TEXT DEFAULT '',
+  body TEXT DEFAULT '',
+  topics JSONB NOT NULL DEFAULT '[]'::jsonb,
+  cover TEXT DEFAULT '',
+  links JSONB NOT NULL DEFAULT '[]'::jsonb,
+  status TEXT NOT NULL DEFAULT 'invited'
+    CHECK (status IN ('invited', 'accepted', 'scheduled', 'completed', 'published', 'declined', 'cancelled')),
+  featured BOOLEAN NOT NULL DEFAULT false,
+  visible BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE appearances ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public read" ON appearances;
+CREATE POLICY "Public read" ON appearances FOR SELECT
+  USING (visible AND status IN ('accepted', 'scheduled', 'completed', 'published'));
+
 -- Settings: one row, created by admin on first save (columns match supabase-schema.sql)
 CREATE TABLE IF NOT EXISTS settings (
   id SERIAL PRIMARY KEY,

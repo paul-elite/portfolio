@@ -3,6 +3,52 @@ import { revalidatePath } from 'next/cache';
 import { supabase, Settings, defaultSettings } from '@/lib/supabase';
 import { mapIllustration, mapProject, mapSettings } from '@/lib/content-adapters';
 import { withSettingsIconFallbacks } from '@/lib/settings-icon-assets';
+import { toAppearance, validateAppearance } from '@/lib/appearances';
+
+// Appearances have their own validation and columns, so they're saved here rather than through the
+// generic path below. Every change also refreshes the public pages that list them.
+const APPEARANCES_SETUP = 'The appearances table is missing. Run the appearances SQL in supabase-content-schema.sql once.';
+const missingTable = (error: { code?: string; message?: string } | null) =>
+  !!error && (error.code === '42P01' || error.code === 'PGRST205' || /appearances/.test(error.message || '') && /not find|does not exist/.test(error.message || ''));
+const slugify = (s: string) => s.toLowerCase().trim().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'appearance';
+
+function revalidateAppearances() {
+  revalidatePath('/');
+  revalidatePath('/appearances');
+}
+
+async function createAppearance(data: Record<string, unknown>) {
+  const checked = validateAppearance(data);
+  if (!checked.ok) return NextResponse.json({ error: checked.error, details: checked.error }, { status: 400 });
+  const base = slugify(checked.row.title as string);
+  // A title can repeat (a second episode on the same show): its address gets a number
+  for (let n = 1; n <= 20; n++) {
+    const slug = n === 1 ? base : `${base}-${n}`;
+    const { data: item, error } = await supabase.from('appearances').insert({ id: crypto.randomUUID(), slug, ...checked.row }).select().single();
+    if (!error) { revalidateAppearances(); return NextResponse.json({ success: true, item: toAppearance(item) }); }
+    if (missingTable(error)) return NextResponse.json({ error: APPEARANCES_SETUP, details: APPEARANCES_SETUP }, { status: 503 });
+    if (error.code !== '23505') {
+      console.error('Appearance insert error:', error);
+      return NextResponse.json({ error: 'Failed to create', details: error.message }, { status: 500 });
+    }
+  }
+  return NextResponse.json({ error: 'Failed to create', details: 'Too many appearances share this title.' }, { status: 409 });
+}
+
+async function updateAppearance(id: string, data: Record<string, unknown>) {
+  if (!id) return NextResponse.json({ error: 'Missing id', details: 'Missing id' }, { status: 400 });
+  const checked = validateAppearance(data);
+  if (!checked.ok) return NextResponse.json({ error: checked.error, details: checked.error }, { status: 400 });
+  const { data: item, error } = await supabase.from('appearances')
+    .update({ ...checked.row, updated_at: new Date().toISOString() }).eq('id', id).select().single();
+  if (error) {
+    if (missingTable(error)) return NextResponse.json({ error: APPEARANCES_SETUP, details: APPEARANCES_SETUP }, { status: 503 });
+    console.error('Appearance update error:', error);
+    return NextResponse.json({ error: 'Failed to update', details: error.message }, { status: 500 });
+  }
+  revalidateAppearances();
+  return NextResponse.json({ success: true, item: toAppearance(item) });
+}
 
 // No fallback: without ADMIN_PASSWORD configured, every admin request is refused.
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
@@ -103,12 +149,13 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const [settings, projectsRes, writingsRes, illustrationsRes, interactionsRes] = await Promise.all([
+    const [settings, projectsRes, writingsRes, illustrationsRes, interactionsRes, appearancesRes] = await Promise.all([
       loadSettings(),
       supabase.from('projects').select('*').order('created_at', { ascending: false }),
       supabase.from('writings').select('*').order('created_at', { ascending: false }),
       supabase.from('illustrations').select('*'),
       supabase.from('interactions').select('*').order('created_at', { ascending: false }),
+      supabase.from('appearances').select('*').order('date', { ascending: false, nullsFirst: true }),
     ]);
 
     // Log errors for debugging
@@ -122,6 +169,9 @@ export async function GET(request: NextRequest) {
       writings: writingsRes.data || [],
       illustrations: (illustrationsRes.data || []).map(mapIllustration),
       interactions: interactionsRes.data || [],
+      appearances: (appearancesRes.data || []).map(toAppearance),
+      // Until the table exists, admin explains how to add it instead of failing to save
+      appearancesSetup: missingTable(appearancesRes.error) ? APPEARANCES_SETUP : null,
     });
   } catch (error) {
     console.error('Error loading content:', error);
@@ -136,6 +186,8 @@ export async function POST(request: NextRequest) {
 
   try {
     const { type, data } = await request.json();
+
+    if (type === 'appearances') return createAppearance(data || {});
 
     if (!['projects', 'illustrations', 'writings', 'interactions'].includes(type)) {
       return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
@@ -230,6 +282,8 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: true, settings: savedSettings });
     }
 
+    if (type === 'appearances') return updateAppearance(String(id || ''), data || {});
+
     if (!['projects', 'illustrations', 'writings', 'interactions'].includes(type)) {
       return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
     }
@@ -290,7 +344,7 @@ export async function DELETE(request: NextRequest) {
   try {
     const { type, id } = await request.json();
 
-    if (!['projects', 'illustrations', 'writings', 'interactions'].includes(type)) {
+    if (!['projects', 'illustrations', 'writings', 'interactions', 'appearances'].includes(type)) {
       return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
     }
 
@@ -309,6 +363,7 @@ export async function DELETE(request: NextRequest) {
     if (type === 'projects') {
       revalidatePath('/project/[slug]', 'page');
     }
+    if (type === 'appearances') revalidateAppearances();
 
     return NextResponse.json({ success: true });
   } catch (error) {
