@@ -23,7 +23,8 @@ export default function ArticleVisits({ lead }: { lead: boolean }) {
         const seen = `visited:${path}`;
         if (!sessionStorage.getItem(seen)) {
           sessionStorage.setItem(seen, '1');
-          await fetch('/api/track', {
+          // Logging the visit may fail (offline, a blocker); the count still loads either way
+          await fetch('/api/read', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -34,9 +35,9 @@ export default function ArticleVisits({ lead }: { lead: boolean }) {
               pageTitle: document.title,
               screen: `${window.screen.width}x${window.screen.height}`,
             }),
-          });
+          }).catch(() => {});
         }
-        const res = await fetch(`/api/views?path=${encodeURIComponent(path)}`, { cache: 'no-store' });
+        const res = await fetch(`/api/read?path=${encodeURIComponent(path)}`, { cache: 'no-store' });
         const { visits: n } = await res.json();
         if (live && typeof n === 'number') setVisits(n);
       } catch {
