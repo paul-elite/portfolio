@@ -15,6 +15,7 @@ import { mapPortfolioContent, mapProject, mapSettings, mapWriting, settingsToSit
 import type { NavItem, PortfolioContent, Project, SiteConfig, Writing } from './content-model';
 import { withSettingsIconFallbacks } from './settings-icon-assets';
 import { publicStage, toAppearance, type Appearance } from './appearances';
+import { publishedAppearances } from './published-appearances';
 
 export async function getSettings() {
   if (!hasSupabaseConfig) {
@@ -184,23 +185,25 @@ export async function getWritingBySlug(slug: string): Promise<Writing | null> {
   }
 }
 
-// The appearances a visitor may see, soonest upcoming first, then the most recent past ones.
-// Until the table exists (or if it can't be reached) there are simply none: never sample ones.
+// The appearances a visitor may see, soonest upcoming first, then the most recent past ones: the ones
+// shipped with the site (lib/published-appearances.ts) plus the table's, where the table's win on slug.
+// Until the table exists (or if it can't be reached) only the shipped ones show: never sample ones.
 export async function getPublicAppearances(): Promise<{ upcoming: Appearance[]; past: Appearance[] }> {
-  const none = { upcoming: [], past: [] };
-  if (!hasSupabaseConfig) return none;
-  try {
-    const { data, error } = await supabase.from('appearances').select('*').eq('visible', true);
-    if (error || !data) return none;
-    const all = data.map(toAppearance);
-    const byDate = (a: Appearance, b: Appearance) => (a.date ?? '9999').localeCompare(b.date ?? '9999');
-    return {
-      upcoming: all.filter((a) => publicStage(a) === 'upcoming').sort(byDate),
-      past: all.filter((a) => publicStage(a) === 'past').sort((a, b) => byDate(b, a)),
-    };
-  } catch {
-    return none;
+  let stored: Appearance[] = [];
+  if (hasSupabaseConfig) {
+    try {
+      const { data, error } = await supabase.from('appearances').select('*').eq('visible', true);
+      if (!error && data) stored = data.map(toAppearance);
+    } catch {
+      // fall through to the shipped ones
+    }
   }
+  const all = [...publishedAppearances.filter((p) => !stored.some((a) => a.slug === p.slug)), ...stored];
+  const byDate = (a: Appearance, b: Appearance) => (a.date ?? '9999').localeCompare(b.date ?? '9999');
+  return {
+    upcoming: all.filter((a) => publicStage(a) === 'upcoming').sort(byDate),
+    past: all.filter((a) => publicStage(a) === 'past').sort((a, b) => byDate(b, a)),
+  };
 }
 
 export function getSiblingItems(items: NavItem[], slug: string) {
