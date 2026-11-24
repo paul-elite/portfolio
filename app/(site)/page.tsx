@@ -45,9 +45,10 @@ export default async function Home() {
   // each with its type on the left (Study / Design / Essay). No dates.
   const featuredItems = getFeatured(content);
   const featured: Row[] = featuredItems;
-  // Appearances marked Featured in admin: upcoming first, then past; each opens on the Appearances page
-  const featuredAppearances: Row[] = [...appearances.upcoming, ...appearances.past]
-    .filter((a) => a.featured)
+  // Every appearance a visitor can see, like Featured: upcoming first, then past (newest first), with
+  // ones marked Featured in admin pinned to the top; each opens on the Appearances page
+  const allAppearances = [...appearances.upcoming, ...appearances.past];
+  const homeAppearances: Row[] = [...allAppearances.filter((a) => a.featured), ...allAppearances.filter((a) => !a.featured)]
     .map((a) => ({ key: `a-${a.slug}`, title: a.title, cat: typeInfo(a.type).label, href: `/appearances#${a.slug}` }));
 
   const socialBits: React.ReactNode[] = [];
@@ -91,7 +92,7 @@ export default async function Home() {
 
         {/* No "New" badge for now */}
         <FeaturedList items={featured} />
-        <FeaturedList items={featuredAppearances} label="Appearances" />
+        <FeaturedList items={homeAppearances} label="Appearances" />
 
         <footer className={s.footer}>
           <SpotifyNow />

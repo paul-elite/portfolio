@@ -296,7 +296,7 @@ export default function AppearancesAdmin({
             </label>
             <label className="flex items-center gap-3 text-sm font-medium text-gray-700">
               <input type="checkbox" checked={draft.featured} onChange={(e) => set('featured', e.target.checked)} />
-              Feature on the home page
+              Pin to the top of Appearances on the home page
             </label>
           </div>
 
