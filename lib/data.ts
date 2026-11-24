@@ -15,7 +15,7 @@ export const siteConfig = {
   name: "Elite",
   title: "Designer & Developer",
   avatar: "",
-  bio: "I design and build digital products with a focus on interaction design, prototyping, and front-end development.",
+  bio: "I am passionate about building intuitive digital experiences that makes people feel something.\n\nI am particularly interested in mobility, navigation, transportation, and location-based experiences — products that bridge the gap between the digital and physical worlds.",
   social: {
     twitter: "https://twitter.com",
     github: "https://github.com",
