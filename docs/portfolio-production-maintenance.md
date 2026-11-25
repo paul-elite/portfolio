@@ -10,8 +10,8 @@ All finished work in this session should go to production.
 2. Run `npm run build`.
 3. Commit to `main` with a concise behavior-focused message.
 4. Push `origin main`.
-5. Deploy production with `npx vercel --prod --yes`.
-6. Confirm the deployment is `READY` and aliased to `https://work.paulelite.me`.
+5. Deploy production with `npm run deploy` (builds with OpenNext and runs `wrangler deploy`; needs `npx wrangler login` once).
+6. Confirm `https://portfolio.elitethedev.workers.dev` serves the change.
 
 If the Vercel CLI times out after the build, check the deployment by ID before retrying. A timeout during status polling can still produce a ready deployment.
 
@@ -51,9 +51,11 @@ ALTER TABLE IF EXISTS settings
 
 ## Deployment Context
 
-Vercel project:
-- Project: `portfolio`
-- Production domain: `work.paulelite.me`
-- Git remote: `https://github.com/paul-elite/portfolio.git`
+Since 2026-11-25 the site runs on Cloudflare Workers through `@opennextjs/cloudflare` (the Vercel team was disabled: every site answered 402).
 
-Use direct production deploys after pushing because Git webhook visibility can lag.
+- Worker: `portfolio` (`wrangler.jsonc`, `open-next.config.ts`)
+- Address: `https://portfolio.elitethedev.workers.dev`
+- Secrets live in Cloudflare (`wrangler secret put NAME`): `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN`. `DEPLOYED=1` is a plain var; `/api/track` only records visits when it (or `VERCEL`) is set.
+- The adapter needs Next 16.4.5 or newer.
+- `paulelite.com` still points at Vercel in Namecheap's DNS; it must be repointed to Cloudflare before it serves this Worker.
+- Git remote: `https://github.com/paul-elite/portfolio.git`

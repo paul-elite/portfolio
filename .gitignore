@@ -46,3 +46,8 @@ next-env.d.ts
 # Agent skill working files (preview installs, filmed contact sheets)
 /.agents/skills/*/node_modules
 /.agents/skills/*/shots
+
+# Cloudflare (OpenNext) build output and local state
+.open-next
+.wrangler
+.dev.vars
