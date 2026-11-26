@@ -29,6 +29,7 @@ type S = {
   green: boolean
   tab: 'style' | 'wear'
   cap: boolean
+  panel?: boolean // every colour at once: the Colour bar grown into a panel over both bars
 }
 const base: S = { level: 0, enter: null, hair: 'bob', green: false, tab: 'style', cap: false }
 
@@ -58,6 +59,21 @@ const Undo = ({ redo }: { redo?: boolean }) => (
     <path d="M20.99 8h-12a6 6 0 0 0 0 12h4M16.99 4l1.16.88C20.04 6.32 20.99 7.04 20.99 8s-.95 1.68-2.84 3.12L16.99 12" {...LINE} />
   </svg>
 )
+// The panel's own button (the editor's four arrows turned inward: show fewer)
+const Collapse = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden>
+    <path d="M3 3l6 6m0 0V4.5M9 9H4.5M21 3l-6 6m0 0V4.5M15 9h4.5M3 21l6-6m0 0v4.5M9 15H4.5M21 21l-6-6m0 0v4.5m0-4.5h4.5" {...LINE} />
+  </svg>
+)
+// The panel's colours, as the editor lays them out: twelve hues across, pale at the top to deep at the foot,
+// and a row of greys. One cell is the scene's green.
+const HUES = [0, 22, 38, 52, 86, 140, 168, 196, 216, 250, 282, 318]
+const TONES: [number, number][] = [[80, 92], [82, 84], [84, 75], [84, 64], [88, 51], [84, 37], [82, 25]]
+const GRID: string[][] = [
+  ...TONES.map(([sat, light]) => HUES.map((h) => `hsl(${h} ${sat}% ${light}%)`)),
+  Array.from({ length: 12 }, (_, i) => `hsl(40 4% ${Math.round(100 - i * (100 / 11))}%)`),
+]
+const GREEN_AT = { row: 4, col: 4 }
 const Close = () => <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden><path d="M18 6 6 18M6 6l12 12" {...LINE} /></svg>
 const More = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
@@ -104,7 +120,25 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
   return (
     // Which way the stack is moving, so its bars can go one at a time: opening Colour, the main bar
     // folds, then Hair slides down, then Colour rises; closing it, the same steps run backwards
-    <div className="av-scene" data-step={s.level === 2 ? 'open' : s.level === 1 && !s.enter ? 'return' : undefined}>
+    <div className="av-scene" data-step={s.level === 2 ? 'open' : s.level === 1 && !s.enter ? 'return' : undefined} data-panel={s.panel || undefined}>
+      {/* Every colour: the Colour bar grown into a panel over its own place and the bar's beneath. The bar
+          beneath is put away while it is open, with only a sliver of it showing under the panel; the
+          panel's one button sits outside it, beside the colours. */}
+      <div className="av-panel" data-on={s.panel || undefined} aria-hidden={!s.panel}>
+        <span className="av-panel__peek" />
+        <div className="av-grid">
+          {GRID.map((row, r) => (
+            <div key={r} className="av-grid__row">
+              {row.map((fill, c) => {
+                const green = r === GREEN_AT.row && c === GREEN_AT.col
+                return <span key={c} className="av-cell" style={{ background: green ? '#50c810' : fill }} data-target={green ? 'cell-green' : undefined} data-cursor="hand" />
+              })}
+            </div>
+          ))}
+        </div>
+        <span className="av-panel__close" data-target="collapse" data-cursor="hand"><Collapse /></span>
+      </div>
+
       {/* The tray: the main bar folded under Hair */}
       <div className="av-tray" data-on={s.level === 2 || undefined} style={{ width: hw - 64 }} />
 
@@ -117,7 +151,7 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
               <span data-on={s.green || undefined}><Cluster fills={SHADES_GREEN} /></span>
             </span>
           </span>
-          <span className="av-tool" data-cursor="hand"><Svg className="av-wheel" src={A.wheel.spectrum} /></span>
+          <span className="av-tool" data-target="wheel" data-cursor="hand"><Svg className="av-wheel" src={A.wheel.spectrum} /></span>
         </div>
         <span className="av-sep" />
         <div className="av-row av-swatches">
@@ -187,7 +221,8 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
                 : k === 'color'
                   ? <span className="av-cat__art" aria-hidden><span className="av-rainbow" /></span>
                   : <Svg src={A.bar[k]} className="av-cat__art" />}
-              <span className="av-label">{k === 'color' ? 'Color' : k[0].toUpperCase() + k.slice(1)}</span>
+              {/* (the tile for the background: the editor calls it Frame since 26 Nov 2026) */}
+              <span className="av-label">{k === 'color' ? 'Frame' : k[0].toUpperCase() + k.slice(1)}</span>
             </span>
           ))}
         </div>
@@ -432,6 +467,26 @@ async function reducedRun(a: Act<S>) {
   await a.move(REST)
   await a.wait(900)
 }
+/* ---- Every colour at once: the wheel grows the Colour bar into a panel over both bars; a colour is picked
+   there and the panel folds back into the bar, which now wears it ---- */
+const panelStart: S = { ...base, level: 2, hair: 'wavy' }
+async function panel(a: Act<S>) {
+  await a.wait(500)
+  a.mark('open the panel')
+  await a.enter({ at: 'wheel', x: 0.5, y: 0.5 })
+  await a.click({ at: 'wheel', x: 0.5, y: 0.5 })
+  await a.set({ panel: true })
+  await a.wait(1300)
+  a.mark('pick green')
+  await a.click({ at: 'cell-green', x: 0.5, y: 0.5 })
+  await a.set({ green: true, panel: false })
+  await a.wait(500)
+  await a.move(REST)
+  await a.wait(600)
+}
+export function AvatarsPanel() {
+  return <Frame label="Every colour at once: the Colour bar grows into a panel over both bars, a colour is picked, and it folds back" initial={panelStart} poster={{ ...panelStart, panel: true }} script={panel} />
+}
 export function AvatarsReduced() {
   return <Frame label="With reduced motion, bars fade in and out without moving" initial={{ ...base, hair: 'wavy' }} poster={{ ...base, hair: 'wavy', level: 2 }} script={reducedRun} reduced caption="With reduced motion on" />
 }
@@ -442,6 +497,7 @@ export const AVATAR_DEMOS: Record<string, () => ReactNode> = {
   'avatars-room': AvatarsRoom,
   'avatars-close': AvatarsClose,
   'avatars-reduced': AvatarsReduced,
+  'avatars-panel': AvatarsPanel,
   'avatars-stack': AvatarsStack,
   'avatars-tabs': AvatarsTabs,
   'avatars-muted': AvatarsMuted,
