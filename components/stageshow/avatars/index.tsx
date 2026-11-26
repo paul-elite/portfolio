@@ -275,11 +275,16 @@ type FrameProps = {
 function Frame({ initial, poster, script, still, label, slow = 1, reduced, caption, cursor = true }: FrameProps) {
   const touch = useTouch()
   const [run, setRun] = useState(0)
+  // A scene that is shown slowed down lets the reader choose how slow (the user, 2026-11-26): a menu of
+  // 1×, 2× and 3× in place of a fixed "Slowed down 3×". It opens on the speed the scene was written
+  // for; choosing another plays the scene again at that speed. 1× is the editor's real speed.
+  const slowable = slow > 1
+  const [speed, setSpeed] = useState(slow)
   // Nothing loops: a scene plays once while the pointer is over it (once when seen, on a phone),
   // and Replay plays it again straight away
   const play = run > 0 ? 'once' : 'hover'
   return (
-    <figure className="av-figure" aria-label={label} style={{ '--t': slow } as CSSProperties}>
+    <figure className="av-figure" aria-label={label} style={{ '--t': speed } as CSSProperties}>
       <Stage
         key={run}
         width={648}
@@ -287,7 +292,7 @@ function Frame({ initial, poster, script, still, label, slow = 1, reduced, capti
         compact={{ below: 480, width: 358, height: 260 }}
         initial={initial}
         poster={poster}
-        script={script ? humanHand(play === 'hover' && !touch ? whileHovered(script, initial) : script, slow) : undefined}
+        script={script ? humanHand(play === 'hover' && !touch ? whileHovered(script, initial) : script, speed) : undefined}
         play={still ? undefined : play}
         cursor={still || !cursor ? undefined : { at: REST, style: 'arrow' }}
         className={'av-card' + (reduced ? ' av-reduced' : '')}
@@ -298,7 +303,23 @@ function Frame({ initial, poster, script, still, label, slow = 1, reduced, capti
       </Stage>
       {(caption || !still) && (
         <div className="av-foot">
-          {caption && <figcaption className="av-caption">{caption}</figcaption>}
+          {slowable ? (
+            <label className="av-speed">
+              <span className="av-caption">Slowed down</span>
+              <span className="av-speed__pick">
+                <select
+                  value={speed}
+                  aria-label="How much the scene is slowed down"
+                  onChange={(e) => { setSpeed(Number(e.target.value)); setRun((n) => n + 1) }}
+                >
+                  {[1, 2, 3].map((n) => <option key={n} value={n}>{n}×</option>)}
+                </select>
+                <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </span>
+            </label>
+          ) : (
+            caption && <figcaption className="av-caption">{caption}</figcaption>
+          )}
           {!still && (
             <button type="button" className="av-replay" onClick={() => setRun((n) => n + 1)}>Replay</button>
           )}
@@ -402,7 +423,7 @@ async function rise(a: Act<S>) {
   await a.wait(900)
 }
 export function AvatarsRise() {
-  return <Frame label="Hair growing in place over the main bar, then sinking back, slowed down" initial={base} poster={{ ...base, level: 1 }} script={rise} slow={3} caption="Slowed down 3×" />
+  return <Frame label="Hair growing in place over the main bar, then sinking back, slowed down" initial={base} poster={{ ...base, level: 1 }} script={rise} slow={3} />
 }
 
 /* ---- The stack makes room: Colour rises, Hair slides down and the main bar folds into the tray (slowed 3×) ---- */
@@ -422,7 +443,7 @@ async function room(a: Act<S>) {
   await a.wait(800)
 }
 export function AvatarsRoom() {
-  return <Frame label="Colour rises, Hair slides down and the main bar folds into the tray, slowed down" initial={roomStart} poster={{ ...roomStart, level: 2 }} script={room} slow={3} caption="Slowed down 3×" />
+  return <Frame label="Colour rises, Hair slides down and the main bar folds into the tray, slowed down" initial={roomStart} poster={{ ...roomStart, level: 2 }} script={room} slow={3} />
 }
 
 /* ---- Closing: both bars close, then open again, slowed 2× ---- */
@@ -446,7 +467,7 @@ async function closing(a: Act<S>) {
   await a.wait(900)
 }
 export function AvatarsClose() {
-  return <Frame label="Each bar sinks back behind the one under it as it closes, slowed down" initial={closeStart} poster={closeStart} script={closing} slow={2} caption="Slowed down 2×" />
+  return <Frame label="Each bar sinks back behind the one under it as it closes, slowed down" initial={closeStart} poster={closeStart} script={closing} slow={2} />
 }
 
 /* ---- With reduced motion: the same stack, fades only ---- */

@@ -24,6 +24,40 @@
 }
 .av-replay:hover { color: #0e0e0c; }
 .av-replay:active { transform: scale(0.97); }
+/* How slow a slowed scene plays: the words "Slowed down" and a small menu of 1×, 2×, 3×, drawn as a pill
+   like Replay beside it. It is the browser's own menu underneath, so it works with a keyboard and opens
+   as a wheel or a sheet on a phone. */
+.av-speed { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.av-speed__pick {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  border-radius: 100px;
+  background: #fff;
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.12), 0 1px 2px rgb(0 0 0 / 0.06);
+  color: #5e5f63;
+  transition: color 140ms ease, transform 120ms ease-out;
+}
+.av-speed__pick:hover { color: #0e0e0c; }
+.av-speed__pick:active { transform: scale(0.97); }
+.av-speed__pick select {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 28px;
+  margin: 0;
+  padding: 0 26px 0 12px;
+  border: 0;
+  border-radius: 100px;
+  background: transparent;
+  color: inherit;
+  font: 12px/1 var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.av-speed__pick select:focus-visible { outline: 2px solid #5e5f63; outline-offset: 2px; }
+.av-speed__pick svg { position: absolute; right: 10px; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .av-speed__pick { transition: none; } }
 
 .av-card {
   /* The server-rendered cursor has no position yet and would flash at the stage's top-left corner until
