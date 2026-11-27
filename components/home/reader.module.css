@@ -69,7 +69,7 @@
 .tocLink[data-state="current"] { color: #111; }
 
 /* The ruler beside the labels: one long tick level with each topic and one short tick halfway to the
-   next, each taking its topic's state: quietest still to come, mid grey once read, dark where you are */
+   next, each taking its topic's state: quietest still to come, mid grey once read, blue where you are (the user, 2026-11-27) */
 .seg {
   position: absolute;
   left: -22px;
@@ -81,7 +81,7 @@
   transition: background-color 0.18s ease, width 0.18s ease-out;
 }
 .seg[data-state="read"] { background: rgba(0, 0, 0, 0.22); }
-.seg[data-state="current"] { width: 6px; background: #111; }
+.seg[data-state="current"] { width: 6px; background: #1084fe; }
 .tickLong {
   position: absolute;
   pointer-events: none;
@@ -93,7 +93,7 @@
   transition: background-color 0.18s ease, width 0.18s ease-out;
 }
 .tickLong[data-state="read"] { background: rgba(0, 0, 0, 0.35); }
-.tickLong[data-state="current"] { width: 10px; background: #111; }
+.tickLong[data-state="current"] { width: 10px; background: #1084fe; }
 
 /* ---- right: the article ---- */
 .article {
