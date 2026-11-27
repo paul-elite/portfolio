@@ -353,10 +353,10 @@
     width: var(--hist);
     height: 56px;
     box-sizing: border-box;
-    border: 0.5px solid #43413e;
+    border: 0.5px solid transparent; /* as the editor (Figma UI/History 113:8513): sunk darker, a 0.5px ring only */
     border-radius: 14px;
-    background: #2a2826;
-    box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.33);
+    background: #111213;
+    box-shadow: 0 0 0 0.5px rgb(94 94 94 / 0.33);
   }
   .tb-hist { display: grid; place-items: center; color: #dad8d4; transition: color calc(160ms * var(--t, 1)) ease-out; }
   .tb-hist[data-off] { color: #676560; }
