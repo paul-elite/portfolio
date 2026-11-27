@@ -17,21 +17,26 @@ export default function ArticleReader({
   title,
   date,
   toc = [],
+  back = true,
   children,
 }: {
   title: string;
   date?: string;
   toc?: Toc;
+  // false hides the Back button (a project tagged 'no-back')
+  back?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <main data-reader className={`${serif.variable} ${sans.variable} ${r.page}`}>
-      <BackBar>
-        <Link href="/" className={r.back}>
-          <HugeiconsIcon icon={ArrowTurnBackwardIcon} size={16} strokeWidth={1.5} aria-hidden="true" />
-          Back
-        </Link>
-      </BackBar>
+      {back && (
+        <BackBar>
+          <Link href="/" className={r.back}>
+            <HugeiconsIcon icon={ArrowTurnBackwardIcon} size={16} strokeWidth={1.5} aria-hidden="true" />
+            Back
+          </Link>
+        </BackBar>
+      )}
       <div className={r.wrap}>
         <aside className={r.toc}>
           {toc.length > 0 && <TocRail toc={toc} />}
