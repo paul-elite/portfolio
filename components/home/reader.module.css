@@ -171,6 +171,10 @@
 .page[data-rules="off"] .article :where(h2, h3) { border-top: 0; padding-top: 0; margin-top: 3.5rem; }
 /* An image that melts into the page at its edges (an image block with meta.vignette), the same oval
    fade the demos' dotted ground uses (the user, 2026-11-27) */
+/* ...and as wide as the demos: the text column plus 24px each side on wide screens */
+@media (min-width: 861px) {
+  .article figure[data-vignette] { width: calc(100% + 48px); margin-left: -24px; margin-right: -24px; }
+}
 .article figure[data-vignette] img {
   -webkit-mask-image: radial-gradient(closest-side, #000 58%, transparent 100%);
   mask-image: radial-gradient(closest-side, #000 58%, transparent 100%);
