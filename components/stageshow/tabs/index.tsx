@@ -308,14 +308,14 @@ function Frame({ initial, poster, script, still, label, slow = 1, reduced, capti
         <div className="tb-foot">
           {slowable ? (
             <label className="tb-speed">
-              <span className="tb-caption">Slowed down</span>
               <span className="tb-speed__pick">
                 <select
                   value={speed}
                   aria-label="How much the scene is slowed down"
                   onChange={(e) => { setSpeed(Number(e.target.value)); setRun((n) => n + 1) }}
                 >
-                  {[1, 2, 3].map((n) => <option key={n} value={n}>{n}x</option>)}
+                  {/* the words live in the menu itself (the user, 2026-11-27): 1x is the real speed */}
+                  {[1, 2, 3].map((n) => <option key={n} value={n}>{n === 1 ? 'Real speed 1x' : `Slowed down ${n}x`}</option>)}
                 </select>
                 <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </span>
