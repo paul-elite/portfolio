@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import r from './reader.module.css';
 
 type Toc = { id: string; label: string }[];
@@ -47,6 +47,18 @@ export default function TocRail({ toc }: { toc: Toc }) {
     };
   }, [toc]);
 
+  // The white card behind a label: one card for the whole list that slides from label to label as the
+  // pointer moves down it (or keyboard focus does), rather than a card appearing on each label in turn.
+  // It arrives where it's needed without sliding (from wherever it last was), and fades when the pointer leaves.
+  const navRef = useRef<HTMLElement>(null);
+  const [hl, setHl] = useState<{ x: number; y: number; w: number; h: number; on: boolean; jump: boolean }>({ x: 0, y: 0, w: 0, h: 0, on: false, jump: true });
+  const point = (el: Element | null) => {
+    const a = el && (el as HTMLElement).closest ? ((el as HTMLElement).closest('a[data-toc]') as HTMLElement | null) : null;
+    if (!a) return;
+    setHl((was) => ({ x: a.offsetLeft - 8, y: a.offsetTop - 3, w: a.offsetWidth + 16, h: a.offsetHeight + 6, on: true, jump: !was.on }));
+  };
+  const leave = () => setHl((was) => ({ ...was, on: false }));
+
   const go = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     const h = document.getElementById(id);
     if (!h) return;
@@ -58,7 +70,22 @@ export default function TocRail({ toc }: { toc: Toc }) {
   };
 
   return (
-    <nav className={r.tocNav} aria-label="Contents">
+    <nav
+      ref={navRef}
+      className={r.tocNav}
+      aria-label="Contents"
+      onPointerOver={(e) => { if (e.pointerType === 'mouse') point(e.target as Element); }}
+      onPointerLeave={(e) => { if (e.pointerType === 'mouse') leave(); }}
+      onFocus={(e) => { if ((e.target as HTMLElement).matches(':focus-visible')) point(e.target); }}
+      onBlur={(e) => { if (!navRef.current?.contains(e.relatedTarget as Node)) leave(); }}
+    >
+      <span
+        className={r.tocHl}
+        aria-hidden
+        data-on={hl.on || undefined}
+        data-jump={hl.jump || undefined}
+        style={{ transform: `translate(${hl.x}px, ${hl.y}px)`, width: hl.w, height: hl.h }}
+      />
       {toc.map((h, i) => {
         const state = i === active ? 'current' : i < active ? 'read' : 'ahead';
         return (

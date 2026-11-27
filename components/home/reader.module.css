@@ -268,14 +268,36 @@
   z-index: -1;
   border-radius: 7px;
   background: #fefdfb;
-  box-shadow:
-    0 0 0 0.5px rgba(130, 100, 20, 0.16),
-    0 2px 10px rgba(130, 100, 20, 0.1);
+  /* flat: a 0.5px ring and nothing else (the user, 2026-11-27) */
+  box-shadow: 0 0 0 0.5px rgba(130, 100, 20, 0.14);
   opacity: 0;
   pointer-events: none;
   transition: opacity 160ms ease-out;
 }
-.tocLink:active::before, .tocLink:focus-visible::before {
+/* The card that slides between labels (TocRail): same flat card, one for the whole list. It moves on
+   screen, so ease-in-out; arriving or leaving it only fades. data-jump: it has just arrived, so it takes its
+   place without sliding from the last label it was on */
+.tocHl {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  border-radius: 7px;
+  background: #fefdfb;
+  box-shadow: 0 0 0 0.5px rgba(130, 100, 20, 0.14);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform;
+  transition:
+    transform 200ms cubic-bezier(0.45, 0, 0.25, 1),
+    width 200ms cubic-bezier(0.45, 0, 0.25, 1),
+    height 200ms cubic-bezier(0.45, 0, 0.25, 1),
+    opacity 130ms ease-out;
+}
+.tocHl[data-on] { opacity: 1; transition-duration: 200ms, 200ms, 200ms, 160ms; }
+.tocHl[data-jump] { transition-property: opacity; }
+@media (prefers-reduced-motion: reduce) { .tocHl { transition-property: opacity; } }
+.tocLink:active::before {
   opacity: 1;
   transition-duration: 60ms;
 }
@@ -285,7 +307,7 @@
 /* Hovering shows the same white card as pressing (pointers that can hover only, so a tap on a phone
    doesn't leave it stuck on): contents labels, Back and links in the text */
 @media (hover: hover) {
-  .tocLink:hover::before { opacity: 1; transition-timing-function: ease; }
+  /* (hovering a label: the sliding card, .tocHl, not a card of its own) */
   .article a:hover {
     background-color: #fefdfb;
     box-shadow:
