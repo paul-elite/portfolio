@@ -1,0 +1,485 @@
+/* The Avatars scenes. Values are the editor's (avatars.paulelite.com) and its Figma (113:9122). */
+.tb-figure { position: relative; margin: 2.25rem 0; }
+/* Wide screens: the stage is the text column plus 24px on each side */
+@media (min-width: 861px) {
+  figure.tb-figure { width: calc(100% + 48px); margin-left: -24px; margin-right: -24px; }
+}
+.tb-foot { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+/* Replay and the caption sit side by side, centred under the stage */
+.tb-foot .tb-caption { margin: 0; color: #999996; font: 12px/1.4 var(--font-sans), ui-sans-serif, system-ui, sans-serif; }
+.tb-replay {
+  order: -1;
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 100px;
+  background: #fff;
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.12), 0 1px 2px rgb(0 0 0 / 0.06);
+  color: #5e5f63;
+  font: 12px/1 var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  cursor: pointer;
+  transition: color 140ms ease, transform 120ms ease-out;
+}
+.tb-replay:hover { color: #0e0e0c; }
+.tb-replay:active { transform: scale(0.97); }
+/* How slow a slowed scene plays: the words "Slowed down" and a small menu of 1x, 2x, 3x, drawn as a pill
+   like Replay beside it. It is the browser's own menu underneath, so it works with a keyboard and opens
+   as a wheel or a sheet on a phone. */
+.tb-speed { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.tb-speed__pick {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  border-radius: 100px;
+  background: #fff;
+  /* a 0.5px outline and nothing else (the user, 2026-11-27). A ring, not a border: browsers round a
+     border under 1px up to a whole pixel */
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.22);
+  color: #5e5f63;
+  transition: color 140ms ease, transform 120ms ease-out;
+}
+.tb-speed__pick:hover { color: #0e0e0c; }
+.tb-speed__pick:active { transform: scale(0.97); }
+.tb-speed__pick select {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 100%;
+  margin: 0;
+  padding: 0 26px 0 12px;
+  border: 0;
+  border-radius: 100px;
+  background: transparent;
+  color: inherit;
+  font: 12px/1 var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.tb-speed__pick select:focus-visible { outline: 2px solid #5e5f63; outline-offset: 2px; }
+.tb-speed__pick svg { position: absolute; right: 10px; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .tb-speed__pick { transition: none; } }
+
+.tb-card {
+  /* The server-rendered cursor has no position yet and would flash at the stage's top-left corner until
+     the script places it (an inline transform); keep it hidden until then */
+  & .ss-cursor:not([style*="translate"]) { visibility: hidden; }
+  & .ss-stage {
+    overflow: hidden;
+    border-radius: 20px;
+    background: #fff;
+    /* Two shadows: a warm-grey edge that is only a 0.5px spread, and a larger, lighter drop beneath it */
+    box-shadow:
+      0 0 0 0.5px rgb(139 133 116 / 0.27),
+      0 4px 14px rgb(139 133 116 / 0.1);
+    isolation: isolate;
+    /* The editor's labels are sans, like the site's interface (the article around it is serif) */
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    /* Slots: A holds the bar in focus, B the one under it (the main bar on its own) */
+    --A: 112px;
+    --B: 184px;
+    --tab: 54px;
+    --gap: 10px;
+    --more: 48px;
+    --sw: 32px;
+    --swgap: 4px;
+    --tool: 40px;
+    --padR: 16px;
+    --colpad: 12px;
+    --hist: 114px;
+    --cat: 56px;
+    --cat-wide: 60px;
+    --catgap: 4px;
+    --morebtn: 40px;
+  }
+  & .ss-stage[data-layout="compact"] {
+    --A: 58px;
+    --B: 130px;
+    --tab: 40px;
+    --gap: 6px;
+    --more: 48px;
+    --close: 24px;
+    --sw: 30px;
+    --swgap: 2px;
+    --tool: 36px;
+    --padR: 10px;
+    --colpad: 10px;
+    --hist: 78px;
+    --cat: 44px;
+    --cat-wide: 48px;
+    --catgap: 2px;
+    --morebtn: 22px;
+    --maingap: 6px;
+    --histgap: 16px;
+  }
+
+  .tb-scene { position: absolute; inset: 0; }
+  /* A fine dot grid that fades toward the edges: a canvas feel, lighter than any line in the bars */
+  & .ss-stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, #bbb8ae 0.7px, transparent 1.1px);
+    background-size: 16px 16px;
+    background-position: center;
+    -webkit-mask-image: radial-gradient(ellipse 75% 80% at 50% 50%, #000 30%, transparent 85%);
+    mask-image: radial-gradient(ellipse 75% 80% at 50% 50%, #000 30%, transparent 85%);
+    /* Very light, so the dots sit behind the bars and never compete with them */
+    opacity: 0.32;
+  }
+
+  /* ---- Bars ---- */
+  .tb-bar {
+    position: absolute;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+    height: 64px;
+    box-sizing: border-box;
+    overflow: hidden;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 1px 3px rgb(82 78 72 / 0.08), 0 5px 5px rgb(82 78 72 / 0.07), 0 12px 7px rgb(82 78 72 / 0.04), 0 0 0 0.5px rgb(0 0 0 / 0.25);
+    transform-origin: center bottom;
+    will-change: transform, opacity;
+    /* Visible places: a little spring as a bar arrives or moves */
+    transition:
+      transform 260ms cubic-bezier(0.3, 1.2, 0.45, 1),
+      opacity 160ms ease-out,
+      filter 160ms ease-out,
+      width 150ms cubic-bezier(0.45, 0, 0.1, 1),
+      box-shadow 180ms ease-out;
+  }
+  .tb-hair, .tb-colour { top: var(--A); padding: 4px var(--padR) 4px 4px; }
+  .tb-colour { padding: 4px var(--colpad); }
+
+  /* Hidden places: tucked behind the bar under it, slightly smaller, blurred; leaving is quicker and eases out */
+  .tb-bar[data-pos="under"], .tb-bar[data-pos="tray"] {
+    opacity: 0;
+    filter: blur(2px);
+    transition: transform calc(170ms * var(--t, 1)) ease-out, opacity calc(170ms * var(--t, 1)) ease-out, filter calc(170ms * var(--t, 1)) ease-out, width calc(150ms * var(--t, 1)) ease;
+  }
+  .tb-hair { z-index: 2; }
+  .tb-colour { z-index: 1; }
+  .tb-hair[data-pos="top"] { transform: translateX(-50%); }
+  .tb-hair[data-pos="under"] { transform: translateX(-50%) translateY(calc(var(--B) - var(--A) + 8px)) scale(0.94); }
+  .tb-hair[data-pos="below"] { transform: translateX(-50%) translateY(calc(var(--B) - var(--A))); transition-duration: calc(220ms * var(--t, 1)), calc(160ms * var(--t, 1)), calc(160ms * var(--t, 1)), calc(150ms * var(--t, 1)), calc(180ms * var(--t, 1)); transition-timing-function: cubic-bezier(0.2, 0, 0, 1), ease-out, ease-out, ease, ease-out; }
+  .tb-colour[data-pos="top"] { transform: translateX(-50%); }
+  .tb-colour[data-pos="under"] { transform: translateX(-50%) translateY(16px) scale(0.94); }
+
+  /* A bar opening grows in place, the way the editor's first bars did: full height first while it's
+     still a narrow sliver at its centre, then it widens out to its full row (no slide up from behind).
+     Its options fill in once it has widened (--d) */
+  .tb-bar[data-enter][data-pos="top"] {
+    --grow: calc(440ms * var(--t, 1));
+    --d: calc(300ms * var(--t, 1));
+    transition-property: width, box-shadow;
+    animation: tb-grow var(--grow) cubic-bezier(0.2, 0, 0, 1) both;
+  }
+
+  /* One bar at a time, never two moving together. Opening Colour: the main bar folds (0), Hair slides
+     down (180ms), Colour rises (360ms). Closing it: Colour sinks (0), Hair goes back up (170ms), the main
+     bar unfolds (340ms) */
+  .tb-scene[data-step="open"] .tb-hair[data-pos="below"] { transition-delay: calc(180ms * var(--t, 1)); }
+  .tb-scene[data-step="open"] .tb-colour[data-pos="top"] { transition-delay: calc(360ms * var(--t, 1)); --d: calc(660ms * var(--t, 1)); animation-delay: calc(360ms * var(--t, 1)); }
+  .tb-scene[data-step="return"] .tb-hair[data-pos="top"] { transition-delay: calc(170ms * var(--t, 1)); }
+  .tb-scene[data-step="return"] .tb-main[data-pos="floor"] { transition-delay: calc(340ms * var(--t, 1)), calc(380ms * var(--t, 1)), calc(340ms * var(--t, 1)), calc(560ms * var(--t, 1)); }
+  .tb-scene[data-step="return"] .tb-tray:not([data-on]) { transition-delay: calc(340ms * var(--t, 1)); }
+
+  /* The main bar: the floor. Folding into the tray it drops behind Hair at once; coming back it
+     stays behind until it has landed, so it comes out from under Hair, never over it */
+  .tb-main {
+    top: var(--B);
+    z-index: 3;
+    gap: var(--maingap, 8px);
+    padding: 4px;
+    background: #21201f;
+    transition:
+      transform 220ms cubic-bezier(0.2, 0, 0, 1),
+      opacity 160ms ease-out 40ms,
+      filter 160ms ease-out,
+      z-index 0s linear 220ms;
+  }
+  .tb-main[data-pos="floor"] { transform: translateX(-50%); }
+  .tb-main[data-pos="tray"] { z-index: 0; transform: translateX(-50%) translateY(12px) scale(0.9); transition: transform calc(220ms * var(--t, 1)) cubic-bezier(0.2, 0, 0, 1), opacity calc(140ms * var(--t, 1)) ease-out, filter calc(140ms * var(--t, 1)) ease-out, z-index 0s; }
+
+  .tb-tray {
+    position: absolute;
+    top: calc(var(--B) + 39px);
+    left: 50%;
+    z-index: 1;
+    height: 34px;
+    border-radius: 10.8px;
+    background: var(--under);
+    box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.1), 0 3px 3px rgb(82 78 72 / 0.06);
+    opacity: 0;
+    transform: translateX(-50%) translateY(-6px);
+    transition: opacity calc(120ms * var(--t, 1)) ease-out, transform calc(220ms * var(--t, 1)) cubic-bezier(0.2, 0, 0, 1), width calc(150ms * var(--t, 1)) ease;
+  }
+  .tb-tray[data-on] { opacity: 1; transform: translateX(-50%); transition-delay: calc(120ms * var(--t, 1)), calc(60ms * var(--t, 1)), calc(0ms * var(--t, 1)); }
+
+  /* ---- Pieces ---- */
+  .tb-label { font-size: 10.5px; line-height: normal; letter-spacing: 0.1px; color: #807d75; white-space: nowrap; transition: color calc(180ms * var(--t, 1)) ease-out; }
+  .tb-tabs { display: flex; flex: none; gap: 4px; padding: 2px; border-radius: 16px; background: #eeece7; }
+  .tb-tab {
+    display: grid;
+    grid-template-rows: 28px auto;
+    place-items: center;
+    align-content: center;
+    gap: 2px;
+    width: var(--tab);
+    height: 52px;
+    border-radius: 14px;
+    transition: background-color calc(160ms * var(--t, 1)) ease, box-shadow calc(160ms * var(--t, 1)) ease;
+  }
+  .tb-tab[data-on] { background: #fff; box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 1px 3px rgb(82 78 72 / 0.12); }
+  .tb-tab[data-on] .tb-label { color: #0e0e0c; }
+  .tb-tab__art, .tb-more__art, .tb-cat__art { display: grid; place-items: center; height: 28px; }
+  .tb-tab__art svg, .tb-cat__art svg { display: block; }
+
+  .tb-row { display: flex; flex: none; align-items: center; gap: 9px; }
+  /* Crossfading art: every version in one cell */
+  .tb-layers { display: grid; place-items: center; }
+  .tb-layers > * { grid-area: 1 / 1; opacity: 0; transition: opacity calc(180ms * var(--t, 1)) ease-out; }
+  .tb-layers > [data-on] { opacity: 1; }
+  .tb-layers img, .tb-layers svg { display: block; }
+  /* The two tabs' rows in one cell: the chosen one crosses in, the other crosses out */
+  .tb-rows { display: grid; flex: none; }
+  .tb-rows > .tb-row { grid-area: 1 / 1; opacity: 0; transform: translateY(2px); pointer-events: none; transition: opacity calc(160ms * var(--t, 1)) ease-out, transform calc(160ms * var(--t, 1)) ease-out; }
+  .tb-rows > .tb-row[data-on] { opacity: 1; transform: none; pointer-events: auto; }
+  .tb-opt { display: grid; flex: none; place-items: center; width: 48px; height: 48px; border-radius: 14px; transition: background-color calc(140ms * var(--t, 1)) ease, box-shadow calc(140ms * var(--t, 1)) ease; }
+  .tb-opt svg { display: block; }
+  .tb-opt > * { transition: filter calc(180ms * var(--t, 1)) ease-out, opacity calc(180ms * var(--t, 1)) ease-out; }
+  /* The chosen option sits on a soft grey square, no outline (Figma 156:17484) */
+  .tb-opt[data-on] { background: #f3f3f1; }
+
+  /* Hair's tabs, a pill 9px over the bar in focus. It arrives once the bar has risen and leaves first */
+  .tb-crumb {
+    position: absolute;
+    top: calc(var(--A) - 33px);
+    left: 50%;
+    z-index: 4;
+    display: flex;
+    padding: 2px;
+    border-radius: 100px;
+    background: #fff;
+    box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.12), 0 2px 4px 1px rgb(0 0 0 / 0.05);
+    font-size: 12px;
+    line-height: 16px;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px) scale(0.96);
+    transition: opacity calc(110ms * var(--t, 1)) ease-out, transform calc(170ms * var(--t, 1)) ease-out;
+  }
+  .tb-crumb[data-on] {
+    opacity: 1;
+    transform: translateX(-50%);
+    transition: opacity calc(150ms * var(--t, 1)) ease-out calc(400ms * var(--t, 1)), transform calc(220ms * var(--t, 1)) cubic-bezier(0.2, 0, 0, 1) calc(400ms * var(--t, 1));
+  }
+  .tb-crumb__tab {
+    padding: 2px 8px;
+    border-radius: 100px;
+    color: #999996;
+    transition: background-color calc(150ms * var(--t, 1)) ease, color calc(150ms * var(--t, 1)) ease, scale calc(120ms * var(--t, 1)) ease-out;
+  }
+  .tb-crumb__tab[data-on] { background: #efefee; color: #151515; }
+
+  /* The main bar's Color tab: the rainbow wheel with a white hub */
+  .tb-rainbow {
+    position: relative;
+    display: block;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: conic-gradient(from 90deg, #f00, #ff7f00 30deg, #ff0 60deg, #0f0 120deg, #0ff 180deg, #00f 240deg, #f0f 300deg, #ff007f 330deg, #f00);
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.12);
+  }
+  /* the frame's own colour in place of the rainbow (as the editor: the wheel turns solid once a colour is chosen) */
+  .tb-rainbow[data-solid] { background: var(--c); box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.16); }
+  .tb-rainbow::after {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.8), 0 0.5px 1.5px rgb(0 0 0 / 0.18);
+  }
+
+  .tb-more {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: var(--more);
+    height: 48px;
+    border-radius: 14px;
+    overflow: hidden;
+    transition: background-color calc(160ms * var(--t, 1)) ease, opacity calc(110ms * var(--t, 1)) ease-out calc(110ms * var(--t, 1)), width calc(150ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1), margin calc(150ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1), scale calc(120ms * var(--t, 1)) ease-out;
+  }
+  .tb-more:not([data-show]) {
+    width: 0;
+    margin-left: calc(var(--gap) * -1);
+    opacity: 0;
+    transition: background-color calc(160ms * var(--t, 1)) ease, opacity calc(70ms * var(--t, 1)) ease-out, width calc(150ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1) calc(60ms * var(--t, 1)), margin calc(150ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1) calc(60ms * var(--t, 1)), scale calc(120ms * var(--t, 1)) ease-out;
+  }
+  .tb-more[data-on] { background: #eeece7; }
+  .tb-more[data-on] .tb-label { color: #0e0e0c; }
+  .tb-more__art svg { width: 26px; height: 26px; }
+
+  .tb-sep { flex: none; width: 2px; height: 13px; border-radius: 1px; background: #eeece7; }
+  .tb-close { display: grid; flex: none; place-items: center; width: var(--close, 28px); color: #a4a29a; transition: color calc(180ms * var(--t, 1)) ease-out; }
+
+  .tb-tools { display: flex; flex: none; gap: 6px; }
+  .tb-tool { display: grid; place-items: center; width: var(--tool); height: 48px; border-radius: 14px; }
+  /* All colours: the editor's rainbow wheel with its white stopper (assets: A.wheel.spectrum) */
+  .tb-wheel { display: block; line-height: 0; }
+  .tb-swatches { gap: var(--swgap); }
+  .tb-swatch { display: grid; flex: none; place-items: center; width: var(--sw); height: 48px; }
+  .tb-swatch svg { display: block; }
+
+  /* The main bar's pieces (the editor's dark bar) */
+  .tb-history {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    gap: var(--histgap, 28px);
+    width: var(--hist);
+    height: 56px;
+    box-sizing: border-box;
+    border: 0.5px solid #43413e;
+    border-radius: 14px;
+    background: #2a2826;
+    box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.33);
+  }
+  .tb-hist { display: grid; place-items: center; color: #dad8d4; transition: color calc(160ms * var(--t, 1)) ease-out; }
+  .tb-hist[data-off] { color: #676560; }
+  .tb-more-btn { width: var(--morebtn); color: #dad8d4; }
+  .tb-groove { flex: none; width: 2px; height: 24px; border-radius: 100px; background: #151514; box-shadow: inset -0.5px 0 0.5px rgb(207 210 212 / 0.25), inset 0 0 0.2px rgb(169 172 176 / 0.66); }
+  .tb-cats { position: relative; display: flex; gap: var(--catgap); }
+  .tb-cat { position: relative; z-index: 1; display: grid; grid-template-rows: 28px auto; place-items: center; align-content: center; width: var(--cat); height: 56px; transition: scale calc(120ms * var(--t, 1)) ease-out; }
+  .tb-cat[data-k="outfit"], .tb-cat[data-k="color"] { width: var(--cat-wide); gap: 2px; }
+  .tb-cat[data-on] .tb-label { color: #0e0e0c; }
+  /* A pressed tab gives a little, as the editor's do */
+  .tb-cat[data-pressed], .tb-crumb__tab[data-pressed], .tb-more[data-pressed] { scale: 0.97; }
+  /* The white selection behind the chosen tab */
+  .tb-ind {
+    position: absolute;
+    top: 0;
+    left: calc(var(--cat) + var(--catgap));
+    width: var(--cat);
+    height: 56px;
+    border-radius: 14px;
+    background: #fff;
+    opacity: 0;
+    transition: opacity calc(120ms * var(--t, 1)) ease-out;
+  }
+  .tb-ind[data-on] { opacity: 1; }
+
+  /* ---- The bar under the top one: drawn, but quiet ---- */
+  /* The black main bar, folded into the tray, turns grey; the white bar you came from stays white */
+  & .ss-stage { --under: #e4e3e0; }
+
+  /* ---- The panel: every colour at once ----
+     It stands on the stack's foot (the lower bar's bottom edge) and reaches as far up as its rows need.
+     Closed, only the strip where the Colour bar sits is cut out of it, drawn in at the sides; opening,
+     that cut grows to the whole panel, so the bar itself seems to become it. The bars it covers are
+     put away while it is open. */
+  .tb-panel {
+    --cell: 18px;
+    --cgap: 4px;
+    --pad: 14px;
+    --ph: calc(8 * var(--cell) + 7 * var(--cgap) + 2 * var(--pad));
+    position: absolute;
+    left: 50%;
+    top: calc(var(--B) + 64px - var(--ph));
+    z-index: 5;
+    box-sizing: border-box;
+    height: var(--ph);
+    padding: var(--pad);
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 1px 3px rgb(82 78 72 / 0.08), 0 5px 5px rgb(82 78 72 / 0.07), 0 12px 7px rgb(82 78 72 / 0.04), 0 0 0 0.5px rgb(0 0 0 / 0.25);
+    transform: translateX(-50%);
+    opacity: 0;
+    pointer-events: none;
+    clip-path: inset(calc(var(--ph) - 64px - (var(--B) - var(--A))) 28px calc(var(--B) - var(--A)) 28px round 18px);
+    transition: clip-path calc(380ms * var(--t, 1)) cubic-bezier(0.22, 1, 0.36, 1), opacity calc(120ms * var(--t, 1)) ease-out calc(140ms * var(--t, 1));
+    will-change: clip-path, opacity;
+  }
+  .tb-panel[data-on] {
+    opacity: 1;
+    pointer-events: auto;
+    clip-path: inset(-24px -64px -24px -24px round 18px);
+    transition: clip-path calc(420ms * var(--t, 1)) cubic-bezier(0.22, 1, 0.36, 1), opacity calc(100ms * var(--t, 1)) ease-out;
+  }
+  .tb-grid { display: flex; flex-direction: column; gap: var(--cgap); }
+  .tb-grid__row { display: flex; gap: var(--cgap); }
+  .tb-cell { flex: none; width: var(--cell); height: var(--cell); border-radius: 5px; box-shadow: inset 0 0 0 0.5px rgb(0 0 0 / 0.08); }
+  /* a sliver of the bar that was put away, still showing under the panel */
+  .tb-panel__peek { position: absolute; top: 100%; left: 28px; right: 28px; height: 8px; border-radius: 0 0 10.8px 10.8px; background: #fff; box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.2), 0 3px 3px rgb(82 78 72 / 0.06); clip-path: inset(0 -6px -8px -6px); opacity: 0; transition: opacity calc(120ms * var(--t, 1)) ease-out; }
+  .tb-panel[data-on] .tb-panel__peek { opacity: 1; transition-delay: calc(240ms * var(--t, 1)); }
+  /* its one button, outside the panel and halfway up it */
+  .tb-panel__close { position: absolute; left: calc(100% + 8px); top: 50%; display: grid; place-items: center; width: 40px; height: 40px; margin-top: -20px; border-radius: 14px; background: #fff; color: #a4a29a; box-shadow: 0 1px 3px rgb(82 78 72 / 0.08), 0 4px 6px rgb(82 78 72 / 0.06), 0 0 0 0.5px rgb(0 0 0 / 0.2); }
+  .tb-scene[data-panel] .tb-colour, .tb-scene[data-panel] .tb-hair { opacity: 0; transition: opacity calc(140ms * var(--t, 1)) ease-out; }
+  .tb-scene[data-panel] .tb-tray { opacity: 0; transition: opacity calc(120ms * var(--t, 1)) ease-out; }
+  & .ss-stage[data-layout="compact"] .tb-panel { --cell: 15px; --cgap: 3px; --pad: 10px; }
+  & .ss-stage[data-layout="compact"] .tb-panel__close { width: 34px; height: 34px; margin-top: -17px; left: calc(100% + 6px); }
+  @media (prefers-reduced-motion: reduce) {
+    .tb-panel, .tb-panel[data-on] { transition: opacity calc(140ms * var(--t, 1)) ease-out; clip-path: none; }
+  }
+  .tb-bar[data-muted] { box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.16), 0 2px 4px rgb(82 78 72 / 0.05); }
+  .tb-bar[data-muted] .tb-opt > *,
+  .tb-bar[data-muted] .tb-tab:not([data-on]) .tb-tab__art { filter: grayscale(1) brightness(1.2) contrast(0.6); opacity: 0.55; }
+  .tb-bar[data-muted] .tb-tab[data-on] .tb-tab__art { filter: grayscale(0.6); opacity: 0.8; }
+  .tb-bar[data-muted] .tb-label { color: #bfbcb4; }
+  .tb-bar[data-muted] .tb-more[data-on] .tb-label { color: #0e0e0c; }
+  .tb-bar[data-muted] .tb-opt[data-on] { background: #f6f6f4; }
+  .tb-bar[data-muted] .tb-close { color: #c9c6bf; }
+  .tb-tab__art { transition: filter calc(180ms * var(--t, 1)) ease-out, opacity calc(180ms * var(--t, 1)) ease-out; }
+
+  /* ---- A bar that just rose: its contents slide up from beneath, just after the surface ---- */
+  .tb-bar[data-enter] > *, .tb-bar[data-enter] .tb-row[data-on] > *, .tb-bar[data-enter] .tb-swatches > * { animation: tb-up calc(190ms * var(--t, 1)) cubic-bezier(0.2, 0, 0, 1) var(--d, 0ms) both; }
+  .tb-bar[data-enter] .tb-row > :nth-child(2), .tb-bar[data-enter] .tb-swatches > :nth-child(2) { animation-delay: calc(var(--d, 0ms) + 22ms * var(--t, 1)); }
+  .tb-bar[data-enter] .tb-row > :nth-child(3), .tb-bar[data-enter] .tb-swatches > :nth-child(3) { animation-delay: calc(var(--d, 0ms) + 34ms * var(--t, 1)); }
+  .tb-bar[data-enter] .tb-swatches > :nth-child(4) { animation-delay: calc(var(--d, 0ms) + 46ms * var(--t, 1)); }
+  .tb-bar[data-enter] .tb-swatches > :nth-child(5) { animation-delay: calc(var(--d, 0ms) + 58ms * var(--t, 1)); }
+  .tb-bar[data-enter] .tb-swatches > :nth-child(6) { animation-delay: calc(var(--d, 0ms) + 70ms * var(--t, 1)); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tb-bar, .tb-tray, .tb-more { transition: opacity calc(140ms * var(--t, 1)) ease-out !important; }
+    .tb-crumb, .tb-crumb[data-on] { transform: translateX(-50%); transition: opacity calc(140ms * var(--t, 1)) ease-out; }
+    .tb-bar[data-enter][data-pos="top"] { animation: none; }
+    .tb-bar[data-pos="under"] { filter: none; }
+    .tb-bar[data-enter] > *, .tb-bar[data-enter] .tb-row > *, .tb-bar[data-enter] .tb-swatches > * { animation: none; }
+    .tb-layers > *, .tb-rows > .tb-row { transition: opacity calc(140ms * var(--t, 1)) ease-out; transform: none; }
+  }
+}
+
+/* A scene showing reduced motion: bars fade in and out, nothing rises, slides, scales or blurs */
+.tb-card.tb-reduced {
+  & .tb-panel, & .tb-panel[data-on] { transition: opacity 140ms ease-out; clip-path: none; }
+  & .tb-bar, & .tb-tray, & .tb-more { transition: opacity 140ms ease-out !important; }
+  & .tb-crumb, & .tb-crumb[data-on] { transform: translateX(-50%); transition: opacity 140ms ease-out; }
+  & .tb-bar[data-enter][data-pos="top"] { animation: none; transition: opacity 140ms ease-out !important; }
+  & .tb-bar[data-pos="under"], & .tb-bar[data-pos="tray"] { filter: none; }
+  & .tb-hair[data-pos="under"], & .tb-colour[data-pos="under"] { transform: translateX(-50%); }
+  & .tb-hair[data-pos="under"] { transform: translateX(-50%) translateY(calc(var(--B) - var(--A))); }
+  & .tb-main[data-pos="tray"] { transform: translateX(-50%); }
+  & .tb-hair[data-pos="below"] { transition: opacity 140ms ease-out, transform 0s !important; }
+  & .tb-bar[data-enter] > *, & .tb-bar[data-enter] .tb-row > *, & .tb-bar[data-enter] .tb-swatches > * { animation: none; }
+}
+
+/* Height first (a small chip at the centre grows to full height), then width out to the bar's own width
+   (--w); the bar is real all the way, edge and shadow, its contents pinned left and revealed as it widens */
+@keyframes tb-grow {
+  0% { max-width: 24px; height: 10px; margin-top: 27px; }
+  42% { max-width: 56px; height: 64px; margin-top: 0; }
+  100% { max-width: var(--w, 640px); height: 64px; margin-top: 0; }
+}
+@keyframes tb-up { from { opacity: 0; transform: translateY(10px); } }
+@keyframes tb-tab { from { opacity: 0.25; transform: translateY(2px); } }
+@keyframes tb-fade { from { opacity: 0; } }
