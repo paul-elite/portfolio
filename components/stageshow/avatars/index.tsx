@@ -37,18 +37,18 @@ const base: S = { level: 0, enter: null, hair: 'bob', green: false, tab: 'style'
 // stage can ease them like the editor does. ----
 type Z = ReturnType<typeof sizes>
 const sizes = (compact: boolean) => compact
-  ? { tab: 40, opt: 48, gap: 6, more: 48, sw: 30, swGap: 2, tool: 36, padL: 4, padR: 10, colPad: 10, close: 24, sep: 2, hairs: ['ponytail', 'bob', 'bun', 'wavy'] as Hair[], hats: ['hat'] as const, swatches: ['#1a1a1a', '#5a3620', '#50c810', '#f70492'], main: 326 }
+  ? { tab: 40, opt: 48, gap: 6, more: 48, sw: 30, swGap: 2, tool: 36, padL: 4, padR: 10, colPad: 10, close: 24, sep: 2, hairs: ['ponytail', 'bob', 'wavy'] as Hair[], hats: ['hat'] as const, swatches: ['#1a1a1a', '#5a3620', '#50c810', '#f70492'], main: 326 }
   : { tab: 54, opt: 48, gap: 10, more: 48, sw: 32, swGap: 4, tool: 40, padL: 4, padR: 16, colPad: 12, close: 28, sep: 2, hairs: ['ponytail', 'bob', 'bun', 'wavy'] as Hair[], hats: ['hat', 'hijab'] as const, swatches: ['#1a1a1a', '#5a3620', '#a8693f', '#e8b04b', '#50c810', '#f70492'], main: 444 }
 // Bars are centred with translateX(-50%): an even width keeps them on whole pixels
 const even = (n: number) => Math.ceil(n / 2) * 2
 const sum = (n: number, size: number, gap: number) => n * size + Math.max(0, n - 1) * gap
 const closeW = (z: Z) => z.gap + z.sep + z.gap + z.close
 function hairWidth(s: S, z: Z) {
-  const opts = s.tab === 'style' ? z.hairs.length : 1 + z.hats.length
+  const opts = 1 + (s.tab === 'style' ? z.hairs.length : z.hats.length)
   const colour = s.tab === 'style' || s.cap
   return even(z.padL + sum(opts, z.opt, 9) + (colour ? z.gap + z.more : 0) + closeW(z) + z.padR)
 }
-const colourWidth = (z: Z) => even(z.colPad + 2 * z.tool + 6 + z.gap + z.sep + z.gap + sum(z.swatches.length, z.sw, z.swGap) + closeW(z) + z.colPad)
+const colourWidth = (z: Z) => even(z.colPad + 2 * z.tool + 6 + z.gap + z.sep + z.gap + sum(z.swatches.length, z.sw, z.swGap) + z.gap + z.close + closeW(z) + z.colPad)
 
 const Svg = ({ src, className, ...rest }: { src: string; className?: string } & Record<`data-${string}`, unknown>) => <span className={className} aria-hidden dangerouslySetInnerHTML={{ __html: src }} {...rest} />
 
@@ -74,6 +74,9 @@ const GRID: string[][] = [
   Array.from({ length: 12 }, (_, i) => `hsl(40 4% ${Math.round(100 - i * (100 / 11))}%)`),
 ]
 const GREEN_AT = { row: 4, col: 4 }
+// Expand: the editor's four arrows pointing outward (every option at once). Every colour bar has it, beside the ×
+const EXPAND = ['M8 3.1S4.03 2.74 3.39 3.39C2.74 4.03 3.1 8 3.1 8', 'M8 20.9s-3.97.36-4.61-.29C2.74 19.97 3.1 16 3.1 16', 'M16 3.1s3.97-.36 4.61.29C21.26 4.03 20.9 8 20.9 8', 'M16 20.9s3.97.36 4.61-.29C21.26 19.97 20.9 16 20.9 16', 'M14.01 10l6.05-6.05', 'M10 14l-6.36 6.38', 'M10 10L3.85 3.86', 'M13.98 14l6.55 6.5']
+const Expand = () => <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden>{EXPAND.map((d) => <path key={d} d={d} {...LINE} />)}</svg>
 const Close = () => <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden><path d="M18 6 6 18M6 6l12 12" {...LINE} /></svg>
 const More = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
@@ -166,6 +169,7 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
           })}
         </div>
         <span className="av-sep" />
+        <span className="av-close av-expand" data-cursor="hand"><Expand /></span>
         <span className="av-close" data-target="close-colour" data-cursor="hand"><Close /></span>
       </div>
 
@@ -180,6 +184,8 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
         {/* Both tabs' rows share one cell (they're the same width); the chosen one crosses in */}
         <div className="av-rows">
           <div className="av-row" data-on={s.tab === 'style' || undefined}>
+            {/* None comes first and never scrolls, as in the editor */}
+            <span className="av-opt" data-cursor="hand"><None /></span>
             {z.hairs.map((h) => (
               <span key={h} className="av-opt" data-on={s.hair === h || undefined} data-target={s.tab === 'style' ? 'hair-' + h : undefined} data-cursor="hand">
                 {/* only the chosen style wears the hair colour; the rest stay grey */}
@@ -219,9 +225,10 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
               {k === 'hair'
                 ? <Layers className="av-cat__art" show={s.level > 0 ? 1 : 0} items={[A.bar.hair, A.bar.hairOn]} />
                 : k === 'color'
-                  ? <span className="av-cat__art" aria-hidden><span className="av-rainbow" /></span>
+                  ? <span className="av-cat__art" aria-hidden><span className="av-rainbow" data-solid style={{ '--c': '#fff' } as CSSProperties} /></span>
                   : <Svg src={A.bar[k]} className="av-cat__art" />}
-              {/* (the tile for the background: the editor calls it Frame since 26 Nov 2026) */}
+              {/* (the tile for the background: the editor calls it Frame since 26 Nov 2026. Its wheel is solid in the
+                  frame's colour, as the editor draws it, rather than the rainbow) */}
               <span className="av-label">{k === 'color' ? 'Frame' : k[0].toUpperCase() + k.slice(1)}</span>
             </span>
           ))}
@@ -276,8 +283,8 @@ function Frame({ initial, poster, script, still, label, slow = 1, reduced, capti
   const touch = useTouch()
   const [run, setRun] = useState(0)
   // A scene that is shown slowed down lets the reader choose how slow (the user, 2026-11-26): a menu of
-  // 1×, 2× and 3× in place of a fixed "Slowed down 3×". It opens on the speed the scene was written
-  // for; choosing another plays the scene again at that speed. 1× is the editor's real speed.
+  // 1x, 2x and 3x in place of a fixed "Slowed down 3×". It opens on the speed the scene was written
+  // for; choosing another plays the scene again at that speed. 1x is the editor's real speed.
   const slowable = slow > 1
   const [speed, setSpeed] = useState(slow)
   // Nothing loops: a scene plays once while the pointer is over it (once when seen, on a phone),
@@ -312,7 +319,7 @@ function Frame({ initial, poster, script, still, label, slow = 1, reduced, capti
                   aria-label="How much the scene is slowed down"
                   onChange={(e) => { setSpeed(Number(e.target.value)); setRun((n) => n + 1) }}
                 >
-                  {[1, 2, 3].map((n) => <option key={n} value={n}>{n}×</option>)}
+                  {[1, 2, 3].map((n) => <option key={n} value={n}>{n}x</option>)}
                 </select>
                 <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </span>
