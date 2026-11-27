@@ -200,8 +200,22 @@
 @media (max-width: 520px) {
   .col { --rail: 56px; --rg: 16px; }
 }
+/* Holds the turning disc and, outside it, the Spotify mark at its lower right, which never turns */
+.spwDiscWrap { position: relative; display: block; width: 44px; height: 44px; flex: 0 0 auto; }
+.spwMark {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  /* a ring of the page's own colour, so the mark sits on the disc's edge instead of melting into the art */
+  box-shadow: 0 0 0 2px #fefcf5;
+  pointer-events: none;
+}
 .spwDisc {
   position: relative;
+  display: block;
   width: 44px;
   height: 44px;
   border-radius: 50%;
