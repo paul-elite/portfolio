@@ -69,7 +69,7 @@
 .tocLink[data-state="current"] { color: #111; }
 
 /* The ruler beside the labels: one long tick level with each topic and one short tick halfway to the
-   next, each taking its topic's state: quietest still to come, mid grey once read, blue where you are (the user, 2026-11-27) */
+   next, each taking its topic's state: quietest still to come, mid grey once read, dark where you are */
 .seg {
   position: absolute;
   left: -22px;
@@ -81,7 +81,7 @@
   transition: background-color 0.18s ease, width 0.18s ease-out;
 }
 .seg[data-state="read"] { background: rgba(0, 0, 0, 0.22); }
-.seg[data-state="current"] { width: 6px; background: #1084fe; }
+.seg[data-state="current"] { width: 6px; background: #111; }
 .tickLong {
   position: absolute;
   pointer-events: none;
@@ -93,7 +93,10 @@
   transition: background-color 0.18s ease, width 0.18s ease-out;
 }
 .tickLong[data-state="read"] { background: rgba(0, 0, 0, 0.35); }
-.tickLong[data-state="current"] { width: 10px; background: #1084fe; }
+.tickLong[data-state="current"] { width: 10px; background: #111; }
+/* The label under the pointer (the one wearing the white card) has its tick in blue (the user, 2026-11-27) */
+.tocLink:focus-visible > .tickLong { background: #1084fe; }
+@media (hover: hover) { .tocLink:hover > .tickLong { background: #1084fe; } }
 
 /* ---- right: the article ---- */
 .article {
@@ -166,6 +169,23 @@
 /* Sections set apart by white space alone, no line (a project tagged 'no-rules': Tabs that stack, the user
    2026-11-27). The space the line and its padding took is kept as margin */
 .page[data-rules="off"] .article :where(h2, h3) { border-top: 0; padding-top: 0; margin-top: 3.5rem; }
+/* An exact value in the text (`150ms`, `64px`): set in the sans on a chip a little lighter than the page,
+   with a hairline and a 4px corner, the way technical writing sets values apart from prose (the user,
+   2026-11-27). Never broken across lines */
+.article [data-value] {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.87em;
+  letter-spacing: 0;
+  -webkit-text-stroke: 0.2px currentColor;
+  color: #3a3a38;
+  padding: 0.1em 0.38em;
+  margin: 0 0.06em;
+  border-radius: 4px;
+  background: #fffefb;
+  box-shadow: 0 0 0 0.5px rgba(130, 100, 20, 0.2);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
 /* A highlighter mark: the hand-drawn marker stroke from Figma 140:9832 (#FFD200, round ends, a slight
    wave), stretched behind the words, which are plain black. Each wrapped line gets its own stroke */
 .article mark {

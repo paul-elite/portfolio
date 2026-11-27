@@ -5,11 +5,14 @@ import type { ContentBlock } from '@/lib/content-model';
 import { headingId } from '@/lib/toc';
 import InteractiveBlock from '@/components/content/interactive/InteractiveBlock';
 
-// ==like this== in a text block draws a highlighter mark behind those words
+// ==like this== in a text block draws a highlighter mark behind those words; `like this` sets an exact
+// value (a timing, a size: `150ms`, `64px`) apart in the sans, on a small chip
 function marked(text?: string) {
-  if (!text || !text.includes('==')) return text;
-  return text.split(/(==[^=]+==)/g).map((part, i) =>
-    part.startsWith('==') && part.endsWith('==') ? <mark key={i}>{part.slice(2, -2)}</mark> : part,
+  if (!text || !(text.includes('==') || text.includes('`'))) return text;
+  return text.split(/(==[^=]+==|`[^`]+`)/g).map((part, i) =>
+    part.startsWith('==') && part.endsWith('==') ? <mark key={i}>{part.slice(2, -2)}</mark>
+      : part.length > 2 && part.startsWith('`') && part.endsWith('`') ? <span key={i} data-value>{part.slice(1, -1)}</span>
+        : part,
   );
 }
 
