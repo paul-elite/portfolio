@@ -60,12 +60,6 @@ const Undo = ({ redo }: { redo?: boolean }) => (
     <path d="M20.99 8h-12a6 6 0 0 0 0 12h4M16.99 4l1.16.88C20.04 6.32 20.99 7.04 20.99 8s-.95 1.68-2.84 3.12L16.99 12" {...LINE} />
   </svg>
 )
-// The panel's own button (the editor's four arrows turned inward: show fewer)
-const Collapse = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden>
-    <path d="M3 3l6 6m0 0V4.5M9 9H4.5M21 3l-6 6m0 0V4.5M15 9h4.5M3 21l6-6m0 0v4.5M9 15H4.5M21 21l-6-6m0 0v4.5m0-4.5h4.5" {...LINE} />
-  </svg>
-)
 // The panel's colours, as the editor lays them out: twelve hues across, pale at the top to deep at the foot,
 // and a row of greys. One cell is the scene's green.
 const HUES = [0, 22, 38, 52, 86, 140, 168, 196, 216, 250, 282, 318]
@@ -141,7 +135,7 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
             </div>
           ))}
         </div>
-        <span className="tb-panel__close" data-target="collapse" data-cursor="hand"><Collapse /></span>
+        <span className="tb-panel__close" data-target="collapse" data-cursor="hand"><Close /></span>
       </div>
 
       {/* The tray: the main bar folded under Hair */}
