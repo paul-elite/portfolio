@@ -14,6 +14,13 @@ export const revalidate = 60;
 
 const CARD_ONLY = 'search-interfaces';
 
+// Share images made for one article (public/og/<slug>.png, 2400×1260 = 1200×630 at 2×). An article
+// without one keeps the site's own
+const OG: Record<string, string> = {
+  'tabs-that-stack': '/og/tabs-that-stack.png',
+};
+const SITE = 'https://paulelite.com';
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const p = await getProjectBySlug(slug);
@@ -23,7 +30,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const draft = !!p?.tags?.includes('draft');
   // A project with its own icon shows it in the tab; the rest keep the site's (the portrait)
   const icons = p?.avatar ? { icon: p.avatar, shortcut: p.avatar, apple: p.avatar } : undefined;
-  return { title: p ? `${p.title} - ${name}` : name, ...(icons ? { icons } : {}), ...(draft ? { robots: { index: false, follow: false } } : {}) };
+  const og = OG[slug];
+  const share = og && p
+    ? {
+        openGraph: { title: p.title, description: p.description || undefined, url: `${SITE}/projects/${slug}`, type: 'article' as const, images: [{ url: SITE + og, width: 2400, height: 1260, alt: p.title }] },
+        twitter: { card: 'summary_large_image' as const, title: p.title, description: p.description || undefined, images: [SITE + og] },
+      }
+    : {};
+  return { title: p ? `${p.title} - ${name}` : name, ...(p?.description && og ? { description: p.description } : {}), ...share, ...(icons ? { icons } : {}), ...(draft ? { robots: { index: false, follow: false } } : {}) };
 }
 
 export default async function ProjectContent({ params }: { params: Promise<{ slug: string }> }) {
