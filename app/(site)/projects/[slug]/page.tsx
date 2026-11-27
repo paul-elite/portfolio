@@ -17,7 +17,7 @@ const CARD_ONLY = 'search-interfaces';
 // Share images made for one article (public/og/<slug>.png, 2400×1260 = 1200×630 at 2×). An article
 // without one keeps the site's own
 const OG: Record<string, string> = {
-  'tabs-that-stack': '/og/tabs-that-stack.png',
+  'tabs-that-stack': '/og/tabs-that-stack.png?v=2', // v2: the user's collage from Figma (2026-11-27)
 };
 const SITE = 'https://paulelite.com';
 
