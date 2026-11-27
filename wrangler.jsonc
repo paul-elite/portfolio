@@ -8,6 +8,9 @@
   "vars": { "DEPLOYED": "1" },
   // the user's domain (the zone is on Cloudflare since 2026-11-26): Cloudflare makes the DNS records and
   // the certificates for custom domains itself
+  // (with routes of its own a Worker loses its workers.dev address unless this says to keep it; the
+  // avatar API and older links still use it)
+  "workers_dev": true,
   "routes": [
     { "pattern": "paulelite.com", "custom_domain": true },
     { "pattern": "www.paulelite.com", "custom_domain": true },
