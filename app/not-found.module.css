@@ -1,0 +1,75 @@
+/* The 404: the article pages' warm ground, Hedvig type, and the avatar editor's dark bar as the way out */
+.page {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 48px 20px;
+  background: #fefcf5;
+  color: #111;
+}
+.inner {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.code {
+  margin: 0 0 18px;
+  font: 13px/1 var(--nf-sans), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  color: #999996;
+  padding: 6px 10px;
+  border-radius: 100px;
+  background: #fffefb;
+  box-shadow: 0 0 0 0.5px rgba(130, 100, 20, 0.2);
+  font-variant-numeric: tabular-nums;
+}
+.title {
+  margin: 0;
+  font: 400 28px/1.2 var(--nf-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-text-stroke: 0.35px currentColor;
+  letter-spacing: -0.01em;
+}
+.lead {
+  margin: 14px 0 0;
+  max-width: 44ch;
+  font: 400 15px/1.6 var(--nf-serif), Georgia, 'Times New Roman', serif;
+  letter-spacing: 0.3px;
+  color: #545454;
+  -webkit-text-stroke: 0.125px currentColor;
+}
+
+/* The way out: the editor's main bar, dark, nothing selected; a tab you point at takes the white chip */
+.bar {
+  margin-top: 36px;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 20px;
+  background: #202123;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.25), 0 12px 32px rgba(32, 33, 35, 0.16), 0 2px 6px rgba(32, 33, 35, 0.12);
+}
+.tab {
+  display: grid;
+  grid-template-rows: 24px auto;
+  place-items: center;
+  gap: 4px;
+  min-width: 76px;
+  padding: 10px 10px 8px;
+  border-radius: 16px;
+  color: #9a9ca3;
+  font: 12px/1.2 var(--nf-sans), ui-sans-serif, system-ui, sans-serif;
+  text-decoration: none;
+  transition: background-color 160ms ease, color 160ms ease, transform 120ms ease-out;
+}
+.tab:hover { background: #fff; color: #111; }
+.tab:active { transform: scale(0.97); }
+.tab:focus-visible { outline: none; background: #fff; color: #111; box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25); }
+
+@media (max-width: 420px) {
+  .title { font-size: 24px; }
+  .tab { min-width: 64px; padding: 9px 6px 7px; }
+}
+@media (prefers-reduced-motion: reduce) { .tab { transition: none; } }
