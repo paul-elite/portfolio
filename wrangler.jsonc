@@ -10,7 +10,9 @@
   // the certificates for custom domains itself
   "routes": [
     { "pattern": "paulelite.com", "custom_domain": true },
-    { "pattern": "www.paulelite.com", "custom_domain": true }
+    { "pattern": "www.paulelite.com", "custom_domain": true },
+    // the shop (Bachs payments), served by the same Worker: middleware.ts puts its pages at the root
+    { "pattern": "shop.paulelite.com", "custom_domain": true }
   ],
   "observability": { "enabled": true }
 }

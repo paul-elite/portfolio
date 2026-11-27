@@ -4,7 +4,7 @@ import { claimEvent, findOrder, releaseEvent, updateOrder } from '@/lib/store';
 
 // Bachs webhook: the only thing that marks an order paid. Verified on the raw body, applied once per
 // event id, and checked against the checkout itself (status, amount, currency) before a file unlocks.
-// Register https://work.paulelite.me/api/webhooks/bachs for checkout.completed, collection.succeeded
+// Register https://shop.paulelite.com/api/webhooks/bachs for checkout.completed, collection.succeeded
 // and checkout.expired.
 
 const PAYMENT_EVENTS = new Set(['checkout.completed', 'collection.succeeded']);

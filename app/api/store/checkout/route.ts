@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createCheckoutSession, hasBachsConfig } from '@/lib/bachs';
 import { hasSupabaseConfig } from '@/lib/supabase';
-import { createOrder, getProduct, setOrderCheckout, siteUrl } from '@/lib/store';
+import { createOrder, getProduct, setOrderCheckout } from '@/lib/store';
+import { shopUrlFor } from '@/lib/shop';
 
 // Start a purchase: the server picks the product and price, saves an order, opens a Bachs hosted checkout
 // and returns its URL. The browser never decides what is charged.
@@ -18,14 +19,15 @@ export async function POST(req: NextRequest) {
 
   try {
     const order = await createOrder(product);
-    const site = siteUrl();
+    // back to the address the buyer started on (the shop's own, normally)
+    const site = shopUrlFor(req.url);
     const session = await createCheckoutSession({
       reference: order.id,
       amount: Number(product.price_amount).toFixed(2),
       currency: product.price_currency,
       bachsProductId: product.bachs_product_id,
-      successUrl: `${site}/store/order/${order.access_token}`,
-      cancelUrl: `${site}/store/${product.slug}`,
+      successUrl: `${site}/order/${order.access_token}`,
+      cancelUrl: `${site}/${product.slug}`,
       idempotencyKey: order.idempotency_key,
       metadata: { order_id: order.id, product: product.slug },
     });
