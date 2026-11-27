@@ -58,7 +58,7 @@ export default async function ProjectContent({ params }: { params: Promise<{ slu
 
   // a project tagged 'no-back' shows Back as a faded, disabled "Back to Home" (Tabs that stack, the user 2026-11-27)
   return (
-    <ArticleReader title={project.title} date={longDate(project.published || project.year)} toc={toc} back={!project.tags?.includes('no-back')}>
+    <ArticleReader title={project.title} date={longDate(project.published || project.year)} toc={toc} back={!project.tags?.includes('no-back')} rules={!project.tags?.includes('no-rules')}>
       {/* The description is the project's card line; the article opens on its own text (Figma 140:9911) */}
       {csShown.map(([label, value]) => (
         <div key={label}>

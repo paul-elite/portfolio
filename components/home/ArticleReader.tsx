@@ -18,6 +18,7 @@ export default function ArticleReader({
   date,
   toc = [],
   back = true,
+  rules = true,
   children,
 }: {
   title: string;
@@ -25,10 +26,12 @@ export default function ArticleReader({
   toc?: Toc;
   // false shows Back as "Back to Home", disabled and faded (a project tagged 'no-back')
   back?: boolean;
+  // false sets sections apart with white space only, no line above each heading (a project tagged 'no-rules')
+  rules?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <main data-reader className={`${serif.variable} ${sans.variable} ${r.page}`}>
+    <main data-reader data-rules={rules ? undefined : 'off'} className={`${serif.variable} ${sans.variable} ${r.page}`}>
       <BackBar>
         {back ? (
           <Link href="/" className={r.back}>

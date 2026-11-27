@@ -163,6 +163,9 @@
   border-top: 0.5px solid rgba(130, 100, 20, 0.13);
   scroll-margin-top: 4.5rem;
 }
+/* Sections set apart by white space alone, no line (a project tagged 'no-rules': Tabs that stack, the user
+   2026-11-27). The space the line and its padding took is kept as margin */
+.page[data-rules="off"] .article :where(h2, h3) { border-top: 0; padding-top: 0; margin-top: 3.5rem; }
 /* A highlighter mark: the hand-drawn marker stroke from Figma 140:9832 (#FFD200, round ends, a slight
    wave), stretched behind the words, which are plain black. Each wrapped line gets its own stroke */
 .article mark {
