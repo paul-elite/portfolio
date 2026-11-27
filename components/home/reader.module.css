@@ -169,6 +169,12 @@
 /* Sections set apart by white space alone, no line (a project tagged 'no-rules': Tabs that stack, the user
    2026-11-27). The space the line and its padding took is kept as margin */
 .page[data-rules="off"] .article :where(h2, h3) { border-top: 0; padding-top: 0; margin-top: 3.5rem; }
+/* An image that melts into the page at its edges (an image block with meta.vignette), the same oval
+   fade the demos' dotted ground uses (the user, 2026-11-27) */
+.article figure[data-vignette] img {
+  -webkit-mask-image: radial-gradient(ellipse 72% 78% at 50% 50%, #000 52%, transparent 100%);
+  mask-image: radial-gradient(ellipse 72% 78% at 50% 50%, #000 52%, transparent 100%);
+}
 /* An exact value in the text (`150ms`, `64px`): set in the sans on a chip a little lighter than the page,
    with a hairline and a 4px corner, the way technical writing sets values apart from prose (the user,
    2026-11-27). Never broken across lines */

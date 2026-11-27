@@ -67,7 +67,8 @@ function ContentBlockView({ block, type }: { block: ContentBlock; type: (typeof 
       );
     case 'image':
       return (
-        <figure className="my-6 rounded-lg overflow-hidden">
+        // meta.vignette: the image fades into the page at its edges, like the demos' dotted ground
+        <figure className={block.meta?.vignette ? 'my-6' : 'my-6 rounded-lg overflow-hidden'} data-vignette={block.meta?.vignette ? '' : undefined}>
           <OptimizedImage
             src={block.content}
             alt={block.meta?.alt || ''}

@@ -9,7 +9,9 @@ export interface ContentBlock {
     language?: string;
     size?: 'small' | 'medium' | 'large' | 'full';
     /** Headings only: false leaves it out of the table of contents */
-    toc?: boolean;
+    toc?: boolean
+    // an image that fades into the page at its edges
+    vignette?: boolean;
   };
 }
 
