@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { Stage, type Act } from '../kit'
 import { A } from './assets'
 import { humanHand } from '../hand'
@@ -108,6 +108,30 @@ function Layers({ show, items, className }: { show: number; items: string[]; cla
   )
 }
 
+// Hair's tabs (Style · Headwear): one white chip that slides to the chosen tab, as in the editor
+// (the user, 2026-11-27). The chip is measured from the chosen tab; the first time it is placed without moving
+function Crumb({ open, tab }: { open: boolean; tab: 'style' | 'wear' }) {
+  const box = useRef<HTMLDivElement>(null)
+  const chip = useRef<HTMLSpanElement>(null)
+  useLayoutEffect(() => {
+    const b = box.current, c = chip.current
+    const on = b?.querySelector<HTMLElement>('.tb-crumb__tab[data-on]')
+    if (!b || !c || !on) return
+    const first = !c.dataset.placed
+    if (first) c.style.transition = 'none'
+    c.style.width = on.offsetWidth + 'px'
+    c.style.transform = `translateX(${on.offsetLeft}px)`
+    if (first) { void c.offsetWidth; c.style.transition = ''; c.dataset.placed = '1' }
+  }, [tab])
+  return (
+    <div className="tb-crumb" ref={box} data-on={open || undefined} role="tablist">
+      <span className="tb-crumb__chip" ref={chip} aria-hidden />
+      <span className="tb-crumb__tab" data-on={tab === 'style' || undefined} data-target="tab-style" data-cursor="hand">Style</span>
+      <span className="tb-crumb__tab" data-on={tab === 'wear' || undefined} data-target="tab-wear" data-cursor="hand">Headwear</span>
+    </div>
+  )
+}
+
 function Scene({ s, compact }: { s: S; compact: boolean }) {
   const z = sizes(compact)
   const hairPos = s.level === 0 ? 'under' : s.level === 1 ? 'top' : 'below'
@@ -170,10 +194,7 @@ function Scene({ s, compact }: { s: S; compact: boolean }) {
       </div>
 
       {/* Hair's tabs: a small pill over the bar in focus (Figma 156:17484), gone once Hair is under Colour */}
-      <div className="tb-crumb" data-on={s.level === 1 || undefined} role="tablist">
-        <span className="tb-crumb__tab" data-on={s.tab === 'style' || undefined} data-target="tab-style" data-cursor="hand">Style</span>
-        <span className="tb-crumb__tab" data-on={s.tab === 'wear' || undefined} data-target="tab-wear" data-cursor="hand">Headwear</span>
-      </div>
+      <Crumb open={s.level === 1} tab={s.tab} />
 
       {/* Hair: rises from behind the main bar; slides down muted under Colour */}
       <div className="tb-bar tb-hair" data-pos={hairPos} data-muted={s.level === 2 || undefined} data-enter={s.enter === 'hair' || undefined} style={{ width: hw, '--w': hw + 'px' } as CSSProperties}>

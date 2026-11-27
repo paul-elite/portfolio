@@ -316,7 +316,22 @@
     color: #999996;
     transition: background-color calc(150ms * var(--t, 1)) ease, color calc(150ms * var(--t, 1)) ease, scale calc(120ms * var(--t, 1)) ease-out;
   }
-  .tb-crumb__tab[data-on] { background: #fff; color: #151515; box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.1); }
+  .tb-crumb__tab[data-on] { color: #151515; }
+  .tb-crumb__tab { position: relative; z-index: 1; }
+  /* the chosen tab's white chip, one for both tabs, sliding between them (placed by Crumb) */
+  .tb-crumb__chip {
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: 0;
+    width: 0;
+    border-radius: 100px;
+    background: #fff;
+    box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.1);
+    pointer-events: none;
+    will-change: transform;
+    transition: transform calc(220ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1), width calc(220ms * var(--t, 1)) cubic-bezier(0.45, 0, 0.1, 1);
+  }
 
   /* The main bar's Color tab: the rainbow wheel with a white hub */
   .tb-rainbow {
@@ -482,6 +497,7 @@
   @media (prefers-reduced-motion: reduce) {
     .tb-bar, .tb-tray, .tb-more { transition: opacity calc(140ms * var(--t, 1)) ease-out !important; }
     .tb-crumb, .tb-crumb[data-on] { transform: translateX(-50%); transition: opacity calc(140ms * var(--t, 1)) ease-out; }
+    .tb-crumb__chip { transition: none; }
     .tb-bar[data-enter][data-pos="top"] { animation: none; }
     .tb-bar[data-pos="under"] { filter: none; }
     .tb-bar[data-enter] > *, .tb-bar[data-enter] .tb-row > *, .tb-bar[data-enter] .tb-swatches > * { animation: none; }
