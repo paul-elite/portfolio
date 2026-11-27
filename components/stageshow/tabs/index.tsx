@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { Stage, type Act } from '../kit'
 import { A } from './assets'
 import { humanHand } from '../hand'
@@ -275,6 +275,69 @@ type FrameProps = {
   caption?: string
   cursor?: boolean // false: the camera tells it, nothing is pressed
 }
+// How slow a slowed scene plays (the user, 2026-11-27): our own menu, not the browser's, so it can look like
+// the rest of the site. The button is a warm-grey pill; the list is a warm-grey tray with the chosen speed
+// on a white chip, like the tab switcher, its corners nested inside the tray's. Keyboard: arrows move,
+// Enter or Space picks, Escape closes; a click anywhere else closes it.
+const SPEEDS = [1, 2, 3]
+const speedLabel = (n: number) => (n === 1 ? 'Real speed 1x' : `Slowed down ${n}x`)
+function SpeedMenu({ speed, onPick }: { speed: number; onPick: (n: number) => void }) {
+  const [open, setOpen] = useState(false)
+  const [at, setAt] = useState(speed)
+  const root = useRef<HTMLDivElement>(null)
+  const btn = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    if (!open) return
+    setAt(speed)
+    const away = (e: PointerEvent) => { if (!root.current?.contains(e.target as Node)) setOpen(false) }
+    document.addEventListener('pointerdown', away)
+    return () => document.removeEventListener('pointerdown', away)
+  }, [open, speed])
+  const pick = (n: number) => { setOpen(false); btn.current?.focus(); if (n !== speed) onPick(n) }
+  const keys = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') { setOpen(false); btn.current?.focus(); return }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault()
+      if (!open) { setOpen(true); return }
+      const k = SPEEDS.indexOf(at) + (e.key === 'ArrowDown' ? 1 : -1)
+      setAt(SPEEDS[(k + SPEEDS.length) % SPEEDS.length])
+    }
+    if (open && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); pick(at) }
+  }
+  return (
+    <div className="tb-speed" ref={root} onKeyDown={keys}>
+      <button
+        ref={btn}
+        type="button"
+        className="tb-speed__pick"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={`Speed: ${speedLabel(speed)}`}
+        onClick={() => setOpen((o) => !o)}
+      >
+        {speedLabel(speed)}
+        <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      </button>
+      <ul className="tb-speed__menu" role="listbox" aria-label="Speed" data-open={open || undefined}>
+        {SPEEDS.map((n) => (
+          <li
+            key={n}
+            role="option"
+            aria-selected={n === speed}
+            className="tb-speed__opt"
+            data-on={n === speed || undefined}
+            data-at={(open && n === at) || undefined}
+            onPointerEnter={() => setAt(n)}
+            onClick={() => pick(n)}
+          >
+            {speedLabel(n)}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 function Frame({ initial, poster, script, still, label, slow = 1, reduced, caption, cursor = true }: FrameProps) {
   const touch = useTouch()
   const [run, setRun] = useState(0)
@@ -307,19 +370,7 @@ function Frame({ initial, poster, script, still, label, slow = 1, reduced, capti
       {(caption || !still) && (
         <div className="tb-foot">
           {slowable ? (
-            <label className="tb-speed">
-              <span className="tb-speed__pick">
-                <select
-                  value={speed}
-                  aria-label="How much the scene is slowed down"
-                  onChange={(e) => { setSpeed(Number(e.target.value)); setRun((n) => n + 1) }}
-                >
-                  {/* the words live in the menu itself (the user, 2026-11-27): 1x is the real speed */}
-                  {[1, 2, 3].map((n) => <option key={n} value={n}>{n === 1 ? 'Real speed 1x' : `Slowed down ${n}x`}</option>)}
-                </select>
-                <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </span>
-            </label>
+            <SpeedMenu speed={speed} onPick={(n) => { setSpeed(n); setRun((r) => r + 1) }} />
           ) : (
             caption && <figcaption className="tb-caption">{caption}</figcaption>
           )}

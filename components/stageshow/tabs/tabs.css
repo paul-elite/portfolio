@@ -27,42 +27,69 @@
 /* How slow a slowed scene plays: the words "Slowed down" and a small menu of 1x, 2x, 3x, drawn as a pill
    like Replay beside it. It is the browser's own menu underneath, so it works with a keyboard and opens
    as a wheel or a sheet on a phone. */
-.tb-speed { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.tb-speed { position: relative; display: inline-flex; }
+/* The button: a warm-grey pill (the site's yellow-grey), same shape and size as before */
 .tb-speed__pick {
   position: relative;
   display: inline-flex;
   align-items: center;
+  gap: 8px;
   height: 28px;
-  border-radius: 100px;
-  background: #fff;
-  /* a 0.5px outline and nothing else (the user, 2026-11-27). A ring, not a border: browsers round a
-     border under 1px up to a whole pixel */
-  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.22);
-  color: #5e5f63;
-  transition: color 140ms ease, transform 120ms ease-out;
-}
-.tb-speed__pick:hover { color: #0e0e0c; }
-.tb-speed__pick:active { transform: scale(0.97); }
-.tb-speed__pick select {
-  appearance: none;
-  -webkit-appearance: none;
-  height: 100%;
   margin: 0;
-  padding: 0 26px 0 12px;
+  padding: 0 10px 0 12px;
   border: 0;
   border-radius: 100px;
-  background: transparent;
-  color: inherit;
+  background: #efebe1;
+  box-shadow: 0 0 0 0.5px rgb(130 100 20 / 0.16);
+  color: #6b665b;
   font: 12px/1 var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
   cursor: pointer;
+  transition: color 140ms ease, background-color 140ms ease, transform 120ms ease-out;
 }
-/* no solid stroke once a speed is chosen (the user, 2026-11-27): the menu keeps focus after a pick, so
-   focus only deepens the pill's own hairline a little, which is still visible when tabbing to it */
-.tb-speed__pick select:focus { outline: none; }
-.tb-speed__pick:has(select:focus-visible) { box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.4), 0 0 0 3px rgb(0 0 0 / 0.05); }
-.tb-speed__pick svg { position: absolute; right: 10px; pointer-events: none; }
-@media (prefers-reduced-motion: reduce) { .tb-speed__pick { transition: none; } }
+.tb-speed__pick:hover, .tb-speed__pick[aria-expanded="true"] { color: #1d1b16; background: #e9e4d7; }
+.tb-speed__pick:active { transform: scale(0.97); }
+.tb-speed__pick:focus { outline: none; }
+.tb-speed__pick:focus-visible { box-shadow: 0 0 0 0.5px rgb(130 100 20 / 0.4), 0 0 0 3px rgb(130 100 20 / 0.08); }
+/* The list: a warm-grey tray, the chosen or pointed-at speed a white chip on it (like the tab switcher).
+   The tray's corners are 12px with 3px of padding, so the chips' are 9px: one curve inside the other */
+.tb-speed__menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 100%;
+  margin: 0;
+  padding: 3px;
+  list-style: none;
+  border-radius: 12px;
+  background: #f3f0e8;
+  box-shadow: 0 0 0 0.5px rgb(130 100 20 / 0.18), 0 8px 24px rgb(82 78 72 / 0.12);
+  transform-origin: top left;
+  opacity: 0;
+  transform: scale(0.96) translateY(-2px);
+  pointer-events: none;
+  transition: opacity 120ms ease-out, transform 120ms ease-out;
+}
+.tb-speed__menu[data-open] { opacity: 1; transform: none; pointer-events: auto; transition-duration: 150ms; }
+.tb-speed__opt {
+  padding: 7px 10px;
+  border-radius: 9px;
+  color: #6b665b;
+  font: 12px/1.2 var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease, box-shadow 120ms ease;
+}
+.tb-speed__opt[data-on], .tb-speed__opt[data-at] { background: #fff; color: #151515; box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.1); }
+.tb-speed__menu:has(.tb-speed__opt[data-at]) .tb-speed__opt[data-on]:not([data-at]) { background: transparent; box-shadow: none; color: #6b665b; }
+@media (prefers-reduced-motion: reduce) { .tb-speed__pick, .tb-speed__menu { transition: none; } }
+/* (inside an article, whose own list styles would indent the menu and space its items) */
+.tb-foot .tb-speed__menu { padding: 3px; margin: 0; list-style: none; }
+.tb-foot .tb-speed__opt { margin: 0; padding: 7px 10px; list-style: none; }
+.tb-foot .tb-speed__opt::before, .tb-foot .tb-speed__opt::marker { content: none; }
 
 .tb-card {
   /* The server-rendered cursor has no position yet and would flash at the stage's top-left corner until
