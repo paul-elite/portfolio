@@ -53,6 +53,8 @@
 }
 .back:hover { color: #111; }
 .back:active { transform: scale(0.97); }
+/* Back that can't be used (a project tagged 'no-back'): shown, faded, and it doesn't react */
+.back[data-disabled] { opacity: 0.35; cursor: default; pointer-events: none; }
 .tocNav { position: relative; display: flex; flex-direction: column; gap: 0.55rem; padding-left: 22px; }
 .tocLink {
   color: rgba(0, 0, 0, 0.4);

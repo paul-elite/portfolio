@@ -23,20 +23,25 @@ export default function ArticleReader({
   title: string;
   date?: string;
   toc?: Toc;
-  // false hides the Back button (a project tagged 'no-back')
+  // false shows Back as "Back to Home", disabled and faded (a project tagged 'no-back')
   back?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <main data-reader className={`${serif.variable} ${sans.variable} ${r.page}`}>
-      {back && (
-        <BackBar>
+      <BackBar>
+        {back ? (
           <Link href="/" className={r.back}>
             <HugeiconsIcon icon={ArrowTurnBackwardIcon} size={16} strokeWidth={1.5} aria-hidden="true" />
             Back
           </Link>
-        </BackBar>
-      )}
+        ) : (
+          <span className={r.back} aria-disabled="true" data-disabled>
+            <HugeiconsIcon icon={ArrowTurnBackwardIcon} size={16} strokeWidth={1.5} aria-hidden="true" />
+            Back to Home
+          </span>
+        )}
+      </BackBar>
       <div className={r.wrap}>
         <aside className={r.toc}>
           {toc.length > 0 && <TocRail toc={toc} />}
