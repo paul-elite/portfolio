@@ -269,7 +269,7 @@
     display: flex;
     padding: 2px;
     border-radius: 100px;
-    background: #fff;
+    background: #eff0f1; /* a grey track with the chosen tab white on it, as the editor (2026-11-27) */
     box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.12), 0 2px 4px 1px rgb(0 0 0 / 0.05);
     font-size: 12px;
     line-height: 16px;
@@ -289,7 +289,7 @@
     color: #999996;
     transition: background-color calc(150ms * var(--t, 1)) ease, color calc(150ms * var(--t, 1)) ease, scale calc(120ms * var(--t, 1)) ease-out;
   }
-  .tb-crumb__tab[data-on] { background: #efefee; color: #151515; }
+  .tb-crumb__tab[data-on] { background: #fff; color: #151515; box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 1px 2px rgb(0 0 0 / 0.06); }
 
   /* The main bar's Color tab: the rainbow wheel with a white hub */
   .tb-rainbow {

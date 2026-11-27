@@ -77,7 +77,9 @@ const GRID: string[][] = [
 const GREEN_AT = { row: 4, col: 4 }
 // Expand: the editor's four arrows pointing outward (every option at once). Every colour bar has it, beside the ×
 const EXPAND = ['M8 3.1S4.03 2.74 3.39 3.39C2.74 4.03 3.1 8 3.1 8', 'M8 20.9s-3.97.36-4.61-.29C2.74 19.97 3.1 16 3.1 16', 'M16 3.1s3.97-.36 4.61.29C21.26 4.03 20.9 8 20.9 8', 'M16 20.9s3.97.36 4.61-.29C21.26 19.97 20.9 16 20.9 16', 'M14.01 10l6.05-6.05', 'M10 14l-6.36 6.38', 'M10 10L3.85 3.86', 'M13.98 14l6.55 6.5']
-const Expand = () => <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden>{EXPAND.map((d) => <path key={d} d={d} {...LINE} />)}</svg>
+// drawn at the ×'s size: the arrows reach 18 of the box and the × 12, so the view is widened to match,
+// the stroke thickened to stay 1.5px (as the editor, 2026-11-27)
+const Expand = () => <svg width="24" height="24" viewBox="-6 -6 36 36" aria-hidden>{EXPAND.map((d) => <path key={d} d={d} {...LINE} strokeWidth={2.25} />)}</svg>
 const Close = () => <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden><path d="M18 6 6 18M6 6l12 12" {...LINE} /></svg>
 const More = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
