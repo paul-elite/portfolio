@@ -57,7 +57,10 @@
   font-variant-numeric: tabular-nums;
   cursor: pointer;
 }
-.tb-speed__pick select:focus-visible { outline: 2px solid #5e5f63; outline-offset: 2px; }
+/* no solid stroke once a speed is chosen (the user, 2026-11-27): the menu keeps focus after a pick, so
+   focus only deepens the pill's own hairline a little, which is still visible when tabbing to it */
+.tb-speed__pick select:focus { outline: none; }
+.tb-speed__pick:has(select:focus-visible) { box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.4), 0 0 0 3px rgb(0 0 0 / 0.05); }
 .tb-speed__pick svg { position: absolute; right: 10px; pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .tb-speed__pick { transition: none; } }
 

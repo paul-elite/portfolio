@@ -90,13 +90,12 @@ const None = () => (
     <path d="M13.6 26.4 26.4 13.6" stroke="#c8c8c7" strokeWidth="1.5" strokeLinecap="round" />
   </svg>
 )
-// The shades and all-colours buttons: a ring of dots
+// The shades button: the editor's ring of dots, exactly as drawn in Figma (373:36673): seven dots, 15 across
+// in a 60 box at these centres, shown 22px across. It shows the shades of the colour in use, dark to light
+const RING_DOTS = [[30, 7.5], [48, 16.5], [52.5, 36], [40.5, 52.5], [21, 52.5], [7.5, 36], [12, 16.5]]
 const Cluster = ({ fills }: { fills: string[] }) => (
-  <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden>
-    {fills.map((f, i) => {
-      const a = (i / fills.length) * Math.PI * 2 - Math.PI / 2
-      return <circle key={i} cx={14 + Math.cos(a) * 8.5} cy={14 + Math.sin(a) * 8.5} r="3.6" fill={f} />
-    })}
+  <svg width="22" height="22" viewBox="0 0 60 60" aria-hidden>
+    {RING_DOTS.map(([x, y], i) => <circle key={i} cx={x} cy={y} r="7.5" fill={fills[i % fills.length]} />)}
   </svg>
 )
 const SHADES_BLACK = ['#1a1a1a', '#3a3a3a', '#5a5a5a', '#7a7a7a', '#9a9a9a', '#bcbcbc', '#dedede']
