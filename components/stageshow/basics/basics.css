@@ -1,0 +1,171 @@
+/* The demos in the four "basics" articles: typography, colour, AI and building a product. One quiet app window
+   each on the stage's well, pinned at the top and sides and running off the bottom, so the stage crops it. */
+.bs .ss-stage {
+  overflow: hidden;
+  background: var(--ss-well);
+}
+.bs-win {
+  position: absolute;
+  top: 28px;
+  left: 44px;
+  width: 512px;
+  height: 420px;
+}
+.bs .ss-stage[data-layout='compact'] .bs-win {
+  top: 20px;
+  left: 16px;
+  width: 326px;
+  height: 480px;
+}
+.bs-label {
+  color: var(--ss-text);
+  font-size: 11px;
+}
+.bs-ctl {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+
+/* ---- typography: the text on a page at the left, its two controls at the right ---- */
+.bs-type__body {
+  display: grid;
+  grid-template-columns: 1fr 176px;
+  height: 100%;
+  background: var(--ss-surface);
+}
+.bs-type__page {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 20px;
+  background: var(--ss-canvas);
+  border-right: 1px solid var(--ss-line);
+}
+.bs-type__card {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  border-radius: 10px;
+  background: var(--ss-surface);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 6px 18px -10px rgb(0 0 0 / 0.18);
+}
+/* the next block on the page: placeholder lines, running off the foot of the window */
+.bs-type__next { display: grid; gap: 9px; padding: 20px; border-radius: 10px; background: var(--ss-surface); box-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 6px 18px -10px rgb(0 0 0 / 0.18); }
+.bs-type__h {
+  color: var(--ss-text-strong);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.1;
+  white-space: nowrap;
+  transition: letter-spacing 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.bs-type__p {
+  display: block;
+  color: var(--ss-text);
+  font-size: 13px;
+  white-space: normal;
+  transition: line-height 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.bs-type__panel {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  padding: 20px 16px;
+}
+.bs-type__panel .ss-seg { width: 100%; }
+.bs .ss-stage[data-layout='compact'] .bs-type__body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+.bs .ss-stage[data-layout='compact'] .bs-type__page { padding: 14px; border-right: 0; border-bottom: 1px solid var(--ss-line); }
+.bs .ss-stage[data-layout='compact'] .bs-type__card { padding: 16px; }
+.bs .ss-stage[data-layout='compact'] .bs-type__next { display: none; }
+.bs .ss-stage[data-layout='compact'] .bs-type__h { font-size: 22px; }
+.bs .ss-stage[data-layout='compact'] .bs-type__panel { grid-template-columns: 1.5fr 1fr; gap: 12px; padding: 14px; }
+
+/* ---- colour: the sample on top, the steps and the ratio under it ---- */
+.bs-colour__body {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  height: 100%;
+  padding: 20px;
+  background: var(--ss-surface);
+}
+.bs-colour__sample {
+  display: grid;
+  align-content: center;
+  gap: 6px;
+  height: 188px;
+  padding: 0 24px;
+  border-radius: 10px;
+  transition: background-color 0.5s ease;
+}
+.bs-colour__big { color: #fff; font-size: 26px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+.bs-colour__small { color: #fff; font-size: 13px; }
+.bs-colour__foot { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 20px; }
+.bs-colour__steps { display: flex; gap: 8px; }
+.bs-colour__step { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; box-shadow: inset 0 0 0 1.5px transparent; transition: box-shadow 0.2s ease; }
+.bs-colour__step > span { width: 28px; height: 28px; border-radius: 7px; }
+.bs-colour__step[data-on] { box-shadow: inset 0 0 0 1.5px var(--ss-text-strong); }
+.bs-colour__read { justify-items: end; }
+.bs-colour__ratio { display: flex; align-items: center; gap: 10px; height: 36px; }
+.bs-colour__num { color: var(--ss-text-strong); font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.bs .ss-stage[data-layout='compact'] .bs-colour__body { padding: 14px; gap: 16px; }
+.bs .ss-stage[data-layout='compact'] .bs-colour__sample { height: 170px; padding: 0 18px; }
+.bs .ss-stage[data-layout='compact'] .bs-colour__big { font-size: 24px; }
+.bs .ss-stage[data-layout='compact'] .bs-colour__foot { grid-template-columns: 1fr; gap: 16px; }
+.bs .ss-stage[data-layout='compact'] .bs-colour__read { justify-items: start; }
+
+/* ---- AI: a thread pinned to its foot, over the composer (after the kit's ai-chat) ---- */
+.bs-ai .bs-win { height: 400px; }
+.bs-ai__body {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  height: 100%;
+  padding: 16px 20px 56px;
+  background: var(--ss-surface);
+}
+.bs-ai__thread {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 12px;
+  min-height: 0;
+  padding-bottom: 18px;
+  overflow: hidden;
+}
+.bs-ai__q { display: flex; justify-content: flex-end; }
+.bs-ai__q .ss-text {
+  max-width: 80%;
+  white-space: normal;
+  text-wrap: pretty;
+  padding: 8px 14px;
+  border-radius: 16px;
+  background: var(--ss-ink-1);
+  color: var(--ss-text-strong);
+  font-size: 13px;
+  line-height: 1.35;
+}
+.bs-ai__a { display: block; max-width: 92%; color: var(--ss-text-strong); font-size: 13px; line-height: 1.55; white-space: normal; }
+.bs-ai__a--past { color: var(--ss-text); }
+.bs-ai__thinking { color: var(--ss-text); font-size: 13px; }
+.bs .ss-stage[data-layout='compact'] .bs-ai__body { padding: 14px 14px 56px; }
+.bs-ai .ss-stage[data-layout='compact'] .bs-win { height: 500px; }
+
+/* ---- product: the total in a head row, the features under it ---- */
+.bs-product__body { height: 100%; background: var(--ss-surface); }
+.bs-product__head { display: flex; align-items: baseline; justify-content: space-between; padding: 16px 20px 14px; border-bottom: 1px solid var(--ss-line); }
+.bs-product__total { display: inline-flex; align-items: baseline; gap: 6px; color: var(--ss-text-strong); font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.bs-product__unit { color: var(--ss-text); font-size: 13px; font-weight: 400; letter-spacing: 0; }
+.bs-product__list { padding: 2px 20px; }
+.bs-product__row { padding: 11px 0; border-top: 1px solid var(--ss-line); border-radius: 0; }
+.bs-product__row:first-child { border-top: 0; }
+.bs-product__name { color: var(--ss-text-strong); font-size: 13px; font-weight: 500; transition: color 0.3s ease; }
+.bs-product__weeks { margin-right: 14px; color: var(--ss-text); font-size: 12px; font-variant-numeric: tabular-nums; transition: color 0.3s ease; }
+.bs-product__row[data-off] .bs-product__name { color: var(--ss-text-faint); }
+.bs-product__row[data-off] .bs-product__weeks { color: var(--ss-text-faint); text-decoration: line-through; }
+.bs .ss-stage[data-layout='compact'] .bs-product__head { padding: 14px 16px 12px; }
+.bs .ss-stage[data-layout='compact'] .bs-product__list { padding: 2px 16px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bs-type__h, .bs-type__p, .bs-colour__sample, .bs-colour__step, .bs-product__name, .bs-product__weeks { transition: none; }
+}
